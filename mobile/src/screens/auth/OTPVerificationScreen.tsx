@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { RouteProp } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useRef, useState } from "react";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -19,12 +18,13 @@ type RootStackParamList = {
   OTPVerification: { phoneNumber: string };
   RoomList: undefined;
   MainTabs: undefined;
+  Register: { phoneNumber: string };
 };
 
-type OTPVerificationScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "OTPVerification">;
-  route: RouteProp<RootStackParamList, "OTPVerification">;
-};
+type OTPVerificationScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "OTPVerification"
+>;
 
 const OTPVerificationScreen = ({
   navigation,
@@ -60,8 +60,12 @@ const OTPVerificationScreen = ({
     }
     setIsLoading(true);
     try {
+      // TODO: Implement verify OTP API call
+      // Giả lập API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      navigation.replace("MainTabs");
+
+      // Nếu là user mới, chuyển đến màn hình đăng ký
+      navigation.replace("Register", { phoneNumber });
     } catch (error) {
       Alert.alert("Lỗi", "Mã OTP không đúng. Vui lòng thử lại.");
     } finally {
@@ -107,7 +111,9 @@ const OTPVerificationScreen = ({
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              ref={(ref) => (inputRefs.current[index] = ref)}
+              ref={(ref) => {
+                if (ref) inputRefs.current[index] = ref;
+              }}
               style={[styles.otpInput, digit ? styles.otpInputFilled : {}]}
               value={digit}
               onChangeText={(text) => handleOtpChange(text, index)}
