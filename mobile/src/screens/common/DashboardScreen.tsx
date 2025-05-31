@@ -1,3 +1,5 @@
+import { User } from "@/types/user";
+import { getStoreUser } from "@/utils/appUtil";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -5,6 +7,16 @@ import QuickActionButton from "../../components/QuickActionButton";
 import StatCard from "../../components/StatCard";
 
 const DashboardScreen = () => {
+  const [user, setUser] = React.useState<User | undefined>(undefined);
+
+  React.useEffect(() => {
+    const loadUser = async () => {
+      const userData = await getStoreUser();
+      setUser(userData);
+    };
+    loadUser();
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
@@ -14,7 +26,7 @@ const DashboardScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Trang chủ</Text>
-          <Text style={styles.subtitle}>Xin chào, John Smith</Text>
+          <Text style={styles.subtitle}>Xin chào, {user?.name}</Text>
         </View>
 
         {/* Stats */}

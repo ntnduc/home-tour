@@ -6,6 +6,7 @@ import "reflect-metadata";
 import { AppDataSource } from "./config/database";
 import "./config/passport";
 import { AuthController } from "./controllers/AuthController";
+import { TestController } from "./controllers/TestController";
 import { authMiddleware } from "./middlewares/auth.middleware";
 
 dotenv.config();
@@ -17,14 +18,20 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 
-// Public routes
+//#region Public API
+// Authen api
 app.post("/api/auth/request-otp", AuthController.requestOTP);
 app.post("/api/auth/resend-otp", AuthController.resendOTP);
 app.post("/api/auth/verify-otp", AuthController.verifyOTP);
+app.post("/api/auth/register", AuthController.register);
 app.post("/api/auth/login", AuthController.login);
 app.post("/api/auth/verify-login", AuthController.verifyLogin);
 app.post("/api/auth/refresh-token", AuthController.refreshToken);
 app.post("/api/auth/logout", AuthController.logout);
+
+// Test api
+app.get("/api/test", TestController.test);
+//#endregion
 
 // Protected routes
 app.get("/api/auth/check-login", authMiddleware, AuthController.checkLogin);

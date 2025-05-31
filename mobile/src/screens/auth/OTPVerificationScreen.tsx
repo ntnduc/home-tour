@@ -1,4 +1,6 @@
+import { verifyOTP } from "@/api/auth/api";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -18,7 +20,7 @@ type RootStackParamList = {
   OTPVerification: { phoneNumber: string };
   RoomList: undefined;
   MainTabs: undefined;
-  Register: { phoneNumber: string };
+  Register: { registrationToken: string };
 };
 
 type OTPVerificationScreenProps = NativeStackScreenProps<
@@ -60,12 +62,17 @@ const OTPVerificationScreen = ({
     }
     setIsLoading(true);
     try {
-      // TODO: Implement verify OTP API call
-      // Giả lập API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Nếu là user mới, chuyển đến màn hình đăng ký
-      navigation.replace("Register", { phoneNumber });
+      const response = await verifyOTP(phoneNumber, otpString);
+      if (!response.isRegistered && response.registrationToken) {
+        navigation.replace("Register", {
+          registrationToken: response.registrationToken,
+        });
+      } else {
+        await AsyncStorage.setItem("accessToken", response.accessToken);
+        await AsyncStorage.setItem("refreshToken", response.refreshToken);
+        await AsyncStorage.setItem("user", JSON.stringify(response.user));
+        navigation.replace("MainTabs");
+      }
     } catch (error) {
       Alert.alert("Lỗi", "Mã OTP không đúng. Vui lòng thử lại.");
     } finally {

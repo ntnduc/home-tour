@@ -1,7 +1,8 @@
+import { requestOTP } from "@/api/auth/api";
 import { RootStackParamList } from "@/navigation";
-import { requestOTP } from "@/services/api";
+import { checkLogin } from "@/utils/appUtil";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -20,6 +21,21 @@ type LoginScreenProps = {
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    checkInitialLogin();
+  }, []);
+
+  const checkInitialLogin = async () => {
+    try {
+      const isLoggedIn = await checkLogin();
+      if (isLoggedIn) {
+        navigation.replace("MainTabs");
+      }
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra đăng nhập:", error);
+    }
+  };
 
   const handleRequestOTP = async () => {
     if (!phoneNumber.trim()) {

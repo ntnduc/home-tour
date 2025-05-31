@@ -28,16 +28,35 @@ export class OTPService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
+  private static formatPhoneNumber(phoneNumber: string): string {
+    // Loại bỏ tất cả ký tự không phải số
+    const cleaned = phoneNumber.replace(/\D/g, "");
+
+    // Nếu số điện thoại bắt đầu bằng 0, thay thế bằng +84
+    if (cleaned.startsWith("0")) {
+      return "+84" + cleaned.substring(1);
+    }
+
+    // Nếu số điện thoại không có mã quốc gia, thêm +84
+    if (!cleaned.startsWith("84")) {
+      return "+84" + cleaned;
+    }
+
+    // Nếu số điện thoại đã có mã quốc gia 84, thêm dấu +
+    return "+" + cleaned;
+  }
+
   static async sendOTP(phoneNumber: string): Promise<string> {
     const otp = this.generateOTP();
+    // const formattedPhoneNumber = this.formatPhoneNumber(phoneNumber);
 
     try {
       // Gửi SMS thông qua Twilio
-      await client.messages.create({
-        body: `Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút.`,
-        from: twilioPhoneNumber,
-        to: phoneNumber,
-      });
+      // await client.messages.create({
+      //   body: `Mã OTP của bạn là: ${otp}. Mã này có hiệu lực trong 5 phút.`,
+      //   from: twilioPhoneNumber,
+      //   to: formattedPhoneNumber,
+      // });
 
       return otp;
     } catch (error) {

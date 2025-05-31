@@ -1,3 +1,4 @@
+import ProfileScreen from "@/screens/profile/ProfileScreen";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
@@ -16,9 +17,6 @@ const TenantsScreen = () => (
 );
 const ReportsScreen = () => (
   <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>Báo cáo</Text>
-);
-const ProfileScreen = () => (
-  <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>Cá nhân</Text>
 );
 
 const Tab = createBottomTabNavigator();

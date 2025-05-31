@@ -1,3 +1,6 @@
+import { register } from "@/api/auth/api";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import {
@@ -9,8 +12,16 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { RootStackParamList } from "../../navigation";
+
+type RootStackParamList = {
+  Login: undefined;
+  OTPVerification: { phoneNumber: string };
+  RoomList: undefined;
+  MainTabs: undefined;
+  Register: { registrationToken: string };
+};
 
 type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -18,21 +29,28 @@ type RegisterScreenProps = NativeStackScreenProps<
 >;
 
 const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
-  const { phoneNumber } = route.params;
+  const { registrationToken } = route.params;
   const [fullName, setFullName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!fullName.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập họ và tên");
+      Alert.alert("Lỗi", "Vui lòng nhập họ tên của bạn.");
       return;
     }
 
+    setIsLoading(true);
     try {
-      // TODO: Implement register API call
-      // Sau khi đăng ký thành công, chuyển đến màn hình chính
+      const response = await register(registrationToken, fullName);
+      // Lưu token vào AsyncStorage
+      await AsyncStorage.setItem("accessToken", response.accessToken);
+      await AsyncStorage.setItem("refreshToken", response.refreshToken);
+      await AsyncStorage.setItem("user", JSON.stringify(response.user));
       navigation.replace("MainTabs");
-    } catch (error) {
-      Alert.alert("Lỗi", "Đã có lỗi xảy ra khi đăng ký");
+    } catch (error: any) {
+      Alert.alert("Lỗi", error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -42,21 +60,35 @@ const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
+        <Ionicons
+          name="person-add-outline"
+          size={48}
+          color="#6a5af9"
+          style={{ alignSelf: "center", marginBottom: 8 }}
+        />
         <Text style={styles.title}>Hoàn tất đăng ký</Text>
         <Text style={styles.subtitle}>
-          Vui lòng nhập họ và tên để hoàn tất đăng ký
+          Vui lòng nhập họ tên của bạn để hoàn tất đăng ký
         </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Họ và tên"
-          value={fullName}
-          onChangeText={setFullName}
-          autoCapitalize="words"
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Họ và tên"
+            value={fullName}
+            onChangeText={setFullName}
+            autoCapitalize="words"
+          />
+        </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Hoàn tất</Text>
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleRegister}
+          disabled={isLoading}
+        >
+          <Text style={styles.buttonText}>
+            {isLoading ? "Đang xử lý..." : "Hoàn tất"}
+          </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -64,15 +96,8 @@ const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  content: {
-    flex: 1,
-    padding: 24,
-    justifyContent: "center",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
+  content: { flex: 1, padding: 24, justifyContent: "center" },
   title: {
     fontSize: 26,
     fontWeight: "bold",
@@ -86,13 +111,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 28,
   },
+  inputContainer: {
+    marginBottom: 24,
+  },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 15,
+    borderWidth: 2,
+    borderColor: "#e0e0e0",
     borderRadius: 12,
+    padding: 16,
     fontSize: 16,
-    marginBottom: 20,
+    backgroundColor: "#f5f6fa",
   },
   button: {
     backgroundColor: "#6a5af9",
@@ -105,6 +133,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+  buttonDisabled: { backgroundColor: "#ccc" },
   buttonText: {
     color: "#fff",
     fontSize: 16,
