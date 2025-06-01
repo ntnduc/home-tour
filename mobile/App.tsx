@@ -1,3 +1,4 @@
+import CreateTenantScreen from "@/screens/tenant/CreateTenantScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
@@ -48,6 +49,11 @@ export default function App() {
             name="RoomDetail"
             component={RoomDetailScreen}
             options={{ title: "Chi tiết phòng trọ" }}
+          />
+          <Stack.Screen
+            name="CreateTenant"
+            component={CreateTenantScreen}
+            options={{ title: "Tạo thông tin thuê phòng" }}
           />
         </Stack.Navigator>
         <StatusBar style="auto" />

@@ -1,6 +1,6 @@
+import { logout } from "@/api/auth/api";
 import { User } from "@/types/user";
 import { getStoreUser } from "@/utils/appUtil";
-import { storage } from "@/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -47,7 +47,11 @@ const ProfileScreen = () => {
         text: "Đăng xuất",
         style: "destructive",
         onPress: async () => {
-          await storage.clearAll();
+          try {
+            await logout();
+          } catch (error) {
+            //
+          }
           navigation.reset({
             index: 0,
             routes: [{ name: "Login" }],

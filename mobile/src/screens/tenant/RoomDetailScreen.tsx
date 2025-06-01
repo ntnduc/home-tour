@@ -12,6 +12,7 @@ import {
 
 type RootStackParamList = {
   RoomDetail: { roomId: string };
+  CreateTenant: undefined;
 };
 
 type RoomDetailScreenProps = {
@@ -114,10 +115,10 @@ const RoomDetailScreen = ({ navigation }: RoomDetailScreenProps) => {
         <TouchableOpacity
           style={styles.rentButton}
           onPress={() => {
-            // TODO: Implement rent functionality
+            navigation.navigate("CreateTenant");
           }}
         >
-          <Text style={styles.rentButtonText}>Thuê ngay</Text>
+          <Text style={styles.rentButtonText}>Thêm tài sản</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

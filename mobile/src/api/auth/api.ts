@@ -1,4 +1,6 @@
 import { privateApi, publicApi } from "@/services/api";
+import { VerifyOTPResponse } from "@/types/auth";
+import { createSuccessResponse, handleApiError } from "@/utils/apiUtil";
 import { storage } from "@/utils/storage";
 
 export const requestOTP = async (phoneNumber: string) => {
@@ -17,9 +19,10 @@ export const verifyOTP = async (phoneNumber: string, otp: string) => {
       phoneNumber,
       otp,
     });
-    return response.data;
+    return createSuccessResponse<VerifyOTPResponse>(response.data.data);
   } catch (error) {
-    throw error;
+    console.error("verifyOTP:", JSON.stringify(error));
+    throw handleApiError(error);
   }
 };
 
@@ -31,7 +34,7 @@ export const register = async (registrationToken: string, fullname: string) => {
     });
     return response.data;
   } catch (error) {
-    throw error;
+    throw handleApiError(error);
   }
 };
 
@@ -44,8 +47,10 @@ export const login = async (phoneNumber: string, otp: string) => {
 };
 
 export const logout = async () => {
+  try {
+    await privateApi.post("/auth/logout");
+  } catch (error) {
+    console.error("logout:", JSON.stringify(error));
+  }
   await storage.clearAll();
 };
-
-// Export default privateApi để sử dụng cho các request cần authentication
-export default privateApi;

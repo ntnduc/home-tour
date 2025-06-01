@@ -1,4 +1,4 @@
-import { API_URL } from "@/config";
+import { API_URL, PREFIX_URL } from "@/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
@@ -8,7 +8,7 @@ const TIMEOUT = 10000; // 10 giây
 
 // Instance cho các request không cần authentication
 export const publicApi = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL + PREFIX_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -17,7 +17,7 @@ export const publicApi = axios.create({
 
 // Instance cho các request cần authentication
 export const privateApi = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL + PREFIX_URL,
   headers: {
     "Content-Type": "application/json",
   },

@@ -3,4 +3,5 @@ export type RootStackParamList = {
   OTPVerification: { phoneNumber: string };
   Register: { registrationToken: string };
   MainTabs: undefined;
+  CreateTenant: undefined;
 };

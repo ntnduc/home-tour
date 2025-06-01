@@ -9,6 +9,9 @@ export interface VerifyOTPResponse {
   message: string;
   registrationToken: string;
   isRegistered: boolean;
+  accessToken: string;
+  refreshToken: string;
+  user?: User;
 }
 
 export interface RegisterResponse {

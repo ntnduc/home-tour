@@ -6,6 +6,7 @@ import "reflect-metadata";
 import { AppDataSource } from "./config/database";
 import "./config/passport";
 import { AuthController } from "./controllers/AuthController";
+import { LocationController } from "./controllers/LocationController";
 import { TestController } from "./controllers/TestController";
 import { authMiddleware } from "./middlewares/auth.middleware";
 
@@ -27,20 +28,29 @@ app.post("/api/auth/register", AuthController.register);
 app.post("/api/auth/login", AuthController.login);
 app.post("/api/auth/verify-login", AuthController.verifyLogin);
 app.post("/api/auth/refresh-token", AuthController.refreshToken);
-app.post("/api/auth/logout", AuthController.logout);
 
 // Test api
 app.get("/api/test", TestController.test);
 //#endregion
 
-// Protected routes
+//#region Protected routes
+// Location api
+app.get("/api/location/combo-provinces", LocationController.getComboProvinces);
+app.get("/api/location/combo-districts", LocationController.getComboDistricts);
+
+// Auth api
+app.post("/api/auth/logout", authMiddleware, AuthController.logout);
 app.get("/api/auth/check-login", authMiddleware, AuthController.checkLogin);
+
+// User api
 app.get("/api/user/profile", authMiddleware, (req, res) => {
   res.json({
     message: "Thông tin người dùng",
     user: req.user,
   });
 });
+
+//#endregion
 
 // Initialize TypeORM
 AppDataSource.initialize()

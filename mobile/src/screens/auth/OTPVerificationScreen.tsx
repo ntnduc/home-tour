@@ -1,4 +1,4 @@
-import { verifyOTP } from "@/api/auth/api";
+import { requestOTP, verifyOTP } from "@/api/auth/api";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -63,18 +63,19 @@ const OTPVerificationScreen = ({
     setIsLoading(true);
     try {
       const response = await verifyOTP(phoneNumber, otpString);
-      if (!response.isRegistered && response.registrationToken) {
+      const data = response.data;
+      if (!data.isRegistered && data.registrationToken) {
         navigation.replace("Register", {
-          registrationToken: response.registrationToken,
+          registrationToken: data.registrationToken,
         });
       } else {
-        await AsyncStorage.setItem("accessToken", response.accessToken);
-        await AsyncStorage.setItem("refreshToken", response.refreshToken);
-        await AsyncStorage.setItem("user", JSON.stringify(response.user));
+        await AsyncStorage.setItem("accessToken", data.accessToken);
+        await AsyncStorage.setItem("refreshToken", data.refreshToken);
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
         navigation.replace("MainTabs");
       }
-    } catch (error) {
-      Alert.alert("Lỗi", "Mã OTP không đúng. Vui lòng thử lại.");
+    } catch (error: any) {
+      Alert.alert("Lỗi", error?.error?.message ?? "Mã OTP không đúng.");
     } finally {
       setIsLoading(false);
     }
@@ -84,8 +85,8 @@ const OTPVerificationScreen = ({
     if (timeLeft > 0) return;
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setTimeLeft(60);
+      await requestOTP(phoneNumber);
+      setOtp(["", "", "", "", "", ""]);
       Alert.alert("Thành công", "Mã OTP mới đã được gửi.");
     } catch (error) {
       Alert.alert("Lỗi", "Không thể gửi lại mã OTP. Vui lòng thử lại sau.");
@@ -142,20 +143,32 @@ const OTPVerificationScreen = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.resendButton,
-            timeLeft > 0 && styles.resendButtonDisabled,
-          ]}
-          onPress={handleResendOTP}
-          disabled={timeLeft > 0 || isLoading}
-        >
-          <Text style={styles.resendButtonText}>
-            {timeLeft > 0
-              ? `Gửi lại mã sau ${timeLeft}s`
-              : "Gửi lại mã xác thực"}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.bottomButtonsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.resendButton,
+              timeLeft > 0 && styles.resendButtonDisabled,
+            ]}
+            onPress={handleResendOTP}
+            disabled={timeLeft > 0 || isLoading}
+          >
+            <Text style={styles.resendButtonText}>
+              {timeLeft > 0
+                ? `Gửi lại mã sau ${timeLeft}s`
+                : "Gửi lại mã xác thực"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <View style={styles.backButtonContent}>
+              <Ionicons name="chevron-back" size={18} color="#666" />
+              <Text style={styles.backButtonText}>Quay lại</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -165,34 +178,36 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   content: { flex: 1, padding: 24, justifyContent: "center" },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
     color: "#222",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
-    marginBottom: 28,
+    marginBottom: 32,
+    lineHeight: 22,
   },
   otpContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 32,
-    marginTop: 8,
+    marginBottom: 36,
+    marginTop: 12,
+    paddingHorizontal: 8,
   },
   otpInput: {
-    width: 48,
-    height: 48,
-    borderWidth: 2,
+    width: 50,
+    height: 50,
+    borderWidth: 1.5,
     borderColor: "#e0e0e0",
     borderRadius: 12,
     textAlign: "center",
-    fontSize: 22,
+    fontSize: 24,
     color: "#222",
-    backgroundColor: "#f5f6fa",
+    backgroundColor: "#f8f9fa",
   },
   otpInputFilled: {
     borderColor: "#6a5af9",
@@ -205,20 +220,49 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
     shadowColor: "#6a5af9",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
   },
   buttonDisabled: { backgroundColor: "#ccc" },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: 0.5,
   },
-  resendButton: { marginTop: 20, alignItems: "center" },
+  bottomButtonsContainer: {
+    marginTop: 24,
+    gap: 16,
+  },
+  resendButton: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
   resendButtonDisabled: { opacity: 0.5 },
-  resendButtonText: { color: "#6a5af9", fontSize: 15, fontWeight: "bold" },
+  resendButtonText: {
+    color: "#6a5af9",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  backButton: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  backButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  backButtonText: {
+    color: "#666",
+    fontSize: 15,
+    fontWeight: "500",
+    fontStyle: "italic",
+    marginLeft: 4,
+  },
 });
 
 export default OTPVerificationScreen;

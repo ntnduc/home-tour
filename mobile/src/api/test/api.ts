@@ -5,7 +5,6 @@ import { createSuccessResponse, handleApiError } from "@/utils/apiUtil";
 export const testApi = async (): Promise<ApiResponse> => {
   try {
     const response = await publicApi.get("/api/test");
-    console.log("💞💓💗💞💓💗 ~ testApi ~ response:", response);
     return createSuccessResponse(response.data);
   } catch (error) {
     return handleApiError(error);

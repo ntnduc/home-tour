@@ -1,13 +1,19 @@
+import { RootStackParamList } from "@/navigation";
 import { User } from "@/types/user";
 import { getStoreUser } from "@/utils/appUtil";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import QuickActionButton from "../../components/QuickActionButton";
 import StatCard from "../../components/StatCard";
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 const DashboardScreen = () => {
   const [user, setUser] = React.useState<User | undefined>(undefined);
+  const navigation = useNavigation<NavigationProp>();
 
   React.useEffect(() => {
     const loadUser = async () => {
@@ -69,7 +75,9 @@ const DashboardScreen = () => {
           <QuickActionButton
             label="Thêm tài sản"
             icon={<Ionicons name="add" size={24} color="#fff" />}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("CreateTenant");
+            }}
             gradient
           />
           <QuickActionButton

@@ -5,6 +5,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   RoomList: undefined;
   RoomDetail: { roomId: string };
+  CreateTenant: undefined;
 };
 
 export type TabParamList = {
