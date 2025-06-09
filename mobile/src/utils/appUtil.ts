@@ -1,3 +1,4 @@
+import { checkLogin as checkLoginApi } from "@/api/auth/api";
 import { User } from "@/types/user";
 import { storage } from "./storage";
 
@@ -8,7 +9,14 @@ export const getStoreUser = async (): Promise<User | undefined> => {
 export const checkLogin = async (): Promise<boolean> => {
   const accessToken = await storage.getAccessToken();
   const user = await storage.getUser();
-  return !!(accessToken && user);
+  if (!accessToken || !user) {
+    return false;
+  }
+  const reponse = await checkLoginApi();
+  if (reponse?.isLoggedIn) {
+    return true;
+  }
+  return false;
 };
 
 export const formatCurrency = (value: string) => {

@@ -38,6 +38,16 @@ export const register = async (registrationToken: string, fullname: string) => {
   }
 };
 
+export const checkLogin = async () => {
+  try {
+    const response = await privateApi.get("/auth/check-login");
+    return response.data;
+  } catch (error) {
+    console.error("checkLogin:", JSON.stringify(error));
+    throw handleApiError(error);
+  }
+};
+
 export const login = async (phoneNumber: string, otp: string) => {
   const response = await publicApi.post("/auth/login", {
     phoneNumber,
