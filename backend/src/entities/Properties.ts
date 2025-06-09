@@ -17,45 +17,42 @@ export class Properties {
   @OneToMany(() => UserProperties, (userProperty) => userProperty.property)
   userProperties: UserProperties[];
 
+  @OneToMany(
+    () => PropertyService,
+    (propertyService) => propertyService.property
+  )
+  propertyServices: PropertyService[];
+
   @Column()
   name: string;
 
   @Column()
   address: string;
 
-  @Column()
-  ward: string;
+  @Column({ nullable: true })
+  provinceCode: number;
 
-  @Column()
-  district: string;
+  @Column({ nullable: true })
+  districtCode: number;
 
-  @Column()
-  city: string;
+  @Column({ nullable: true })
+  wardCode: number;
 
-  @Column()
-  country: string;
-
-  @Column()
+  @Column({ nullable: true })
   latitude: number;
 
-  @Column()
+  @Column({ nullable: true })
   longitude: number;
 
-  @Column()
-  description: string;
-
-  @Column()
+  @Column({ nullable: true, default: 0 })
   defaultRoomRent: number;
+
+  @Column({ nullable: true, default: 5 })
+  paymentDate: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @OneToMany(
-    () => PropertyService,
-    (propertyService) => propertyService.property
-  )
-  propertyServices: PropertyService[];
 }

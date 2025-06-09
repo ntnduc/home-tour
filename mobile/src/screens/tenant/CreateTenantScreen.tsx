@@ -1,4 +1,8 @@
-import { getComboDistricts, getComboProvinces } from "@/api/location/api";
+import {
+  getComboDistricts,
+  getComboProvinces,
+  getComboWards,
+} from "@/api/location/api";
 import { ComboBox } from "@/components/ComboBox";
 import { createStyles } from "@/styles/StyleCreateTenantScreent";
 import { ComboOption } from "@/types/comboOption";
@@ -24,11 +28,12 @@ import {
 
 interface FormData {
   name: string;
-  city: number;
+  city: string;
   paymentDate: number;
   district: string;
+  ward: string;
   address: string;
-  defaultPrice: string;
+  defaultRoomRent: string;
   services: Array<{
     id: number;
     name: string;
@@ -41,12 +46,14 @@ const CreateTenantScreen = () => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
   const [images, setImages] = useState([]);
-  const [location, setLocation] = useState<ComboOption<number, string>[]>([]);
-  const [cities, setCities] = useState<ComboOption<number, string>[]>([]);
+  const [location, setLocation] = useState<ComboOption<string, string>[]>([]);
+  const [cities, setCities] = useState<ComboOption<string, string>[]>([]);
+  const [wards, setWards] = useState<ComboOption<string, string>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+  const [isLoadingWard, setIsLoadingWard] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
-    "city" | "district" | null
+    "city" | "district" | "ward" | null
   >(null);
 
   useEffect(() => {
@@ -61,13 +68,27 @@ const CreateTenantScreen = () => {
     }
   };
 
-  const getDistricts = async (provinceId: number) => {
+  const getDistricts = async (provinceId: string) => {
     setIsLoadingDistricts(true);
+    setIsLoadingWard(true);
     const response = await getComboDistricts(provinceId);
     if (response.success) {
       setLocation(response.data ?? []);
+    } else {
+      setLocation([]);
     }
+    setWards([]);
     setIsLoadingDistricts(false);
+    setIsLoadingWard(false);
+  };
+
+  const getWards = async (districtId: string) => {
+    setIsLoadingWard(true);
+    const response = await getComboWards(districtId);
+    if (response.success) {
+      setWards(response.data ?? []);
+    }
+    setIsLoadingWard(false);
   };
 
   const {
@@ -79,7 +100,7 @@ const CreateTenantScreen = () => {
   } = useForm<FormData>({
     defaultValues: {
       name: "",
-      defaultPrice: "",
+      defaultRoomRent: "",
       paymentDate: 5,
       services: [
         { id: 2, name: "Nước", price: "", priceType: "fixed" },
@@ -198,12 +219,38 @@ const CreateTenantScreen = () => {
                 <ComboBox
                   value={value}
                   options={location}
-                  onChange={onChange}
+                  onChange={(item) => {
+                    onChange(item);
+                    getWards(item);
+                  }}
                   placeholder="Chọn quận/huyện"
                   error={errors.district?.message}
                   isLoading={isLoadingDistricts}
                   onFocus={() => setActiveDropdown("district")}
                   isActive={activeDropdown === "district"}
+                />
+              )}
+            />
+          </YStack>
+
+          <YStack space="$2">
+            <Text style={styles.label}>
+              Phường/Xã <Text style={styles.requiredText}>*</Text>
+            </Text>
+            <Controller
+              control={control}
+              name="ward"
+              rules={{ required: "Vui lòng chọn phường/xã" }}
+              render={({ field: { onChange, value } }) => (
+                <ComboBox
+                  value={value}
+                  options={wards}
+                  onChange={onChange}
+                  placeholder="Chọn phường/xã"
+                  error={errors.ward?.message}
+                  isLoading={isLoadingWard}
+                  onFocus={() => setActiveDropdown("ward")}
+                  isActive={activeDropdown === "ward"}
                 />
               )}
             />
@@ -249,7 +296,7 @@ const CreateTenantScreen = () => {
             </Text>
             <Controller
               control={control}
-              name="defaultPrice"
+              name="defaultRoomRent"
               rules={{ required: "Vui lòng nhập giá thuê mặc định" }}
               render={({ field: { onChange, value } }) => (
                 <Input
@@ -260,7 +307,7 @@ const CreateTenantScreen = () => {
                     onChange(numericValue);
                   }}
                   keyboardType="numeric"
-                  borderColor={errors.defaultPrice ? "#ff3b30" : "#ddd"}
+                  borderColor={errors.defaultRoomRent ? "#ff3b30" : "#ddd"}
                 />
               )}
             />

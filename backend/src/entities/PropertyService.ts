@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Properties } from "./Properties";
-import { Service } from "./Service";
+import { Service, ServiceCalculationMethod } from "./Service";
 
 @Entity("property_service")
 export class PropertyService {
@@ -30,7 +30,14 @@ export class PropertyService {
   @Column()
   serviceId: number;
 
-  @Column()
+  @Column({
+    type: "enum",
+    enum: ServiceCalculationMethod,
+    default: ServiceCalculationMethod.FIXED_PER_ROOM,
+  })
+  calculationMethod: ServiceCalculationMethod;
+
+  @Column({ nullable: true })
   price: number;
 
   @Column()

@@ -35,8 +35,24 @@ app.get("/api/test", TestController.test);
 
 //#region Protected routes
 // Location api
-app.get("/api/location/combo-provinces", LocationController.getComboProvinces);
-app.get("/api/location/combo-districts", LocationController.getComboDistricts);
+app.get(
+  "/api/location/combo-provinces",
+  authMiddleware,
+  LocationController.getComboProvinces
+);
+app.get(
+  "/api/location/combo-districts",
+  authMiddleware,
+  LocationController.getComboDistricts
+);
+app.get(
+  "/api/location/combo-wards",
+  authMiddleware,
+  LocationController.getComboWards
+);
+
+// Property api
+// app.post("/api/property", authMiddleware, PropertyController.createProperty);
 
 // Auth api
 app.post("/api/auth/logout", authMiddleware, AuthController.logout);
