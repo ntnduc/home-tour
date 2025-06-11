@@ -1,3 +1,4 @@
+import { PropertyService } from "@/entities/PropertyService";
 import { ServiceCalculationMethod } from "@/entities/Service";
 
 export class CreatePropertyServiceRequest {
@@ -8,11 +9,14 @@ export class CreatePropertyServiceRequest {
   isActive: boolean;
   calculationMethod: ServiceCalculationMethod;
 
-  toEntity() {
-    return {
-      ...this,
-      propertyId: this.propertyId.toString(),
-      serviceId: this.serviceId.toString(),
-    };
+  toEntity(): PropertyService {
+    const propertyService = new PropertyService();
+    // propertyService.property = this.propertyId;
+    // propertyService.service = this.serviceId;
+    propertyService.price = this.price;
+    propertyService.unit = this.unit;
+    propertyService.isActive = this.isActive;
+    propertyService.calculationMethod = this.calculationMethod;
+    return propertyService;
   }
 }

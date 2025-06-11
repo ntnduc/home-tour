@@ -1,23 +1,30 @@
+import { Properties } from "../../entities/Properties";
 import { CreatePropertyServiceRequest } from "./property.service.dto";
 
 export class CreatePropertyRequest {
   name: string;
   address: string;
-  provinceCode: number;
-  districtCode: number;
-  wardCode: number;
+  provinceCode: string;
+  districtCode: string;
+  wardCode: string;
   latitude?: number;
   longitude?: number;
   defaultRoomRent: number;
+  paymentDate: number;
   propertyServices?: CreatePropertyServiceRequest[];
 
-  toEntity() {
-    return {
-      ...this,
-      provinceCode: this.provinceCode.toString(),
-      districtCode: this.districtCode.toString(),
-      wardCode: this.wardCode.toString(),
-    };
+  toEntity(): Properties {
+    const property = new Properties();
+    property.name = this.name;
+    property.address = this.address;
+    property.provinceCode = this.provinceCode;
+    property.districtCode = this.districtCode;
+    property.wardCode = this.wardCode;
+    property.defaultRoomRent = this.defaultRoomRent;
+    property.paymentDate = this.paymentDate;
+    property.latitude = this.latitude;
+    property.longitude = this.longitude;
+    return property;
   }
 }
 
@@ -25,9 +32,9 @@ export class DetailPropertyResponse {
   id: number;
   name: string;
   address: string;
-  provinceCode: number;
-  districtCode: number;
-  wardCode: number;
+  provinceCode: string;
+  districtCode: string;
+  wardCode: string;
   latitude: number;
   longitude: number;
   defaultRoomRent: number;

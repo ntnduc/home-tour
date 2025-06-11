@@ -1,3 +1,4 @@
+import { IsInt, Max, Min } from "class-validator";
 import {
   Column,
   CreateDateColumn,
@@ -30,24 +31,27 @@ export class Properties {
   address: string;
 
   @Column({ nullable: true })
-  provinceCode: number;
+  provinceCode: string;
 
   @Column({ nullable: true })
-  districtCode: number;
+  districtCode: string;
 
   @Column({ nullable: true })
-  wardCode: number;
+  wardCode: string;
 
   @Column({ nullable: true })
-  latitude: number;
+  latitude?: number;
 
   @Column({ nullable: true })
-  longitude: number;
+  longitude?: number;
 
   @Column({ nullable: true, default: 0 })
   defaultRoomRent: number;
 
-  @Column({ nullable: true, default: 5 })
+  @Column({ default: 5 })
+  @IsInt({ message: "Ngày thanh toán phải là số nguyên!" })
+  @Min(1, { message: "Ngày thanh toán không hợp lệ!" })
+  @Max(31, { message: "Ngày thanh toán không hợp lệ!" })
   paymentDate: number;
 
   @CreateDateColumn()

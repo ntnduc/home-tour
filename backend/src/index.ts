@@ -7,6 +7,8 @@ import { AppDataSource } from "./config/database";
 import "./config/passport";
 import { AuthController } from "./controllers/AuthController";
 import { LocationController } from "./controllers/LocationController";
+import { PropertyController } from "./controllers/PropertyController";
+import { ServiceController } from "./controllers/ServiceController";
 import { TestController } from "./controllers/TestController";
 import { authMiddleware } from "./middlewares/auth.middleware";
 
@@ -52,7 +54,14 @@ app.get(
 );
 
 // Property api
-// app.post("/api/property", authMiddleware, PropertyController.createProperty);
+app.post("/api/property", authMiddleware, PropertyController.createProperty);
+
+// Service api
+app.get(
+  "/api/service/combo-services-existed",
+  authMiddleware,
+  ServiceController.getComboServiceExisted
+);
 
 // Auth api
 app.post("/api/auth/logout", authMiddleware, AuthController.logout);

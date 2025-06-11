@@ -1,22 +1,30 @@
-import { AppDataSource } from "@/config/database";
-import { CreatePropertyRequest } from "@/dtos/property/property.dto";
-import { Properties } from "@/entities/Properties";
+import { AppDataSource } from "../../config/database";
+import { CreatePropertyRequest } from "../../dtos/property/property.dto";
+import { Properties } from "../../entities/Properties";
 
 export class PropertyService {
+  private static propertyRepository = AppDataSource.getRepository(Properties);
+
   static async createProperty(property: CreatePropertyRequest) {
-    const propertyRepository = AppDataSource.getRepository(Properties);
-
     const propertyEntity = property.toEntity();
+    console.log(
+      "💞💓💗💞💓💗 ~ PropertyService ~ createProperty ~ propertyEntity:",
+      propertyEntity
+    );
 
-    if (property.propertyServices) {
-      const propertyServices = property.propertyServices.map((service) =>
-        service.toEntity()
-      );
-      propertyEntity.propertyServices = propertyServices;
-    }
+    // if (property.propertyServices && property.propertyServices.length > 0) {
+    //   const propertyServices = property.propertyServices.map((service) => {
+    //     const propertyService = new PropertyService();
+    //     propertyService.property = propertyEntity;
+    //     propertyService.service = service.toEntity();
+    //     return propertyService;
+    //   });
+    //   propertyEntity.propertyServices = propertyServices;
+    // }
 
-    const newProperty = propertyRepository.create(propertyEntity);
+    const newProperty =
+      PropertyService.propertyRepository.create(propertyEntity);
 
-    return propertyRepository.save(newProperty);
+    return PropertyService.propertyRepository.save(newProperty);
   }
 }

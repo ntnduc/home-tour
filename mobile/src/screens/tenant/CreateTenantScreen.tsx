@@ -2,12 +2,16 @@ import {
   getComboDistricts,
   getComboProvinces,
   getComboWards,
-} from "@/api/location/api";
+} from "@/api/location/location.api";
+import { createProperty } from "@/api/property/property.api";
 import { ComboBox } from "@/components/ComboBox";
+import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { createStyles } from "@/styles/StyleCreateTenantScreent";
 import { ComboOption } from "@/types/comboOption";
+import { PropertyCreateRequest } from "@/types/property";
 import { formatCurrency } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -26,23 +30,8 @@ import {
   useTheme as useTamaguiTheme,
 } from "tamagui";
 
-interface FormData {
-  name: string;
-  city: string;
-  paymentDate: number;
-  district: string;
-  ward: string;
-  address: string;
-  defaultRoomRent: string;
-  services: Array<{
-    id: number;
-    name: string;
-    price: string;
-    priceType: "fixed" | "perUnit";
-  }>;
-}
-
 const CreateTenantScreen = () => {
+  const navigation = useNavigation();
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
   const [images, setImages] = useState([]);
@@ -53,17 +42,18 @@ const CreateTenantScreen = () => {
   const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
   const [isLoadingWard, setIsLoadingWard] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
-    "city" | "district" | "ward" | null
+    "provinceCode" | "districtCode" | "wardCode" | null
   >(null);
 
   useEffect(() => {
-    getProvinces();
+    getProvinces().finally(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   const getProvinces = async () => {
     const response = await getComboProvinces();
     if (response.success) {
-      setIsLoading(false);
       setCities(response.data ?? []);
     }
   };
@@ -97,16 +87,35 @@ const CreateTenantScreen = () => {
     formState: { errors },
     setValue,
     watch,
-  } = useForm<FormData>({
+  } = useForm<PropertyCreateRequest>({
     defaultValues: {
       name: "",
-      defaultRoomRent: "",
+      defaultRoomRent: 5000000,
       paymentDate: 5,
       services: [
-        { id: 2, name: "Nước", price: "", priceType: "fixed" },
-        { id: 1, name: "Điện", priceType: "fixed" },
-        { id: 3, name: "Wifi", price: "", priceType: "fixed" },
-        { id: 4, name: "Gửi xe", price: "", priceType: "fixed" },
+        {
+          id: 2,
+          name: "Nước",
+          price: 0,
+          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+        },
+        {
+          id: 1,
+          name: "Điện",
+          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+        },
+        {
+          id: 3,
+          name: "Wifi",
+          price: 0,
+          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+        },
+        {
+          id: 4,
+          name: "Gửi xe",
+          price: 0,
+          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+        },
       ],
     },
   });
@@ -120,8 +129,8 @@ const CreateTenantScreen = () => {
       {
         id: currentServices.length + 1,
         name: "",
-        price: "",
-        priceType: "fixed",
+        price: 0,
+        priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
       },
     ]);
   };
@@ -136,23 +145,33 @@ const CreateTenantScreen = () => {
 
   const handlePriceTypeChange = (
     id: number,
-    priceType: "fixed" | "perUnit"
+    priceType: ServiceCalculateMethod
   ) => {
     const currentServices = watch("services");
     setValue(
       "services",
       currentServices.map((service) =>
-        service.id === id ? { ...service, priceType, price: "" } : service
+        service.id === id
+          ? {
+              ...service,
+              priceType,
+              price: 0,
+            }
+          : service
       )
     );
   };
 
-  const onSubmit = (data: FormData) => {
-    console.log({
-      ...data,
-      location,
-      images,
-    });
+  const onSubmit = (data: PropertyCreateRequest) => {
+    setIsLoading(true);
+    createProperty(data)
+      .finally(() => {
+        setIsLoading(false);
+        navigation.goBack();
+      })
+      .catch((errors) => {
+        console.log("💞💓💗💞💓💗 ~ onSubmit ~ errors:", errors);
+      });
   };
 
   if (isLoading) {
@@ -188,7 +207,7 @@ const CreateTenantScreen = () => {
             </Text>
             <Controller
               control={control}
-              name="city"
+              name="provinceCode"
               rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
               render={({ field: { onChange, value } }) => (
                 <ComboBox
@@ -199,9 +218,9 @@ const CreateTenantScreen = () => {
                     getDistricts(item);
                   }}
                   placeholder="Chọn thành phố/tỉnh"
-                  error={errors.city?.message}
-                  onFocus={() => setActiveDropdown("city")}
-                  isActive={activeDropdown === "city"}
+                  error={errors.provinceCode?.message}
+                  onFocus={() => setActiveDropdown("provinceCode")}
+                  isActive={activeDropdown === "provinceCode"}
                 />
               )}
             />
@@ -213,7 +232,7 @@ const CreateTenantScreen = () => {
             </Text>
             <Controller
               control={control}
-              name="district"
+              name="districtCode"
               rules={{ required: "Vui lòng chọn quận/huyện" }}
               render={({ field: { onChange, value } }) => (
                 <ComboBox
@@ -224,10 +243,10 @@ const CreateTenantScreen = () => {
                     getWards(item);
                   }}
                   placeholder="Chọn quận/huyện"
-                  error={errors.district?.message}
+                  error={errors.districtCode?.message}
                   isLoading={isLoadingDistricts}
-                  onFocus={() => setActiveDropdown("district")}
-                  isActive={activeDropdown === "district"}
+                  onFocus={() => setActiveDropdown("districtCode")}
+                  isActive={activeDropdown === "districtCode"}
                 />
               )}
             />
@@ -239,7 +258,7 @@ const CreateTenantScreen = () => {
             </Text>
             <Controller
               control={control}
-              name="ward"
+              name="wardCode"
               rules={{ required: "Vui lòng chọn phường/xã" }}
               render={({ field: { onChange, value } }) => (
                 <ComboBox
@@ -247,10 +266,10 @@ const CreateTenantScreen = () => {
                   options={wards}
                   onChange={onChange}
                   placeholder="Chọn phường/xã"
-                  error={errors.ward?.message}
+                  error={errors.wardCode?.message}
                   isLoading={isLoadingWard}
-                  onFocus={() => setActiveDropdown("ward")}
-                  isActive={activeDropdown === "ward"}
+                  onFocus={() => setActiveDropdown("wardCode")}
+                  isActive={activeDropdown === "wardCode"}
                 />
               )}
             />
@@ -301,7 +320,7 @@ const CreateTenantScreen = () => {
               render={({ field: { onChange, value } }) => (
                 <Input
                   placeholder="Nhập giá thuê mặc định"
-                  value={value ? formatCurrency(value) : ""}
+                  value={value ? formatCurrency(value.toString()) : ""}
                   onChangeText={(text) => {
                     const numericValue = text.replace(/[^0-9]/g, "");
                     onChange(numericValue);
@@ -414,7 +433,9 @@ const CreateTenantScreen = () => {
                         render={({ field: { onChange, value } }) => (
                           <Input
                             placeholder="Giá"
-                            value={value}
+                            value={
+                              value ? formatCurrency(value.toString()) : ""
+                            }
                             onChangeText={onChange}
                             keyboardType="numeric"
                             borderColor={
@@ -438,15 +459,19 @@ const CreateTenantScreen = () => {
                             <TouchableOpacity
                               style={[
                                 styles.priceTypeButton,
-                                value === "fixed" &&
+                                value ===
+                                  ServiceCalculateMethod.FIXED_PER_ROOM &&
                                   styles.priceTypeButtonActive,
                               ]}
-                              onPress={() => onChange("fixed")}
+                              onPress={() =>
+                                onChange(ServiceCalculateMethod.FIXED_PER_ROOM)
+                              }
                             >
                               <Text
                                 style={[
                                   styles.priceTypeButtonText,
-                                  value === "fixed" &&
+                                  value ===
+                                    ServiceCalculateMethod.FIXED_PER_ROOM &&
                                     styles.priceTypeButtonTextActive,
                                 ]}
                               >
@@ -456,15 +481,19 @@ const CreateTenantScreen = () => {
                             <TouchableOpacity
                               style={[
                                 styles.priceTypeButton,
-                                value === "perUnit" &&
+                                value ===
+                                  ServiceCalculateMethod.PER_UNIT_SIMPLE &&
                                   styles.priceTypeButtonActive,
                               ]}
-                              onPress={() => onChange("perUnit")}
+                              onPress={() =>
+                                onChange(ServiceCalculateMethod.PER_UNIT_SIMPLE)
+                              }
                             >
                               <Text
                                 style={[
                                   styles.priceTypeButtonText,
-                                  value === "perUnit" &&
+                                  value ===
+                                    ServiceCalculateMethod.PER_UNIT_SIMPLE &&
                                     styles.priceTypeButtonTextActive,
                                 ]}
                               >

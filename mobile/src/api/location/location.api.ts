@@ -9,9 +9,11 @@ export const getComboProvinces = async (): Promise<
     const response = await privateApi.get<
       ApiResponse<ComboOption<string, string>[]>
     >("/location/combo-provinces");
+
     if (response.status === 200) {
       return response.data;
     }
+
     return {
       success: false,
       message: response.data.message,
@@ -47,7 +49,6 @@ export const getComboWards = async (
     const response = await privateApi.get<
       ApiResponse<ComboOption<string, string>[]>
     >(`/location/combo-wards?districtCode=${districtId}`);
-    console.log("💞💓💗💞💓💗 ~ response:", response);
     if (response.status === 200) {
       return response.data;
     }

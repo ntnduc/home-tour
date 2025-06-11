@@ -70,10 +70,6 @@ export class LocationController {
         value: ward.code,
         label: ward.fullName,
       }));
-      console.log(
-        "💞💓💗💞💓💗 ~ LocationController ~ result ~ result:",
-        result
-      );
 
       return ResponseHandler.success(res, result);
     } catch (error) {
