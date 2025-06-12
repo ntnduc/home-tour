@@ -456,8 +456,17 @@ const CreateTenantScreen = () => {
                         render={({ field: { onChange, value } }) => (
                           <Input
                             placeholder="Giá"
+                            disabled={
+                              service.calculationMethod ===
+                              ServiceCalculateMethod.FREE
+                            }
                             value={
-                              value ? formatCurrency(value.toString()) : ""
+                              service.calculationMethod ===
+                              ServiceCalculateMethod.FREE
+                                ? "0"
+                                : value
+                                ? formatCurrency(value.toString())
+                                : ""
                             }
                             onChangeText={(text) => {
                               const numericValue = text.replace(/[^0-9]/g, "");

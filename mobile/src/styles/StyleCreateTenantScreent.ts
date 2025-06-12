@@ -130,7 +130,7 @@ export const createStyles = (theme: any) =>
       borderRadius: 8,
       alignItems: "center",
       justifyContent: "center",
-      marginTop: 16,
+      marginTop: 0,
     },
     submitButtonText: {
       color: theme.background?.val,

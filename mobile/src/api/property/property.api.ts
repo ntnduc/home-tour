@@ -8,7 +8,6 @@ export const createProperty = async (data: PropertyCreateRequest) => {
       "/property",
       data
     );
-    console.log("💞💓💗💞💓💗 ~ createProperty ~ response:", response);
     if (response.status === 200) {
       return response.data;
     }
