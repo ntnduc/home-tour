@@ -5,7 +5,10 @@ import {
 } from "@/api/location/location.api";
 import { createProperty } from "@/api/property/property.api";
 import { ComboBox } from "@/components/ComboBox";
-import { ServiceCalculateMethod } from "@/constant/service.constant";
+import {
+  SERVICE_CALCULATE_METHOD_WITH_INFO,
+  ServiceCalculateMethod,
+} from "@/constant/service.constant";
 import { createStyles } from "@/styles/StyleCreateTenantScreent";
 import { ComboOption } from "@/types/comboOption";
 import { PropertyCreateRequest } from "@/types/property";
@@ -16,6 +19,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  Alert,
   SafeAreaView,
   ScrollView,
   Text,
@@ -94,28 +98,29 @@ const CreateTenantScreen = () => {
       paymentDate: 5,
       services: [
         {
-          id: 2,
+          index: 0,
           name: "Nước",
           price: 0,
-          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+          calculationMethod: ServiceCalculateMethod.PER_UNIT_SIMPLE,
         },
         {
-          id: 1,
+          index: 1,
           name: "Điện",
-          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+          price: 0,
+          calculationMethod: ServiceCalculateMethod.PER_UNIT_SIMPLE,
         },
         {
-          id: 3,
+          index: 2,
           name: "Wifi",
           price: 0,
-          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+          calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
         },
-        {
-          id: 4,
-          name: "Gửi xe",
-          price: 0,
-          priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
-        },
+        // {
+        //   index: 3,
+        //   name: "Gửi xe",
+        //   price: 0,
+        //   calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
+        // },
       ],
     },
   });
@@ -127,34 +132,34 @@ const CreateTenantScreen = () => {
     setValue("services", [
       ...currentServices,
       {
-        id: currentServices.length + 1,
+        index: currentServices.length,
         name: "",
         price: 0,
-        priceType: ServiceCalculateMethod.FIXED_PER_ROOM,
+        calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
       },
     ]);
   };
 
-  const handleRemoveService = (id: number) => {
+  const handleRemoveService = (index: number) => {
     const currentServices = watch("services");
     setValue(
       "services",
-      currentServices.filter((service) => service.id !== id)
+      currentServices.filter((service) => service.index !== index)
     );
   };
 
   const handlePriceTypeChange = (
-    id: number,
-    priceType: ServiceCalculateMethod
+    index: number,
+    calculationMethod: ServiceCalculateMethod
   ) => {
     const currentServices = watch("services");
     setValue(
       "services",
       currentServices.map((service) =>
-        service.id === id
+        service.index === index
           ? {
               ...service,
-              priceType,
+              calculationMethod,
               price: 0,
             }
           : service
@@ -385,9 +390,9 @@ const CreateTenantScreen = () => {
               padding="$3"
               borderRadius="$4"
             >
-              {services.map((service) => (
+              {services.map((service, index) => (
                 <YStack
-                  key={service.id}
+                  key={index}
                   space="$2"
                   backgroundColor="#fff"
                   padding="$3"
@@ -395,40 +400,58 @@ const CreateTenantScreen = () => {
                   borderWidth={1}
                   borderColor="#e9ecef"
                   marginBottom="$2"
+                  style={{ position: "relative" }}
                 >
+                  <TouchableOpacity
+                    style={styles.removeServiceItemButton}
+                    onPress={() => handleRemoveService(service.index)}
+                  >
+                    <Ionicons name="close" size={16} color="#fff" />
+                  </TouchableOpacity>
                   <XStack space="$2" alignItems="center">
-                    <View style={styles.serviceIconContainer}>
-                      <Ionicons
-                        name={
-                          service.name === "Điện"
-                            ? "flash-outline"
-                            : service.name === "Nước"
-                            ? "water-outline"
-                            : service.name === "Wifi"
-                            ? "wifi-outline"
-                            : service.name === "Gửi xe"
-                            ? "car-outline"
-                            : "apps-outline"
-                        }
-                        size={20}
-                        color="#007AFF"
-                      />
-                    </View>
                     <YStack space="$2" flex={1}>
                       <Controller
                         control={control}
-                        name={`services.${service.id - 1}.name`}
+                        name={`services.${service.index}.name`}
                         render={({ field: { onChange, value } }) => (
-                          <Input
-                            placeholder="Tên dịch vụ"
-                            value={value}
-                            onChangeText={onChange}
-                          />
+                          <View style={{ position: "relative" }}>
+                            <Input
+                              placeholder="Tên dịch vụ"
+                              value={value}
+                              onChangeText={onChange}
+                              paddingLeft={40}
+                            />
+                            <View
+                              style={{
+                                position: "absolute",
+                                left: 12,
+                                top: 0,
+                                bottom: 0,
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Ionicons
+                                name={
+                                  service.name === "Điện"
+                                    ? "flash-outline"
+                                    : service.name === "Nước"
+                                    ? "water-outline"
+                                    : service.name === "Wifi"
+                                    ? "wifi-outline"
+                                    : service.name === "Gửi xe"
+                                    ? "car-outline"
+                                    : "apps-outline"
+                                }
+                                size={20}
+                                color="#007AFF"
+                              />
+                            </View>
+                          </View>
                         )}
                       />
                       <Controller
                         control={control}
-                        name={`services.${service.id - 1}.price`}
+                        name={`services.${service.index}.price`}
                         rules={{ required: "Vui lòng nhập giá dịch vụ" }}
                         render={({ field: { onChange, value } }) => (
                           <Input
@@ -436,80 +459,183 @@ const CreateTenantScreen = () => {
                             value={
                               value ? formatCurrency(value.toString()) : ""
                             }
-                            onChangeText={onChange}
+                            onChangeText={(text) => {
+                              const numericValue = text.replace(/[^0-9]/g, "");
+                              onChange(numericValue);
+                            }}
                             keyboardType="numeric"
                             borderColor={
-                              errors.services?.[service.id - 1]?.price
+                              errors.services?.[service.index]?.price
                                 ? "#ff3b30"
                                 : "#ddd"
                             }
                           />
                         )}
                       />
-                      {errors.services?.[service.id - 1]?.price && (
+                      {errors.services?.[service.index]?.price && (
                         <Text style={styles.errorText}>
-                          {errors.services[service.id - 1]?.price?.message}
+                          {errors.services[service.index]?.price?.message}
                         </Text>
                       )}
                       <Controller
                         control={control}
-                        name={`services.${service.id - 1}.priceType`}
-                        render={({ field: { onChange, value } }) => (
-                          <View style={styles.priceTypeContainer}>
-                            <TouchableOpacity
-                              style={[
-                                styles.priceTypeButton,
-                                value ===
-                                  ServiceCalculateMethod.FIXED_PER_ROOM &&
-                                  styles.priceTypeButtonActive,
-                              ]}
-                              onPress={() =>
-                                onChange(ServiceCalculateMethod.FIXED_PER_ROOM)
-                              }
-                            >
+                        name={`services.${service.index}.calculationMethod`}
+                        render={({ field: { onChange, value } }) => {
+                          const [isExpanded, setIsExpanded] = useState(false);
+
+                          return (
+                            <YStack space="$2">
                               <Text
                                 style={[
-                                  styles.priceTypeButtonText,
-                                  value ===
-                                    ServiceCalculateMethod.FIXED_PER_ROOM &&
-                                    styles.priceTypeButtonTextActive,
+                                  styles.label,
+                                  {
+                                    marginTop: 12,
+                                    marginBottom: 0,
+                                    textAlign: "center",
+                                  },
                                 ]}
                               >
-                                Cố định
+                                Cách tính tiền
                               </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={[
-                                styles.priceTypeButton,
-                                value ===
-                                  ServiceCalculateMethod.PER_UNIT_SIMPLE &&
-                                  styles.priceTypeButtonActive,
-                              ]}
-                              onPress={() =>
-                                onChange(ServiceCalculateMethod.PER_UNIT_SIMPLE)
-                              }
-                            >
-                              <Text
-                                style={[
-                                  styles.priceTypeButtonText,
-                                  value ===
-                                    ServiceCalculateMethod.PER_UNIT_SIMPLE &&
-                                    styles.priceTypeButtonTextActive,
-                                ]}
-                              >
-                                Theo đơn vị
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
+                              <YStack space="$2">
+                                <TouchableOpacity
+                                  style={[
+                                    styles.calculationMethodButton,
+                                    styles.calculationMethodButtonActive,
+                                  ]}
+                                  onPress={() => onChange(value)}
+                                >
+                                  <XStack
+                                    space="$3"
+                                    alignItems="center"
+                                    flex={1}
+                                  >
+                                    <Ionicons
+                                      name={
+                                        SERVICE_CALCULATE_METHOD_WITH_INFO[
+                                          value
+                                        ].icon
+                                      }
+                                      size={20}
+                                      color="#fff"
+                                    />
+                                    <Text
+                                      style={[
+                                        styles.methodTitle,
+                                        styles.methodTitleActive,
+                                      ]}
+                                    >
+                                      {
+                                        SERVICE_CALCULATE_METHOD_WITH_INFO[
+                                          value
+                                        ].label
+                                      }
+                                    </Text>
+                                  </XStack>
+                                  <TouchableOpacity
+                                    style={styles.methodDetailButton}
+                                    onPress={() => {
+                                      Alert.alert(
+                                        "Thông tin",
+                                        SERVICE_CALCULATE_METHOD_WITH_INFO[
+                                          value
+                                        ].info
+                                      );
+                                    }}
+                                  >
+                                    <Ionicons
+                                      name="information-circle-outline"
+                                      size={20}
+                                      color="#fff"
+                                    />
+                                  </TouchableOpacity>
+                                </TouchableOpacity>
+
+                                {isExpanded && (
+                                  <>
+                                    {Object.values(ServiceCalculateMethod)
+                                      .filter((method) => method !== value)
+                                      .map((method) => (
+                                        <TouchableOpacity
+                                          key={method}
+                                          style={[
+                                            styles.calculationMethodButton,
+                                          ]}
+                                          onPress={() => onChange(method)}
+                                        >
+                                          <XStack
+                                            space="$3"
+                                            alignItems="center"
+                                            flex={1}
+                                          >
+                                            <Ionicons
+                                              name={
+                                                SERVICE_CALCULATE_METHOD_WITH_INFO[
+                                                  method
+                                                ].icon
+                                              }
+                                              size={20}
+                                              color="#007AFF"
+                                            />
+                                            <Text style={[styles.methodTitle]}>
+                                              {
+                                                SERVICE_CALCULATE_METHOD_WITH_INFO[
+                                                  method
+                                                ].label
+                                              }
+                                            </Text>
+                                          </XStack>
+                                          <TouchableOpacity
+                                            style={styles.methodDetailButton}
+                                            onPress={() => {
+                                              Alert.alert(
+                                                "Thông tin",
+                                                SERVICE_CALCULATE_METHOD_WITH_INFO[
+                                                  method
+                                                ].info
+                                              );
+                                            }}
+                                          >
+                                            <Ionicons
+                                              name="information-circle-outline"
+                                              size={20}
+                                              color="#666"
+                                            />
+                                          </TouchableOpacity>
+                                        </TouchableOpacity>
+                                      ))}
+                                  </>
+                                )}
+
+                                <TouchableOpacity
+                                  style={styles.expandButton}
+                                  onPress={() => setIsExpanded(!isExpanded)}
+                                >
+                                  <XStack
+                                    space="$2"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                  >
+                                    <Text style={styles.expandButtonText}>
+                                      {isExpanded ? "Thu gọn" : "Xem thêm"}
+                                    </Text>
+                                    <Ionicons
+                                      name={
+                                        isExpanded
+                                          ? "chevron-up"
+                                          : "chevron-down"
+                                      }
+                                      size={16}
+                                      color="#007AFF"
+                                    />
+                                  </XStack>
+                                </TouchableOpacity>
+                              </YStack>
+                            </YStack>
+                          );
+                        }}
                       />
                     </YStack>
-                    <TouchableOpacity
-                      style={styles.removeServiceButton}
-                      onPress={() => handleRemoveService(service.id)}
-                    >
-                      <Ionicons name="close" size={20} color="#666" />
-                    </TouchableOpacity>
                   </XStack>
                 </YStack>
               ))}

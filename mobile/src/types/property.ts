@@ -1,4 +1,4 @@
-import { Service } from "./service";
+import { Service, ServiceCreateRequest } from "./service";
 
 export interface Property {
   id: number;
@@ -13,4 +13,7 @@ export interface Property {
   services: Service[];
 }
 
-export interface PropertyCreateRequest extends Omit<Property, "id"> {}
+export interface PropertyCreateRequest
+  extends Omit<Property, "id" | "services"> {
+  services: ServiceCreateRequest[];
+}

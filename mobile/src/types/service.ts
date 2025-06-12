@@ -4,10 +4,11 @@ export interface Service {
   id: number;
   name: string;
   price: number;
-  priceType: ServiceCalculateMethod;
+  calculationMethod: ServiceCalculateMethod;
 }
 
 export interface ServiceCreateRequest {
+  index: number;
   name: string;
   price: number;
   calculationMethod: ServiceCalculateMethod;

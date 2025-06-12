@@ -24,6 +24,7 @@ export class PropertyService {
 
   @ManyToOne(() => Service, (service) => service.propertyServices, {
     onDelete: "CASCADE",
+    cascade: ["insert"],
   })
   service: Service;
 
@@ -40,8 +41,8 @@ export class PropertyService {
   @Column({ nullable: true })
   price: number;
 
-  @Column()
-  unit: string;
+  @Column({ nullable: true })
+  unit?: string;
 
   @Column({ default: true })
   isActive: boolean;

@@ -20,7 +20,10 @@ export class Properties {
 
   @OneToMany(
     () => PropertyService,
-    (propertyService) => propertyService.property
+    (propertyService) => propertyService.property,
+    {
+      cascade: true,
+    }
   )
   propertyServices: PropertyService[];
 

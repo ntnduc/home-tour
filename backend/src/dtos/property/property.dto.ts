@@ -11,7 +11,7 @@ export class CreatePropertyRequest {
   longitude?: number;
   defaultRoomRent: number;
   paymentDate: number;
-  propertyServices?: CreatePropertyServiceRequest[];
+  services?: CreatePropertyServiceRequest[];
 
   toEntity(): Properties {
     const property = new Properties();
