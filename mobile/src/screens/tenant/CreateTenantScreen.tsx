@@ -5,6 +5,7 @@ import {
 } from "@/api/location/location.api";
 import { createProperty } from "@/api/property/property.api";
 import { ComboBox } from "@/components/ComboBox";
+import Loading from "@/components/Loading";
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
   ServiceCalculateMethod,
@@ -17,8 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+
 import {
-  ActivityIndicator,
   Alert,
   SafeAreaView,
   ScrollView,
@@ -26,6 +27,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import {
   Input,
   TextArea,
@@ -37,7 +39,9 @@ import {
 const CreateTenantScreen = () => {
   const navigation = useNavigation();
   const theme = useTamaguiTheme();
+
   const styles = createStyles(theme);
+
   const [images, setImages] = useState([]);
   const [location, setLocation] = useState<ComboOption<string, string>[]>([]);
   const [cities, setCities] = useState<ComboOption<string, string>[]>([]);
@@ -115,12 +119,12 @@ const CreateTenantScreen = () => {
           price: 0,
           calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
         },
-        // {
-        //   index: 3,
-        //   name: "Gửi xe",
-        //   price: 0,
-        //   calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
-        // },
+        {
+          index: 3,
+          name: "Gửi xe",
+          price: 0,
+          calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
+        },
       ],
     },
   });
@@ -170,21 +174,28 @@ const CreateTenantScreen = () => {
   const onSubmit = (data: PropertyCreateRequest) => {
     setIsLoading(true);
     createProperty(data)
-      .finally(() => {
-        setIsLoading(false);
+      .then(() => {
+        Toast.show({
+          type: "success",
+          text1: "Thành công",
+          text2: "Tạo căn hộ thành công",
+        });
         navigation.goBack();
       })
       .catch((errors) => {
-        console.log("💞💓💗💞💓💗 ~ onSubmit ~ errors:", errors);
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: "Tạo căn hộ thất bại",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6a5af9" />
-      </SafeAreaView>
-    );
+    return <Loading />;
   }
 
   return (

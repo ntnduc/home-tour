@@ -1,8 +1,16 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { TextStyle } from "tamagui";
 
 interface QuickActionButtonProps {
   label: string;
+  styleLabel?: StyleProp<TextStyle>;
   icon: React.ReactNode;
   onPress: () => void;
   gradient?: boolean;
@@ -13,13 +21,14 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   icon,
   onPress,
   gradient,
+  styleLabel,
 }) => (
   <TouchableOpacity
     style={[styles.button, gradient && styles.gradient]}
     onPress={onPress}
   >
     <View style={styles.icon}>{icon}</View>
-    <Text style={styles.label}>{label}</Text>
+    <Text style={[styles.label, styleLabel as any]}>{label}</Text>
   </TouchableOpacity>
 );
 

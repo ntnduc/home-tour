@@ -215,12 +215,6 @@ export const createStyles = (theme: any) =>
       color: "#666",
       fontSize: 14,
     },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "#fff",
-    },
     skeletonContainer: {
       flexDirection: "row",
       alignItems: "center",

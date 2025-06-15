@@ -3,6 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
+
+import Toast from "react-native-toast-message";
 import { TamaguiProvider } from "tamagui";
 import { RootStackParamList } from "./src/navigation/index";
 import TabNavigator from "./src/navigation/TabNavigator";
@@ -58,6 +60,7 @@ export default function App() {
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>
+      <Toast />
     </TamaguiProvider>
   );
 }

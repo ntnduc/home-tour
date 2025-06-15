@@ -1,4 +1,5 @@
 import { RootStackParamList } from "@/navigation";
+import { colors } from "@/theme/colors";
 import { User } from "@/types/user";
 import { getStoreUser } from "@/utils/appUtil";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -78,6 +79,7 @@ const DashboardScreen = () => {
             onPress={() => {
               navigation.navigate("CreateTenant");
             }}
+            styleLabel={{ color: colors.text.inverse }}
             gradient
           />
           <QuickActionButton
