@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,17 +18,17 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { phone: createUserDto.phone },
     });
 
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('Số điện thoại đã được sử dụng!');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.usersRepository.create({
       ...createUserDto,
-      password: hashedPassword,
+      isPhoneVerified: true,
+      isActive: true,
     });
 
     return this.usersRepository.save(user);
@@ -43,6 +42,25 @@ export class UsersService {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
+
+  async findUserByPhone(phone: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { phone: phone },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${phone} not found`);
+    }
+    return user;
+  }
+  async findUserUnVerify(phone: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { phone: phone, isPhoneVerified: false },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${phone} not found`);
     }
     return user;
   }

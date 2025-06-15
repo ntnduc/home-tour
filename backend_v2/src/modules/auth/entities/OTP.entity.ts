@@ -6,25 +6,22 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('users')
-export class User {
+@Entity('otp')
+export class OTP {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
-  phone: string;
-
-  @Column({ unique: true, nullable: true })
-  email: string;
+  @Column()
+  phoneNumber: string;
 
   @Column()
-  fullName: string;
+  code: string;
 
   @Column({ default: false })
-  isPhoneVerified: boolean;
+  isUsed: boolean;
 
-  @Column({ default: false })
-  isActive: boolean;
+  @Column()
+  expiresAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
