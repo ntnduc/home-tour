@@ -1,0 +1,253 @@
+{
+	"info": {
+		"_postman_id": "25885334-4bbef954-9185-40c4-a56a-516c33f7ad1a",
+		"name": "Home Tour API",
+		"description": "API collection cho ứng dụng Home Tour",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Request OTP",
+					"id": "25885334-7c145df0-9e28-48f9-953a-e3325fa4e604",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"0123456789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/request-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"request-otp"
+							]
+						},
+						"description": "Gửi mã OTP đến số điện thoại"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"id": "25885334-8fd85153-c758-4cea-9095-f770ced2a68a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"0123456789\",\n    \"otp\": \"123456\",\n    \"name\": \"Nguyen Van A\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-otp"
+							]
+						},
+						"description": "Xác thực mã OTP và đăng ký/đăng nhập"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"id": "25885334-0e198930-d366-4c4f-9180-8d0ec82eeb2c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"0123456789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập bằng số điện thoại"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Login",
+					"id": "25885334-0db54ce7-c1fe-48d7-955a-a8354bf7c39c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"0123456789\",\n    \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify-login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-login"
+							]
+						},
+						"description": "Xác thực OTP khi đăng nhập"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Login",
+					"id": "25885334-ccc57a44-e17c-4392-a7ec-0cda80da249d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/check-login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"check-login"
+							]
+						},
+						"description": "Kiểm tra trạng thái đăng nhập"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"id": "25885334-f4b5bcbb-258c-489c-aa83-a87f691f65bf",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Làm mới access token"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"id": "25885334-0f608dd6-b082-4869-ac24-3a33d15c8e05",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Đăng xuất"
+					},
+					"response": []
+				}
+			],
+			"id": "25885334-a31a7cbd-e32c-401e-b243-a7df4537176d"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "access_token",
+			"value": "your_access_token_here"
+		},
+		{
+			"key": "refresh_token",
+			"value": "your_refresh_token_here"
+		}
+	]
+}
