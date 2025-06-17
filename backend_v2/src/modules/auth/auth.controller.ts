@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RequestRegister } from './dto/auth.dto';
@@ -8,7 +9,7 @@ import { RequestRegister } from './dto/auth.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('request-send-otp')
+  @Post('request-otp')
   async requestSendOTP(@Body() body: { phoneNumber: string }) {
     return this.authService.requestSendOTP(body.phoneNumber);
   }
@@ -18,6 +19,10 @@ export class AuthController {
     return this.authService.verifyOTP(body.phoneNumber, body.code);
   }
 
+  @UseGuards(AuthGuard('jwt-temp'))
   @Post('register')
-  async register(@Body() body: RequestRegister) {}
+  async register(@Request() req, @Body() body: RequestRegister) {
+    const { phone } = req.user;
+    return this.authService.register(body.name, phone);
+  }
 }

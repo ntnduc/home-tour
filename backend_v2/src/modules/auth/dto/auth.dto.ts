@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { User } from 'src/modules/users/entities/user.entity';
 
 export class ReponseOtpVerify {
@@ -27,5 +27,6 @@ export class ReponseOtpVerify {
 
 export class RequestRegister {
   @IsString()
+  @IsNotEmpty()
   name: string;
 }

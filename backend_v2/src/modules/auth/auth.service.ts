@@ -2,6 +2,8 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { ReponseOtpVerify } from './dto/auth.dto';
 import { OTP } from './entities/OTP.entity';
@@ -14,6 +16,8 @@ export class AuthService {
     private tokenRepository: Repository<Token>,
     @InjectRepository(OTP)
     private otpRepository: Repository<OTP>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
 
     @Inject(UsersService)
     private userService: UsersService,
@@ -21,10 +25,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async requestSendOTP(phoneNumber: string): Promise<void> {
+  async requestSendOTP(phoneNumber: string): Promise<boolean> {
     const formattedPhoneNumber = AuthService.formatPhoneNumber(phoneNumber);
     const otp = await this.generateOTP(formattedPhoneNumber);
     await this.otpRepository.save(otp);
+    return true;
   }
 
   async verifyOTP(
@@ -45,8 +50,12 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP');
     }
 
-    const findExitedUser =
-      await this.userService.findUserByPhone(formattedPhoneNumber);
+    const findExitedUser = await this.userRepository.findOne({
+      where: {
+        phone: formattedPhoneNumber,
+        isPhoneVerified: true,
+      },
+    });
 
     if (!findExitedUser) {
       const tempToken = this.genTemplateToken(formattedPhoneNumber);
@@ -73,35 +82,32 @@ export class AuthService {
   }
 
   async register(name: string, phone: string) {
-    const user = await this.userService.findUserUnVerify(phone);
-    if (!user) throw new BadRequestException('Không tìm thấy user');
-    user.isPhoneVerified = true;
-    const userUpdateDto = { isPhoneVerified: true, fullName: name };
-    await this.userService.update(user.id, userUpdateDto);
+    const userNew = { fullName: name, phone: phone } as CreateUserDto;
+    const user = await this.userService.create(userNew);
     const token = await this.generateToken(user.id, user.phone);
     return {
       accessToken: token.accessToken,
       refreshToken: token.refreshToken,
-      user: token.user,
+      user: user,
     };
   }
 
   static formatPhoneNumber(phoneNumber: string): string {
-    // Loại bỏ tất cả ký tự không phải số
-    const cleaned = phoneNumber.replace(/\D/g, '');
+    // Bỏ toàn bộ ký tự không phải số
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
 
-    // Nếu số điện thoại bắt đầu bằng 0, thay thế bằng +84
-    if (cleaned.startsWith('0')) {
-      return '+84' + cleaned.substring(1);
+    if (digitsOnly.startsWith('0')) {
+      // Nếu là dạng 09x..., 03x..., 07x... thì chuyển thành +84...
+      return '+84' + digitsOnly.slice(1);
     }
 
-    // Nếu số điện thoại không có mã quốc gia, thêm +84
-    if (!cleaned.startsWith('84')) {
-      return '+84' + cleaned;
+    if (digitsOnly.startsWith('84')) {
+      // Nếu đã có 84 đầu => thêm dấu +
+      return '+' + digitsOnly;
     }
 
-    // Nếu số điện thoại đã có mã quốc gia 84, thêm dấu +
-    return '+' + cleaned;
+    // Trường hợp không rõ, cứ gắn +84 phía trước
+    return '+84' + digitsOnly;
   }
 
   private async generateOTP(phoneNumber: string): Promise<OTP> {
@@ -139,7 +145,7 @@ export class AuthService {
       },
       {
         secret: process.env.JWT_SECRET,
-        expiresIn: '10m',
+        expiresIn: '15m',
       },
     );
 
@@ -159,6 +165,7 @@ export class AuthService {
       phoneNumber,
       accessToken,
       refreshToken,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 15),
     });
 
     return token;

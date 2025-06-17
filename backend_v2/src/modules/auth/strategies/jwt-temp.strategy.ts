@@ -6,14 +6,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 export class JwtTempStrategy extends PassportStrategy(Strategy, 'jwt-temp') {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromHeader('temp-token'),
       secretOrKey: process.env.JWT_TEMP_SECRET,
       ignoreExpiration: false,
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: any, request: Request) {
     // payload sẽ chứa thông tin số điện thoại từ token tạm
-    return { phone: payload.phone };
+    return { phone: payload.phoneNumber };
   }
 }
