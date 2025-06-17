@@ -21,7 +21,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt-temp'))
   @Post('register')
-  async register(@Request() req, @Body() body: RequestRegister) {
+  async register(@Request() req: any, @Body() body: RequestRegister) {
     const { phone } = req.user;
     return this.authService.register(body.name, phone);
   }
