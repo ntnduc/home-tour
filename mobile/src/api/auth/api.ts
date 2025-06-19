@@ -39,7 +39,6 @@ export const register = async (registrationToken: string, fullname: string) => {
       }
     );
 
-    console.log("💞💓💗💞💓💗 ~ register ~ response:", response);
     return response.data;
   } catch (error) {
     return handleApiError(error);
