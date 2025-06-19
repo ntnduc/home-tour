@@ -26,6 +26,7 @@ export interface ApiSuccess<T> {
   success: true;
   data: T;
   message?: string;
+  code?: number;
 }
 
 // Các mã lỗi thường gặp

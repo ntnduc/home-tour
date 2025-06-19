@@ -64,9 +64,9 @@ const OTPVerificationScreen = ({
     try {
       const response = await verifyOTP(phoneNumber, otpString);
       const data = response.data;
-      if (!data.isRegistered && data.registrationToken) {
+      if (!data.isRegistered && data.tempToken) {
         navigation.replace("Register", {
-          registrationToken: data.registrationToken,
+          registrationToken: data.tempToken,
         });
       } else {
         await AsyncStorage.setItem("accessToken", data.accessToken);

@@ -11,6 +11,7 @@ export interface VerifyOTPResponse {
   isRegistered: boolean;
   accessToken: string;
   refreshToken: string;
+  tempToken: string;
   user?: User;
 }
 

@@ -33,7 +33,7 @@ const DashboardScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Trang chủ</Text>
-          <Text style={styles.subtitle}>Xin chào, {user?.name}</Text>
+          <Text style={styles.subtitle}>Xin chào, {user?.fullName}</Text>
         </View>
 
         {/* Stats */}

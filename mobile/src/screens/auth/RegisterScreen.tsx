@@ -42,11 +42,12 @@ const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
     setIsLoading(true);
     try {
       const response = await register(registrationToken, fullName);
+      const data = response.data;
       // Lưu token vào AsyncStorage
-      await AsyncStorage.setItem("accessToken", response.accessToken);
-      await AsyncStorage.setItem("refreshToken", response.refreshToken);
-      await AsyncStorage.setItem("user", JSON.stringify(response.user));
-      navigation.replace("MainTabs");
+      await AsyncStorage.setItem("accessToken", data.accessToken);
+      await AsyncStorage.setItem("refreshToken", data.refreshToken);
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      navigation.navigate("MainTabs");
     } catch (error: any) {
       Alert.alert("Lỗi", error.message);
     } finally {
@@ -90,6 +91,15 @@ const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
             {isLoading ? "Đang xử lý..." : "Hoàn tất"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <View style={styles.backButtonContent}>
+            <Ionicons name="chevron-back" size={18} color="#666" />
+            <Text style={styles.backButtonText}>Quay lại</Text>
+          </View>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -98,6 +108,23 @@ const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   content: { flex: 1, padding: 24, justifyContent: "center" },
+  backButton: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  backButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  backButtonText: {
+    color: "#666",
+    fontSize: 15,
+    fontWeight: "500",
+    fontStyle: "italic",
+    marginLeft: 4,
+  },
   title: {
     fontSize: 26,
     fontWeight: "bold",

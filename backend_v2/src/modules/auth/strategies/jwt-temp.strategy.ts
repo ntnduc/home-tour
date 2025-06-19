@@ -6,7 +6,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 export class JwtTempStrategy extends PassportStrategy(Strategy, 'jwt-temp') {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromHeader('temp-token'),
+      _jwtFromRequest: ExtractJwt.fromHeader('temp-token'),
+      get jwtFromRequest() {
+        return this._jwtFromRequest;
+      },
+      set jwtFromRequest(value) {
+        this._jwtFromRequest = value;
+      },
       secretOrKey: process.env.JWT_TEMP_SECRET,
       ignoreExpiration: false,
     });

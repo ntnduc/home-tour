@@ -82,7 +82,7 @@ const ProfileScreen = () => {
               </Avatar>
             </XStack>
             <YStack space="$2" alignItems="center">
-              <H3 color="$color">{user?.name || "Chưa cập nhật"}</H3>
+              <H3 color="$color">{user?.fullName || "Chưa cập nhật"}</H3>
               <Paragraph color="$colorHover">
                 {user?.phoneNumber || "Chưa cập nhật"}
               </Paragraph>

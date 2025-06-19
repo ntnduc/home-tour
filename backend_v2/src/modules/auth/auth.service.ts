@@ -2,7 +2,6 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { ReponseOtpVerify } from './dto/auth.dto';
@@ -50,6 +49,9 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP');
     }
 
+    otp.isUsed = true;
+    await this.otpRepository.update(otp.id, otp);
+
     const findExitedUser = await this.userRepository.findOne({
       where: {
         phone: formattedPhoneNumber,
@@ -57,16 +59,12 @@ export class AuthService {
       },
     });
 
-    if (!findExitedUser) {
+    if (!findExitedUser || !findExitedUser.isPhoneVerified) {
       const tempToken = this.genTemplateToken(formattedPhoneNumber);
       return {
         isRegistered: false,
         tempToken,
       };
-    }
-
-    if (findExitedUser.isPhoneVerified) {
-      throw new BadRequestException('User already verified');
     }
 
     const token = await this.generateToken(
@@ -77,13 +75,39 @@ export class AuthService {
       isRegistered: true,
       refreshToken: token.refreshToken,
       accessToken: token.accessToken,
-      user: token.user,
+      user: findExitedUser,
     };
   }
 
   async register(name: string, phone: string) {
-    const userNew = { fullName: name, phone: phone } as CreateUserDto;
-    const user = await this.userService.create(userNew);
+    const userNew = {
+      fullName: name,
+      phone: phone,
+      isPhoneVerified: true,
+      isActive: true,
+    };
+    try {
+      const findUser = await this.userRepository.findOneBy({ phone });
+      if (findUser) {
+        findUser.isPhoneVerified = true;
+        const userUpdated = await this.userService.update(
+          findUser.id,
+          findUser,
+        );
+        const token = await this.generateToken(
+          userUpdated.id,
+          userUpdated.phone,
+        );
+        return {
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken,
+          user: userUpdated,
+        };
+      }
+    } catch {
+      //DO NOTHING
+    }
+    const user = await this.userRepository.save(userNew);
     const token = await this.generateToken(user.id, user.phone);
     return {
       accessToken: token.accessToken,
