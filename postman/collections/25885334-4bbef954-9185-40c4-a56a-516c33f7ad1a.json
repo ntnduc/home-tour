@@ -281,8 +281,39 @@
 						"disableBodyPruning": true
 					},
 					"request": {
-						"method": "GET",
-						"header": []
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDYxNDUwOSwiZXhwIjoxNzUwNjE1NDA5fQ.oyFcXJ9OqTMGYrOj1WmX4Ax-eNqnfZozat9MDYQFRqw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "3423fds",
+									"type": "text",
+									"uuid": "61b4ed32-df31-4d03-b528-385c2645b7b8"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test"
+							]
+						}
 					},
 					"response": []
 				}
