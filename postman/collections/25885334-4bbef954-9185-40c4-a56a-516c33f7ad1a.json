@@ -148,6 +148,16 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDU3MzQ3OSwiZXhwIjoxNzUwNTc0Mzc5fQ.dfb0zTg4vNIsem8INmiZZgAhXQ2e3ph3EtEqIaaxec4",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
