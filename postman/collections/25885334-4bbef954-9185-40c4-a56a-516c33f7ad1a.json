@@ -241,6 +241,18 @@
 						"description": "Đăng xuất"
 					},
 					"response": []
+				},
+				{
+					"name": "New Request",
+					"id": "25885334-69b32ba8-579e-4ddb-92d8-ceb5eb9b90a4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
 				}
 			],
 			"id": "25885334-a31a7cbd-e32c-401e-b243-a7df4537176d"
