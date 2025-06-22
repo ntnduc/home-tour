@@ -197,7 +197,7 @@ export class AuthService {
       },
       {
         secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: '1h',
+        expiresIn: '10h',
       },
     );
 

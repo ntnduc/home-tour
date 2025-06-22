@@ -1,6 +1,7 @@
 import { privateApi } from "@/services/api";
 import { ApiResponse } from "@/types/api";
 import { ComboOption } from "@/types/comboOption";
+import { createSuccessResponse } from "@/utils/apiUtil";
 
 export const getComboProvinces = async (): Promise<
   ApiResponse<ComboOption<string, string>[]>
@@ -8,10 +9,14 @@ export const getComboProvinces = async (): Promise<
   try {
     const response = await privateApi.get<
       ApiResponse<ComboOption<string, string>[]>
-    >("/location/combo-provinces");
-
-    if (response.status === 200) {
-      return response.data;
+    >("/location/provinces");
+    if (response.status === 200 && response.data.data) {
+      const combo = response.data?.data.map((item) => ({
+        key: item.value,
+        value: item.value,
+        label: item.label,
+      }));
+      return createSuccessResponse(combo);
     }
 
     return {
@@ -29,9 +34,14 @@ export const getComboDistricts = async (
   try {
     const response = await privateApi.get<
       ApiResponse<ComboOption<string, string>[]>
-    >(`/location/combo-districts?provinceCode=${provinceId}`);
-    if (response.status === 200) {
-      return response.data;
+    >(`/location/districts/${provinceId}`);
+    if (response.status === 200 && response.data.data) {
+      const combo = response.data?.data.map((item) => ({
+        key: item.value,
+        value: item.value,
+        label: item.label,
+      }));
+      return createSuccessResponse(combo);
     }
     return {
       success: false,
@@ -48,9 +58,14 @@ export const getComboWards = async (
   try {
     const response = await privateApi.get<
       ApiResponse<ComboOption<string, string>[]>
-    >(`/location/combo-wards?districtCode=${districtId}`);
-    if (response.status === 200) {
-      return response.data;
+    >(`/location/wards/${districtId}`);
+    if (response.status === 200 && response.data.data) {
+      const combo = response.data?.data.map((item) => ({
+        key: item.value,
+        value: item.value,
+        label: item.label,
+      }));
+      return createSuccessResponse(combo);
     }
     return {
       success: false,
