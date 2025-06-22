@@ -13,7 +13,7 @@ export const checkLogin = async (): Promise<boolean> => {
     return false;
   }
   const reponse = await checkLoginApi();
-  if (reponse?.isLoggedIn) {
+  if (reponse.data?.isLoggedIn) {
     return true;
   }
   return false;

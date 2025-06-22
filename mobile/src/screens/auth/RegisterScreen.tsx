@@ -1,6 +1,6 @@
 import { register } from "@/api/auth/api";
+import { storage } from "@/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import {
@@ -44,9 +44,9 @@ const RegisterScreen = ({ navigation, route }: RegisterScreenProps) => {
       const response = await register(registrationToken, fullName);
       const data = response.data;
       // Lưu token vào AsyncStorage
-      await AsyncStorage.setItem("accessToken", data.accessToken);
-      await AsyncStorage.setItem("refreshToken", data.refreshToken);
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      await storage.setAccessToken(data.accessToken);
+      await storage.setRefreshToken(data.refreshToken);
+      await storage.setUser(data.user);
       navigation.navigate("MainTabs");
     } catch (error: any) {
       Alert.alert("Lỗi", error.message);

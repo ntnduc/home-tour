@@ -1,6 +1,6 @@
 import { requestOTP, verifyOTP } from "@/api/auth/api";
+import { storage } from "@/utils/storage";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -69,9 +69,9 @@ const OTPVerificationScreen = ({
           registrationToken: data.tempToken,
         });
       } else {
-        await AsyncStorage.setItem("accessToken", data.accessToken);
-        await AsyncStorage.setItem("refreshToken", data.refreshToken);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        await storage.setAccessToken(data.accessToken);
+        await storage.setRefreshToken(data.refreshToken);
+        await storage.setUser(data.user);
         navigation.replace("MainTabs");
       }
     } catch (error: any) {

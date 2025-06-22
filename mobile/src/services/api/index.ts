@@ -1,4 +1,5 @@
 import { API_URL, PREFIX_URL } from "@/config";
+import { storage } from "@/utils/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
@@ -83,14 +84,14 @@ privateApi.interceptors.response.use(
         });
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-        await AsyncStorage.setItem("accessToken", accessToken);
-        await AsyncStorage.setItem("refreshToken", newRefreshToken);
+        await storage.setAccessToken(accessToken);
+        await storage.setRefreshToken(newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return privateApi(originalRequest);
       } catch (error) {
         // Nếu refresh token thất bại, đăng xuất user
-        await AsyncStorage.multiRemove(["accessToken", "refreshToken", "user"]);
+        await storage.removeTokens();
         // TODO: Chuyển về màn hình login
         return Promise.reject(error);
       }

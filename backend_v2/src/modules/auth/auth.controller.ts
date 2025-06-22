@@ -45,6 +45,8 @@ export class AuthController {
 
   @Get('check-login')
   async checkLogin(@Request() req: any) {
-    return 'Authen success';
+    return {
+      isLoggedIn: true,
+    };
   }
 }
