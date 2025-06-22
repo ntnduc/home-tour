@@ -30,3 +30,9 @@ export class RequestRegister {
   @IsNotEmpty()
   name: string;
 }
+
+export class RequestRefreshToken {
+  @IsString()
+  @IsNotEmpty()
+  refreshToken: string;
+}

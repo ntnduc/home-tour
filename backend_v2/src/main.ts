@@ -1,9 +1,11 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionFilter } from './common/filter/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { StickAuthGaurd } from './modules/auth/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,8 +21,13 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new AllExceptionFilter());
+
+  const jwtService = app.get(JwtService);
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new StickAuthGaurd(jwtService, reflector));
 
   // Swagger setup
   const config = new DocumentBuilder()

@@ -116,6 +116,23 @@ export class AuthService {
     };
   }
 
+  async refreshToken(refreshToken: string) {
+    const token = await this.tokenRepository.findOneBy({ refreshToken });
+
+    if (!token) {
+      throw new BadRequestException('Invalid refresh token');
+    }
+
+    const { userId, phoneNumber } = this.jwtService.decode(token.refreshToken);
+
+    const newToken = await this.generateToken(userId, phoneNumber);
+
+    return {
+      accessToken: newToken.accessToken,
+      refreshToken: newToken.refreshToken,
+    };
+  }
+
   static formatPhoneNumber(phoneNumber: string): string {
     // Bỏ toàn bộ ký tự không phải số
     const digitsOnly = phoneNumber.replace(/\D/g, '');
