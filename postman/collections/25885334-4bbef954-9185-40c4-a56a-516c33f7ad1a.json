@@ -254,22 +254,64 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDYwMTg0MywiZXhwIjoxNzUwNjAyNzQzfQ.UJzibpJvW6L9o5xt0WDubgYj76b58UOksP4gaJRnI_I",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDYxMDQ5NywiZXhwIjoxNzUwNjExMzk3fQ.yLRKM4uAdMas-FwlJCc1lD4aS0UA_qqDHbmc7BCGIT0",
 									"type": "string"
 								}
 							]
 						},
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/auth/logout",
+							"raw": "{{base_url}}/api/property",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"auth",
-								"logout"
+								"property"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"id": "25885334-e3e304fe-7086-4e52-9934-c072b819a90e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDYxNDUwOSwiZXhwIjoxNzUwNjE1NDA5fQ.oyFcXJ9OqTMGYrOj1WmX4Ax-eNqnfZozat9MDYQFRqw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "3423fds",
+									"type": "text",
+									"uuid": "61b4ed32-df31-4d03-b528-385c2645b7b8"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test"
 							]
 						}
 					},
