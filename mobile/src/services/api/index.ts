@@ -1,6 +1,5 @@
 import { API_URL, PREFIX_URL } from "@/config";
 import { storage } from "@/utils/storage";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
 
@@ -46,7 +45,7 @@ privateApi.interceptors.request.use(networkInterceptor);
 // Thêm interceptor để tự động thêm token vào header cho privateApi
 privateApi.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem("accessToken");
+    const token = await storage.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -78,11 +77,12 @@ privateApi.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = await AsyncStorage.getItem("refreshToken");
+        const refreshToken = await storage.getRefreshToken();
         const response = await publicApi.post("/auth/refresh-token", {
           refreshToken,
         });
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { accessToken, refreshToken: newRefreshToken } =
+          response.data.data;
 
         await storage.setAccessToken(accessToken);
         await storage.setRefreshToken(newRefreshToken);

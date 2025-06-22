@@ -49,4 +49,13 @@ export class AuthController {
       isLoggedIn: true,
     };
   }
+
+  @Get('logout')
+  async logout(@Request() req: any) {
+    const { token } = req;
+    await this.authService.logout(token);
+    return {
+      isLoggedIn: false,
+    };
+  }
 }

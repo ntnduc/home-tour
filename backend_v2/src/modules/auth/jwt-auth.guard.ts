@@ -35,6 +35,11 @@ export class StickAuthGaurd implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
+
+      // context.switchToHttp().getRequest().set('token', token);
+
+      (request as any).token = token;
+
       // request.user = payload;
       // request.isTempUser = false;
       return true;

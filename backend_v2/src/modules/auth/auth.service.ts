@@ -117,7 +117,10 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    const token = await this.tokenRepository.findOneBy({ refreshToken });
+    const token = await this.tokenRepository.findOneBy({
+      refreshToken,
+      isRevoked: false,
+    });
 
     if (!token) {
       throw new BadRequestException('Invalid refresh token');
@@ -131,6 +134,20 @@ export class AuthService {
       accessToken: newToken.accessToken,
       refreshToken: newToken.refreshToken,
     };
+  }
+
+  async logout(token: string) {
+    const findToken = await this.tokenRepository.findOneBy({
+      accessToken: token,
+      isRevoked: false,
+    });
+
+    if (!findToken) {
+      return { isLogout: false };
+    }
+    findToken.isRevoked = true;
+    await this.tokenRepository.update(findToken.id, findToken);
+    return { isLogout: true };
   }
 
   static formatPhoneNumber(phoneNumber: string): string {
