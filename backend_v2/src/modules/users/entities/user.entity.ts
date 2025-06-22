@@ -2,10 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
+import { Properties } from '../../property/entities/properties.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -31,4 +32,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Properties, (property) => property.owner)
+  properties: Properties[];
 }
