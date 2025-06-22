@@ -243,27 +243,6 @@
 					"response": []
 				},
 				{
-					"name": "refresh token",
-					"id": "25885334-69b32ba8-579e-4ddb-92d8-ceb5eb9b90a4",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "New Request",
 					"id": "25885334-8da8d3c3-40c8-4597-8eb9-723e333023a7",
 					"protocolProfileBehavior": {
