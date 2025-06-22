@@ -249,8 +249,29 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDYwMTg0MywiZXhwIjoxNzUwNjAyNzQzfQ.UJzibpJvW6L9o5xt0WDubgYj76b58UOksP4gaJRnI_I",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
 					},
 					"response": []
 				}
