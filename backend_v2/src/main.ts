@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionFilter } from './common/filter/http-exception.filter';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { StickAuthGaurd } from './modules/auth/jwt-auth.guard';
 
 async function bootstrap() {
@@ -22,7 +21,6 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new AllExceptionFilter());
 
   const jwtService = app.get(JwtService);

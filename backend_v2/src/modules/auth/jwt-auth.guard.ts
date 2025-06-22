@@ -26,7 +26,6 @@ export class StickAuthGaurd implements CanActivate {
 
     const hasAuth = !!authHeader;
 
-    // Mặc định: chỉ dùng Authorization
     if (!hasAuth)
       throw new UnauthorizedException('Authorization token không hợp lệ');
 
@@ -36,12 +35,9 @@ export class StickAuthGaurd implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
 
-      // context.switchToHttp().getRequest().set('token', token);
-
       (request as any).token = token;
+      (request as any).user = payload;
 
-      // request.user = payload;
-      // request.isTempUser = false;
       return true;
     } catch {
       throw new UnauthorizedException('Authorization token không hợp lệ');

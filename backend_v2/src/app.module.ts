@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { RequestContextInterceptor } from './common/interceptors/request-context.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import databaseConfig from './config/database.config';
 import { DatabaseConfig } from './config/database.interface';
 import { AuthModule } from './modules/auth/auth.module';
 import { LocationModule } from './modules/location/location.module';
 import { PropertyModule } from './modules/property/property.module';
+import { TestModule } from './modules/test/test.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -41,8 +43,18 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     LocationModule,
     PropertyModule,
+    TestModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestContextInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+  ],
 })
 export class AppModule {}
