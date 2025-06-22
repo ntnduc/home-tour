@@ -243,7 +243,7 @@
 					"response": []
 				},
 				{
-					"name": "New Request",
+					"name": "Refresh Token",
 					"id": "25885334-8da8d3c3-40c8-4597-8eb9-723e333023a7",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
