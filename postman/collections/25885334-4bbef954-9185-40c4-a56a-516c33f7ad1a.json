@@ -148,6 +148,16 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkMTU3YzI3Yy04YzI2LTQ1YTgtYjc2NC1mZjdjMWNlMTU2MDkiLCJwaG9uZU51bWJlciI6Iis4NDg2OTg4NTgxMiIsImlhdCI6MTc1MDU3NTkzNywiZXhwIjoxNzUwNTc2ODM3fQ.Hpiw3KHB6oSL547h_kdA_F_rd4T4X2vsa2-7oKU62IE",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -229,6 +239,18 @@
 							]
 						},
 						"description": "Đăng xuất"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"id": "25885334-8da8d3c3-40c8-4597-8eb9-723e333023a7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
