@@ -19,12 +19,12 @@
                 "value": "application/json"
               }
             ],
-						"url": {
-							"raw": "{{base_url}}/api/properties",
-							"host": ["{{base_url}}"],
-							"path": ["api", "properties"]
-						},
-						"description": "Lấy danh sách bất động sản"
+            "url": {
+              "raw": "{{base_url}}/api/properties",
+              "host": ["{{base_url}}"],
+              "path": ["api", "properties"]
+            },
+            "description": "Lấy danh sách bất động sản"
           }
         }
       ]
