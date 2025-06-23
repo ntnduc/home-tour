@@ -7,5 +7,9 @@ export class TestDetailDto extends BaseDetailDto<Test> {
   fromEntity(entity: Test): void {
     this.id = entity.id;
     this.name = entity.name;
+    this.createdBy = entity.createdBy;
+    this.updatedBy = entity.updatedBy;
+    this.createdAt = entity.createdAt;
+    this.updatedAt = entity.updatedAt;
   }
 }
