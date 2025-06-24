@@ -3,19 +3,12 @@ import { Properties } from '../entities/properties.entity';
 
 export class PropertyCreateDto extends BaseCreateDto<Properties> {
   ownerId: string;
-
   name: string;
-
   address: string;
-
   provinceCode: string;
-
   districtCode: string;
-
   wardCode: string;
-
   latitude?: number;
-
   longitude?: number;
 
   getEntity(): Properties {
