@@ -27,6 +27,7 @@ export class BaseService<
     protected readonly createDto: new () => TCreateDto,
     protected readonly updateDto: new () => TUpdateDto,
   ) {}
+  
   getAll(): Promise<TListDto[]> {
     throw new Error('Method not implemented.');
   }
@@ -43,6 +44,7 @@ export class BaseService<
     detailDto.fromEntity(entity);
     return detailDto;
   }
+
   async update(dto: TUpdateDto): Promise<TDetailDto> {
     const entity = await this.genericRepository.findOne({
       where: {
@@ -61,6 +63,7 @@ export class BaseService<
     result.fromEntity(newEntity.raw);
     return result;
   }
+
   delete(id: string): Promise<void> {
     this.genericRepository.delete(id);
     return Promise.resolve();
