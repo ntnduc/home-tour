@@ -1,5 +1,6 @@
-import { Controller } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Request } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { BaseController } from 'src/common/base/crud/base.controller';
 import { PropertyCreateDto } from './dto/property.create.dto';
 import { PropertyDetailDto } from './dto/property.detail.dto';
@@ -26,5 +27,16 @@ export class PropertyController extends BaseController<
       PropertyCreateDto,
       PropertyUpdateDto,
     );
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new entity' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 409, description: 'Entity already exists.' })
+  async create(@Request() request: Request, @Body() dto: PropertyCreateDto) {
+    const createdDto = plainToInstance(PropertyCreateDto, dto);
+    const currentUser = (request as any).user;
+    createdDto.ownerId = currentUser.userId;
+    return await super.create(request, createdDto);
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Get, Param, Post, Put, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { IBaseService } from './IService';
@@ -29,7 +29,7 @@ export class BaseController<
   @ApiOperation({ summary: 'Create a new entity' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 409, description: 'Entity already exists.' })
-  async create(@Body() dto: TCreateDto) {
+  async create(@Request() req: Request, @Body() dto: TCreateDto) {
     const createdDto = plainToInstance(this.createDto, dto);
     return await this.service.create(createdDto);
   }

@@ -6,22 +6,27 @@ import { Services } from '../entities/services.entity';
 
 export class CreateServiceDto extends BaseCreateDto<Services> {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
+  id?: string;
+
+  @IsString()
   name: string;
 
-  @IsEnum(ServiceCalculationMethod)
+  @IsEnum(ServiceCalculationMethod, {
+    message: 'Phương thức tính không hợp lệ!',
+  })
   @IsNotEmpty()
   calculationMethod: ServiceCalculationMethod;
 
   @IsString()
   @IsOptional()
-  defaultUnitName: string;
+  defaultUnitName?: string;
 
   getEntity(): Services {
     const entity = new Services();
     entity.name = this.name;
     entity.calculationMethod = this.calculationMethod;
-    entity.defaultUnitName = this.defaultUnitName;
+    entity.defaultUnitName = this.defaultUnitName ?? '';
     return entity;
   }
 }

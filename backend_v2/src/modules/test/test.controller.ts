@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Request } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BaseController } from 'src/common/base/crud/base.controller';
 import { TestCreateDto } from './dto/test.create.dto';
 import { TestDetailDto } from './dto/test.detail.dto';
@@ -26,5 +26,14 @@ export class TestController extends BaseController<
       TestCreateDto,
       TestUpdateDto,
     );
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new entity' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 409, description: 'Entity already exists.' })
+  async create(@Request() request: Request, @Body() dto: TestCreateDto) {
+    console.log('💞💓💗💞💓💗 ~ create ~ dto:', dto);
+    return await super.create(request, dto);
   }
 }

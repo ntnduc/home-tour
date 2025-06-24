@@ -180,7 +180,7 @@ const CreateTenantScreen = () => {
           text1: "Thành công",
           text2: "Tạo căn hộ thành công",
         });
-        navigation.goBack();
+        // navigation.goBack();
       })
       .catch((errors) => {
         Toast.show({
