@@ -31,6 +31,7 @@ export class BaseService<
   getAll(): Promise<TListDto[]> {
     throw new Error('Method not implemented.');
   }
+  
   async get(id: string): Promise<TDetailDto> {
     const entity = await this.genericRepository.findOne({
       where: {
