@@ -9,6 +9,7 @@ import { DatabaseConfig } from './config/database.interface';
 import { AuthModule } from './modules/auth/auth.module';
 import { LocationModule } from './modules/location/location.module';
 import { PropertyModule } from './modules/property/property.module';
+import { ServicesModule } from './modules/services/services.module';
 import { TestModule } from './modules/test/test.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -44,6 +45,7 @@ import { UsersModule } from './modules/users/users.module';
     LocationModule,
     PropertyModule,
     TestModule,
+    ServicesModule,
   ],
   controllers: [],
   providers: [
