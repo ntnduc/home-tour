@@ -1,10 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
-import {
-  ServiceCalculationMethod,
-  Services,
-} from '../../services/entities/services.entity';
+import { Services } from '../../services/entities/services.entity';
+import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 import { Properties } from './properties.entity';
 
 @Entity('properties_services')

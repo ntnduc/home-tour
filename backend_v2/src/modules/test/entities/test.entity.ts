@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
 import { TestChild } from './test-child.entity';
+import { TestMapping } from './test-mapping.entity';
 
 @Entity('test')
 export class Test extends BaseEntity {
@@ -11,4 +12,7 @@ export class Test extends BaseEntity {
     cascade: true,
   })
   children: TestChild[];
+
+  @OneToMany(() => TestMapping, (testMapping) => testMapping.test)
+  testMappings: TestMapping[];
 }

@@ -8,6 +8,8 @@ export default registerAs('database', () => ({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'home_tour_db',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
-  synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV !== 'production',
+  // synchronize: process.env.NODE_ENV !== 'production',
+  synchronize: true,
+  // logging: process.env.NODE_ENV !== 'production',
+  logging: true,
 }));
