@@ -1,8 +1,14 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
+import { TestChild } from './test-child.entity';
 
 @Entity('test')
 export class Test extends BaseEntity {
   @Column()
   name: string;
+
+  @OneToMany(() => TestChild, (testChild) => testChild.test, {
+    cascade: true,
+  })
+  children: TestChild[];
 }

@@ -40,6 +40,7 @@ export class AuthController {
   @Post('refresh-token')
   @AllowAnonymous()
   async refreshToken(@Body() body: RequestRefreshToken) {
+    console.log('💞💓💗💞💓💗 ~ AuthController ~ refreshToken ~ body:', body);
     return this.authService.refreshToken(body.refreshToken);
   }
 
