@@ -37,7 +37,6 @@ export class PropertyController extends BaseController<
     const createdDto = plainToInstance(PropertyCreateDto, dto);
     const currentUser = (request as any).user;
     createdDto.ownerId = currentUser.userId;
-    console.log('💞💓💗💞💓💗 ~ create ~ createdDto:', createdDto);
     return await super.create(request, createdDto);
   }
 }
