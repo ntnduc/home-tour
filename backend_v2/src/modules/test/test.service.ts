@@ -1,7 +1,7 @@
 import { BadGatewayException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base/crud/base.service';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { TestMappingCreateDto } from './dto/test-mapping.create.dto';
 import { TestCreateDto } from './dto/test.create.dto';
 import { TestDetailDto } from './dto/test.detail.dto';
@@ -22,6 +22,10 @@ export class TestService extends BaseService<
   constructor(
     @InjectRepository(Test)
     private testRepository: Repository<Test>,
+    @InjectRepository(TestContent)
+    private testContentRepository: Repository<TestContent>,
+    @InjectRepository(TestMapping)
+    private testMappingRepository: Repository<TestMapping>,
     private readonly dataSource: DataSource,
   ) {
     super(
@@ -73,28 +77,57 @@ export class TestService extends BaseService<
     try {
       const testEnity = new Test();
       testEnity.name = dto.name;
+      const newTestEntity = this.testRepository.create(testEnity);
+      await queryRunner.manager.save(newTestEntity);
 
       if (dto.testContent && dto.testContent.length > 0) {
-        const testMapping = dto.testContent.map((testContent) => {
-          const testMapping = new TestMapping();
-          if (testContent.id) {
-            testMapping.test_content_id = testContent.id;
-          } else {
-            const testContentEntity = new TestContent();
-            testContentEntity.name = testContent.name;
-            testMapping.testContent = testContentEntity;
-          }
+        const testContentIds = dto.testContent
+          .filter((testContent) => testContent.id)
+          .map((testContent) => testContent.id);
 
-          return testMapping;
+        const findTestContentExit = await this.testContentRepository.find({
+          where: {
+            id: In(testContentIds),
+          },
         });
-        testEnity.testMappings = testMapping;
+
+        const testContentUnExited = dto.testContent.filter(
+          (testContent) =>
+            !findTestContentExit.find(
+              (testContentExit) => testContentExit.id === testContent.id,
+            ),
+        );
+
+        const testContentEntities = testContentUnExited.map((testContent) => {
+          const testContentEntity = new TestContent();
+          testContentEntity.name = testContent.name;
+          return testContentEntity;
+        });
+
+        const newTestContent =
+          this.testContentRepository.create(testContentEntities);
+        await queryRunner.manager.save(newTestContent);
+
+        const allTestContents = [...newTestContent, ...findTestContentExit];
+
+        const testMapping = allTestContents.map((testContentEntity) => {
+          const testMappingEntity = new TestMapping();
+          testMappingEntity.test_content_id = testContentEntity.id;
+          testMappingEntity.test_id = newTestEntity.id;
+          testMappingEntity.name = testContentEntity.name;
+          return testMappingEntity;
+        });
+        this.testMappingRepository.create(testMapping);
+        await queryRunner.manager.save(testMapping);
       }
 
-      await queryRunner.manager.save(testEnity);
+      await queryRunner.commitTransaction();
 
       const result = new TestDetailDto();
+      result.fromEntity(newTestEntity);
       return result;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Lỗi test mapping');
     } finally {
       await queryRunner.release();

@@ -54,74 +54,53 @@ export class PropertyService
     await queryRunner.startTransaction();
 
     try {
-      const servicesDto = propertyCreateDto.services;
-      const propertiesServices: PropertiesService[] = [];
+      const propertyEntity = propertyCreateDto.getEntity();
+      const property = await this.propertiesRepository.create(propertyEntity);
+      await queryRunner.manager.save(property);
 
-      if (servicesDto && servicesDto.length > 0) {
-        const serviceIds = servicesDto.map((serviceDto) => serviceDto.id);
-        //
-        const serviceEntities = await queryRunner.manager.find(Services, {
+      //  Create services
+      if (propertyCreateDto.services && propertyCreateDto.services.length > 0) {
+        const serivceIds = propertyCreateDto.services
+          .filter((service) => service.id)
+          .map((service) => service.id);
+
+        const serviceExited = await this.servicesRepository.find({
           where: {
-            id: In(serviceIds),
+            id: In(serivceIds),
           },
         });
 
-        servicesDto.forEach((serviceDto) => {
-          const findServiceExited = serviceEntities.find(
-            (service) => service.id === serviceDto.id,
-          );
-          if (findServiceExited) {
-            const propertiesServiceEntity = new PropertiesService();
-            propertiesServiceEntity.service = findServiceExited;
-            propertiesServiceEntity.calculationMethod =
-              serviceDto.calculationMethod;
-            // create new properties service
-            const newPropertiesService = queryRunner.manager.create(
-              PropertiesService,
-              propertiesServiceEntity,
-            );
-            propertiesServices.push(newPropertiesService);
-          } else {
-            const serviceEntity = serviceDto.getEntity();
-            const newService = queryRunner.manager.create(
-              Services,
-              serviceEntity,
-            );
-            const propertiesServiceEntity = new PropertiesService();
-            propertiesServiceEntity.calculationMethod =
-              serviceDto.calculationMethod;
-            propertiesServiceEntity.service = newService;
+        const serviceUnExited = propertyCreateDto.services.filter(
+          (service) =>
+            !serviceExited.find((serviceExit) => serviceExit.id === service.id),
+        );
 
-            // create new properties service
-            const newPropertiesService = queryRunner.manager.create(
-              PropertiesService,
-              propertiesServiceEntity,
-            );
-            propertiesServices.push(newPropertiesService);
-          }
+        const services = serviceUnExited.map((service) => {
+          const serviceEntity = service.getEntity();
+          return serviceEntity;
         });
-      }
 
-      // create new properties
-      const propertiesCreateEntity = propertyCreateDto.getEntity();
-      propertiesCreateEntity.services = propertiesServices;
-      const propertiesEntity = queryRunner.manager.create(
-        Properties,
-        propertiesCreateEntity,
-      );
-      console.log(
-        '💞💓💗💞💓💗 ~ overridecreate ~ propterties:',
-        propertiesEntity,
-      );
-      const properties = await this.propertiesRepository.save(propertiesEntity);
-      // const propterties = await queryRunner.manager.save(propertiesEntity);
+        const newServices = this.servicesRepository.create(services);
+        await queryRunner.manager.save(newServices);
+
+        const allServices = [...newServices, ...serviceExited];
+        const propertiesServices = allServices.map((service) => {
+          const propertiesServiceEntity = new PropertiesService();
+          propertiesServiceEntity.propertyId = property.id;
+          propertiesServiceEntity.serviceId = service.id;
+          return propertiesServiceEntity;
+        });
+
+        const newPropertiesServices =
+          this.propertiesServicesRepository.create(propertiesServices);
+        await queryRunner.manager.save(newPropertiesServices);
+      }
 
       await queryRunner.commitTransaction();
       const result = new PropertyDetailDto();
-      result.fromEntity(properties);
+      result.fromEntity(property);
       return result;
     } catch (err) {
-      // console.error('💞💓💗💞💓💗 ~ overridecreate ~ err:', err);
       await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Lỗi khi tạo property!');
     } finally {

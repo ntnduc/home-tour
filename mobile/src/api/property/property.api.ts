@@ -7,4 +7,5 @@ export const createProperty = async (data: PropertyCreateRequest) => {
     "/property",
     data
   );
+  return response;
 };
