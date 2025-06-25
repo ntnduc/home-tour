@@ -33,6 +33,7 @@ export class PropertiesService extends BaseEntity {
     type: 'enum',
     enum: ServiceCalculationMethod,
     default: ServiceCalculationMethod.FREE,
+    enumName: 'service_calculation_method',
   })
   calculationMethod: ServiceCalculationMethod;
 }
