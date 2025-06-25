@@ -1,10 +1,8 @@
 import { IsOptional } from 'class-validator';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseUpdateDto } from '../../../common/base/dto/update.dto';
-import {
-  ServiceCalculationMethod,
-  Services,
-} from '../entities/services.entity';
+import { Services } from '../entities/services.entity';
+import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 
 export class UpdateServiceDto extends BaseUpdateDto<Services> {
   @IsOptional()

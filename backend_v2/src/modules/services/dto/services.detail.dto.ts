@@ -1,8 +1,6 @@
 import { BaseDetailDto } from '../../../common/base/dto/detail.dto';
-import {
-  ServiceCalculationMethod,
-  Services,
-} from '../entities/services.entity';
+import { Services } from '../entities/services.entity';
+import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 
 export class ServiceDetailDto extends BaseDetailDto<Services> {
   name: string;

@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ServiceCalculationMethod } from '../entities/services.entity';
+import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 
 import { BaseCreateDto } from '../../../common/base/dto/create.dto';
 import { Services } from '../entities/services.entity';

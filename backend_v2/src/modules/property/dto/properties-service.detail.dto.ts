@@ -1,7 +1,7 @@
 import { ServiceDetailDto } from 'src/modules/services/dto/services.detail.dto';
 import { BaseDetailDto } from '../../../common/base/dto/detail.dto';
-import { ServiceCalculationMethod } from '../../services/entities/services.entity';
 import { PropertiesService } from '../entities/properties-service.entity';
+import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 import { PropertyDetailDto } from './property.detail.dto';
 
 export class PropertyServiceDetailDto extends BaseDetailDto<PropertiesService> {

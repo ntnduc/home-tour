@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { ServiceCalculationMethod } from '../../services/entities/services.entity';
 import { BaseCreateDto } from '../../../common/base/dto/create.dto';
 import { PropertiesService } from '../entities/properties-service.entity';
+import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 
 export class CreatePropertyServiceDto extends BaseCreateDto<PropertiesService> {
   @IsString()
