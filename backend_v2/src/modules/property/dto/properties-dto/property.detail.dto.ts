@@ -1,5 +1,5 @@
 import { BaseDetailDto } from 'src/common/base/dto/detail.dto';
-import { Properties } from '../entities/properties.entity';
+import { Properties } from '../../entities/properties.entity';
 
 export class PropertyDetailDto extends BaseDetailDto<Properties> {
   ownerId: string;

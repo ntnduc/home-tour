@@ -17,6 +17,9 @@ export class PropertiesService extends BaseEntity {
   @IsNotEmpty()
   propertyId: string;
 
+  @Column({ nullable: true })
+  name?: string;
+
   @ManyToOne(() => Services, (services) => services.propertiesServices, {
     onDelete: 'CASCADE',
   })

@@ -9,7 +9,7 @@ import { TestUpdateDto } from './dto/test.update.dto';
 import { Test } from './entities/test.entity';
 import { TestService } from './test.service';
 
-@ApiTags('test')
+@ApiTags('Test')
 @Controller('api/test')
 export class TestController extends BaseController<
   TestService,

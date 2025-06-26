@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
 import { User } from '../../users/entities/user.entity';
 import { PropertiesService } from './properties-service.entity';
+import { Rooms } from './rooms.entity';
 
 @Entity('properties')
 export class Properties extends BaseEntity {
@@ -49,4 +50,7 @@ export class Properties extends BaseEntity {
     (propertiesService) => propertiesService.property,
   )
   services: PropertiesService[];
+
+  @OneToMany(() => Rooms, (rooms) => rooms.property)
+  rooms: Rooms[];
 }

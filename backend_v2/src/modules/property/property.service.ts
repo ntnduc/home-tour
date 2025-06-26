@@ -3,11 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { IBaseService } from 'src/common/base/crud/IService';
 import { DataSource, In, Repository } from 'typeorm';
+import { CreateServiceDto } from '../services/dto/services.create.dto';
 import { Services } from '../services/entities/services.entity';
-import { PropertyCreateDto } from './dto/property.create.dto';
-import { PropertyDetailDto } from './dto/property.detail.dto';
-import { PropertyListDto } from './dto/property.list.dto';
-import { PropertyUpdateDto } from './dto/property.update.dto';
+import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
+import { PropertyDetailDto } from './dto/properties-dto/property.detail.dto';
+import { PropertyListDto } from './dto/properties-dto/property.list.dto';
+import { PropertyUpdateDto } from './dto/properties-dto/property.update.dto';
 import { PropertiesService } from './entities/properties-service.entity';
 import { Properties } from './entities/properties.entity';
 
@@ -64,18 +65,21 @@ export class PropertyService
           .filter((service) => service.id)
           .map((service) => service.id);
 
-        const serviceExited = await this.servicesRepository.find({
+        const serviceExited: Services[] = await this.servicesRepository.find({
           where: {
             id: In(serivceIds),
           },
         });
 
-        const serviceUnExited = propertyCreateDto.services.filter(
-          (service) =>
-            !serviceExited.find((serviceExit) => serviceExit.id === service.id),
-        );
+        const serviceUnExited: CreateServiceDto[] =
+          propertyCreateDto.services.filter(
+            (service) =>
+              !serviceExited.find(
+                (serviceExit) => serviceExit.id === service.id,
+              ),
+          );
 
-        const services = serviceUnExited.map((service) => {
+        const services: Services[] = serviceUnExited.map((service) => {
           const serviceEntity = service.getEntity();
           return serviceEntity;
         });
@@ -83,12 +87,27 @@ export class PropertyService
         const newServices = this.servicesRepository.create(services);
         await queryRunner.manager.save(newServices);
 
-        const allServices = [...newServices, ...serviceExited];
-        const propertiesServices = allServices.map((service) => {
+        const propertiesServices: PropertiesService[] = [];
+        newServices.forEach((service) => {
           const propertiesServiceEntity = new PropertiesService();
           propertiesServiceEntity.propertyId = property.id;
           propertiesServiceEntity.serviceId = service.id;
-          return propertiesServiceEntity;
+          propertiesServiceEntity.calculationMethod = service.calculationMethod;
+          propertiesServiceEntity.name = service.name;
+          propertiesServices.push(propertiesServiceEntity);
+        });
+
+        serviceExited.forEach((service) => {
+          const propertiesServiceEntity = new PropertiesService();
+          const findServiceDto = propertyCreateDto.services?.find(
+            (serviceDto) => serviceDto.id && serviceDto.id === service.id,
+          );
+          propertiesServiceEntity.propertyId = property.id;
+          propertiesServiceEntity.serviceId = service.id;
+          propertiesServiceEntity.calculationMethod =
+            findServiceDto?.calculationMethod || service.calculationMethod;
+          propertiesServiceEntity.name = findServiceDto?.name || service.name;
+          propertiesServices.push(propertiesServiceEntity);
         });
 
         const newPropertiesServices =

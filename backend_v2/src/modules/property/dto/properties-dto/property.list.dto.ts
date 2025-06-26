@@ -1,5 +1,5 @@
 import { BaseListDto } from 'src/common/base/dto/list.dto';
-import { Properties } from '../entities/properties.entity';
+import { Properties } from '../../entities/properties.entity';
 
 export class PropertyListDto extends BaseListDto<Properties> {
   fromEntity(entity: Properties): void {

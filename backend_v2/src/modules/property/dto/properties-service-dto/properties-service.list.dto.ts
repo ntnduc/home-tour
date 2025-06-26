@@ -1,6 +1,6 @@
-import { BaseListDto } from '../../../common/base/dto/list.dto';
-import { PropertiesService } from '../entities/properties-service.entity';
-import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
+import { BaseListDto } from '../../../../common/base/dto/list.dto';
+import { ServiceCalculationMethod } from '../../../../common/enums/service.enum';
+import { PropertiesService } from '../../entities/properties-service.entity';
 
 export class PropertyServiceListDto extends BaseListDto<PropertiesService> {
   propertyId: string;

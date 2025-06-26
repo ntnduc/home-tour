@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { BaseCreateDto } from 'src/common/base/dto/create.dto';
 import { CreateServiceDto } from 'src/modules/services/dto/services.create.dto';
-import { Properties } from '../entities/properties.entity';
+import { Properties } from '../../entities/properties.entity';
 
 export class PropertyCreateDto extends BaseCreateDto<Properties> {
   @IsOptional()

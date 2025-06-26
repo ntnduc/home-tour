@@ -12,7 +12,7 @@ import { AllowAnonymous } from 'src/common/decorators/allow-anonymous.decorator'
 import { AuthService } from './auth.service';
 import { RequestRefreshToken, RequestRegister } from './dto/auth.dto';
 
-@ApiTags('auth')
+@ApiTags('Authentication')
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

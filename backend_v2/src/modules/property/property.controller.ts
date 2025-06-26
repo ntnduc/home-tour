@@ -2,10 +2,10 @@ import { Body, Controller, Post, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { BaseController } from 'src/common/base/crud/base.controller';
-import { PropertyCreateDto } from './dto/property.create.dto';
-import { PropertyDetailDto } from './dto/property.detail.dto';
-import { PropertyListDto } from './dto/property.list.dto';
-import { PropertyUpdateDto } from './dto/property.update.dto';
+import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
+import { PropertyDetailDto } from './dto/properties-dto/property.detail.dto';
+import { PropertyListDto } from './dto/properties-dto/property.list.dto';
+import { PropertyUpdateDto } from './dto/properties-dto/property.update.dto';
 import { Properties } from './entities/properties.entity';
 import { PropertyService } from './property.service';
 

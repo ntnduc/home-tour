@@ -1,6 +1,6 @@
 import { BaseUpdateDto } from 'src/common/base/dto/update.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { Properties } from '../entities/properties.entity';
+import { Properties } from '../../entities/properties.entity';
 
 export class PropertyUpdateDto extends BaseUpdateDto<Properties> {
   ownerId: string;
