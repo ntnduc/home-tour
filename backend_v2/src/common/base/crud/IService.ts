@@ -1,3 +1,6 @@
+import { BaseFilterDto } from '../dto/filter.dto';
+import { PaginateResult } from './search.crud';
+
 export interface IBaseService<
   TEntity,
   TDetailDto,
@@ -5,7 +8,7 @@ export interface IBaseService<
   TCreateDto,
   TUpdateDto,
 > {
-  getAll(): Promise<TListDto[]>;
+  getAll(filter: BaseFilterDto<TEntity>): Promise<PaginateResult<TListDto>>;
   get(id: string): Promise<TDetailDto>;
   update(entity: TUpdateDto): Promise<TDetailDto>;
   create(entity: TCreateDto): Promise<TDetailDto>;

@@ -1,6 +1,16 @@
-import { Body, Delete, Get, Param, Post, Put, Request } from '@nestjs/common';
+import {
+  Body,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { BaseFilterDto } from '../dto/filter.dto';
 import { IBaseService } from './IService';
 
 export class BaseController<
@@ -37,8 +47,8 @@ export class BaseController<
   @Get()
   @ApiOperation({ summary: 'Get all entities' })
   @ApiResponse({ status: 200, description: 'List of entities.' })
-  async getAll() {
-    return await this.service.getAll();
+  async getAll(@Query() query: BaseFilterDto<TEntity>) {
+    return await this.service.getAll(query);
   }
 
   @Get(':id')
