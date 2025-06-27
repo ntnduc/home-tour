@@ -29,7 +29,7 @@ export class LocationService {
       where: { province_code: provinceCode },
     });
     return districts.map((district) => ({
-      label: district.name,
+      label: district.full_name,
       value: district.code,
     }));
   }
@@ -39,7 +39,7 @@ export class LocationService {
       where: { district_code: districtCode },
     });
     return wards.map((ward) => ({
-      label: ward.name,
+      label: ward.full_name,
       value: ward.code,
     }));
   }

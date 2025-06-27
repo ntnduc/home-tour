@@ -9,7 +9,7 @@ export default registerAs('database', () => ({
   database: process.env.DB_DATABASE || 'home_tour_db',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   // synchronize: process.env.NODE_ENV !== 'production',
-  synchronize: true,
+  synchronize: false,
   // logging: process.env.NODE_ENV !== 'production',
   logging: true,
 }));

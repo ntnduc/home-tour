@@ -11,6 +11,8 @@ import { PropertyListDto } from './dto/properties-dto/property.list.dto';
 import { PropertyUpdateDto } from './dto/properties-dto/property.update.dto';
 import { PropertiesService } from './entities/properties-service.entity';
 import { Properties } from './entities/properties.entity';
+import { Rooms } from './entities/rooms.entity';
+import { RoomsService } from './rooms.service';
 
 @Injectable()
 export class PropertyService
@@ -37,8 +39,11 @@ export class PropertyService
     private propertiesServicesRepository: Repository<PropertiesService>,
     @InjectRepository(Services)
     private servicesRepository: Repository<Services>,
-
+    @InjectRepository(Rooms)
+    private roomsRepository: Repository<Rooms>,
     private readonly dataSource: DataSource,
+
+    private readonly roomService: RoomsService,
   ) {
     super(
       propertiesRepository,
@@ -113,6 +118,15 @@ export class PropertyService
         const newPropertiesServices =
           this.propertiesServicesRepository.create(propertiesServices);
         await queryRunner.manager.save(newPropertiesServices);
+      }
+
+      // Create rooms
+      const rooms =
+        this.roomService.getRoomsDefaultFromTotalNumberRooms(propertyCreateDto);
+      if (rooms && rooms.length > 0) {
+        rooms.forEach((room) => (room.propertyId = property.id));
+        const newRooms = this.roomsRepository.create(rooms);
+        await queryRunner.manager.save(newRooms);
       }
 
       await queryRunner.commitTransaction();

@@ -9,6 +9,8 @@ export interface Property {
   provinceCode: string;
   districtCode: string;
   wardCode: string;
+  numberFloor?: number;
+  totalRoom: number;
   images: string[];
   services: Service[];
 }

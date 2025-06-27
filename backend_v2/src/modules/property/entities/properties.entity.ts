@@ -39,6 +39,12 @@ export class Properties extends BaseEntity {
   @Column({ nullable: true, default: 0 })
   defaultRoomRent: number;
 
+  @Column({ nullable: true })
+  numberFloor?: number;
+
+  @Column()
+  totalRoom: number;
+
   @Column({ default: 5 })
   @IsInt({ message: 'Ngày thanh toán phải là số nguyên!' })
   @Min(1, { message: 'Ngày thanh toán không hợp lệ!' })

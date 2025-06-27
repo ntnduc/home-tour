@@ -49,6 +49,13 @@ export class PropertyCreateDto extends BaseCreateDto<Properties> {
 
   @IsNumber()
   @IsOptional()
+  numberFloor?: number;
+
+  @IsNumber()
+  totalRoom: number;
+
+  @IsNumber()
+  @IsOptional()
   @Min(1, { message: 'Ngày thanh toán không hợp lệ!' })
   @Max(31, { message: 'Ngày thanh toán không hợp lệ!' })
   paymentDate?: number;
@@ -68,6 +75,8 @@ export class PropertyCreateDto extends BaseCreateDto<Properties> {
       ? parseInt(this.longitude)
       : undefined;
     entity.defaultRoomRent = this.defaultRoomRent;
+    entity.numberFloor = this.numberFloor;
+    entity.totalRoom = this.totalRoom;
     entity.paymentDate = this.paymentDate ?? 5;
     return entity;
   }

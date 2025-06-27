@@ -18,6 +18,10 @@ export class PropertyDetailDto extends BaseDetailDto<Properties> {
 
   longitude?: number;
 
+  numberFloor?: number;
+
+  totalRoom?: number;
+
   fromEntity(entity: Properties): void {
     this.id = entity.id;
     this.ownerId = entity.ownerId;
@@ -28,5 +32,7 @@ export class PropertyDetailDto extends BaseDetailDto<Properties> {
     this.wardCode = entity.wardCode;
     this.latitude = entity.latitude;
     this.longitude = entity.longitude;
+    this.numberFloor = entity.numberFloor;
+    this.totalRoom = entity.totalRoom;
   }
 }

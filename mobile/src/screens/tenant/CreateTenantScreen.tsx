@@ -378,6 +378,60 @@ const CreateTenantScreen = () => {
               )}
             />
           </YStack>
+          <XStack space="$4">
+            <YStack space="$2" flex={1}>
+              <Text style={styles.label}>
+                Số phòng <Text style={styles.requiredText}>*</Text>
+              </Text>
+
+              <Controller
+                control={control}
+                name="totalRoom"
+                rules={{ required: "Vui lòng nhập số phòng" }}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    placeholder="Nhập số phòng"
+                    value={value?.toString()}
+                    onChangeText={(text) => {
+                      const numericValue = text.replace(/[^0-9]/g, "");
+                      const num = parseInt(numericValue);
+                      if (!num) {
+                        onChange(null);
+                        return;
+                      }
+                      onChange(num);
+                    }}
+                    keyboardType="numeric"
+                    borderColor={errors.totalRoom ? "#ff3b30" : "#ddd"}
+                  />
+                )}
+              />
+            </YStack>
+            <YStack space="$2" flex={1}>
+              <Text style={styles.label}>Số tầng</Text>
+              <Controller
+                control={control}
+                name="numberFloor"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    placeholder="Nhập số tầng"
+                    value={value?.toString()}
+                    onChangeText={(text) => {
+                      const numericValue = text.replace(/[^0-9]/g, "");
+                      const num = parseInt(numericValue);
+                      if (!num) {
+                        onChange(null);
+                        return;
+                      }
+                      onChange(num);
+                    }}
+                    keyboardType="numeric"
+                    borderColor={errors.numberFloor ? "#ff3b30" : "#ddd"}
+                  />
+                )}
+              />
+            </YStack>
+          </XStack>
 
           <YStack space="$2">
             <XStack

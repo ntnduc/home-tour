@@ -15,6 +15,8 @@ import RoomDetailScreen from "./src/screens/tenant/RoomDetailScreen";
 import RoomListScreen from "./src/screens/tenant/RoomListScreen";
 import config from "./tamagui.config";
 
+import "./global.css";
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
