@@ -7,10 +7,10 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import HeaderComponents from "../common/HeaderComponents";
 
 type RootStackParamList = {
   RoomList: undefined;
@@ -198,42 +198,24 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="dark-content" className="bg-black" />
       <FlatList
         data={filteredRooms.slice(0, visibleCount)}
         renderItem={renderRoomCard}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={
-          <>
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>Danh Sách Phòng</Text>
-            </View>
-            <View style={styles.searchBarWrapper}>
-              <Ionicons
-                name="search"
-                size={20}
-                color="#888"
-                style={{ marginLeft: 10 }}
-              />
-              <TextInput
-                style={styles.searchBar}
-                placeholder="Tìm kiếm phòng hoặc tòa nhà..."
-                value={search}
-                onChangeText={setSearch}
-                placeholderTextColor="#aaa"
-              />
-              {search.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => setSearch("")}
-                  style={{ padding: 6 }}
-                >
-                  <Ionicons name="close-circle" size={18} color="#bbb" />
-                </TouchableOpacity>
-              )}
-            </View>
-          </>
+          <HeaderComponents
+            title="Danh Sách Phòng"
+            isSearch
+            searchConfig={{
+              placeholder: "Tìm kiếm phòng hoặc tòa nhà...",
+              onSearch: (text) => setSearch(text),
+            }}
+          />
         }
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ margin: 10, marginTop: 0 }}
+        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 40 }}>
             <Text style={{ color: "#888" }}>Không tìm thấy phòng phù hợp.</Text>
@@ -259,29 +241,32 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    alignItems: "center",
-    marginBottom: 12,
+  headerContainer: {
+    backgroundColor: "#fff",
+    paddingTop: 24,
+    paddingBottom: 8,
+    paddingHorizontal: 0,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#222",
-    marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 14,
+    textAlign: "center",
+    letterSpacing: 0.2,
   },
   searchBarWrapper: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F4F6FB",
-    borderRadius: 12,
-    marginBottom: 16,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    borderRadius: 16,
+    marginBottom: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   searchBar: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 8,
     color: "#222",

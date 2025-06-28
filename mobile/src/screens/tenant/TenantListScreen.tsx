@@ -3,20 +3,20 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import {
   FlatList,
-  Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import HeaderComponents from "../common/HeaderComponents";
 
 type RootStackParamList = {
   RoomDetail: { roomId: string };
   EditBuilding: { buildingId: string };
   AddRoom: { buildingId: string };
+  RoomList: { buildingId?: string };
 };
 
 type RoomListScreenProps = {
@@ -42,26 +42,6 @@ interface Building {
   tenants: number;
   amenities: string[];
 }
-
-// Mock data
-const mockRooms: Room[] = [
-  {
-    id: "1",
-    title: "Phòng trọ cao cấp222",
-    address: "123 Nguyễn Văn Linh, Quận 7, TP.HCM",
-    price: "3.500.000",
-    area: "25m²",
-    images: ["https://example.com/room1.jpg"],
-  },
-  {
-    id: "2",
-    title: "Phòng trọ tiện nghi",
-    address: "456 Lê Văn Việt, Quận 9, TP.HCM",
-    price: "2.800.000",
-    area: "20m²",
-    images: ["https://example.com/room2.jpg"],
-  },
-];
 
 const mockBuildings: Building[] = [
   {
@@ -192,26 +172,9 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
       b.address.toLowerCase().includes(search.toLowerCase())
   );
 
-  const renderRoomItem = ({ item }: { item: Room }) => (
-    <TouchableOpacity
-      style={styles.roomCard}
-      onPress={() => navigation.navigate("RoomDetail", { roomId: item.id })}
-    >
-      <Image
-        source={{ uri: item.images[0] }}
-        style={styles.roomImage}
-        defaultSource={require("../../../assets/icon.png")}
-      />
-      <View style={styles.roomInfo}>
-        <Text style={styles.roomTitle}>{item.title}</Text>
-        <Text style={styles.roomAddress}>{item.address}</Text>
-        <View style={styles.roomDetails}>
-          <Text style={styles.roomPrice}>{item.price}đ/tháng</Text>
-          <Text style={styles.roomArea}>{item.area}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  const handleSearch = (text: string) => {
+    setSearch(text);
+  };
 
   const renderBuildingCard = ({ item }: { item: Building }) => {
     const occupancyRate = Math.round((item.tenants / item.rooms) * 100);
@@ -272,6 +235,14 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
               >
                 <Ionicons name="add" size={20} color="#34C759" />
               </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.iconBtn, { backgroundColor: "#FFF6E5" }]}
+                onPress={() =>
+                  navigation.navigate("RoomList", { buildingId: item.id })
+                }
+              >
+                <Ionicons name="home" size={18} color="#FF9500" />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -282,54 +253,40 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Quản lý tòa nhà</Text>
-      </View>
-      <View style={styles.searchBarWrapper}>
-        <Ionicons
-          name="search"
-          size={20}
-          color="#888"
-          style={{ marginLeft: 10 }}
-        />
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Tìm kiếm tòa nhà hoặc địa chỉ..."
-          value={search}
-          onChangeText={setSearch}
-          placeholderTextColor="#aaa"
-        />
-        {search.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setSearch("")}
-            style={{ padding: 6 }}
-          >
-            <Ionicons name="close-circle" size={18} color="#bbb" />
-          </TouchableOpacity>
-        )}
-      </View>
-      <View style={styles.statsRow}>
-        <View style={[styles.statsBox, { backgroundColor: "#F0F8FF" }]}>
-          <Text style={styles.statsIcon}>🏢</Text>
-          <Text style={styles.statsValue}>{totalBuildings}</Text>
-          <Text style={styles.statsLabel}>Tòa nhà</Text>
-        </View>
-        <View style={[styles.statsBox, { backgroundColor: "#F8FFF0" }]}>
-          <Text style={styles.statsIcon}>🔑</Text>
-          <Text style={styles.statsValue}>{totalRooms}</Text>
-          <Text style={styles.statsLabel}>Phòng</Text>
-        </View>
-        <View style={[styles.statsBox, { backgroundColor: "#FFF8F0" }]}>
-          <Text style={styles.statsIcon}>👤</Text>
-          <Text style={styles.statsValue}>{totalTenants}</Text>
-          <Text style={styles.statsLabel}>Đã thuê</Text>
-        </View>
-      </View>
       <FlatList
         data={filteredBuildings}
         renderItem={renderBuildingCard}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        ListHeaderComponent={
+          <HeaderComponents
+            title="Quản lý tòa nhà"
+            isSearch
+            searchConfig={{
+              placeholder: "Tìm kiếm tòa nhà...",
+              onSearch: handleSearch,
+            }}
+          >
+            <View style={styles.statsRow}>
+              <View style={[styles.statsBox, { backgroundColor: "#F0F8FF" }]}>
+                <Text style={styles.statsIcon}>🏢</Text>
+                <Text style={styles.statsValue}>{totalBuildings}</Text>
+                <Text style={styles.statsLabel}>Tòa nhà</Text>
+              </View>
+              <View style={[styles.statsBox, { backgroundColor: "#F8FFF0" }]}>
+                <Text style={styles.statsIcon}>🔑</Text>
+                <Text style={styles.statsValue}>{totalRooms}</Text>
+                <Text style={styles.statsLabel}>Phòng</Text>
+              </View>
+              <View style={[styles.statsBox, { backgroundColor: "#FFF8F0" }]}>
+                <Text style={styles.statsIcon}>👤</Text>
+                <Text style={styles.statsValue}>{totalTenants}</Text>
+                <Text style={styles.statsLabel}>Đã thuê</Text>
+              </View>
+            </View>
+          </HeaderComponents>
+        }
+        contentContainerStyle={{ margin: 10, marginTop: 0 }}
+        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 40 }}>
@@ -478,39 +435,32 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
   },
-  header: {
-    alignItems: "center",
-    paddingTop: 18,
-    paddingBottom: 12,
+  headerContainer: {
     backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
-    marginBottom: 8,
+    paddingTop: 24,
+    paddingBottom: 8,
+    paddingHorizontal: 0,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#222",
-    marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 14,
     textAlign: "center",
+    letterSpacing: 0.2,
   },
   searchBarWrapper: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F4F6FB",
-    borderRadius: 12,
-    marginBottom: 14,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    borderRadius: 16,
+    marginBottom: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   searchBar: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 8,
     color: "#222",
