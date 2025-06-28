@@ -11,8 +11,8 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import OTPVerificationScreen from "./src/screens/auth/OTPVerificationScreen";
 import RegisterScreen from "./src/screens/auth/RegisterScreen";
-import RoomDetailScreen from "./src/screens/tenant/RoomDetailScreen";
-import RoomListScreen from "./src/screens/tenant/RoomListScreen";
+import RoomDetailScreen from "./src/screens/tenant/RoomListScreen";
+import RoomListScreen from "./src/screens/tenant/TenantListScreen";
 import config from "./tamagui.config";
 
 import "./global.css";

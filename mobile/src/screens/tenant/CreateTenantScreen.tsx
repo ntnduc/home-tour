@@ -17,7 +17,7 @@ import { formatCurrency } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, FieldErrors, useForm } from "react-hook-form";
 
 import {
   Alert,
@@ -192,6 +192,10 @@ const CreateTenantScreen = () => {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  const onError = (errors: FieldErrors<PropertyCreateRequest>) => {
+    Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
   };
 
   if (isLoading) {
@@ -719,7 +723,7 @@ const CreateTenantScreen = () => {
         <YStack padding="$4">
           <TouchableOpacity
             style={styles.submitButton}
-            onPress={handleSubmit(onSubmit)}
+            onPress={handleSubmit(onSubmit, onError)}
           >
             <XStack space="$2" alignItems="center">
               <Text style={styles.submitButtonText}>Tạo căn hộ</Text>

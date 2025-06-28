@@ -1,4 +1,6 @@
 import ProfileScreen from "@/screens/profile/ProfileScreen";
+import RoomListScreen from "@/screens/tenant/RoomListScreen";
+import TeantListScreen from "@/screens/tenant/TenantListScreen";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
@@ -10,11 +12,7 @@ import DashboardScreen from "../screens/common/DashboardScreen";
 const PropertiesScreen = () => (
   <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>Tài sản</Text>
 );
-const TenantsScreen = () => (
-  <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>
-    Người thuê
-  </Text>
-);
+
 const ReportsScreen = () => (
   <Text style={{ flex: 1, textAlign: "center", marginTop: 50 }}>Báo cáo</Text>
 );
@@ -38,10 +36,8 @@ const TabNavigator = () => {
             return <Ionicons name="home-outline" size={size} color={color} />;
           if (route.name === "Tài sản")
             return <MaterialIcons name="apartment" size={size} color={color} />;
-          if (route.name === "Người thuê")
-            return (
-              <FontAwesome5 name="user-friends" size={size} color={color} />
-            );
+          if (route.name === "Phòng")
+            return <FontAwesome5 name="door-open" size={size} color={color} />;
           if (route.name === "Báo cáo")
             return (
               <Ionicons name="bar-chart-outline" size={size} color={color} />
@@ -59,8 +55,8 @@ const TabNavigator = () => {
       })}
     >
       <Tab.Screen name="Trang chủ" component={DashboardScreen} />
-      <Tab.Screen name="Tài sản" component={PropertiesScreen} />
-      <Tab.Screen name="Người thuê" component={TenantsScreen} />
+      <Tab.Screen name="Tài sản" component={TeantListScreen} />
+      <Tab.Screen name="Phòng" component={RoomListScreen} />
       <Tab.Screen name="Báo cáo" component={ReportsScreen} />
       <Tab.Screen name="Cá nhân" component={ProfileScreen} />
     </Tab.Navigator>
