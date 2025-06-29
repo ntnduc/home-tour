@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { colors } from "../../theme/colors";
 import HeaderComponents from "../common/HeaderComponents";
 
 type RootStackParamList = {
@@ -156,11 +157,23 @@ const avgOccupancy =
 
 const getStatusInfo = (building: Building) => {
   if (building.tenants === building.rooms) {
-    return { label: "Đầy phòng", color: "#FF3B30", bg: "#FFECEC" };
+    return {
+      label: "Đầy phòng",
+      color: colors.status.success,
+      bg: colors.status.success + "20",
+    };
   } else if (building.tenants === 0) {
-    return { label: "Trống", color: "#FF9500", bg: "#FFF6E5" };
+    return {
+      label: "Trống",
+      color: colors.status.warning,
+      bg: colors.status.warning + "20",
+    };
   } else {
-    return { label: "Còn phòng", color: "#34C759", bg: "#E9F9EF" };
+    return {
+      label: "Còn phòng",
+      color: colors.status.error,
+      bg: colors.status.error + "20",
+    };
   }
 };
 
@@ -182,77 +195,118 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
 
     return (
       <View style={styles.buildingCard}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text style={styles.buildingName}>{item.name}</Text>
-            <Text style={styles.buildingAddress}>{item.address}</Text>
-            <Text style={styles.buildingDesc}>{item.description}</Text>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoText}>🏢 {item.floors} tầng</Text>
-              <Text style={styles.infoText}>🔑 {item.rooms} phòng</Text>
-              <Text style={styles.infoText}>👤 {item.tenants} thuê</Text>
-            </View>
-            <View style={styles.progressBarBg}>
+        <View style={styles.cardHeader}>
+          <View style={styles.buildingInfo}>
+            <View style={styles.titleRow}>
+              <Text style={styles.buildingName}>{item.name}</Text>
               <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: `${occupancyRate}%`,
-                    backgroundColor:
-                      occupancyRate === 100 ? "#FF3B30" : "#34C759",
-                  },
-                ]}
-              />
+                style={[styles.statusBadge, { backgroundColor: status.bg }]}
+              >
+                <Text style={[styles.statusText, { color: status.color }]}>
+                  {status.label}
+                </Text>
+              </View>
             </View>
-            <Text style={styles.progressPercent}>{occupancyRate}% lấp đầy</Text>
+            <Text style={styles.buildingAddress}>{item.address}</Text>
           </View>
-          <View style={{ alignItems: "flex-end" }}>
-            <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-              <Text style={[styles.statusText, { color: status.color }]}>
-                {status.label}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", marginTop: 8 }}>
-              <TouchableOpacity
-                style={styles.iconBtn}
-                onPress={() =>
-                  navigation.navigate("EditBuilding", { buildingId: item.id })
-                }
-              >
-                <Ionicons name="pencil" size={18} color="#007AFF" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.iconBtn}
-                onPress={() =>
-                  navigation.navigate("AddRoom", { buildingId: item.id })
-                }
-              >
-                <Ionicons name="add" size={20} color="#34C759" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.iconBtn, { backgroundColor: "#FFF6E5" }]}
-                onPress={() =>
-                  navigation.navigate("RoomList", { buildingId: item.id })
-                }
-              >
-                <Ionicons name="home" size={18} color="#FF9500" />
-              </TouchableOpacity>
-            </View>
+          <TouchableOpacity
+            style={styles.updateBtn}
+            onPress={() =>
+              navigation.navigate("EditBuilding", { buildingId: item.id })
+            }
+          >
+            <Ionicons name="pencil" size={18} color={colors.primary.main} />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.buildingDesc}>{item.description}</Text>
+
+        <View style={styles.basicInfoRow}>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>🏢</Text>
+            <Text style={styles.infoLabel}>{item.floors} tầng</Text>
           </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>🔑</Text>
+            <Text style={styles.infoLabel}>{item.rooms} phòng</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoIcon}>👤</Text>
+            <Text style={styles.infoLabel}>{item.tenants} thuê</Text>
+          </View>
+        </View>
+
+        <View style={styles.progressSection}>
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressLabel}>Tỷ lệ lấp đầy</Text>
+            <Text style={styles.progressPercent}>{occupancyRate}%</Text>
+          </View>
+          <View style={styles.progressBarBg}>
+            <View
+              style={[
+                styles.progressBarFill,
+                {
+                  width: `${occupancyRate}%`,
+                  backgroundColor:
+                    occupancyRate === 100
+                      ? colors.status.success
+                      : colors.status.error,
+                },
+              ]}
+            />
+          </View>
+        </View>
+
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[
+              styles.actionBtn,
+              {
+                backgroundColor: colors.status.success + "10",
+                borderColor: colors.status.success + "30",
+              },
+            ]}
+            onPress={() =>
+              navigation.navigate("AddRoom", { buildingId: item.id })
+            }
+          >
+            <Ionicons name="add" size={16} color={colors.status.success} />
+            <Text
+              style={[styles.actionBtnText, { color: colors.status.success }]}
+            >
+              Thêm phòng
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionBtn,
+              {
+                backgroundColor: colors.primary.light,
+                borderColor: colors.primary.main + "30",
+              },
+            ]}
+            onPress={() =>
+              navigation.navigate("RoomList", { buildingId: item.id })
+            }
+          >
+            <Ionicons name="home" size={16} color={colors.primary.main} />
+            <Text
+              style={[styles.actionBtnText, { color: colors.primary.main }]}
+            >
+              Xem phòng
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.background.default}
+      />
       <FlatList
         data={filteredBuildings}
         renderItem={renderBuildingCard}
@@ -267,17 +321,32 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
             }}
           >
             <View style={styles.statsRow}>
-              <View style={[styles.statsBox, { backgroundColor: "#F0F8FF" }]}>
+              <View
+                style={[
+                  styles.statsBox,
+                  { backgroundColor: colors.primary.light },
+                ]}
+              >
                 <Text style={styles.statsIcon}>🏢</Text>
                 <Text style={styles.statsValue}>{totalBuildings}</Text>
                 <Text style={styles.statsLabel}>Tòa nhà</Text>
               </View>
-              <View style={[styles.statsBox, { backgroundColor: "#F8FFF0" }]}>
+              <View
+                style={[
+                  styles.statsBox,
+                  { backgroundColor: colors.status.success + "20" },
+                ]}
+              >
                 <Text style={styles.statsIcon}>🔑</Text>
                 <Text style={styles.statsValue}>{totalRooms}</Text>
                 <Text style={styles.statsLabel}>Phòng</Text>
               </View>
-              <View style={[styles.statsBox, { backgroundColor: "#FFF8F0" }]}>
+              <View
+                style={[
+                  styles.statsBox,
+                  { backgroundColor: colors.status.warning + "20" },
+                ]}
+              >
                 <Text style={styles.statsIcon}>👤</Text>
                 <Text style={styles.statsValue}>{totalTenants}</Text>
                 <Text style={styles.statsLabel}>Đã thuê</Text>
@@ -290,7 +359,7 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 40 }}>
-            <Text style={{ color: "#888" }}>
+            <Text style={{ color: colors.text.secondary }}>
               Không tìm thấy tòa nhà phù hợp.
             </Text>
           </View>
@@ -311,16 +380,16 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background.paper,
   },
   listContainer: {
     padding: 16,
   },
   roomCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
     borderRadius: 12,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: colors.neutral.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -342,10 +411,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+    color: colors.text.primary,
   },
   roomAddress: {
     fontSize: 14,
-    color: "#666",
+    color: colors.text.secondary,
     marginBottom: 8,
   },
   roomDetails: {
@@ -356,87 +426,118 @@ const styles = StyleSheet.create({
   roomPrice: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: colors.primary.main,
   },
   roomArea: {
     fontSize: 14,
-    color: "#666",
+    color: colors.text.secondary,
   },
   buildingCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
     borderRadius: 14,
     padding: 16,
     marginBottom: 18,
-    shadowColor: "#000",
+    shadowColor: colors.neutral.black,
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#F2F2F2",
+    borderColor: colors.border.light,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  buildingInfo: {
+    flex: 1,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
   },
   buildingName: {
     fontSize: 17,
     fontWeight: "bold",
-    color: "#222",
-    marginBottom: 2,
+    color: colors.text.primary,
+    flex: 1,
   },
   buildingAddress: {
     fontSize: 13,
-    color: "#888",
+    color: colors.text.secondary,
     marginBottom: 2,
   },
   buildingDesc: {
     fontSize: 13,
-    color: "#888",
+    color: colors.text.secondary,
     marginBottom: 6,
     fontStyle: "italic",
   },
-  infoRow: {
+  basicInfoRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 4,
     gap: 12,
   },
-  infoText: {
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  infoIcon: {
     fontSize: 13,
-    color: "#666",
+    color: colors.text.secondary,
     marginRight: 8,
+  },
+  infoLabel: {
+    fontSize: 13,
+    color: colors.text.secondary,
+  },
+  progressSection: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  progressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 2,
+  },
+  progressLabel: {
+    fontSize: 13,
+    color: colors.text.secondary,
   },
   progressBarBg: {
     width: "100%",
-    height: 5,
-    backgroundColor: "#F2F2F2",
+    height: 6,
+    backgroundColor: colors.border.light,
     borderRadius: 3,
     overflow: "hidden",
-    marginTop: 2,
   },
   progressBarFill: {
-    height: 5,
+    height: 6,
     borderRadius: 3,
   },
   progressPercent: {
-    fontSize: 13,
-    color: "#34C759",
-    fontWeight: "bold",
-    marginTop: 2,
-    marginBottom: 2,
+    fontSize: 14,
+    color: colors.text.primary,
+    fontWeight: "600",
   },
   statusBadge: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 10,
-    paddingVertical: 3,
-    marginLeft: 12,
-    marginTop: 2,
+    paddingVertical: 4,
+    minWidth: 80,
+    alignItems: "center",
   },
   statusText: {
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: "600",
+    textAlign: "center",
   },
   headerContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
     paddingTop: 24,
     paddingBottom: 8,
     paddingHorizontal: 0,
@@ -444,7 +545,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#222",
+    color: colors.text.primary,
     marginBottom: 14,
     textAlign: "center",
     letterSpacing: 0.2,
@@ -452,7 +553,7 @@ const styles = StyleSheet.create({
   searchBarWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6FB",
+    backgroundColor: colors.background.paper,
     borderRadius: 16,
     marginBottom: 18,
     paddingHorizontal: 10,
@@ -463,7 +564,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 8,
-    color: "#222",
+    color: colors.text.primary,
     backgroundColor: "transparent",
   },
   statsRow: {
@@ -478,8 +579,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     paddingVertical: 14,
-    backgroundColor: "#F4F6FB",
-    shadowColor: "#000",
+    backgroundColor: colors.background.paper,
+    shadowColor: colors.neutral.black,
     shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 1,
@@ -491,41 +592,64 @@ const styles = StyleSheet.create({
   statsValue: {
     fontWeight: "bold",
     fontSize: 18,
-    color: "#007AFF",
+    color: colors.primary.main,
   },
   statsLabel: {
     fontSize: 13,
-    color: "#666",
+    color: colors.text.secondary,
     marginTop: 2,
   },
   fab: {
     position: "absolute",
     right: 24,
     bottom: 32,
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.primary.main,
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#007AFF",
+    shadowColor: colors.primary.main,
     shadowOpacity: 0.18,
     shadowRadius: 8,
     elevation: 5,
   },
   fabIcon: {
-    color: "#fff",
+    color: colors.neutral.white,
     fontSize: 32,
     fontWeight: "bold",
     marginTop: -2,
   },
-  iconBtn: {
-    backgroundColor: "#F4F6FB",
+  updateBtn: {
+    backgroundColor: colors.background.paper,
     borderRadius: 8,
     padding: 7,
     marginLeft: 6,
     alignItems: "center",
     justifyContent: "center",
+  },
+  statusRow: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 6,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: "500",
   },
 });
 
