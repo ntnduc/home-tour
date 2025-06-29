@@ -429,7 +429,16 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           }}
         >
           <View style={{ flex: 1 }}>
-            <Text style={styles.roomName}>{item.name}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.roomName}>{item.name}</Text>
+              <View
+                style={[styles.statusBadge, { backgroundColor: status.bg }]}
+              >
+                <Text style={[styles.statusText, { color: status.color }]}>
+                  {item.status}
+                </Text>
+              </View>
+            </View>
             <Text style={styles.buildingName}>{item.building}</Text>
             <Text style={styles.price}>
               {item.price.toLocaleString()}đ/tháng
@@ -533,14 +542,6 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           >
             <Ionicons name="pencil" size={18} color={colors.primary.main} />
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.statusRow}>
-          <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-            <Text style={[styles.statusText, { color: status.color }]}>
-              {item.status}
-            </Text>
-          </View>
         </View>
 
         {/* Nút hành động hợp đồng */}
@@ -1018,11 +1019,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   roomName: {
     fontSize: 17,
     fontWeight: "bold",
     color: colors.text.primary,
-    marginBottom: 2,
+    flex: 1,
   },
   buildingName: {
     fontSize: 13,
@@ -1048,15 +1055,16 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   statusBadge: {
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
+    minWidth: 80,
     alignItems: "center",
-    justifyContent: "center",
   },
   statusText: {
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: "600",
+    textAlign: "center",
   },
   fab: {
     position: "absolute",
