@@ -4,4 +4,6 @@ export type RootStackParamList = {
   Register: { registrationToken: string };
   MainTabs: undefined;
   CreateTenant: undefined;
+  InvoiceDetail: { invoice: any };
+  InvoiceHistory: undefined;
 };

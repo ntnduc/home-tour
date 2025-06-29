@@ -19,13 +19,14 @@ export type SearchConfig = {
 
 export type HeaderComponentsProps = {
   title: string;
+  className?: string;
   isSearch?: boolean;
   searchConfig?: SearchConfig;
   children?: React.ReactNode;
 };
 
 const HeaderComponents = (props: HeaderComponentsProps) => {
-  const { title, isSearch, searchConfig, children } = props;
+  const { title, isSearch, searchConfig, children, className } = props;
   const [search, setSearch] = useState("");
 
   const handeleSearch = (text?: string) => {
@@ -36,33 +37,37 @@ const HeaderComponents = (props: HeaderComponentsProps) => {
   };
 
   return (
-    <View className="flex flex-col justify-between items-center content-center bg-white w-full mb-4">
-      <Text style={styles.headerTitle}>{title}</Text>
-      {isSearch && (
-        <View style={styles.searchBarWrapper}>
-          <Ionicons
-            name="search"
-            size={20}
-            color="#888"
-            style={{ marginLeft: 10 }}
-          />
-          <TextInput
-            style={[styles.searchBar, searchConfig?.style]}
-            placeholder={searchConfig?.placeholder || "Tìm kiếm..."}
-            value={search}
-            onChangeText={handeleSearch}
-            placeholderTextColor="#aaa"
-          />
-          {search.length > 0 && (
-            <TouchableOpacity
-              onPress={() => handeleSearch("")}
-              style={{ padding: 6 }}
-            >
-              <Ionicons name="close-circle" size={18} color="#bbb" />
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
+    <View
+      className={`flex flex-col justify-between items-center content-center bg-white w-full ${className}`}
+    >
+      <View className="flex flex-col justify-between items-center content-center bg-white w-full mb-4">
+        <Text style={styles.headerTitle}>{title}</Text>
+        {isSearch && (
+          <View style={styles.searchBarWrapper}>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#888"
+              style={{ marginLeft: 10 }}
+            />
+            <TextInput
+              style={[styles.searchBar, searchConfig?.style]}
+              placeholder={searchConfig?.placeholder || "Tìm kiếm..."}
+              value={search}
+              onChangeText={handeleSearch}
+              placeholderTextColor="#aaa"
+            />
+            {search.length > 0 && (
+              <TouchableOpacity
+                onPress={() => handeleSearch("")}
+                style={{ padding: 6 }}
+              >
+                <Ionicons name="close-circle" size={18} color="#bbb" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </View>
       {children}
     </View>
   );
@@ -74,7 +79,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F4F6FB",
     borderRadius: 16,
-    marginBottom: 18,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },

@@ -285,7 +285,7 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
             </View>
           </HeaderComponents>
         }
-        contentContainerStyle={{ margin: 10, marginTop: 0 }}
+        contentContainerStyle={{ margin: 8, marginTop: 0 }}
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
