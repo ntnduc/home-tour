@@ -43,7 +43,10 @@ const HeaderComponents = (props: HeaderComponentsProps) => {
       <View className="flex flex-col justify-between items-center content-center bg-white w-full mb-4">
         <Text style={styles.headerTitle}>{title}</Text>
         {isSearch && (
-          <View style={styles.searchBarWrapper}>
+          <View
+            style={styles.searchBarWrapper}
+            className={searchConfig?.className}
+          >
             <Ionicons
               name="search"
               size={20}

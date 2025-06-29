@@ -302,11 +302,8 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={colors.background.default}
-      />
+    <SafeAreaView className="bg-white flex-1">
+      <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
       <FlatList
         data={filteredBuildings}
         renderItem={renderBuildingCard}
@@ -318,6 +315,7 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
             searchConfig={{
               placeholder: "Tìm kiếm tòa nhà...",
               onSearch: handleSearch,
+              className: "mx-2",
             }}
           >
             <View style={styles.statsRow}>
@@ -354,7 +352,6 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
             </View>
           </HeaderComponents>
         }
-        contentContainerStyle={{ margin: 8, marginTop: 0 }}
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -378,60 +375,6 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.paper,
-  },
-  listContainer: {
-    padding: 16,
-  },
-  roomCard: {
-    backgroundColor: colors.background.default,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: colors.neutral.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  roomImage: {
-    width: "100%",
-    height: 200,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  roomInfo: {
-    padding: 16,
-  },
-  roomTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: colors.text.primary,
-  },
-  roomAddress: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: 8,
-  },
-  roomDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  roomPrice: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.primary.main,
-  },
-  roomArea: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
   buildingCard: {
     backgroundColor: colors.background.default,
     borderRadius: 14,
@@ -443,6 +386,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 1,
     borderColor: colors.border.light,
+    marginHorizontal: 8,
   },
   cardHeader: {
     flexDirection: "row",
@@ -535,37 +479,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
     textAlign: "center",
-  },
-  headerContainer: {
-    backgroundColor: colors.background.default,
-    paddingTop: 24,
-    paddingBottom: 8,
-    paddingHorizontal: 0,
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: colors.text.primary,
-    marginBottom: 14,
-    textAlign: "center",
-    letterSpacing: 0.2,
-  },
-  searchBarWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.background.paper,
-    borderRadius: 16,
-    marginBottom: 18,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  searchBar: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    color: colors.text.primary,
-    backgroundColor: "transparent",
   },
   statsRow: {
     flexDirection: "row",
