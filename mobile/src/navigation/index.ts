@@ -1,3 +1,4 @@
+import { Contract } from "@/types/contract";
 import { Invoice } from "@/types/payment";
 
 export type RootStackParamList = {
@@ -8,12 +9,19 @@ export type RootStackParamList = {
   RoomList: undefined;
   RoomDetail: { roomId: string };
   CreateTenant: undefined;
+  UpdateRoom: { room: any };
   InvoiceDetail: { invoice: Invoice; fromHistory?: boolean };
   InvoiceHistory: undefined;
+  // Contract management routes
+  CreateContract: { room: any };
+  ContractDetail: { contract: Contract };
+  ContractList: undefined;
+  TerminateContract: { contract: Contract };
 };
 
 export type TabParamList = {
   Home: undefined;
   RoomList: undefined;
+  ContractList: undefined;
   Profile: undefined;
 };

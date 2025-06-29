@@ -1,14 +1,35 @@
-import { RootStackParamList } from "@/navigation";
-import { colors } from "@/theme/colors";
-import { User } from "@/types/user";
-import { getStoreUser } from "@/utils/appUtil";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import QuickActionButton from "../../components/QuickActionButton";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import StatCard from "../../components/StatCard";
+import { User } from "../../types/user";
+import { getStoreUser } from "../../utils/appUtil";
+
+type RootStackParamList = {
+  Login: undefined;
+  OTPVerification: { phoneNumber: string };
+  Register: { registrationToken: string };
+  MainTabs: undefined;
+  RoomList: undefined;
+  RoomDetail: { roomId: string };
+  CreateTenant: undefined;
+  UpdateRoom: { room: any };
+  InvoiceDetail: { invoice: any; fromHistory?: boolean };
+  InvoiceHistory: undefined;
+  CreateContract: { room: any };
+  ContractDetail: { contract: any };
+  ContractList: undefined;
+  TerminateContract: { contract: any };
+};
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -23,6 +44,44 @@ const DashboardScreen = () => {
     };
     loadUser();
   }, []);
+
+  const quickActions = [
+    {
+      id: 1,
+      title: "Quản lý phòng",
+      description: "Xem và quản lý danh sách phòng",
+      icon: "business-outline",
+      color: "#007AFF",
+      onPress: () => navigation.navigate("RoomList"),
+    },
+    {
+      id: 2,
+      title: "Hợp đồng",
+      description: "Xem và quản lý hợp đồng thuê phòng",
+      icon: "document-text-outline",
+      color: "#34C759",
+      onPress: () => navigation.navigate("ContractList"),
+    },
+    {
+      id: 3,
+      title: "Lịch sử hóa đơn",
+      description: "Xem lịch sử thanh toán",
+      icon: "time-outline",
+      color: "#FF9500",
+      onPress: () => navigation.navigate("InvoiceHistory"),
+    },
+    {
+      id: 4,
+      title: "Báo cáo",
+      description: "Xem báo cáo thống kê",
+      icon: "bar-chart-outline",
+      color: "#AF52DE",
+      onPress: () => {
+        // TODO: Navigate to report screen
+        console.log("Navigate to report");
+      },
+    },
+  ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -72,27 +131,73 @@ const DashboardScreen = () => {
 
         {/* Quick Actions */}
         <Text style={styles.quickActionTitle}>Thao tác nhanh</Text>
-        <View style={styles.quickActionsRow}>
-          <QuickActionButton
-            label="Thêm tài sản"
-            icon={<Ionicons name="add" size={24} color="#fff" />}
-            onPress={() => {
-              navigation.navigate("CreateTenant");
-            }}
-            styleLabel={{ color: colors.text.inverse }}
-            gradient
-          />
-          <QuickActionButton
-            label="Thêm người thuê"
-            icon={<FontAwesome5 name="user-plus" size={24} color="#6a5af9" />}
-            onPress={() => {}}
-          />
+        <View style={styles.quickActionsContainer}>
+          {quickActions.map((action) => (
+            <TouchableOpacity
+              key={action.id}
+              style={styles.quickActionCard}
+              onPress={action.onPress}
+              activeOpacity={0.8}
+            >
+              <View style={styles.quickActionContent}>
+                <View
+                  style={[
+                    styles.quickActionIcon,
+                    { backgroundColor: `${action.color}20` },
+                  ]}
+                >
+                  <Ionicons
+                    name={action.icon as any}
+                    size={24}
+                    color={action.color}
+                  />
+                </View>
+                <View style={styles.quickActionText}>
+                  <Text style={styles.quickActionTitleText}>
+                    {action.title}
+                  </Text>
+                  <Text style={styles.quickActionDescription}>
+                    {action.description}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* Recent Activity */}
+        {/* Recent Activities */}
         <Text style={styles.recentTitle}>Hoạt động gần đây</Text>
         <View style={styles.recentBox}>
-          <Text style={{ color: "#888" }}>Chưa có hoạt động nào.</Text>
+          <View style={styles.recentActivities}>
+            <View style={styles.recentActivity}>
+              <View
+                style={[styles.activityDot, { backgroundColor: "#34C759" }]}
+              />
+              <Text style={styles.activityText}>
+                Hợp đồng mới được tạo cho Phòng 101
+              </Text>
+              <Text style={styles.activityTime}>2 giờ trước</Text>
+            </View>
+            <View style={styles.recentActivity}>
+              <View
+                style={[styles.activityDot, { backgroundColor: "#007AFF" }]}
+              />
+              <Text style={styles.activityText}>
+                Thanh toán hóa đơn tháng 1/2024
+              </Text>
+              <Text style={styles.activityTime}>1 ngày trước</Text>
+            </View>
+            <View style={styles.recentActivity}>
+              <View
+                style={[styles.activityDot, { backgroundColor: "#FF9500" }]}
+              />
+              <Text style={styles.activityText}>
+                Cập nhật thông tin Phòng 202
+              </Text>
+              <Text style={styles.activityTime}>2 ngày trước</Text>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -100,29 +205,115 @@ const DashboardScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
-  header: { marginBottom: 16 },
-  title: { fontSize: 22, fontWeight: "bold" },
-  subtitle: { color: "#888", marginTop: 4 },
-  statsRow: { flexDirection: "row", justifyContent: "space-between" },
-  quickActionTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
-    marginTop: 24,
-    marginBottom: 8,
+  container: {
+    flex: 1,
+    padding: 16,
   },
-  quickActionsRow: { flexDirection: "row", justifyContent: "space-between" },
-  recentTitle: {
+  header: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  subtitle: {
     fontSize: 16,
+    color: "#666",
+  },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  quickActionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
     marginTop: 24,
-    marginBottom: 8,
+    marginBottom: 16,
+  },
+  quickActionsContainer: {
+    marginBottom: 24,
+  },
+  quickActionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  quickActionContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  quickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
+  quickActionText: {
+    flex: 1,
+  },
+  quickActionTitleText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+  quickActionDescription: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  recentTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 16,
   },
   recentBox: {
-    backgroundColor: "#f5f6fa",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 24,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  recentActivities: {
+    gap: 12,
+  },
+  recentActivity: {
+    flexDirection: "row",
     alignItems: "center",
+  },
+  activityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  activityText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#374151",
+  },
+  activityTime: {
+    fontSize: 12,
+    color: "#9CA3AF",
   },
 });
 

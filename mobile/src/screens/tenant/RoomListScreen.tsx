@@ -12,7 +12,10 @@ import {
   View,
 } from "react-native";
 import BuildingSelector from "../../components/BuildingSelector";
+import ContractListModal from "../../components/ContractListModal";
 import PaymentSummary from "../../components/PaymentSummary";
+import { colors } from "../../theme/colors";
+import { Contract, ContractStatus } from "../../types/contract";
 import {
   Invoice,
   PAYMENT_STATUS_COLOR,
@@ -24,8 +27,13 @@ import HeaderComponents from "../common/HeaderComponents";
 type RootStackParamList = {
   RoomList: undefined;
   RoomDetail: { roomId: number };
+  UpdateRoom: { room: any };
   InvoiceDetail: { invoice: Invoice; fromHistory?: boolean };
   InvoiceHistory: undefined;
+  // Contract management routes
+  CreateContract: { room: any };
+  ContractDetail: { contract: any };
+  TerminateContract: { contract: any };
 };
 
 type RoomListScreenProps = {
@@ -310,9 +318,12 @@ const mockRoomList = [
 ];
 
 const statusColor = {
-  "Đang thuê": { bg: "#E9F9EF", color: "#34C759" },
-  Trống: { bg: "#FFF6E5", color: "#FF9500" },
-  "Đang sửa": { bg: "#FFECEC", color: "#FF3B30" },
+  "Đang thuê": {
+    bg: colors.status.success + "20",
+    color: colors.status.success,
+  },
+  Trống: { bg: colors.status.warning + "20", color: colors.status.warning },
+  "Đang sửa": { bg: colors.status.error + "20", color: colors.status.error },
 };
 
 const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
@@ -321,16 +332,15 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
   const [filterPayment, setFilterPayment] = useState<PaymentStatus | null>(
     null
   );
-  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<string>("Tất cả");
+  const [showContractModal, setShowContractModal] = useState(false);
 
   const filteredRooms = mockRoomList.filter(
     (room) =>
       (room.name.toLowerCase().includes(search.toLowerCase()) ||
         room.building.toLowerCase().includes(search.toLowerCase())) &&
       (filterPayment === null || room.paymentStatus === filterPayment) &&
-      (selectedBuilding === null ||
-        room.building ===
-          mockBuildings.find((b) => b.id === selectedBuilding)?.name)
+      (selectedBuilding === "Tất cả" || room.building === selectedBuilding)
   );
 
   // Tính toán thống kê thanh toán theo tòa nhà được chọn
@@ -338,40 +348,31 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
     totalRooms: mockRoomList.filter(
       (room) =>
         room.paymentStatus &&
-        (selectedBuilding === null ||
-          room.building ===
-            mockBuildings.find((b) => b.id === selectedBuilding)?.name)
+        (selectedBuilding === "Tất cả" || room.building === selectedBuilding)
     ).length,
     pendingPayments: mockRoomList.filter(
       (room) =>
         room.paymentStatus === PaymentStatus.PENDING &&
-        (selectedBuilding === null ||
-          room.building ===
-            mockBuildings.find((b) => b.id === selectedBuilding)?.name)
+        (selectedBuilding === "Tất cả" || room.building === selectedBuilding)
     ).length,
     overduePayments: mockRoomList.filter(
       (room) =>
         room.paymentStatus === PaymentStatus.OVERDUE &&
-        (selectedBuilding === null ||
-          room.building ===
-            mockBuildings.find((b) => b.id === selectedBuilding)?.name)
+        (selectedBuilding === "Tất cả" || room.building === selectedBuilding)
     ).length,
     paidPayments: mockRoomList.filter(
       (room) =>
         room.paymentStatus === PaymentStatus.PAID &&
-        (selectedBuilding === null ||
-          room.building ===
-            mockBuildings.find((b) => b.id === selectedBuilding)?.name)
+        (selectedBuilding === "Tất cả" || room.building === selectedBuilding)
     ).length,
     totalAmount: mockInvoices
       .filter(
         (invoice) =>
           (invoice.status === PaymentStatus.PENDING ||
             invoice.status === PaymentStatus.OVERDUE) &&
-          (selectedBuilding === null ||
+          (selectedBuilding === "Tất cả" ||
             mockRoomList.find((room) => room.id === invoice.roomId)
-              ?.building ===
-              mockBuildings.find((b) => b.id === selectedBuilding)?.name)
+              ?.building === selectedBuilding)
       )
       .reduce((sum, invoice) => sum + invoice.totalAmount, 0),
   };
@@ -382,6 +383,10 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
 
   const getInvoiceForRoom = (roomId: number) => {
     return mockInvoices.find((invoice) => invoice.roomId === roomId);
+  };
+
+  const getContractForRoom = (roomId: number) => {
+    return mockContracts.find((contract) => contract.roomId === roomId);
   };
 
   const formatDate = (dateString: string) => {
@@ -404,6 +409,7 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
     };
 
     const invoice = getInvoiceForRoom(item.id);
+    const contract = getContractForRoom(item.id);
     const paymentStatusColor = item.paymentStatus
       ? PAYMENT_STATUS_COLOR[item.paymentStatus as PaymentStatus]
       : null;
@@ -434,6 +440,23 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
             </View>
             {item.description && (
               <Text style={styles.roomDesc}>{item.description}</Text>
+            )}
+
+            {/* Thông tin hợp đồng cho phòng đang thuê */}
+            {contract && item.status === "Đang thuê" && (
+              <View style={styles.contractInfo}>
+                <View style={styles.contractRow}>
+                  <Text style={styles.contractLabel}>Người thuê:</Text>
+                  <Text style={styles.contractText}>{contract.tenantName}</Text>
+                </View>
+                <View style={styles.contractRow}>
+                  <Text style={styles.contractLabel}>Hợp đồng:</Text>
+                  <Text style={styles.contractText}>
+                    #{contract.id} - {formatDate(contract.startDate)} đến{" "}
+                    {formatDate(contract.endDate)}
+                  </Text>
+                </View>
+              </View>
             )}
 
             {/* Thông tin thanh toán */}
@@ -505,10 +528,10 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           <TouchableOpacity
             style={styles.updateBtn}
             onPress={() => {
-              /* Xử lý update phòng */
+              navigation.navigate("UpdateRoom", { room: item });
             }}
           >
-            <Ionicons name="pencil" size={18} color="#007AFF" />
+            <Ionicons name="pencil" size={18} color={colors.primary.main} />
           </TouchableOpacity>
         </View>
 
@@ -519,6 +542,54 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
             </Text>
           </View>
         </View>
+
+        {/* Nút hành động hợp đồng */}
+        {item.status === "Trống" ? (
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.createContractBtn}
+              onPress={() => {
+                navigation.navigate("CreateContract", { room: item });
+              }}
+            >
+              <Ionicons
+                name="document-text-outline"
+                size={16}
+                color={colors.primary.main}
+              />
+              <Text style={styles.createContractBtnText}>Tạo hợp đồng</Text>
+            </TouchableOpacity>
+          </View>
+        ) : item.status === "Đang thuê" && contract ? (
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.viewContractBtn}
+              onPress={() => {
+                navigation.navigate("ContractDetail", { contract });
+              }}
+            >
+              <Ionicons
+                name="document-outline"
+                size={16}
+                color={colors.primary.main}
+              />
+              <Text style={styles.viewContractBtnText}>Xem hợp đồng</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.terminateContractBtn}
+              onPress={() => {
+                navigation.navigate("TerminateContract", { contract });
+              }}
+            >
+              <Ionicons
+                name="close-circle-outline"
+                size={16}
+                color={colors.status.error}
+              />
+              <Text style={styles.terminateContractBtnText}>Kết thúc</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
         {/* Nút hành động thanh toán */}
         {item.paymentStatus &&
@@ -537,7 +608,11 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
                   }
                 }}
               >
-                <Ionicons name="receipt-outline" size={16} color="#007AFF" />
+                <Ionicons
+                  name="receipt-outline"
+                  size={16}
+                  color={colors.primary.main}
+                />
                 <Text style={styles.invoiceBtnText}>Xem hóa đơn</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -552,7 +627,11 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
                   }
                 }}
               >
-                <Ionicons name="card-outline" size={16} color="#fff" />
+                <Ionicons
+                  name="card-outline"
+                  size={16}
+                  color={colors.neutral.white}
+                />
                 <Text style={styles.payBtnText}>Thanh toán</Text>
               </TouchableOpacity>
             </View>
@@ -595,7 +674,11 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           <Ionicons
             name="time-outline"
             size={14}
-            color={filterPayment === PaymentStatus.PENDING ? "#fff" : "#666"}
+            color={
+              filterPayment === PaymentStatus.PENDING
+                ? colors.neutral.white
+                : colors.text.secondary
+            }
           />
           <Text
             style={[
@@ -618,7 +701,11 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           <Ionicons
             name="warning-outline"
             size={14}
-            color={filterPayment === PaymentStatus.OVERDUE ? "#fff" : "#666"}
+            color={
+              filterPayment === PaymentStatus.OVERDUE
+                ? colors.neutral.white
+                : colors.text.secondary
+            }
           />
           <Text
             style={[
@@ -640,7 +727,11 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           <Ionicons
             name="checkmark-circle-outline"
             size={14}
-            color={filterPayment === PaymentStatus.PAID ? "#fff" : "#666"}
+            color={
+              filterPayment === PaymentStatus.PAID
+                ? colors.neutral.white
+                : colors.text.secondary
+            }
           />
           <Text
             style={[
@@ -655,6 +746,77 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
       </ScrollView>
     </View>
   );
+
+  const handleContractPress = (contract: Contract) => {
+    setShowContractModal(false);
+    // TODO: Navigate to contract detail
+    console.log("View contract:", contract.id);
+  };
+
+  const handleTerminatePress = (contract: Contract) => {
+    setShowContractModal(false);
+    // TODO: Navigate to terminate contract
+    console.log("Terminate contract:", contract.id);
+  };
+
+  const handleRenewPress = (contract: Contract) => {
+    setShowContractModal(false);
+    // TODO: Navigate to renew contract
+    console.log("Renew contract:", contract.id);
+  };
+
+  // Mock contracts data
+  const mockContracts: Contract[] = [
+    {
+      id: 1,
+      roomId: 1,
+      roomName: "Phòng 101",
+      buildingName: "Tòa Sunrise",
+      tenantName: "Nguyễn Văn A",
+      tenantPhone: "0123456789",
+      tenantEmail: "nguyenvana@email.com",
+      tenantIdCard: "123456789",
+      tenantAddress: "123 Đường ABC, Quận 1, TP.HCM",
+      startDate: "2024-01-01",
+      endDate: "2024-12-31",
+      monthlyRent: 3500000,
+      deposit: 3500000,
+      status: ContractStatus.ACTIVE,
+      createdAt: "2024-01-01",
+      signedAt: "2024-01-01",
+      services: [
+        {
+          id: 1,
+          name: "Điện",
+          price: 3500,
+          calculationMethod: "PER_UNIT_SIMPLE",
+          isIncluded: true,
+        },
+        {
+          id: 2,
+          name: "Nước",
+          price: 15000,
+          calculationMethod: "PER_UNIT_SIMPLE",
+          isIncluded: true,
+        },
+        {
+          id: 3,
+          name: "Wifi",
+          price: 100000,
+          calculationMethod: "FIXED_PER_ROOM",
+          isIncluded: true,
+        },
+        {
+          id: 4,
+          name: "Gửi xe",
+          price: 25000,
+          calculationMethod: "FIXED_PER_ROOM",
+          isIncluded: true,
+        },
+      ],
+    },
+    // Add more mock contracts as needed
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -672,18 +834,39 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
               onSearch: (text) => setSearch(text),
             }}
           />
-          <TouchableOpacity
-            style={styles.historyButton}
-            onPress={() => navigation.navigate("InvoiceHistory")}
-          >
-            <Ionicons name="time-outline" size={20} color="#007AFF" />
-            <Text style={styles.historyButtonText}>Lịch sử</Text>
-          </TouchableOpacity>
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              style={styles.historyButton}
+              onPress={() => navigation.navigate("InvoiceHistory")}
+            >
+              <Ionicons
+                name="time-outline"
+                size={20}
+                color={colors.primary.main}
+              />
+              <Text style={styles.historyButtonText}>Lịch sử</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.contractButton}
+              onPress={() => setShowContractModal(true)}
+            >
+              <Ionicons
+                name="document-text-outline"
+                size={20}
+                color={colors.primary.main}
+              />
+              <Text style={styles.contractButtonText}>Hợp đồng</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <BuildingSelector
           buildings={mockBuildings}
-          selectedBuilding={selectedBuilding}
-          onSelectBuilding={setSelectedBuilding}
+          selectedBuilding={
+            selectedBuilding === "Tất cả" ? null : selectedBuilding
+          }
+          onSelectBuilding={(buildingId) =>
+            setSelectedBuilding(buildingId === null ? "Tất cả" : buildingId)
+          }
         />
         {renderFilterButtons()}
       </View>
@@ -729,8 +912,18 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           /* Xử lý tạo phòng */
         }}
       >
-        <Ionicons name="add" size={32} color="#fff" />
+        <Ionicons name="add" size={32} color={colors.neutral.white} />
       </TouchableOpacity>
+
+      {/* Contract List Modal */}
+      <ContractListModal
+        visible={showContractModal}
+        onClose={() => setShowContractModal(false)}
+        contracts={mockContracts}
+        onContractPress={handleContractPress}
+        onTerminatePress={handleTerminatePress}
+        onRenewPress={handleRenewPress}
+      />
     </SafeAreaView>
   );
 };
@@ -738,13 +931,13 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
   },
   fixedHeader: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
     paddingHorizontal: 0,
     borderBottomWidth: 1,
-    borderBottomColor: "#E9ECEF",
+    borderBottomColor: colors.border.light,
   },
   headerTop: {
     flexDirection: "row",
@@ -756,7 +949,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#222",
+    color: colors.text.primary,
     marginBottom: 14,
     textAlign: "center",
     letterSpacing: 0.2,
@@ -764,7 +957,7 @@ const styles = StyleSheet.create({
   searchBarWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6FB",
+    backgroundColor: colors.neutral.gray[100],
     borderRadius: 16,
     marginBottom: 18,
     paddingHorizontal: 10,
@@ -775,13 +968,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 8,
-    color: "#222",
+    color: colors.text.primary,
     backgroundColor: "transparent",
   },
   filterContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
     borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
+    borderTopColor: colors.border.light,
     paddingVertical: 8,
   },
   filterScrollContent: {
@@ -795,57 +988,57 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    backgroundColor: "#fff",
+    borderColor: colors.border.main,
+    backgroundColor: colors.background.default,
     gap: 4,
     minWidth: 60,
   },
   filterButtonActive: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
   },
   filterButtonText: {
     fontSize: 12,
-    color: "#666",
+    color: colors.text.secondary,
     fontWeight: "500",
   },
   filterButtonTextActive: {
-    color: "#fff",
+    color: colors.neutral.white,
     fontWeight: "600",
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.background.default,
     borderRadius: 14,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: colors.neutral.black,
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#F2F2F2",
+    borderColor: colors.border.light,
   },
   roomName: {
     fontSize: 17,
     fontWeight: "bold",
-    color: "#222",
+    color: colors.text.primary,
     marginBottom: 2,
   },
   buildingName: {
     fontSize: 13,
-    color: "#888",
+    color: colors.text.secondary,
     marginBottom: 2,
   },
   price: {
     fontSize: 15,
-    color: "#007AFF",
+    color: colors.primary.main,
     fontWeight: "bold",
     marginBottom: 4,
   },
   updateBtn: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: "#F0F4FF",
+    backgroundColor: colors.primary.light,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
@@ -869,13 +1062,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 24,
     bottom: 32,
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.primary.main,
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#007AFF",
+    shadowColor: colors.primary.main,
     shadowOpacity: 0.18,
     shadowRadius: 8,
     elevation: 5,
@@ -889,12 +1082,12 @@ const styles = StyleSheet.create({
   },
   roomInfoText: {
     fontSize: 13,
-    color: "#666",
+    color: colors.text.secondary,
     marginRight: 8,
   },
   roomDesc: {
     fontSize: 13,
-    color: "#888",
+    color: colors.text.secondary,
     marginTop: 2,
     fontStyle: "italic",
   },
@@ -902,7 +1095,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
+    borderTopColor: colors.border.light,
   },
   paymentRow: {
     flexDirection: "row",
@@ -912,7 +1105,7 @@ const styles = StyleSheet.create({
   },
   paymentLabel: {
     fontSize: 12,
-    color: "#666",
+    color: colors.text.secondary,
   },
   paymentStatusBadge: {
     paddingHorizontal: 8,
@@ -928,13 +1121,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   normalText: {
-    color: "#666",
+    color: colors.text.secondary,
   },
   warningText: {
-    color: "#FF9500",
+    color: colors.status.warning,
   },
   overdueText: {
-    color: "#FF3B30",
+    color: colors.status.error,
   },
   daysText: {
     fontSize: 11,
@@ -943,7 +1136,7 @@ const styles = StyleSheet.create({
   invoiceAmount: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#007AFF",
+    color: colors.primary.main,
   },
   actionRow: {
     flexDirection: "row",
@@ -959,13 +1152,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#007AFF",
-    backgroundColor: "#F0F4FF",
+    borderColor: colors.primary.main,
+    backgroundColor: colors.primary.light,
     gap: 4,
   },
   invoiceBtnText: {
     fontSize: 12,
-    color: "#007AFF",
+    color: colors.primary.main,
     fontWeight: "500",
   },
   payBtn: {
@@ -976,17 +1169,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.primary.main,
     gap: 4,
   },
   payBtnText: {
     fontSize: 12,
-    color: "#fff",
+    color: colors.neutral.white,
     fontWeight: "500",
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors.background.paper,
   },
   listContent: {
     padding: 10,
@@ -998,7 +1191,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   emptyText: {
-    color: "#888",
+    color: colors.text.secondary,
     fontSize: 16,
   },
   historyButton: {
@@ -1007,12 +1200,101 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: "#F0F4FF",
+    backgroundColor: colors.primary.light,
     gap: 4,
   },
   historyButtonText: {
     fontSize: 12,
-    color: "#007AFF",
+    color: colors.primary.main,
+    fontWeight: "500",
+  },
+  contractInfo: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  contractRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  contractLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  contractText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: colors.text.primary,
+  },
+  createContractBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary.main,
+    backgroundColor: colors.primary.light,
+    gap: 4,
+  },
+  createContractBtnText: {
+    fontSize: 12,
+    color: colors.primary.main,
+    fontWeight: "500",
+  },
+  viewContractBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary.main,
+    backgroundColor: colors.primary.light,
+    gap: 4,
+  },
+  viewContractBtnText: {
+    fontSize: 12,
+    color: colors.primary.main,
+    fontWeight: "500",
+  },
+  terminateContractBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.status.error,
+    backgroundColor: colors.secondary.light,
+    gap: 4,
+  },
+  terminateContractBtnText: {
+    fontSize: 12,
+    color: colors.status.error,
+    fontWeight: "500",
+  },
+  contractButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: colors.primary.light,
+    gap: 4,
+  },
+  contractButtonText: {
+    fontSize: 12,
+    color: colors.primary.main,
     fontWeight: "500",
   },
 });

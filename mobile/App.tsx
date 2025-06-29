@@ -1,10 +1,10 @@
-import CreateTenantScreen from "@/screens/tenant/CreateTenantScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
+import CreateTenantScreen from "./src/screens/tenant/CreateTenantScreen";
 
 import Toast from "react-native-toast-message";
 import { TamaguiProvider } from "tamagui";
@@ -15,11 +15,16 @@ import OTPVerificationScreen from "./src/screens/auth/OTPVerificationScreen";
 import RegisterScreen from "./src/screens/auth/RegisterScreen";
 import RoomDetailScreen from "./src/screens/tenant/RoomListScreen";
 import RoomListScreen from "./src/screens/tenant/TenantListScreen";
+import UpdateRoomScreen from "./src/screens/tenant/UpdateRoomScreen";
 import config from "./tamagui.config";
 
-import InvoiceDetailScreen from "@/screens/invoice/InvoiceDetailScreen";
-import InvoiceHistoryScreen from "@/screens/invoice/InvoiceHistoryScreen";
 import "./global.css";
+import ContractDetailScreen from "./src/screens/contract/ContractDetailScreen";
+import ContractListScreen from "./src/screens/contract/ContractListScreen";
+import CreateContractScreen from "./src/screens/contract/CreateContractScreen";
+import InvoiceDetailScreen from "./src/screens/invoice/InvoiceDetailScreen";
+import InvoiceHistoryScreen from "./src/screens/invoice/InvoiceHistoryScreen";
+import TerminateContractScreen from "./src/screens/tenant/TerminateContractScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -66,6 +71,11 @@ export default function App() {
             options={{ title: "Tạo thông tin thuê phòng" }}
           />
           <Stack.Screen
+            name="UpdateRoom"
+            component={UpdateRoomScreen}
+            options={{ title: "Cập nhật phòng" }}
+          />
+          <Stack.Screen
             name="InvoiceDetail"
             component={InvoiceDetailScreen}
             options={({ navigation, route }) => {
@@ -103,6 +113,26 @@ export default function App() {
                 </TouchableOpacity>
               ),
             })}
+          />
+          <Stack.Screen
+            name="CreateContract"
+            component={CreateContractScreen}
+            options={{ title: "Tạo hợp đồng" }}
+          />
+          <Stack.Screen
+            name="ContractDetail"
+            component={ContractDetailScreen}
+            options={{ title: "Chi tiết hợp đồng" }}
+          />
+          <Stack.Screen
+            name="TerminateContract"
+            component={TerminateContractScreen}
+            options={{ title: "Hủy hợp đồng" }}
+          />
+          <Stack.Screen
+            name="ContractList"
+            component={ContractListScreen}
+            options={{ title: "Danh sách hợp đồng" }}
           />
         </Stack.Navigator>
         <StatusBar style="auto" />
