@@ -19,3 +19,13 @@ export interface PropertyCreateRequest
   extends Omit<Property, "id" | "services"> {
   services: ServiceCreateRequest[];
 }
+
+export interface PropertyListRequest {
+  page?: number;
+  pageSize?: number;
+  globalSearch?: string;
+}
+
+export interface PropertyListResponse extends Property {
+  renterNumber?: number;
+}

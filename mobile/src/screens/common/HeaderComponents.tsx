@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     paddingVertical: 8,
     paddingHorizontal: 8,
     color: "#222",
@@ -104,11 +104,11 @@ const styles = StyleSheet.create({
     color: "#007AFF",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#222",
-    marginBottom: 14,
-    textAlign: "center",
+    alignSelf: "flex-start",
+    margin: 10,
     letterSpacing: 0.2,
   },
   statsBox: {

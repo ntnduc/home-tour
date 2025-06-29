@@ -15,7 +15,6 @@ import { ComboOption } from "@/types/comboOption";
 import { PropertyCreateRequest } from "@/types/property";
 import { formatCurrency } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
 
@@ -36,8 +35,7 @@ import {
   useTheme as useTamaguiTheme,
 } from "tamagui";
 
-const CreateTenantScreen = () => {
-  const navigation = useNavigation();
+const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   const theme = useTamaguiTheme();
 
   const styles = createStyles(theme);
@@ -504,12 +502,12 @@ const CreateTenantScreen = () => {
                                   service.name === "Điện"
                                     ? "flash-outline"
                                     : service.name === "Nước"
-                                    ? "water-outline"
-                                    : service.name === "Wifi"
-                                    ? "wifi-outline"
-                                    : service.name === "Gửi xe"
-                                    ? "car-outline"
-                                    : "apps-outline"
+                                      ? "water-outline"
+                                      : service.name === "Wifi"
+                                        ? "wifi-outline"
+                                        : service.name === "Gửi xe"
+                                          ? "car-outline"
+                                          : "apps-outline"
                                 }
                                 size={20}
                                 color="#007AFF"
@@ -534,8 +532,8 @@ const CreateTenantScreen = () => {
                               ServiceCalculateMethod.FREE
                                 ? "0"
                                 : value
-                                ? formatCurrency(value.toString())
-                                : ""
+                                  ? formatCurrency(value.toString())
+                                  : ""
                             }
                             onChangeText={(text) => {
                               const numericValue = text.replace(/[^0-9]/g, "");
