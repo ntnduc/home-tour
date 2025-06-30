@@ -13,11 +13,11 @@ import TabNavigator from "./src/navigation/TabNavigator";
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import OTPVerificationScreen from "./src/screens/auth/OTPVerificationScreen";
 import RegisterScreen from "./src/screens/auth/RegisterScreen";
-import RoomDetailScreen from "./src/screens/tenant/RoomListScreen";
+import UpdateRoomScreen from "./src/screens/room/UpdateRoomScreen";
 import RoomListScreen from "./src/screens/tenant/TenantListScreen";
-import UpdateRoomScreen from "./src/screens/tenant/UpdateRoomScreen";
 import config from "./tamagui.config";
 
+import RoomDetailScreen from "@/screens/room/RoomDetailScreen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./global.css";
 import ContractDetailScreen from "./src/screens/contract/ContractDetailScreen";
@@ -37,7 +37,13 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={config}>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="Login">
+          <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{
+              gestureEnabled: true,
+              animation: "slide_from_right",
+            }}
+          >
             <Stack.Screen
               name="Login"
               component={LoginScreen}

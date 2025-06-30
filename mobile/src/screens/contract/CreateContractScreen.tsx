@@ -620,13 +620,13 @@ const CreateContractScreen = ({
       </View>
 
       {/* Back Button */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         className="absolute top-16 left-4 w-10 h-10 rounded-full bg-white/90 items-center justify-center shadow-md"
         onPress={() => navigation.goBack()}
         disabled={isLoading}
       >
         <Ionicons name="arrow-back" size={20} color="#374151" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

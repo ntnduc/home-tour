@@ -419,7 +419,9 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
       <TouchableOpacity
         style={styles.card}
         activeOpacity={0.8}
-        onPress={() => navigation.navigate("RoomDetail", { roomId: item.id })}
+        onPress={() => {
+          navigation.navigate("RoomDetail", { roomId: item.id });
+        }}
       >
         <View
           style={{

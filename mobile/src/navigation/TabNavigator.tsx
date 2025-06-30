@@ -6,7 +6,7 @@ import ContractListScreen from "../screens/contract/ContractListScreen";
 import DashboardScreen from "../screens/dasboard/DashboardScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import ReportScreen from "../screens/report/ReportScreen";
-import RoomListScreen from "../screens/tenant/RoomListScreen";
+import RoomListScreen from "../screens/room/RoomListScreen";
 import TeantListScreen from "../screens/tenant/TenantListScreen";
 
 const Tab = createBottomTabNavigator();
