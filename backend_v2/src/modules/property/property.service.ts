@@ -2,7 +2,12 @@ import { BadGatewayException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { IBaseService } from 'src/common/base/crud/IService';
-import { DataSource, In, Repository } from 'typeorm';
+import { PropertyRoomsStatus } from 'src/common/enums/property.enum';
+import { RoomStatus } from 'src/common/enums/room.enum';
+import { DataSource, In, Repository, SelectQueryBuilder } from 'typeorm';
+import { Districts } from '../location/entities/Districts.entity';
+import { Provinces } from '../location/entities/Provinces.entity';
+import { Wards } from '../location/entities/Wards.entity';
 import { CreateServiceDto } from '../services/dto/services.create.dto';
 import { Services } from '../services/entities/services.entity';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
@@ -41,6 +46,13 @@ export class PropertyService
     private servicesRepository: Repository<Services>,
     @InjectRepository(Rooms)
     private roomsRepository: Repository<Rooms>,
+    @InjectRepository(Provinces)
+    private provincesRepository: Repository<Provinces>,
+    @InjectRepository(Districts)
+    private districtsRepository: Repository<Districts>,
+    @InjectRepository(Wards)
+    private wardsRepository: Repository<Wards>,
+
     private readonly dataSource: DataSource,
 
     private readonly roomService: RoomsService,
@@ -139,5 +151,73 @@ export class PropertyService
     } finally {
       await queryRunner.release();
     }
+  }
+
+  override async specQuery(): Promise<SelectQueryBuilder<Properties>> {
+    const query = this.propertiesRepository.createQueryBuilder('entity');
+    query.leftJoinAndSelect('entity.rooms', 'rooms');
+    query.leftJoinAndSelect('entity.services', 'services');
+    return query;
+  }
+
+  override async beautifyResult(
+    items: Properties[],
+  ): Promise<PropertyListDto[]> {
+    const provinceCodes = items.map((item) => item.provinceCode);
+    const districtCodes = items.map((item) => item.districtCode);
+    const wardCodes = items.map((item) => item.wardCode);
+
+    let provinces: Provinces[] = [];
+    let districts: Districts[] = [];
+    let wards: Wards[] = [];
+
+    if (provinceCodes.length > 0) {
+      provinces = await this.provincesRepository.find({
+        where: { code: In(provinceCodes) },
+      });
+    }
+
+    if (districtCodes.length > 0) {
+      districts = await this.districtsRepository.find({
+        where: { code: In(districtCodes) },
+      });
+    }
+
+    if (wardCodes.length > 0) {
+      wards = await this.wardsRepository.find({
+        where: { code: In(wardCodes) },
+      });
+    }
+
+    const result = items.map((item) => {
+      const listDto = new PropertyListDto();
+      listDto.fromEntity(item);
+      listDto.statusRooms = this.statusRooms(item.rooms);
+
+      const province = provinces.find(
+        (province) => province.code === item.provinceCode,
+      )?.full_name;
+      const district = districts.find(
+        (district) => district.code === item.districtCode,
+      )?.full_name;
+      const ward = wards.find((ward) => ward.code === item.wardCode)?.full_name;
+
+      const address = `${item.address} - ${ward} - ${district} - ${province}`;
+      listDto.address = address;
+
+      return listDto;
+    });
+    return result;
+  }
+
+  private statusRooms(rooms: Rooms[]): PropertyRoomsStatus {
+    if (rooms.length === 0) return PropertyRoomsStatus.EMPTY;
+    const countRoomsOccupied = rooms.filter(
+      (room) => room.status === RoomStatus.OCCUPIED,
+    ).length;
+
+    return countRoomsOccupied === rooms.length
+      ? PropertyRoomsStatus.FULL
+      : PropertyRoomsStatus.PARTIAL;
   }
 }

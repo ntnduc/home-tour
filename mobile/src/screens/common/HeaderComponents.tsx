@@ -9,10 +9,12 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { useDebouncedCallback } from "use-debounce";
 
 export type SearchConfig = {
   placeholder: string;
   className?: string;
+  defaultValue?: string;
   style?: StyleProp<ViewStyle>;
   onSearch: (text: string) => void;
 };
@@ -27,13 +29,21 @@ export type HeaderComponentsProps = {
 
 const HeaderComponents = (props: HeaderComponentsProps) => {
   const { title, isSearch, searchConfig, children, className } = props;
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchConfig?.defaultValue || "");
+  const handleSearch = useDebouncedCallback(() => {
+    searchConfig?.onSearch?.(search);
+  }, 500);
 
-  const handeleSearch = (text?: string) => {
+  const handeleSearchFunc = (text?: string) => {
     if (isSearch && searchConfig) {
-      setSearch(text || "");
-      searchConfig.onSearch?.(text || "");
+      setSearch(text ?? "");
+      handleSearch();
     }
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
+    handleSearch();
   };
 
   return (
@@ -56,14 +66,15 @@ const HeaderComponents = (props: HeaderComponentsProps) => {
             <TextInput
               style={[styles.searchBar, searchConfig?.style]}
               placeholder={searchConfig?.placeholder || "Tìm kiếm..."}
-              value={search}
-              onChangeText={handeleSearch}
+              value={searchConfig?.defaultValue || search}
+              onChangeText={handeleSearchFunc}
               placeholderTextColor="#aaa"
             />
-            {search.length > 0 && (
+            {search && (
               <TouchableOpacity
-                onPress={() => handeleSearch("")}
                 style={{ padding: 6 }}
+                onPress={handleClearSearch}
+                disabled={!search}
               >
                 <Ionicons name="close-circle" size={18} color="#bbb" />
               </TouchableOpacity>

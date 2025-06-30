@@ -1,7 +1,13 @@
 import { Service, ServiceCreateRequest } from "./service";
 
+export enum PropertyRoomsStatus {
+  FULL = "FULL",
+  EMPTY = "EMPTY",
+  PARTIAL = "PARTIAL",
+}
+
 export interface Property {
-  id: number;
+  id: string;
   name: string;
   address: string;
   defaultRoomRent: number;
@@ -27,5 +33,6 @@ export interface PropertyListRequest {
 }
 
 export interface PropertyListResponse extends Property {
-  renterNumber?: number;
+  statusRooms?: PropertyRoomsStatus;
+  totalRoomOccupied?: number;
 }

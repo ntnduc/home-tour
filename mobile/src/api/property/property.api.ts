@@ -19,7 +19,7 @@ export const createProperty = async (data: PropertyCreateRequest) => {
 export const getListProperty = async (
   queryKey: BasePagingRequest
 ): Promise<ApiResponse<BasePagingResponse<PropertyListResponse>>> => {
-  const { limit, offset, filters, sortBy, sortOrder } = queryKey;
+  const { limit, offset, filters, sortBy, sortOrder, globalKey } = queryKey;
 
   const response = await privateApi.get<
     ApiResponse<BasePagingResponse<PropertyListResponse>>
@@ -28,6 +28,7 @@ export const getListProperty = async (
       limit,
       offset,
       filters,
+      globalKey,
       sortBy,
       sortOrder,
     },

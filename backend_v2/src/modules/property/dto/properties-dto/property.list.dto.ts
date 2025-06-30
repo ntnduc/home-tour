@@ -1,4 +1,6 @@
 import { BaseListDto } from 'src/common/base/dto/list.dto';
+import { PropertyRoomsStatus } from 'src/common/enums/property.enum';
+import { RoomStatus } from 'src/common/enums/room.enum';
 import { Properties } from '../../entities/properties.entity';
 
 export class PropertyListDto extends BaseListDto<Properties> {
@@ -6,12 +8,12 @@ export class PropertyListDto extends BaseListDto<Properties> {
     this.id = entity.id;
     this.ownerId = entity.ownerId;
     this.name = entity.name;
-    this.address = entity.address;
-    this.provinceCode = entity.provinceCode;
-    this.districtCode = entity.districtCode;
-    this.wardCode = entity.wardCode;
-    this.latitude = entity.latitude;
-    this.longitude = entity.longitude;
+    this.numberFloor = entity.numberFloor;
+    this.totalRoom = entity?.rooms?.length || 0;
+    this.paymentDate = entity.paymentDate;
+    this.totalRoomOccupied = entity?.rooms?.filter(
+      (room) => room.status === RoomStatus.OCCUPIED,
+    ).length;
   }
   ownerId: string;
 
@@ -19,13 +21,12 @@ export class PropertyListDto extends BaseListDto<Properties> {
 
   address: string;
 
-  provinceCode: string;
+  numberFloor?: number;
 
-  districtCode: string;
+  totalRoom: number;
+  totalRoomOccupied?: number;
 
-  wardCode: string;
+  paymentDate: number;
 
-  latitude?: number;
-
-  longitude?: number;
+  statusRooms: PropertyRoomsStatus;
 }

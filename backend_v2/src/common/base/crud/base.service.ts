@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { BaseCreateDto } from '../dto/create.dto';
 import { BaseDetailDto } from '../dto/detail.dto';
 import { BaseFilterDto } from '../dto/filter.dto';
@@ -30,12 +30,25 @@ export class BaseService<
     protected readonly updateDto: new () => TUpdateDto,
   ) {}
 
+  async specQuery(): Promise<SelectQueryBuilder<TEntity>> {
+    const query = this.genericRepository.createQueryBuilder('entity');
+    return query;
+  }
+
+  async beautifyResult(items: TEntity[]): Promise<TListDto[]> {
+    return items.map((item) => {
+      const listDto = new this.listDto();
+      listDto.fromEntity(item);
+      return listDto as TListDto;
+    });
+  }
+
   async getAll(
     filter: BaseFilterDto<TEntity>,
   ): Promise<PaginateResult<TListDto>> {
     const { globalKey, filter: filterDto, sort, limit, offset } = filter;
+    const query = await this.specQuery();
 
-    const query = this.genericRepository.createQueryBuilder('entity');
     query.skip(offset);
     query.take(limit);
 
@@ -58,11 +71,7 @@ export class BaseService<
     }
 
     const [items, total] = await query.getManyAndCount();
-    const listDto = items.map((item) => {
-      const listDto = new this.listDto();
-      listDto.fromEntity(item);
-      return listDto;
-    });
+    const listDto = await this.beautifyResult(items);
     return new PaginateResult(listDto, total, limit, offset);
   }
 

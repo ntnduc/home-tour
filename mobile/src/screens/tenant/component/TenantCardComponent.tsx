@@ -1,40 +1,65 @@
+import ButtonAction from "@/components/ButtomAction";
+import Status, { StatusType } from "@/components/Status";
 import CardComponent from "@/screens/common/CardComponent";
+import { theme } from "@/theme";
 import { colors } from "@/theme/colors";
-import { PropertyListResponse } from "@/types/property";
+import { PropertyListResponse, PropertyRoomsStatus } from "@/types/property";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const TenantCardComponent = (props: {
   tenantInfo: PropertyListResponse;
-  status: { label: string; color: string; bg: string };
   onUpdate: () => void;
 }) => {
-  const { tenantInfo, status, onUpdate } = props;
+  const { tenantInfo, onUpdate } = props;
+
+  const getStatusInfo = (
+    status?: PropertyRoomsStatus
+  ): { label: string; type: StatusType } => {
+    switch (status) {
+      case PropertyRoomsStatus.FULL:
+        return {
+          label: "Đầy phòng",
+          type: "success",
+        };
+      case PropertyRoomsStatus.EMPTY:
+        return {
+          label: "Chưa tạo phòng",
+          type: "error",
+        };
+      case PropertyRoomsStatus.PARTIAL:
+        return {
+          label: "Còn phòng",
+          type: "warning",
+        };
+      default:
+        return {
+          label: "Trống",
+          type: "warning",
+        };
+    }
+  };
+
+  const status = getStatusInfo(tenantInfo.statusRooms);
 
   return (
     <CardComponent>
-      <View>
-        <View className="flex-row justify-between items-start">
-          <View className="flex-1">
-            <View
-              className="flex-row justify-between items-center"
-              style={styles.titleRow}
-            >
-              <Text style={styles.buildingName}>{tenantInfo.name}</Text>
-              <View
-                style={[styles.statusBadge, { backgroundColor: status.bg }]}
-              >
-                <Text style={[styles.statusText, { color: status.color }]}>
-                  {status.label}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.buildingAddress}>{tenantInfo.address}</Text>
+      <View className="flex flex-col gap-2">
+        <View className="flex-row justify-between items-center align-center content-center">
+          <View className="flex-1 flex flex-row ">
+            <Text style={styles.buildingName}>{tenantInfo.name}</Text>
+          </View>
+          <View>
+            <Status type={status.type} label={status.label} />
           </View>
           <TouchableOpacity style={styles.updateBtn} onPress={onUpdate}>
             <Ionicons name="pencil" size={18} color={colors.primary.main} />
           </TouchableOpacity>
+        </View>
+
+        <View>
+          <Text style={styles.buildingAddress}>{tenantInfo.address}</Text>
         </View>
 
         {/* <Text style={styles.buildingDesc}>{tenantInfo.description}</Text> */}
@@ -42,7 +67,9 @@ const TenantCardComponent = (props: {
         <View style={styles.basicInfoRow}>
           <View style={styles.infoItem}>
             <Text style={styles.infoIcon}>🏢</Text>
-            <Text style={styles.infoLabel}>{tenantInfo.numberFloor} tầng</Text>
+            <Text style={styles.infoLabel}>
+              {tenantInfo.numberFloor ?? 0} tầng
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoIcon}>🔑</Text>
@@ -50,49 +77,28 @@ const TenantCardComponent = (props: {
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoIcon}>👤</Text>
-            <Text style={styles.infoLabel}>{tenantInfo.renterNumber} thuê</Text>
+            <Text style={styles.infoLabel}>
+              {tenantInfo.totalRoomOccupied ?? 0} thuê
+            </Text>
           </View>
         </View>
 
         <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={[
-              styles.actionBtn,
-              {
-                backgroundColor: colors.status.success + "10",
-                borderColor: colors.status.success + "30",
-              },
-            ]}
-            // onPress={() =>
-            //   navigation.navigate("AddRoom", { buildingId: item.id })
-            // }
-          >
-            <Ionicons name="add" size={16} color={colors.status.success} />
-            <Text
-              style={[styles.actionBtnText, { color: colors.status.success }]}
-            >
-              Thêm phòng
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.actionBtn,
-              {
-                backgroundColor: colors.primary.light,
-                borderColor: colors.primary.main + "30",
-              },
-            ]}
-            // onPress={() =>
-            //   navigation.navigate("RoomList", { buildingId: item.id })
-            // }
-          >
-            <Ionicons name="home" size={16} color={colors.primary.main} />
-            <Text
-              style={[styles.actionBtnText, { color: colors.primary.main }]}
-            >
-              Xem phòng
-            </Text>
-          </TouchableOpacity>
+          <ButtonAction
+            text="Thêm phòng"
+            type="success"
+            icon="add"
+            containerStyle={{ flex: 1 }}
+            // onPress={() => {
+            //   navigation.navigate("AddRoom", { buildingId: tenantInfo.id });
+            // }}
+          />
+          <ButtonAction
+            text="Xem phòng"
+            type="secondary"
+            icon="home"
+            containerStyle={{ flex: 1 }}
+          />
         </View>
       </View>
     </CardComponent>
@@ -100,51 +106,25 @@ const TenantCardComponent = (props: {
 };
 
 const styles = StyleSheet.create({
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
   buildingName: {
-    fontSize: 17,
+    fontSize: theme.typography.fontSize.lg + 2,
     fontWeight: "bold",
     color: colors.text.primary,
-    flex: 1,
   },
-  statusBadge: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    minWidth: 80,
-    alignItems: "center",
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-    textAlign: "center",
-  },
+
   buildingAddress: {
     fontSize: 13,
     color: colors.text.secondary,
-    marginBottom: 2,
   },
   updateBtn: {
     backgroundColor: colors.background.paper,
     borderRadius: 8,
     padding: 7,
     marginLeft: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buildingDesc: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    marginBottom: 6,
-    fontStyle: "italic",
   },
   basicInfoRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
     gap: 12,
   },
   infoItem: {
@@ -164,6 +144,7 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: "row",
     gap: 8,
+    marginTop: 4,
   },
   actionBtn: {
     flex: 1,
