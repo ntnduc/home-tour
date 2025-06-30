@@ -5,6 +5,12 @@ export const createStyles = (theme: any) =>
     container: {
       position: "relative",
     },
+    label: {
+      fontSize: theme?.input?.label?.fontSize ?? 16,
+      fontWeight: "600",
+      marginBottom: theme?.input?.label?.marginBottom ?? 8,
+      color: theme.color?.val,
+    },
     selectInput: {
       flexDirection: "row",
       alignItems: "center",

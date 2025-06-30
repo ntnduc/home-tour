@@ -1,6 +1,8 @@
 import { createStyles } from "@/styles/component/StyleInput";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TextInput, View } from "react-native";
+import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface InputProps {
   label?: string;
@@ -15,6 +17,8 @@ interface InputProps {
   max?: number;
   numberOfLines?: number;
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
+  icon?: keyof typeof Ionicons.glyphMap;
+  disabled?: boolean;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -30,8 +34,11 @@ const Input: React.FC<InputProps> = ({
   max,
   numberOfLines = 1,
   keyboardType = "default",
+  icon,
+  disabled = false,
 }) => {
-  const styles = createStyles;
+  const theme = useTamaguiTheme();
+  const styles = createStyles(theme);
 
   const formatCurrency = (text: string) => {
     if (!text) return "";
@@ -60,27 +67,39 @@ const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View className="bg-white rounded-xl shadow-sm">
       {label && (
         <Text style={styles.label}>
           {label}
           {required && <Text style={styles.requiredText}> *</Text>}
         </Text>
       )}
-      <TextInput
-        style={[
-          styles.input,
-          error && styles.inputError,
-          type === "area" && { height: 100, textAlignVertical: "top" },
-        ]}
-        value={value}
-        onChangeText={handleChangeText}
-        placeholder={placeholder}
-        keyboardType={type === "number" ? "numeric" : keyboardType}
-        multiline={type === "area"}
-        numberOfLines={type === "area" ? numberOfLines : 1}
-      />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      <View
+        className={`flex flex-row items-center content-center justify-center
+           bg-gray-50 rounded-lg px-3 py-2 border 
+           ${error ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+      >
+        {icon && (
+          <Ionicons name={icon} size={18} color="#6B7280" className="mr-3" />
+        )}
+        <TextInput
+          className={`flex-1 ${type === "area" ? "h-20" : ""}`}
+          value={value}
+          style={styles.input}
+          onChangeText={handleChangeText}
+          placeholder={placeholder ?? `Nhập ${label}...`}
+          keyboardType={type === "number" ? "numeric" : keyboardType}
+          placeholderTextColor="#9CA3AF"
+          multiline={type === "area"}
+          numberOfLines={type === "area" ? numberOfLines : 1}
+          editable={!disabled}
+        />
+      </View>
+      {error && (
+        <Text className="mt-1" style={styles.errorText}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 };

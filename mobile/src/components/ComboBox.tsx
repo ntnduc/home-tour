@@ -20,6 +20,7 @@ interface ComboBoxProps<T> {
   isLoading?: boolean;
   onFocus?: () => void;
   isActive?: boolean;
+  label?: string;
 }
 
 export const ComboBox = <T,>({
@@ -31,6 +32,7 @@ export const ComboBox = <T,>({
   isLoading = false,
   onFocus,
   isActive = false,
+  label,
 }: ComboBoxProps<T>) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -73,6 +75,7 @@ export const ComboBox = <T,>({
 
   return (
     <View style={styles.container}>
+      {label && <Text style={styles.label}>{label}</Text>}
       <TouchableOpacity
         style={[styles.selectInput, error && styles.errorInput]}
         onPress={handleToggleDropdown}
@@ -129,6 +132,11 @@ export const ComboBox = <T,>({
             )}
           </ScrollView>
         </View>
+      )}
+      {error && (
+        <Text className="mt-1" style={styles.errorText}>
+          {error}
+        </Text>
       )}
     </View>
   );

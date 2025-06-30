@@ -5,6 +5,7 @@ import {
 } from "@/api/location/location.api";
 import { createProperty } from "@/api/property/property.api";
 import { ComboBox } from "@/components/ComboBox";
+import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
@@ -27,13 +28,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import {
-  Input,
-  TextArea,
-  XStack,
-  YStack,
-  useTheme as useTamaguiTheme,
-} from "tamagui";
+import { Input, XStack, YStack, useTheme as useTamaguiTheme } from "tamagui";
 
 const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   const theme = useTamaguiTheme();
@@ -150,25 +145,6 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
     );
   };
 
-  const handlePriceTypeChange = (
-    index: number,
-    calculationMethod: ServiceCalculateMethod
-  ) => {
-    const currentServices = watch("services");
-    setValue(
-      "services",
-      currentServices.map((service) =>
-        service.index === index
-          ? {
-              ...service,
-              calculationMethod,
-              price: 0,
-            }
-          : service
-      )
-    );
-  };
-
   const onSubmit = (data: PropertyCreateRequest) => {
     setIsLoading(true);
     createProperty(data)
@@ -204,120 +180,99 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
       <ScrollView>
         <YStack padding="$4" space="$4">
-          <YStack space="$2">
-            <Text style={styles.label}>Tên gợi nhớ</Text>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
-                  value={value}
-                  onChangeText={onChange}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                value={value}
+                onChangeText={onChange}
+                label="Tên gợi nhớ"
+                error={errors.name?.message}
+              />
+            )}
+          />
 
-          <YStack space="$2">
-            <Text style={styles.label}>
-              Thành phố/Tỉnh <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <Controller
-              control={control}
-              name="provinceCode"
-              rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
-              render={({ field: { onChange, value } }) => (
-                <ComboBox
-                  value={value}
-                  options={cities}
-                  onChange={(item) => {
-                    onChange(item);
-                    getDistricts(item);
-                  }}
-                  placeholder="Chọn thành phố/tỉnh"
-                  error={errors.provinceCode?.message}
-                  onFocus={() => setActiveDropdown("provinceCode")}
-                  isActive={activeDropdown === "provinceCode"}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="provinceCode"
+            rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
+            render={({ field: { onChange, value } }) => (
+              <ComboBox
+                value={value}
+                options={cities}
+                onChange={(item) => {
+                  onChange(item);
+                  getDistricts(item);
+                }}
+                placeholder="Chọn thành phố/tỉnh"
+                error={errors.provinceCode?.message}
+                onFocus={() => setActiveDropdown("provinceCode")}
+                isActive={activeDropdown === "provinceCode"}
+                label="Thành phố / Tỉnh"
+              />
+            )}
+          />
 
-          <YStack space="$2">
-            <Text style={styles.label}>
-              Quận/Huyện <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <Controller
-              control={control}
-              name="districtCode"
-              rules={{ required: "Vui lòng chọn quận/huyện" }}
-              render={({ field: { onChange, value } }) => (
-                <ComboBox
-                  value={value}
-                  options={location}
-                  onChange={(item) => {
-                    onChange(item);
-                    getWards(item);
-                  }}
-                  placeholder="Chọn quận/huyện"
-                  error={errors.districtCode?.message}
-                  isLoading={isLoadingDistricts}
-                  onFocus={() => setActiveDropdown("districtCode")}
-                  isActive={activeDropdown === "districtCode"}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="districtCode"
+            rules={{ required: "Vui lòng chọn quận/huyện" }}
+            render={({ field: { onChange, value } }) => (
+              <ComboBox
+                value={value}
+                options={location}
+                onChange={(item) => {
+                  onChange(item);
+                  getWards(item);
+                }}
+                placeholder="Chọn quận/huyện"
+                error={errors.districtCode?.message}
+                isLoading={isLoadingDistricts}
+                onFocus={() => setActiveDropdown("districtCode")}
+                isActive={activeDropdown === "districtCode"}
+                label="Quận / Huyện"
+              />
+            )}
+          />
 
-          <YStack space="$2">
-            <Text style={styles.label}>
-              Phường/Xã <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <Controller
-              control={control}
-              name="wardCode"
-              rules={{ required: "Vui lòng chọn phường/xã" }}
-              render={({ field: { onChange, value } }) => (
-                <ComboBox
-                  value={value}
-                  options={wards}
-                  onChange={onChange}
-                  placeholder="Chọn phường/xã"
-                  error={errors.wardCode?.message}
-                  isLoading={isLoadingWard}
-                  onFocus={() => setActiveDropdown("wardCode")}
-                  isActive={activeDropdown === "wardCode"}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="wardCode"
+            rules={{ required: "Vui lòng chọn phường/xã" }}
+            render={({ field: { onChange, value } }) => (
+              <ComboBox
+                value={value}
+                options={wards}
+                onChange={onChange}
+                placeholder="Chọn phường/xã"
+                error={errors.wardCode?.message}
+                isLoading={isLoadingWard}
+                onFocus={() => setActiveDropdown("wardCode")}
+                isActive={activeDropdown === "wardCode"}
+                label="Phường / Xã"
+              />
+            )}
+          />
 
-          <YStack space="$2">
-            <Text style={styles.label}>
-              Địa chỉ chi tiết <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <Controller
-              control={control}
-              name="address"
-              rules={{ required: "Vui lòng nhập địa chỉ chi tiết" }}
-              render={({ field: { onChange, value } }) => (
-                <TextArea
-                  placeholder="Nhập địa chỉ chi tiết"
-                  value={value}
-                  onChangeText={onChange}
-                  numberOfLines={3}
-                  backgroundColor="#fff"
-                  borderWidth={1}
-                  borderColor={errors.address ? "#ff3b30" : "#ddd"}
-                  borderRadius={8}
-                  padding={12}
-                  fontSize={16}
-                  minHeight={100}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="address"
+            rules={{ required: "Vui lòng nhập địa chỉ chi tiết" }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập địa chỉ chi tiết"
+                value={value}
+                onChangeText={onChange}
+                required={true}
+                type="area"
+                numberOfLines={3}
+                label="Địa chỉ chi tiết"
+                error={errors.address?.message}
+              />
+            )}
+          />
 
           <YStack space="$2">
             <Text style={styles.label}>Vị trí trên bản đồ</Text>
@@ -327,71 +282,63 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
             </TouchableOpacity>
           </YStack>
 
-          <YStack space="$2">
-            <Text style={styles.label}>
-              Giá thuê mặc định <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <Controller
-              control={control}
-              name="defaultRoomRent"
-              rules={{ required: "Vui lòng nhập giá thuê mặc định" }}
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  placeholder="Nhập giá thuê mặc định"
-                  value={value ? formatCurrency(value.toString()) : ""}
-                  onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9]/g, "");
-                    onChange(numericValue);
-                  }}
-                  keyboardType="numeric"
-                  borderColor={errors.defaultRoomRent ? "#ff3b30" : "#ddd"}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="defaultRoomRent"
+            rules={{ required: "Vui lòng nhập giá thuê mặc định" }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                label="Giá thuê mặc định"
+                required={true}
+                placeholder="Nhập giá thuê mặc định"
+                value={value ? formatCurrency(value.toString()) : ""}
+                onChangeText={(text) => {
+                  const numericValue = text.replace(/[^0-9]/g, "");
+                  onChange(numericValue);
+                }}
+                keyboardType="numeric"
+                error={errors.defaultRoomRent?.message}
+              />
+            )}
+          />
 
-          <YStack space="$2">
-            <Text style={styles.label}>
-              Ngày thanh toán mặc định{" "}
-              <Text style={styles.requiredText}>*</Text>
-            </Text>
-            <Controller
-              control={control}
-              name="paymentDate"
-              rules={{ required: "Vui lòng nhập ngày thanh toán" }}
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  placeholder="Nhập ngày thanh toán"
-                  value={value?.toString()}
-                  onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9]/g, "");
-                    const num = parseInt(numericValue);
-                    if (!num) {
-                      onChange(null);
-                      return;
-                    }
-                    if (num >= 1 && num <= 31) {
-                      onChange(num);
-                    }
-                  }}
-                  keyboardType="numeric"
-                  borderColor={errors.paymentDate ? "#ff3b30" : "#ddd"}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="paymentDate"
+            rules={{ required: "Vui lòng nhập ngày thanh toán" }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                label="Ngày thanh toán"
+                required={true}
+                placeholder="Nhập ngày thanh toán"
+                value={value?.toString()}
+                onChangeText={(text) => {
+                  const numericValue = text.replace(/[^0-9]/g, "");
+                  const num = parseInt(numericValue);
+                  if (!num) {
+                    onChange(null);
+                    return;
+                  }
+                  if (num >= 1 && num <= 31) {
+                    onChange(num);
+                  }
+                }}
+                keyboardType="numeric"
+                error={errors.paymentDate?.message}
+              />
+            )}
+          />
+
           <XStack space="$4">
             <YStack space="$2" flex={1}>
-              <Text style={styles.label}>
-                Số phòng <Text style={styles.requiredText}>*</Text>
-              </Text>
-
               <Controller
                 control={control}
                 name="totalRoom"
                 rules={{ required: "Vui lòng nhập số phòng" }}
                 render={({ field: { onChange, value } }) => (
-                  <Input
+                  <InputBase
+                    label="Số phòng"
+                    required={true}
                     placeholder="Nhập số phòng"
                     value={value?.toString()}
                     onChangeText={(text) => {
@@ -404,20 +351,20 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
                       onChange(num);
                     }}
                     keyboardType="numeric"
-                    borderColor={errors.totalRoom ? "#ff3b30" : "#ddd"}
+                    error={errors.totalRoom?.message}
                   />
                 )}
               />
             </YStack>
             <YStack space="$2" flex={1}>
-              <Text style={styles.label}>Số tầng</Text>
               <Controller
                 control={control}
                 name="numberFloor"
                 render={({ field: { onChange, value } }) => (
-                  <Input
+                  <InputBase
+                    label="Số tầng"
                     placeholder="Nhập số tầng"
-                    value={value?.toString()}
+                    value={value ? value.toString() : ""}
                     onChangeText={(text) => {
                       const numericValue = text.replace(/[^0-9]/g, "");
                       const num = parseInt(numericValue);
@@ -428,7 +375,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
                       onChange(num);
                     }}
                     keyboardType="numeric"
-                    borderColor={errors.numberFloor ? "#ff3b30" : "#ddd"}
+                    error={errors.numberFloor?.message}
                   />
                 )}
               />

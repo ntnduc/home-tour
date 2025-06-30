@@ -1,32 +1,28 @@
 import { StyleSheet } from "react-native";
 
-export const createStyles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: "#000",
-  },
-  inputError: {
-    borderColor: "#ff3b30",
-  },
-  errorText: {
-    color: "#ff3b30",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  label: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
-  },
-  requiredText: {
-    color: "#ff3b30",
-  },
-});
+export const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+    },
+    input: {
+      lineHeight: theme?.input?.lineHeight ?? 20,
+      fontSize: theme?.input?.fontSize ?? 16,
+      paddingVertical: theme?.input?.paddingVertical ?? 4,
+    },
+    inputError: {
+      borderColor: "#ff3b30",
+    },
+    errorText: {
+      color: theme.red10?.val ?? "#ff3b30",
+    },
+    label: {
+      fontSize: theme?.input?.label?.fontSize ?? 16,
+      fontWeight: theme?.input?.label?.fontWeight ?? "600",
+      marginBottom: theme?.input?.label?.marginBottom ?? 8,
+      color: theme.color?.val,
+    },
+    requiredText: {
+      color: "#ff3b30",
+    },
+  });
