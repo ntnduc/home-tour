@@ -17,6 +17,7 @@ export type RootStackParamList = {
   ContractDetail: { contract: Contract };
   ContractList: undefined;
   TerminateContract: { contract: Contract };
+  UpdateTenant: { tenantId: string };
 };
 
 export type TabParamList = {

@@ -29,6 +29,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { Input, XStack, YStack, useTheme as useTamaguiTheme } from "tamagui";
+import ServiceItemComponent from "./component/ServiceItemComponent";
 
 const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   const theme = useTamaguiTheme();
@@ -179,6 +180,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
       <ScrollView>
+        <ServiceItemComponent />
         <YStack padding="$4" space="$4">
           <Controller
             control={control}

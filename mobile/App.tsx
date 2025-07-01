@@ -18,6 +18,7 @@ import RoomListScreen from "./src/screens/tenant/TenantListScreen";
 import config from "./tamagui.config";
 
 import RoomDetailScreen from "@/screens/room/RoomDetailScreen";
+import UpdateTenantScreen from "@/screens/tenant/UpdateTenantScreen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./global.css";
 import ContractDetailScreen from "./src/screens/contract/ContractDetailScreen";
@@ -42,6 +43,7 @@ export default function App() {
             screenOptions={{
               gestureEnabled: true,
               animation: "slide_from_right",
+              title: "Trở lại",
             }}
           >
             <Stack.Screen
@@ -67,32 +69,31 @@ export default function App() {
             <Stack.Screen
               name="RoomList"
               component={RoomListScreen}
-              options={{ title: "Danh sách phòng trọ" }}
+              options={{ title: "Danh Sách Phòng" }}
             />
             <Stack.Screen
               name="RoomDetail"
               component={RoomDetailScreen}
-              options={{ title: "Chi tiết phòng trọ" }}
+              options={{ title: "Chi Tiết Căn Hộ" }}
             />
             <Stack.Screen
               name="CreateTenant"
               component={CreateTenantScreen}
-              options={{ title: "Tạo thông tin thuê phòng" }}
+              options={{ title: "Tạo Căn Hộ" }}
             />
             <Stack.Screen
               name="UpdateRoom"
               component={UpdateRoomScreen}
-              options={{ title: "Cập nhật phòng" }}
+              options={{ title: "Cập Nhật Phòng" }}
             />
             <Stack.Screen
               name="InvoiceDetail"
               component={InvoiceDetailScreen}
               options={({ navigation, route }) => {
-                // Kiểm tra xem có phải từ màn hình lịch sử không
                 const isFromHistory = route.params?.fromHistory;
 
                 return {
-                  title: "Chi tiết hóa đơn",
+                  title: "Chi Tiết Hóa Đơn",
                   headerRight: () =>
                     !isFromHistory ? (
                       <TouchableOpacity
@@ -113,7 +114,7 @@ export default function App() {
               name="InvoiceHistory"
               component={InvoiceHistoryScreen}
               options={({ navigation }) => ({
-                title: "Lịch sử hóa đơn",
+                title: "Lịch Sử Hóa Đơn",
                 headerRight: () => (
                   <TouchableOpacity
                     style={{ marginRight: 16 }}
@@ -130,22 +131,27 @@ export default function App() {
             <Stack.Screen
               name="CreateContract"
               component={CreateContractScreen}
-              options={{ title: "Tạo hợp đồng" }}
+              options={{ title: "Tạo Hợp Đồng" }}
             />
             <Stack.Screen
               name="ContractDetail"
               component={ContractDetailScreen}
-              options={{ title: "Chi tiết hợp đồng" }}
+              options={{ title: "Chi Tiết Hợp Đồng" }}
             />
             <Stack.Screen
               name="TerminateContract"
               component={TerminateContractScreen}
-              options={{ title: "Hủy hợp đồng" }}
+              options={{ title: "Hủy Hợp Đồng" }}
             />
             <Stack.Screen
               name="ContractList"
               component={ContractListScreen}
-              options={{ title: "Danh sách hợp đồng" }}
+              options={{ title: "Danh Sách Hợp Đồng" }}
+            />
+            <Stack.Screen
+              name="UpdateTenant"
+              component={UpdateTenantScreen}
+              options={{ title: "Cập Nhật Căn Hộ" }}
             />
           </Stack.Navigator>
           <StatusBar style="auto" />

@@ -1,4 +1,5 @@
 import { getListProperty } from "@/api/property/property.api";
+import FabButton from "@/components/FabButton";
 import Loading from "@/components/Loading";
 import { ApiResponse } from "@/types/api";
 import { BasePagingResponse } from "@/types/base.response";
@@ -14,7 +15,6 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { colors } from "../../theme/colors";
@@ -27,6 +27,7 @@ type RootStackParamList = {
   AddRoom: { buildingId: string };
   RoomList: { buildingId?: string };
   CreateTenant: undefined;
+  UpdateTenant: { tenantId: string };
 };
 
 type RoomListScreenProps = {
@@ -106,7 +107,7 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
               <TenantCardComponent
                 tenantInfo={item}
                 onUpdate={() => {
-                  /* Xử lý tạo tòa nhà */
+                  navigation.navigate("UpdateTenant", { tenantId: item.id });
                 }}
               />
             );
@@ -166,14 +167,12 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
           }
         />
       )}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          navigation.navigate("CreateTenant");
-        }}
-      >
-        <Text style={styles.fabIcon}>＋</Text>
-      </TouchableOpacity>
+      <FabButton
+        icon="add"
+        iconSize={32}
+        iconStyle={{ marginTop: -2 }}
+        onPress={() => navigation.navigate("CreateTenant")}
+      />
     </SafeAreaView>
   );
 };
@@ -210,27 +209,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.text.secondary,
     marginTop: 2,
-  },
-  fab: {
-    position: "absolute",
-    right: 24,
-    bottom: 32,
-    backgroundColor: colors.primary.main,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: colors.primary.main,
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  fabIcon: {
-    color: colors.neutral.white,
-    fontSize: 32,
-    fontWeight: "bold",
-    marginTop: -2,
   },
 
   statusRow: {

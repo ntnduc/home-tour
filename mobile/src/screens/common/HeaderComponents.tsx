@@ -50,7 +50,7 @@ const HeaderComponents = (props: HeaderComponentsProps) => {
     <View
       className={`flex flex-col justify-between items-center content-center bg-white w-full ${className}`}
     >
-      <View className="flex flex-col justify-between items-center content-center bg-white w-full mb-4">
+      <View className="flex flex-col justify-between items-center content-center bg-white w-full">
         <Text style={styles.headerTitle}>{title}</Text>
         {isSearch && (
           <View

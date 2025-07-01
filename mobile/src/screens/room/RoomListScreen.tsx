@@ -1,3 +1,4 @@
+import FabButton from "@/components/FabButton";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
@@ -909,14 +910,7 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
         />
       </View>
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => {
-          /* Xử lý tạo phòng */
-        }}
-      >
-        <Ionicons name="add" size={32} color={colors.neutral.white} />
-      </TouchableOpacity>
+      <FabButton icon="add" onPress={() => {}} />
 
       {/* Contract List Modal */}
       <ContractListModal
@@ -1193,7 +1187,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 10,
-    paddingBottom: 100,
   },
   emptyContainer: {
     alignItems: "center",

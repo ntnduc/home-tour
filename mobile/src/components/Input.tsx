@@ -1,7 +1,7 @@
 import { createStyles } from "@/styles/component/StyleInput";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Text, TextInput, View } from "react-native";
+import { StyleProp, Text, TextInput, View, ViewStyle } from "react-native";
 import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface InputProps {
@@ -19,6 +19,7 @@ interface InputProps {
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
   icon?: keyof typeof Ionicons.glyphMap;
   disabled?: boolean;
+  inputStyles?: StyleProp<ViewStyle>;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -36,6 +37,7 @@ const Input: React.FC<InputProps> = ({
   keyboardType = "default",
   icon,
   disabled = false,
+  inputStyles,
 }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -85,7 +87,7 @@ const Input: React.FC<InputProps> = ({
         <TextInput
           className={`flex-1 ${type === "area" ? "h-20" : ""}`}
           value={value}
-          style={styles.input}
+          style={[styles.input, inputStyles]}
           onChangeText={handleChangeText}
           placeholder={placeholder ?? `Nhập ${label}...`}
           keyboardType={type === "number" ? "numeric" : keyboardType}
