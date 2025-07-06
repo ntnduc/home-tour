@@ -22,7 +22,6 @@ const ServiceSelectedSearchComponent = ({
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
 
-  const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [valueSelected, setValueSelected] = useState<
     ServiceCreateRequest | string
