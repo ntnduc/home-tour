@@ -10,3 +10,6 @@ export * from './date.utils';
 
 // Validation utilities
 export * from './validation.utils';
+
+// Object utilities
+export * from './object.utils';

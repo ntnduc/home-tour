@@ -3,10 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   NativeSyntheticEvent,
+  ReturnKeyTypeOptions,
   StyleProp,
   Text,
   TextInput,
   TextInputFocusEventData,
+  TextInputSubmitEditingEventData,
   View,
   ViewStyle,
 } from "react-native";
@@ -29,6 +31,10 @@ interface InputProps {
   disabled?: boolean;
   inputStyles?: StyleProp<ViewStyle>;
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  returnKeyType?: ReturnKeyTypeOptions;
+  onSubmitEditing?: (
+    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
+  ) => void;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -48,6 +54,8 @@ const Input: React.FC<InputProps> = ({
   disabled = false,
   inputStyles,
   onBlur,
+  returnKeyType,
+  onSubmitEditing,
 }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -97,6 +105,8 @@ const Input: React.FC<InputProps> = ({
         <TextInput
           className={`flex-1 ${type === "area" ? "h-20" : ""}`}
           value={value}
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
           style={[styles.input, inputStyles]}
           onChangeText={handleChangeText}
           placeholder={placeholder ?? `Nhập ${label}...`}

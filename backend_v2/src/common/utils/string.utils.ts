@@ -3,9 +3,9 @@
  */
 
 /**
- * Convert string to slug format (lowercase, replace spaces with hyphens)
- * @param text - The text to convert to slug
- * @returns The slugified string
+ * Remove accents from Vietnamese text
+ * @param text - The text to remove accents from
+ * @returns Text without accents
  */
 export function removeAccents(text: string): string {
   if (!text) return '';
@@ -13,6 +13,16 @@ export function removeAccents(text: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+}
+
+/**
+ * Convert string to slug format (lowercase, replace spaces with hyphens)
+ * @param text - The text to convert to slug
+ * @returns The slugified string
+ */
+export function toSlug(text: string): string {
+  if (!text) return '';
+  return removeAccents(text).replace(/ /g, '-');
 }
 
 /**

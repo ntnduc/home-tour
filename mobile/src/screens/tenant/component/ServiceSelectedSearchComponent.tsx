@@ -22,6 +22,7 @@ const ServiceSelectedSearchComponent = ({
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
 
+  const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [valueSelected, setValueSelected] = useState<
     ServiceCreateRequest | string
@@ -73,14 +74,15 @@ const ServiceSelectedSearchComponent = ({
     <AutocompleteInput
       hideResults={hideResults}
       onChangeText={handleChangeText}
-      // onFocus={handleFocus}
-      onBlur={() => setHideResults(true)}
-      onStartShouldSetResponderCapture={() => true}
       value={
         typeof valueSelected === "string" ? valueSelected : valueSelected?.name
       }
       error={error}
       data={data?.data?.items ?? []}
+      returnKeyType="done"
+      onSubmitEditing={() => {
+        setHideResults(true);
+      }}
       renderResultList={(list: any) => {
         const flatData = list?.data;
         return (

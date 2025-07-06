@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { isMethodOverridden } from '../../utils';
 import { BaseCreateDto } from '../dto/create.dto';
 import { BaseDetailDto } from '../dto/detail.dto';
 import { BaseFilterDto } from '../dto/filter.dto';
@@ -59,13 +60,21 @@ export class BaseService<
     query.skip(offset);
     query.take(limit);
 
-    if (globalKey) {
-      query.andWhere('entity.name ILIKE :globalKey', {
-        globalKey: `%${globalKey}%`,
-      });
-    }
+    const isApplyFilterOverridden = isMethodOverridden(
+      this,
+      'applyFilter',
+      BaseService,
+    );
 
-    ({ query, filter } = await this.applyFilter(query, filter));
+    if (isApplyFilterOverridden) {
+      ({ query, filter } = await this.applyFilter(query, filter));
+    } else {
+      if (globalKey) {
+        query.andWhere('entity.name ILIKE :globalKey', {
+          globalKey: `%${globalKey}%`,
+        });
+      }
+    }
 
     if (filterDto) {
       Object.keys(filterDto).forEach((key) => {

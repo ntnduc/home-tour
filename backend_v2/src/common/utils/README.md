@@ -11,6 +11,7 @@ import {
   toSlug,
   isValidEmail,
   formatVietnameseDate,
+  isMethodOverridden,
 } from '../../../common/utils';
 ```
 
@@ -20,12 +21,14 @@ import {
 import { toSlug } from '../../../common/utils/string.utils';
 import { isValidEmail } from '../../../common/utils/validation.utils';
 import { formatVietnameseDate } from '../../../common/utils/date.utils';
+import { isMethodOverridden } from '../../../common/utils/object.utils';
 ```
 
 ## Các nhóm utility functions
 
 ### 1. String Utils (`string.utils.ts`)
 
+- `removeAccents(text: string)`: Loại bỏ dấu tiếng Việt
 - `toSlug(text: string)`: Chuyển đổi text thành slug format
 - `capitalizeWords(text: string)`: Viết hoa chữ cái đầu mỗi từ
 - `generateRandomString(length: number)`: Tạo chuỗi ngẫu nhiên
@@ -47,15 +50,22 @@ import { formatVietnameseDate } from '../../../common/utils/date.utils';
 - `isNumeric(str: string)`: Kiểm tra chuỗi chỉ chứa số
 - `isNotEmpty(value: any)`: Kiểm tra giá trị không rỗng
 
+### 4. Object Utils (`object.utils.ts`)
+
+- `isMethodOverridden(instance, methodName, baseClass)`: Kiểm tra method có được override không
+- `getAllPropertyNames(obj)`: Lấy tất cả tên properties của object
+- `deepClone(obj)`: Clone sâu object
+- `deepEqual(obj1, obj2)`: So sánh sâu hai object
+
 ## Ví dụ sử dụng
 
 ```typescript
 // Trong entity
-import { toSlug } from '../../../common/utils';
+import { removeAccents } from '../../../common/utils';
 
 @BeforeInsert()
 generateNameSlug() {
-  this.nameSlug = toSlug(this.name);
+  this.name_slug = removeAccents(this.name);
 }
 
 // Trong service
@@ -70,6 +80,16 @@ async createUser(userData: CreateUserDto) {
   user.createdAt = new Date();
   user.createdAtFormatted = formatVietnameseDate(user.createdAt);
   // ...
+}
+
+// Trong base service để kiểm tra override
+import { isMethodOverridden } from '../../../common/utils';
+
+const isApplyFilterOverridden = isMethodOverridden(this, 'applyFilter', BaseService);
+if (isApplyFilterOverridden) {
+  // Chạy logic override
+} else {
+  // Chạy logic mặc định
 }
 ```
 
