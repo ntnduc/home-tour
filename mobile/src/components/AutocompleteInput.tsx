@@ -19,6 +19,7 @@ export type AutocompleteInputProps<Item> = TextInputProps & {
   renderTextInput?: React.FC<TextInputProps>;
   flatListProps?: Partial<Omit<FlatListProps<Item>, "data">>;
   data: readonly Item[];
+  error?: string;
 };
 
 function defaultKeyExtractor(_: unknown, index: number): string {

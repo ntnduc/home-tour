@@ -183,10 +183,10 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
         <YStack padding="$4" space="$4">
           <Controller
             control={control}
-            name="name"
+            name="serviesNew"
             render={({ field: { onChange, value } }) => (
               <ServiceSelectedSearchComponent
-                value={value}
+                value={value as any}
                 onChange={onChange}
               />
             )}

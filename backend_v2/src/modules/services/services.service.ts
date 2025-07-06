@@ -1,5 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BaseFilterDto } from 'src/common/base/dto/filter.dto';
+import { removeAccents } from 'src/common/utils';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { BaseService } from './../../common/base/crud/base.service';
 import { CreateServiceDto } from './dto/services.create.dto';
 import { ServiceDetailDto } from './dto/services.detail.dto';
@@ -25,5 +27,19 @@ export class ServicesService extends BaseService<
       CreateServiceDto,
       UpdateServiceDto,
     );
+  }
+
+  override async applyFilter(
+    query: SelectQueryBuilder<Services>,
+    filter: BaseFilterDto<Services>,
+  ) {
+    const { globalKey } = filter;
+    if (globalKey) {
+      const slugKey = removeAccents(globalKey);
+      query.andWhere('entity.name_slug ILIKE :slugKey', {
+        globalKey: `%${slugKey}%`,
+      });
+    }
+    return { query, filter };
   }
 }

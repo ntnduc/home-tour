@@ -1,7 +1,15 @@
 import { createStyles } from "@/styles/component/StyleInput";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleProp, Text, TextInput, View, ViewStyle } from "react-native";
+import {
+  NativeSyntheticEvent,
+  StyleProp,
+  Text,
+  TextInput,
+  TextInputFocusEventData,
+  View,
+  ViewStyle,
+} from "react-native";
 import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface InputProps {
@@ -20,6 +28,7 @@ interface InputProps {
   icon?: keyof typeof Ionicons.glyphMap;
   disabled?: boolean;
   inputStyles?: StyleProp<ViewStyle>;
+  onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -38,6 +47,7 @@ const Input: React.FC<InputProps> = ({
   icon,
   disabled = false,
   inputStyles,
+  onBlur,
 }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -95,6 +105,7 @@ const Input: React.FC<InputProps> = ({
           multiline={type === "area"}
           numberOfLines={type === "area" ? numberOfLines : 1}
           editable={!disabled}
+          onBlur={(e) => onBlur?.(e)}
         />
       </View>
       {error && (

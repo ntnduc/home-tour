@@ -12,6 +12,10 @@ export class ServiceListDto extends BaseListDto<Services> {
   @IsOptional()
   name?: string;
 
+  @IsString()
+  @IsOptional()
+  icon?: string;
+
   calculationMethod?: string;
 
   fromEntity(entity: Services): void {
@@ -19,5 +23,6 @@ export class ServiceListDto extends BaseListDto<Services> {
     this.name = entity.name;
     this.calculationMethod = entity.calculationMethod;
     this.defaultUnitName = entity.defaultUnitName;
+    this.icon = entity.icon;
   }
 }

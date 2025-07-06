@@ -43,11 +43,18 @@ export class BaseService<
     });
   }
 
+  async applyFilter(
+    query: SelectQueryBuilder<TEntity>,
+    filter: BaseFilterDto<TEntity>,
+  ) {
+    return { query, filter };
+  }
+
   async getAll(
     filter: BaseFilterDto<TEntity>,
   ): Promise<PaginateResult<TListDto>> {
     const { globalKey, filter: filterDto, sort, limit, offset } = filter;
-    const query = await this.specQuery();
+    let query = await this.specQuery();
 
     query.skip(offset);
     query.take(limit);
@@ -57,6 +64,8 @@ export class BaseService<
         globalKey: `%${globalKey}%`,
       });
     }
+
+    ({ query, filter } = await this.applyFilter(query, filter));
 
     if (filterDto) {
       Object.keys(filterDto).forEach((key) => {

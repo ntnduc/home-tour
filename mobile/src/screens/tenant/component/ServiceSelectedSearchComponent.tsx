@@ -1,88 +1,110 @@
+import { getListService } from "@/api/service/service.api";
 import AutocompleteInput from "@/components/AutocompleteInput";
-import { ServiceCalculateMethod } from "@/constant/service.constant";
-import React, { useState } from "react";
-import { ScrollView, TouchableOpacity } from "react-native";
-import { Text } from "tamagui";
+import { createStyles } from "@/styles/component/StyleComboBox";
+import { ServiceCreateRequest } from "@/types/service";
+import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
+import { Text, useTheme as useTamaguiTheme } from "tamagui";
 
 const ServiceSelectedSearchComponent = ({
   value,
+  error,
   onChange,
 }: {
-  value: string;
-  onChange: (services: string) => void;
+  value: ServiceCreateRequest;
+  error?: string;
+  onChange: (services: ServiceCreateRequest) => void;
 }) => {
-  const optionServices = [
-    {
-      index: 0,
-      name: "Nước",
-      price: 0,
-      calculationMethod: ServiceCalculateMethod.PER_UNIT_SIMPLE,
-    },
-    {
-      index: 1,
-      name: "Điện",
-      price: 0,
-      calculationMethod: ServiceCalculateMethod.PER_UNIT_SIMPLE,
-    },
-    {
-      index: 2,
-      name: "Wifi",
-      price: 0,
-      calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
-    },
-    {
-      index: 3,
-      name: "Gửi xe",
-      price: 0,
-      calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
-    },
-  ];
-  const [options, setOptions] = useState<any[]>([]);
-  const [hideResults, setHideResults] = useState(false);
+  const ICON_DEFAULT = "apps-outline";
+
+  const theme = useTamaguiTheme();
+  const styles = createStyles(theme);
+
+  const [search, setSearch] = useState("");
+  const [valueSelected, setValueSelected] = useState<
+    ServiceCreateRequest | string
+  >(value);
+  const [hideResults, setHideResults] = useState(true);
 
   const onSelectedService = (service: any) => {
-    onChange(service.name);
+    console.log("💞💓💗💞💓💗 ~ onSelectedService ~ service:", service);
+    setValueSelected(service);
     setHideResults(true);
+    onChange(service);
   };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["services", search],
+    queryFn: () =>
+      getListService({
+        limit: 5,
+        offset: 0,
+        globalKey: search,
+      }),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const handleFocus = () => {
+    if (data?.data?.items && data?.data?.items?.length > 0) {
+      setHideResults(false);
+    }
+  };
+
+  const handleChangeText = (text: string) => {
+    setSearch(text);
+    setValueSelected(text);
+
+    if (data?.data?.items && data?.data?.items?.length > 0) {
+      setHideResults(false);
+    } else {
+      setHideResults(true);
+    }
+  };
+
+  useEffect(() => {
+    if (data?.data?.items?.length === 0) {
+      setHideResults(false);
+    }
+  }, [data]);
 
   return (
     <AutocompleteInput
-      autoComplete="off"
       hideResults={hideResults}
-      onChangeText={(text) => {
-        setOptions(
-          optionServices.filter((option) =>
-            option.name.toLowerCase().includes(text.toLowerCase())
-          )
-        );
-        onChange(text);
-      }}
-      value={value}
-      data={options}
-      renderResultList={(item: any) => {
-        const flatData = item?.data;
-
+      onChangeText={handleChangeText}
+      // onFocus={handleFocus}
+      onBlur={() => setHideResults(true)}
+      onStartShouldSetResponderCapture={() => true}
+      value={
+        typeof valueSelected === "string" ? valueSelected : valueSelected?.name
+      }
+      error={error}
+      data={data?.data?.items ?? []}
+      renderResultList={(list: any) => {
+        const flatData = list?.data;
         return (
-          <ScrollView>
-            {flatData.map((item: any, index: number) => (
-              <TouchableOpacity
-                onPress={() => onSelectedService(item.name)}
-                key={index}
-              >
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={styles.dropdownContainer}>
+            <ScrollView style={{ maxHeight: 250 }}>
+              {flatData.map((option: any) => (
+                <TouchableOpacity
+                  className="flex flex-row items-center"
+                  key={String(option.id)}
+                  style={[styles.item]}
+                  onPress={() => onSelectedService(option)}
+                >
+                  <Ionicons
+                    className="mr-3"
+                    name={option?.icon ? option?.icon : ICON_DEFAULT}
+                    size={20}
+                    color="#007AFF"
+                  />
+                  <Text style={[styles.itemText]}>{option.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         );
-      }}
-      flatListProps={{
-        keyboardShouldPersistTaps: "always",
-        keyExtractor: (item: any) => item.name,
-        renderItem: ({ item }) => (
-          <TouchableOpacity onPress={() => onChange(item.title)}>
-            <Text>{item.title}</Text>
-          </TouchableOpacity>
-        ),
       }}
     />
   );
