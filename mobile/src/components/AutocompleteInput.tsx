@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { ReactElement } from "react";
 import type {
   FlatListProps,
@@ -7,7 +8,7 @@ import type {
   ViewStyle,
 } from "react-native";
 import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
-import Input from "./Input";
+import Input, { InputIconProps } from "./Input";
 
 export type AutocompleteInputProps<Item> = TextInputProps & {
   containerStyle?: StyleProp<ViewStyle>;
@@ -20,6 +21,8 @@ export type AutocompleteInputProps<Item> = TextInputProps & {
   flatListProps?: Partial<Omit<FlatListProps<Item>, "data">>;
   data: readonly Item[];
   error?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  iconProps?: InputIconProps;
 };
 
 function defaultKeyExtractor(_: unknown, index: number): string {

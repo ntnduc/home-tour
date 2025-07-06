@@ -25,7 +25,6 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { Input, XStack, YStack, useTheme as useTamaguiTheme } from "tamagui";
@@ -33,14 +32,13 @@ import ServiceSelectedSearchComponent from "./component/ServiceSelectedSearchCom
 
 const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   const theme = useTamaguiTheme();
-
   const styles = createStyles(theme);
 
-  const [images, setImages] = useState([]);
   const [location, setLocation] = useState<ComboOption<string, string>[]>([]);
   const [cities, setCities] = useState<ComboOption<string, string>[]>([]);
   const [wards, setWards] = useState<ComboOption<string, string>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
   const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
   const [isLoadingWard, setIsLoadingWard] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
@@ -180,18 +178,6 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
       <ScrollView>
-        <YStack padding="$4" space="$4">
-          <Controller
-            control={control}
-            name="serviesNew"
-            render={({ field: { onChange, value } }) => (
-              <ServiceSelectedSearchComponent
-                value={value as any}
-                onChange={onChange}
-              />
-            )}
-          />
-        </YStack>
         <YStack padding="$4" space="$4">
           <Controller
             control={control}
@@ -441,39 +427,13 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
                         control={control}
                         name={`services.${service.index}.name`}
                         render={({ field: { onChange, value } }) => (
-                          <View style={{ position: "relative" }}>
-                            <Input
-                              placeholder="Tên dịch vụ"
-                              value={value}
-                              onChangeText={onChange}
-                              paddingLeft={40}
-                            />
-                            <View
-                              style={{
-                                position: "absolute",
-                                left: 12,
-                                top: 0,
-                                bottom: 0,
-                                justifyContent: "center",
-                              }}
-                            >
-                              <Ionicons
-                                name={
-                                  service.name === "Điện"
-                                    ? "flash-outline"
-                                    : service.name === "Nước"
-                                      ? "water-outline"
-                                      : service.name === "Wifi"
-                                        ? "wifi-outline"
-                                        : service.name === "Gửi xe"
-                                          ? "car-outline"
-                                          : "apps-outline"
-                                }
-                                size={20}
-                                color="#007AFF"
-                              />
-                            </View>
-                          </View>
+                          <ServiceSelectedSearchComponent
+                            value={value as any}
+                            onChange={onChange}
+                            error={
+                              errors.services?.[service.index]?.name?.message
+                            }
+                          />
                         )}
                       />
                       <Controller

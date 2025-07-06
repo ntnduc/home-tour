@@ -24,7 +24,6 @@ export interface Property {
 export interface PropertyCreateRequest
   extends Omit<Property, "id" | "services"> {
   services: ServiceCreateRequest[];
-  serviesNew: ServiceCreateRequest | string | null;
 }
 
 export interface PropertyListRequest {

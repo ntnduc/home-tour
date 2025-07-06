@@ -25,6 +25,12 @@ export class Services extends BaseEntity {
   @Column({ nullable: true })
   name_slug?: string;
 
+  @Column({ nullable: false, default: false })
+  isDefaultSelected: boolean;
+
+  @Column({ nullable: false, default: true })
+  isActive: boolean;
+
   @OneToMany(
     () => PropertiesService,
     (propertiesService) => propertiesService.service,

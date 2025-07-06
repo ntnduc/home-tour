@@ -45,12 +45,6 @@ const ServiceSelectedSearchComponent = ({
     staleTime: 1000 * 60 * 2,
   });
 
-  const handleFocus = () => {
-    if (data?.data?.items && data?.data?.items?.length > 0) {
-      setHideResults(false);
-    }
-  };
-
   const handleChangeText = (text: string) => {
     setSearch(text);
     setValueSelected(text);
@@ -80,6 +74,10 @@ const ServiceSelectedSearchComponent = ({
       returnKeyType="done"
       onSubmitEditing={() => {
         setHideResults(true);
+      }}
+      icon={value?.icon ? (value?.icon as any) : ICON_DEFAULT}
+      iconProps={{
+        color: "#007AFF",
       }}
       renderResultList={(list: any) => {
         const flatData = list?.data;

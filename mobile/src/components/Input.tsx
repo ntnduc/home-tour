@@ -8,13 +8,21 @@ import {
   Text,
   TextInput,
   TextInputFocusEventData,
+  TextInputProps,
   TextInputSubmitEditingEventData,
   View,
   ViewStyle,
 } from "react-native";
 import { useTheme as useTamaguiTheme } from "tamagui";
 
-interface InputProps {
+export interface InputIconProps {
+  name?: keyof typeof Ionicons.glyphMap;
+  size?: number;
+  color?: string;
+  className?: string;
+}
+
+interface InputProps extends TextInputProps {
   label?: string;
   value?: string;
   onChangeText?: (text: string) => void | undefined;
@@ -35,6 +43,7 @@ interface InputProps {
   onSubmitEditing?: (
     e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
   ) => void;
+  iconProps?: InputIconProps;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -56,6 +65,7 @@ const Input: React.FC<InputProps> = ({
   onBlur,
   returnKeyType,
   onSubmitEditing,
+  iconProps,
 }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -100,7 +110,13 @@ const Input: React.FC<InputProps> = ({
            ${error ? "border-red-300 bg-red-50" : "border-gray-200"}`}
       >
         {icon && (
-          <Ionicons name={icon} size={18} color="#6B7280" className="mr-3" />
+          <Ionicons
+            name={icon}
+            size={18}
+            color={"#6B7280"}
+            className="mr-3"
+            {...iconProps}
+          />
         )}
         <TextInput
           className={`flex-1 ${type === "area" ? "h-20" : ""}`}
