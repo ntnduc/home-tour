@@ -30,7 +30,6 @@ const ServiceSelectedSearchComponent = ({
   const [hideResults, setHideResults] = useState(true);
 
   const onSelectedService = (service: any) => {
-    console.log("💞💓💗💞💓💗 ~ onSelectedService ~ service:", service);
     setValueSelected(service);
     setHideResults(true);
     onChange(service);
