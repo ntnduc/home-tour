@@ -15,6 +15,9 @@ export class Services extends BaseEntity {
   })
   calculationMethod: ServiceCalculationMethod;
 
+  @Column({ nullable: true, default: 'apps-outline' })
+  icon: string;
+
   @Column({ nullable: true })
   defaultUnitName: string;
 

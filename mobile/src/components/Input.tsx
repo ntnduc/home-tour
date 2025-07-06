@@ -6,8 +6,8 @@ import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface InputProps {
   label?: string;
-  value: string;
-  onChangeText: (text: string) => void;
+  value?: string;
+  onChangeText?: (text: string) => void | undefined;
   placeholder?: string;
   error?: string;
   required?: boolean;
@@ -60,11 +60,11 @@ const Input: React.FC<InputProps> = ({
         return;
       }
 
-      onChangeText(numericValue);
+      onChangeText?.(numericValue);
     } else if (formatMoney) {
-      onChangeText(formatCurrency(text));
+      onChangeText?.(formatCurrency(text));
     } else {
-      onChangeText(text);
+      onChangeText?.(text);
     }
   };
 
