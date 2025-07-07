@@ -111,6 +111,7 @@ export class PropertyService
           propertiesServiceEntity.serviceId = service.id;
           propertiesServiceEntity.calculationMethod = service.calculationMethod;
           propertiesServiceEntity.name = service.name;
+          propertiesServiceEntity.price = service.price;
           propertiesServices.push(propertiesServiceEntity);
         });
 
@@ -124,6 +125,8 @@ export class PropertyService
           propertiesServiceEntity.calculationMethod =
             findServiceDto?.calculationMethod || service.calculationMethod;
           propertiesServiceEntity.name = findServiceDto?.name || service.name;
+          propertiesServiceEntity.price =
+            findServiceDto?.price || service.price;
           propertiesServices.push(propertiesServiceEntity);
         });
 

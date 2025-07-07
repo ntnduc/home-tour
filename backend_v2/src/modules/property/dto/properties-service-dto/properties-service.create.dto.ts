@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
 import { ServiceCalculationMethod } from '../../../../common/enums/service.enum';
 import { PropertiesService } from '../../entities/properties-service.entity';
@@ -16,11 +16,16 @@ export class CreatePropertyServiceDto extends BaseCreateDto<PropertiesService> {
   @IsNotEmpty()
   calculationMethod: ServiceCalculationMethod;
 
+  @IsNumber()
+  @IsNotEmpty()
+  price: number;
+
   getEntity(): PropertiesService {
     const entity = new PropertiesService();
     entity.propertyId = this.propertyId;
     entity.serviceId = this.serviceId;
     entity.calculationMethod = this.calculationMethod;
+    entity.price = this.price;
     return entity;
   }
 }

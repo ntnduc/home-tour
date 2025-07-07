@@ -1,3 +1,4 @@
+import { IsNumber } from 'class-validator';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
 import { ServiceCalculationMethod } from '../../../common/enums/service.enum';
@@ -30,6 +31,10 @@ export class Services extends BaseEntity {
 
   @Column({ nullable: false, default: true })
   isActive: boolean;
+
+  @Column({ nullable: false, default: 0 })
+  @IsNumber()
+  price: number;
 
   @OneToMany(
     () => PropertiesService,

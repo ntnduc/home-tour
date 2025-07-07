@@ -10,6 +10,7 @@ export class PropertyServiceDetailDto extends BaseDetailDto<PropertiesService> {
   calculationMethod: ServiceCalculationMethod;
   service: ServiceDetailDto;
   property: PropertyDetailDto;
+  price: number;
 
   fromEntity(entity: PropertiesService): void {
     this.propertyId = entity.propertyId;
@@ -19,5 +20,6 @@ export class PropertyServiceDetailDto extends BaseDetailDto<PropertiesService> {
     this.updatedBy = entity.updatedBy;
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
+    this.price = entity.price;
   }
 }

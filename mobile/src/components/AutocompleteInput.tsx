@@ -23,6 +23,7 @@ export type AutocompleteInputProps<Item> = TextInputProps & {
   error?: string;
   icon?: keyof typeof Ionicons.glyphMap;
   iconProps?: InputIconProps;
+  label?: string;
 };
 
 function defaultKeyExtractor(_: unknown, index: number): string {
@@ -54,6 +55,7 @@ export const AutocompleteInput = React.forwardRef(
       ),
       flatListProps,
       style,
+      label,
       ...textInputProps
     } = props;
 

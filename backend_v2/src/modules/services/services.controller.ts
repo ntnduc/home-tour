@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { BaseController } from 'src/common/base/crud/base.controller';
 import { CreateServiceDto } from './dto/services.create.dto';
@@ -26,5 +26,10 @@ export class ServicesController extends BaseController<
       CreateServiceDto,
       UpdateServiceDto,
     );
+  }
+
+  @Get('default-selected')
+  async getDefaultSelected() {
+    return this.serviceService.getDefaultSelected();
   }
 }

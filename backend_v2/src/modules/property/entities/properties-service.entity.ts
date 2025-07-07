@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
 import { Services } from '../../services/entities/services.entity';
@@ -29,6 +29,10 @@ export class PropertiesService extends BaseEntity {
   @Column()
   @IsNotEmpty()
   serviceId: string;
+
+  @Column({ nullable: false, default: 0 })
+  @IsNumber()
+  price: number;
 
   @Column({
     type: 'enum',

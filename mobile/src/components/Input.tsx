@@ -44,6 +44,8 @@ interface InputProps extends TextInputProps {
     e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
   ) => void;
   iconProps?: InputIconProps;
+  onClear?: () => void;
+  showClear?: boolean;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -66,6 +68,8 @@ const Input: React.FC<InputProps> = ({
   returnKeyType,
   onSubmitEditing,
   iconProps,
+  onClear,
+  showClear = true,
 }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -123,7 +127,11 @@ const Input: React.FC<InputProps> = ({
           value={value}
           returnKeyType={returnKeyType}
           onSubmitEditing={onSubmitEditing}
-          style={[styles.input, inputStyles]}
+          style={[
+            styles.input,
+            inputStyles,
+            { borderColor: error ? "#ff3b30" : "#ddd" },
+          ]}
           onChangeText={handleChangeText}
           placeholder={placeholder ?? `Nhập ${label}...`}
           keyboardType={type === "number" ? "numeric" : keyboardType}
@@ -133,6 +141,18 @@ const Input: React.FC<InputProps> = ({
           editable={!disabled}
           onBlur={(e) => onBlur?.(e)}
         />
+        {value && showClear && !disabled && (
+          <Ionicons
+            name="close-outline"
+            size={18}
+            color={"#6B7280"}
+            className="mr-3"
+            onPress={() => {
+              onChangeText?.("");
+              onClear?.();
+            }}
+          />
+        )}
       </View>
       {error && (
         <Text className="mt-1" style={styles.errorText}>

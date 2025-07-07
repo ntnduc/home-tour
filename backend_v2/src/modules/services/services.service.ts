@@ -29,6 +29,20 @@ export class ServicesService extends BaseService<
     );
   }
 
+  async getDefaultSelected() {
+    const services = await this.serviceRepository.find({
+      where: {
+        isDefaultSelected: true,
+      },
+    });
+    const result = services.map((service) => {
+      const detailDto = new ServiceDetailDto();
+      detailDto.fromEntity(service);
+      return detailDto;
+    });
+    return result;
+  }
+
   override async applyFilter(
     query: SelectQueryBuilder<Services>,
     filter: BaseFilterDto<Services>,
@@ -40,6 +54,12 @@ export class ServicesService extends BaseService<
         slugKey: `%${slugKey}%`,
       });
     }
+    query.andWhere('entity.isActive = :isActive', {
+      isActive: true,
+    });
+    query.andWhere('entity.isDefaultSelected = :isDefaultSelected', {
+      isDefaultSelected: true,
+    });
     return { query, filter };
   }
 }

@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { BaseUpdateDto } from '../../../../common/base/dto/update.dto';
 import { ServiceCalculationMethod } from '../../../../common/enums/service.enum';
@@ -17,10 +17,15 @@ export class UpdatePropertyServiceDto extends BaseUpdateDto<PropertiesService> {
   @IsOptional()
   calculationMethod?: ServiceCalculationMethod;
 
+  @IsNumber()
+  @IsOptional()
+  price?: number;
+
   getEntity(
     entity: PropertiesService,
   ): QueryDeepPartialEntity<PropertiesService> {
     if (this.propertyId) entity.propertyId = this.propertyId;
+    if (this.price) entity.price = this.price;
     if (this.serviceId) entity.serviceId = this.serviceId;
     if (this.calculationMethod)
       entity.calculationMethod = this.calculationMethod;

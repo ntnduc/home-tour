@@ -1,5 +1,6 @@
 import { checkLogin as checkLoginApi } from "@/api/auth/api";
 import { User } from "@/types/user";
+import uuid from "react-native-uuid";
 import { storage } from "./storage";
 
 export const getStoreUser = async (): Promise<User | undefined> => {
@@ -24,4 +25,8 @@ export const formatCurrency = (value: string) => {
   const numericValue = value.replace(/[.,]/g, "");
   // Thêm dấu chấm ngăn cách hàng nghìn
   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+export const generateId = () => {
+  return uuid.v4();
 };

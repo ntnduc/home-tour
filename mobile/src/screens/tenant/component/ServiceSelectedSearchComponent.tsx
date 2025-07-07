@@ -69,13 +69,18 @@ const ServiceSelectedSearchComponent = ({
       value={
         typeof valueSelected === "string" ? valueSelected : valueSelected?.name
       }
+      placeholder="Nhập tên dịch vụ"
       error={error}
       data={data?.data?.items ?? []}
       returnKeyType="done"
       onSubmitEditing={() => {
         setHideResults(true);
       }}
-      icon={value?.icon ? (value?.icon as any) : ICON_DEFAULT}
+      icon={
+        typeof valueSelected === "string"
+          ? ICON_DEFAULT
+          : ((valueSelected?.icon as any) ?? ICON_DEFAULT)
+      }
       iconProps={{
         color: "#007AFF",
       }}

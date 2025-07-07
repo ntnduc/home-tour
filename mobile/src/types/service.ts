@@ -1,7 +1,7 @@
 import { ServiceCalculateMethod } from "@/constant/service.constant";
 
 export interface Service {
-  id: number;
+  id: string;
   name: string;
   price: number;
   calculationMethod: ServiceCalculateMethod;
@@ -10,7 +10,6 @@ export interface Service {
 
 export interface ServiceCreateRequest {
   id?: string;
-  index: number;
   name: string;
   icon?: string;
   price: number;
@@ -18,3 +17,5 @@ export interface ServiceCreateRequest {
 }
 
 export interface ServiceListResponse extends Service {}
+
+export interface ServiceDefaultResponse extends Service {}

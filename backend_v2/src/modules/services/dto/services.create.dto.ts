@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 
 import { BaseCreateDto } from '../../../common/base/dto/create.dto';
@@ -21,6 +27,9 @@ export class CreateServiceDto extends BaseCreateDto<Services> {
   @IsString()
   @IsOptional()
   defaultUnitName?: string;
+
+  @IsNumber()
+  price: number;
 
   getEntity(): Services {
     const entity = new Services();
