@@ -17,6 +17,7 @@ import React, { useEffect, useId, useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
 
 import { getServiceDefault } from "@/api/service/service.api";
+import ActionButtonBottom from "@/components/ActionButtonBottom";
 import { ServiceCreateRequest } from "@/types/service";
 import {
   Alert,
@@ -490,17 +491,20 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
             </YStack>
           </YStack>
         </YStack>
-        <YStack padding="$4">
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSubmit(onSubmit, onError)}
-          >
-            <XStack space="$2" alignItems="center">
-              <Text style={styles.submitButtonText}>Tạo căn hộ</Text>
-            </XStack>
-          </TouchableOpacity>
-        </YStack>
       </ScrollView>
+      <YStack padding="$2">
+        <ActionButtonBottom
+          actions={[
+            {
+              label: "Tạo căn hộ",
+              onPress: handleSubmit(onSubmit, onError),
+              variant: "primary",
+              isLoading: isLoading,
+              icon: "checkmark-circle",
+            },
+          ]}
+        />
+      </YStack>
     </SafeAreaView>
   );
 };
