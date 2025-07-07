@@ -36,6 +36,7 @@ export class CreateServiceDto extends BaseCreateDto<Services> {
     entity.name = this.name;
     entity.calculationMethod = this.calculationMethod;
     entity.defaultUnitName = this.defaultUnitName ?? '';
+    entity.price = this.price;
     return entity;
   }
 }

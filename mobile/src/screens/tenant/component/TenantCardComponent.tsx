@@ -1,12 +1,11 @@
 import ButtonAction from "@/components/ButtomAction";
-import Status, { StatusType } from "@/components/Status";
+import { StatusType } from "@/components/Status";
 import CardComponent from "@/screens/common/CardComponent";
 import { theme } from "@/theme";
 import { colors } from "@/theme/colors";
 import { PropertyListResponse, PropertyRoomsStatus } from "@/types/property";
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 const TenantCardComponent = (props: {
   tenantInfo: PropertyListResponse;
@@ -16,27 +15,27 @@ const TenantCardComponent = (props: {
 
   const getStatusInfo = (
     status?: PropertyRoomsStatus
-  ): { label: string; type: StatusType } => {
+  ): { label: string; key: StatusType } => {
     switch (status) {
       case PropertyRoomsStatus.FULL:
         return {
           label: "Đầy phòng",
-          type: "success",
+          key: "success",
         };
       case PropertyRoomsStatus.EMPTY:
         return {
           label: "Chưa tạo phòng",
-          type: "error",
+          key: "error",
         };
       case PropertyRoomsStatus.PARTIAL:
         return {
           label: "Còn phòng",
-          type: "warning",
+          key: "warning",
         };
       default:
         return {
           label: "Trống",
-          type: "warning",
+          key: "warning",
         };
     }
   };
@@ -44,25 +43,15 @@ const TenantCardComponent = (props: {
   const status = getStatusInfo(tenantInfo.statusRooms);
 
   return (
-    <CardComponent>
-      <View className="flex flex-col gap-2">
-        <View className="flex-row justify-between items-center align-center content-center">
-          <View className="flex-1 flex flex-row ">
-            <Text style={styles.buildingName}>{tenantInfo.name}</Text>
-          </View>
-          <View>
-            <Status type={status.type} label={status.label} />
-          </View>
-          <TouchableOpacity style={styles.updateBtn} onPress={onUpdate}>
-            <Ionicons name="pencil" size={18} color={colors.primary.main} />
-          </TouchableOpacity>
-        </View>
-
+    <CardComponent
+      title={tenantInfo.name}
+      actions={["edit", "delete"]}
+      statusBadge={{ ...status }}
+    >
+      <View className="flex flex-col ">
         <View>
           <Text style={styles.buildingAddress}>{tenantInfo.address}</Text>
         </View>
-
-        {/* <Text style={styles.buildingDesc}>{tenantInfo.description}</Text> */}
 
         <View style={styles.basicInfoRow}>
           <View style={styles.infoItem}>
@@ -126,6 +115,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    marginBottom: 12,
   },
   infoItem: {
     flexDirection: "row",

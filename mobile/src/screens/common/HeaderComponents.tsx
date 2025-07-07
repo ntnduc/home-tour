@@ -25,10 +25,11 @@ export type HeaderComponentsProps = {
   isSearch?: boolean;
   searchConfig?: SearchConfig;
   children?: React.ReactNode;
+  icon?: React.ReactNode;
 };
 
 const HeaderComponents = (props: HeaderComponentsProps) => {
-  const { title, isSearch, searchConfig, children, className } = props;
+  const { title, isSearch, searchConfig, children, className, icon } = props;
   const [search, setSearch] = useState(searchConfig?.defaultValue || "");
   const handleSearch = useDebouncedCallback(() => {
     searchConfig?.onSearch?.(search);
@@ -51,7 +52,14 @@ const HeaderComponents = (props: HeaderComponentsProps) => {
       className={`flex flex-col justify-between items-center content-center bg-white w-full ${className}`}
     >
       <View className="flex flex-col justify-between items-center content-center bg-white w-full">
-        <Text style={styles.headerTitle}>{title}</Text>
+        <View
+          className="flex flex-row items-center content-start align-start"
+          style={{ alignSelf: "flex-start", marginLeft: 6 }}
+        >
+          {icon}
+          <Text style={styles.headerTitle}>{title}</Text>
+        </View>
+
         {isSearch && (
           <View
             style={styles.searchBarWrapper}
@@ -118,7 +126,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#222",
-    alignSelf: "flex-start",
+    // alignSelf: "flex-start",
     margin: 10,
     letterSpacing: 0.2,
   },

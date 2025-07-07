@@ -31,7 +31,10 @@ const ServiceSelectedSearchComponent = ({
   const onSelectedService = (service: any) => {
     setValueSelected(service);
     setHideResults(true);
-    onChange(service);
+    onChange({
+      name: service?.name ?? service,
+      ...service,
+    });
   };
 
   const { data, isLoading } = useQuery({
@@ -48,6 +51,10 @@ const ServiceSelectedSearchComponent = ({
   const handleChangeText = (text: string) => {
     setSearch(text);
     setValueSelected(text);
+    onChange({
+      ...value,
+      name: text,
+    });
 
     if (data?.data?.items && data?.data?.items?.length > 0) {
       setHideResults(false);
