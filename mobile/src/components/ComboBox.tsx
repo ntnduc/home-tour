@@ -21,6 +21,7 @@ interface ComboBoxProps<T> {
   onFocus?: () => void;
   isActive?: boolean;
   label?: string;
+  required?: boolean;
 }
 
 export const ComboBox = <T,>({
@@ -33,6 +34,7 @@ export const ComboBox = <T,>({
   onFocus,
   isActive = false,
   label,
+  required = false,
 }: ComboBoxProps<T>) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -75,7 +77,11 @@ export const ComboBox = <T,>({
 
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={styles.label}>
+          {label} {required && <Text style={{ color: "red" }}>*</Text>}
+        </Text>
+      )}
       <TouchableOpacity
         style={[styles.selectInput, error && styles.errorInput]}
         onPress={handleToggleDropdown}

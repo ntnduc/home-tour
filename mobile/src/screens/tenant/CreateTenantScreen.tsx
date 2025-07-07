@@ -207,6 +207,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
                 <ComboBox
                   value={value}
                   options={cities}
+                  required={true}
                   onChange={(item) => {
                     onChange(item);
                     getDistricts(item);
@@ -227,6 +228,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
               render={({ field: { onChange, value } }) => (
                 <ComboBox
                   value={value}
+                  required={true}
                   options={location}
                   onChange={(item) => {
                     onChange(item);
@@ -250,6 +252,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
                 <ComboBox
                   value={value}
                   options={wards}
+                  required={true}
                   onChange={onChange}
                   placeholder="Chọn phường/xã"
                   error={errors.wardCode?.message}
