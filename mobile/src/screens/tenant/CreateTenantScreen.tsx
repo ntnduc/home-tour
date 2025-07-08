@@ -129,6 +129,8 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   };
 
   const beforeSubmit = (data: PropertyCreateRequest) => {
+    data.defaultRoomRent = Number(data.defaultRoomRent) ?? 0;
+    data.paymentDate = Number(data.paymentDate) ?? 0;
     data?.services?.forEach((service) => {
       service.price = Number(service.price) ?? 0;
       if (service.calculationMethod === ServiceCalculateMethod.FREE) {

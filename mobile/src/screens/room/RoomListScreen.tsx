@@ -1,4 +1,3 @@
-import FabButton from "@/components/FabButton";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
@@ -7,13 +6,11 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import BuildingSelector from "../../components/BuildingSelector";
-import ContractListModal from "../../components/ContractListModal";
 import PaymentSummary from "../../components/PaymentSummary";
 import { colors } from "../../theme/colors";
 import { Contract, ContractStatus } from "../../types/contract";
@@ -24,6 +21,8 @@ import {
   PaymentStatus,
 } from "../../types/payment";
 import HeaderComponents from "../common/HeaderComponents";
+import RoomCardItemComponent from "./components/RoomCardItemComponents";
+import styles from "./styles/StyleRoomList";
 
 type RootStackParamList = {
   RoomList: undefined;
@@ -403,247 +402,6 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
     return diffDays;
   };
 
-  const renderRoomCard = ({ item }: { item: any }) => {
-    const status = statusColor[item.status as keyof typeof statusColor] || {
-      bg: "#EAF4FF",
-      color: "#007AFF",
-    };
-
-    const invoice = getInvoiceForRoom(item.id);
-    const contract = getContractForRoom(item.id);
-    const paymentStatusColor = item.paymentStatus
-      ? PAYMENT_STATUS_COLOR[item.paymentStatus as PaymentStatus]
-      : null;
-    const daysUntilDue = item.dueDate ? getDaysUntilDue(item.dueDate) : null;
-
-    return (
-      <TouchableOpacity
-        style={styles.card}
-        activeOpacity={0.8}
-        onPress={() => {
-          navigation.navigate("RoomDetail", { roomId: item.id });
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <View style={styles.titleRow}>
-              <Text style={styles.roomName}>{item.name}</Text>
-              <View
-                style={[styles.statusBadge, { backgroundColor: status.bg }]}
-              >
-                <Text style={[styles.statusText, { color: status.color }]}>
-                  {item.status}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.buildingName}>{item.building}</Text>
-            <Text style={styles.price}>
-              {item.price.toLocaleString()}đ/tháng
-            </Text>
-            <View style={styles.roomInfoRow}>
-              <Text style={styles.roomInfoText}>Diện tích: {item.area}m²</Text>
-              <Text style={styles.roomInfoText}>👤 {item.tenants}</Text>
-            </View>
-            {item.description && (
-              <Text style={styles.roomDesc}>{item.description}</Text>
-            )}
-
-            {/* Thông tin hợp đồng cho phòng đang thuê */}
-            {contract && item.status === "Đang thuê" && (
-              <View style={styles.contractInfo}>
-                <View style={styles.contractRow}>
-                  <Text style={styles.contractLabel}>Người thuê:</Text>
-                  <Text style={styles.contractText}>{contract.tenantName}</Text>
-                </View>
-                <View style={styles.contractRow}>
-                  <Text style={styles.contractLabel}>Hợp đồng:</Text>
-                  <Text style={styles.contractText}>
-                    #{contract.id} - {formatDate(contract.startDate)} đến{" "}
-                    {formatDate(contract.endDate)}
-                  </Text>
-                </View>
-              </View>
-            )}
-
-            {/* Thông tin thanh toán */}
-            {item.paymentStatus && paymentStatusColor && (
-              <View style={styles.paymentInfo}>
-                <View style={styles.paymentRow}>
-                  <Text style={styles.paymentLabel}>
-                    Trạng thái thanh toán:
-                  </Text>
-                  <View
-                    style={[
-                      styles.paymentStatusBadge,
-                      { backgroundColor: paymentStatusColor.bg },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.paymentStatusText,
-                        { color: paymentStatusColor.color },
-                      ]}
-                    >
-                      {
-                        PAYMENT_STATUS_LABEL[
-                          item.paymentStatus as PaymentStatus
-                        ]
-                      }
-                    </Text>
-                  </View>
-                </View>
-                {item.dueDate && (
-                  <View style={styles.paymentRow}>
-                    <Text style={styles.paymentLabel}>Hạn thanh toán:</Text>
-                    <Text
-                      style={[
-                        styles.paymentDateText,
-                        daysUntilDue && daysUntilDue < 0
-                          ? styles.overdueText
-                          : daysUntilDue && daysUntilDue <= 3
-                            ? styles.warningText
-                            : styles.normalText,
-                      ]}
-                    >
-                      {formatDate(item.dueDate)}
-                      {daysUntilDue !== null && (
-                        <Text style={styles.daysText}>
-                          {daysUntilDue < 0
-                            ? ` (Quá hạn ${Math.abs(daysUntilDue)} ngày)`
-                            : daysUntilDue === 0
-                              ? " (Hôm nay)"
-                              : daysUntilDue <= 3
-                                ? ` (Còn ${daysUntilDue} ngày)`
-                                : ""}
-                        </Text>
-                      )}
-                    </Text>
-                  </View>
-                )}
-                {invoice && (
-                  <View style={styles.paymentRow}>
-                    <Text style={styles.paymentLabel}>Tổng hóa đơn:</Text>
-                    <Text style={styles.invoiceAmount}>
-                      {invoice.totalAmount.toLocaleString()}đ
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-          <TouchableOpacity
-            style={styles.updateBtn}
-            onPress={() => {
-              navigation.navigate("UpdateRoom", { room: item });
-            }}
-          >
-            <Ionicons name="pencil" size={18} color={colors.primary.main} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Nút hành động hợp đồng */}
-        {item.status === "Trống" ? (
-          <View style={styles.actionRow}>
-            <TouchableOpacity
-              style={styles.createContractBtn}
-              onPress={() => {
-                navigation.navigate("CreateContract", { room: item });
-              }}
-            >
-              <Ionicons
-                name="document-text-outline"
-                size={16}
-                color={colors.primary.main}
-              />
-              <Text style={styles.createContractBtnText}>Tạo hợp đồng</Text>
-            </TouchableOpacity>
-          </View>
-        ) : item.status === "Đang thuê" && contract ? (
-          <View style={styles.actionRow}>
-            <TouchableOpacity
-              style={styles.viewContractBtn}
-              onPress={() => {
-                navigation.navigate("ContractDetail", { contract });
-              }}
-            >
-              <Ionicons
-                name="document-outline"
-                size={16}
-                color={colors.primary.main}
-              />
-              <Text style={styles.viewContractBtnText}>Xem hợp đồng</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.terminateContractBtn}
-              onPress={() => {
-                navigation.navigate("TerminateContract", { contract });
-              }}
-            >
-              <Ionicons
-                name="close-circle-outline"
-                size={16}
-                color={colors.status.error}
-              />
-              <Text style={styles.terminateContractBtnText}>Kết thúc</Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-
-        {/* Nút hành động thanh toán */}
-        {item.paymentStatus &&
-          (item.paymentStatus === PaymentStatus.PENDING ||
-            item.paymentStatus === PaymentStatus.OVERDUE) && (
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={styles.invoiceBtn}
-                onPress={() => {
-                  const invoice = getInvoiceForRoom(item.id);
-                  if (invoice) {
-                    navigation.navigate("InvoiceDetail", {
-                      invoice,
-                      fromHistory: false,
-                    });
-                  }
-                }}
-              >
-                <Ionicons
-                  name="receipt-outline"
-                  size={16}
-                  color={colors.primary.main}
-                />
-                <Text style={styles.invoiceBtnText}>Xem hóa đơn</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.payBtn}
-                onPress={() => {
-                  const invoice = getInvoiceForRoom(item.id);
-                  if (invoice) {
-                    navigation.navigate("InvoiceDetail", {
-                      invoice,
-                      fromHistory: false,
-                    });
-                  }
-                }}
-              >
-                <Ionicons
-                  name="card-outline"
-                  size={16}
-                  color={colors.neutral.white}
-                />
-                <Text style={styles.payBtnText}>Thanh toán</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-      </TouchableOpacity>
-    );
-  };
-
   const renderFilterButtons = () => (
     <View style={styles.filterContainer}>
       <ScrollView
@@ -751,24 +509,6 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
     </View>
   );
 
-  const handleContractPress = (contract: Contract) => {
-    setShowContractModal(false);
-    // TODO: Navigate to contract detail
-    console.log("View contract:", contract.id);
-  };
-
-  const handleTerminatePress = (contract: Contract) => {
-    setShowContractModal(false);
-    // TODO: Navigate to terminate contract
-    console.log("Terminate contract:", contract.id);
-  };
-
-  const handleRenewPress = (contract: Contract) => {
-    setShowContractModal(false);
-    // TODO: Navigate to renew contract
-    console.log("Renew contract:", contract.id);
-  };
-
   // Mock contracts data
   const mockContracts: Contract[] = [
     {
@@ -828,41 +568,15 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
 
       {/* Header cố định */}
       <View style={styles.fixedHeader}>
-        <View style={styles.headerTop}>
-          <HeaderComponents
-            title="Danh Sách Phòng"
-            isSearch
-            className="mx-2"
-            searchConfig={{
-              placeholder: "Tìm kiếm phòng hoặc tòa nhà...",
-              onSearch: (text) => setSearch(text),
-            }}
-          />
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              style={styles.historyButton}
-              onPress={() => navigation.navigate("InvoiceHistory")}
-            >
-              <Ionicons
-                name="time-outline"
-                size={20}
-                color={colors.primary.main}
-              />
-              <Text style={styles.historyButtonText}>Lịch sử</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.contractButton}
-              onPress={() => setShowContractModal(true)}
-            >
-              <Ionicons
-                name="document-text-outline"
-                size={20}
-                color={colors.primary.main}
-              />
-              <Text style={styles.contractButtonText}>Hợp đồng</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <HeaderComponents
+          className="px-2 mb-2"
+          title="Danh Sách Phòng"
+          isSearch
+          searchConfig={{
+            placeholder: "Tìm kiếm phòng hoặc tòa nhà...",
+            onSearch: (text) => setSearch(text),
+          }}
+        />
         <BuildingSelector
           buildings={mockBuildings}
           selectedBuilding={
@@ -875,11 +589,23 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
         {renderFilterButtons()}
       </View>
 
-      {/* Danh sách phòng có thể scroll */}
       <View style={styles.scrollContainer}>
         <FlatList
           data={filteredRooms.slice(0, visibleCount)}
-          renderItem={renderRoomCard}
+          renderItem={({ item }) => (
+            <RoomCardItemComponent
+              item={item}
+              navigation={navigation}
+              getInvoiceForRoom={getInvoiceForRoom}
+              getContractForRoom={getContractForRoom}
+              formatDate={formatDate}
+              getDaysUntilDue={getDaysUntilDue}
+              PaymentStatus={PaymentStatus}
+              PAYMENT_STATUS_COLOR={PAYMENT_STATUS_COLOR}
+              PAYMENT_STATUS_LABEL={PAYMENT_STATUS_LABEL}
+              colors={colors}
+            />
+          )}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
@@ -909,397 +635,8 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           onEndReachedThreshold={0.2}
         />
       </View>
-
-      <FabButton icon="add" onPress={() => {}} />
-
-      {/* Contract List Modal */}
-      <ContractListModal
-        visible={showContractModal}
-        onClose={() => setShowContractModal(false)}
-        contracts={mockContracts}
-        onContractPress={handleContractPress}
-        onTerminatePress={handleTerminatePress}
-        onRenewPress={handleRenewPress}
-      />
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.default,
-  },
-  fixedHeader: {
-    backgroundColor: colors.background.default,
-    paddingHorizontal: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: colors.text.primary,
-    marginBottom: 14,
-    textAlign: "center",
-    letterSpacing: 0.2,
-  },
-  searchBarWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.neutral.gray[100],
-    borderRadius: 16,
-    marginBottom: 18,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  searchBar: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    color: colors.text.primary,
-    backgroundColor: "transparent",
-  },
-  filterContainer: {
-    backgroundColor: colors.background.default,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-    paddingVertical: 8,
-  },
-  filterScrollContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border.main,
-    backgroundColor: colors.background.default,
-    gap: 4,
-    minWidth: 60,
-  },
-  filterButtonActive: {
-    backgroundColor: colors.primary.main,
-    borderColor: colors.primary.main,
-  },
-  filterButtonText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: "500",
-  },
-  filterButtonTextActive: {
-    color: colors.neutral.white,
-    fontWeight: "600",
-  },
-  card: {
-    backgroundColor: colors.background.default,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: colors.neutral.black,
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  roomName: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: colors.text.primary,
-    flex: 1,
-  },
-  buildingName: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    marginBottom: 2,
-  },
-  price: {
-    fontSize: 15,
-    color: colors.primary.main,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  updateBtn: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: colors.primary.light,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-  },
-  statusRow: {
-    flexDirection: "row",
-    marginTop: 6,
-  },
-  statusBadge: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    minWidth: 80,
-    alignItems: "center",
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  fab: {
-    position: "absolute",
-    right: 24,
-    bottom: 32,
-    backgroundColor: colors.primary.main,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: colors.primary.main,
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  roomInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 2,
-    marginBottom: 2,
-    gap: 12,
-  },
-  roomInfoText: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    marginRight: 8,
-  },
-  roomDesc: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    marginTop: 2,
-    fontStyle: "italic",
-  },
-  paymentInfo: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  paymentRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  paymentLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  paymentStatusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  paymentStatusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  paymentDateText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  normalText: {
-    color: colors.text.secondary,
-  },
-  warningText: {
-    color: colors.status.warning,
-  },
-  overdueText: {
-    color: colors.status.error,
-  },
-  daysText: {
-    fontSize: 11,
-    fontStyle: "italic",
-  },
-  invoiceAmount: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: colors.primary.main,
-  },
-  actionRow: {
-    flexDirection: "row",
-    marginTop: 12,
-    gap: 8,
-  },
-  invoiceBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.primary.main,
-    backgroundColor: colors.primary.light,
-    gap: 4,
-  },
-  invoiceBtnText: {
-    fontSize: 12,
-    color: colors.primary.main,
-    fontWeight: "500",
-  },
-  payBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: colors.primary.main,
-    gap: 4,
-  },
-  payBtnText: {
-    fontSize: 12,
-    color: colors.neutral.white,
-    fontWeight: "500",
-  },
-  scrollContainer: {
-    flex: 1,
-    backgroundColor: colors.background.paper,
-  },
-  listContent: {
-    padding: 10,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    marginTop: 40,
-    paddingVertical: 20,
-  },
-  emptyText: {
-    color: colors.text.secondary,
-    fontSize: 16,
-  },
-  historyButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: colors.primary.light,
-    gap: 4,
-  },
-  historyButtonText: {
-    fontSize: 12,
-    color: colors.primary.main,
-    fontWeight: "500",
-  },
-  contractInfo: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  contractRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  contractLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  contractText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: colors.text.primary,
-  },
-  createContractBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.primary.main,
-    backgroundColor: colors.primary.light,
-    gap: 4,
-  },
-  createContractBtnText: {
-    fontSize: 12,
-    color: colors.primary.main,
-    fontWeight: "500",
-  },
-  viewContractBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.primary.main,
-    backgroundColor: colors.primary.light,
-    gap: 4,
-  },
-  viewContractBtnText: {
-    fontSize: 12,
-    color: colors.primary.main,
-    fontWeight: "500",
-  },
-  terminateContractBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.status.error,
-    backgroundColor: colors.secondary.light,
-    gap: 4,
-  },
-  terminateContractBtnText: {
-    fontSize: 12,
-    color: colors.status.error,
-    fontWeight: "500",
-  },
-  contractButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: colors.primary.light,
-    gap: 4,
-  },
-  contractButtonText: {
-    fontSize: 12,
-    color: colors.primary.main,
-    fontWeight: "500",
-  },
-});
 
 export default RoomListScreen;

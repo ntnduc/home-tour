@@ -34,6 +34,8 @@ export type CardComponentProps = {
   style?: StyleProp<ViewStyle>;
   className?: string;
   title?: string;
+  description?: string | React.ReactNode;
+  descriptionStyle?: StyleProp<any>;
   actions?: (CardActionConfig | string)[];
   renderActions?: () => React.ReactNode;
   header?: React.ReactNode;
@@ -70,6 +72,8 @@ const CardComponent = (props: CardComponentProps) => {
     style,
     className,
     title,
+    description,
+    descriptionStyle,
     actions,
     renderActions,
     header,
@@ -125,7 +129,15 @@ const CardComponent = (props: CardComponentProps) => {
         <View style={styles.header}>
           {/* Hàng trên: title + status badge */}
           <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-            {title ? <Text style={styles.title}>{title}</Text> : null}
+            <View style={{ flex: 1 }}>
+              {title ? <Text style={styles.title}>{title}</Text> : null}
+              {description &&
+                (typeof description === "string" ? (
+                  <Text style={[styles.description, descriptionStyle]}>{description}</Text>
+                ) : (
+                  description
+                ))}
+            </View>
             {badge && (
               <View
                 style={[

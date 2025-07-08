@@ -25,9 +25,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "bold",
-    color: colors.text?.primary || "#1F2937",
+    color: colors.text.primary || "#1F2937",
   },
   actionsContainer: {
     flexDirection: "row",
@@ -84,6 +84,12 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: "600",
+  },
+  description: {
+    fontSize: 13,
+    color: '#6B7280', // màu phụ
+    marginTop: 2,
+    fontStyle: 'italic',
   },
 });
 
