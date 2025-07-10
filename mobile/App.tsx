@@ -151,7 +151,9 @@ export default function App() {
             <Stack.Screen
               name="UpdateTenant"
               component={UpdateTenantScreen}
-              options={{ title: "Cập Nhật Căn Hộ" }}
+              options={{
+                title: "Cập Nhật Căn Hộ",
+              }}
             />
           </Stack.Navigator>
           <StatusBar style="auto" />

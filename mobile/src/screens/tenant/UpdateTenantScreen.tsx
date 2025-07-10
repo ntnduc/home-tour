@@ -56,7 +56,7 @@ const mockProperty = {
 
 type UpdateTenantScreenProps = {
   navigation: any;
-  id: string;
+  route: { params: { tenantId: string } };
 };
 
 type ServiceType = {
@@ -66,22 +66,22 @@ type ServiceType = {
   calculationMethod: string;
 };
 
-const UpdateTenantScreen = ({ navigation, id }: UpdateTenantScreenProps) => {
+const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
 
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const featchData = async () => {
-      const responseForm = await getProperty(id);
+      const responseForm = await getProperty(route.params.tenantId);
       if (!responseForm?.data || !responseForm?.success) {
         Toast.show({
           type: "error",
           text1: "Lỗi",
           text2: "Không tìm thấy thông tin!",
         });
-        navigation.back();
+        navigation.goBack && navigation.goBack();
         return;
       }
       const formData = responseForm.data;
@@ -101,8 +101,12 @@ const UpdateTenantScreen = ({ navigation, id }: UpdateTenantScreenProps) => {
             text1: "Lỗi",
             text2: "Không lấy được vị trí!",
           });
+          navigation.goBack && navigation.goBack();
         });
     };
+    featchData().finally(() => {
+      setIsLoading(false);
+    });
   });
 
   // Mock options cho ComboBox
@@ -119,7 +123,6 @@ const UpdateTenantScreen = ({ navigation, id }: UpdateTenantScreenProps) => {
     { key: "00002", label: "Phường B", value: "00002" },
   ];
 
-  const [isLoading, setIsLoading] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
     "provinceCode" | "districtCode" | "wardCode" | null
   >(null);
