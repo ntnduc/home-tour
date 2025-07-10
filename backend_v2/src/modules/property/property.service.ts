@@ -17,6 +17,7 @@ import { PropertyUpdateDto } from './dto/properties-dto/property.update.dto';
 import { PropertiesService } from './entities/properties-service.entity';
 import { Properties } from './entities/properties.entity';
 import { Rooms } from './entities/rooms.entity';
+import { PropertiesRepository } from './repositories/properties.repository';
 import { RoomsService } from './rooms.service';
 
 @Injectable()
@@ -39,7 +40,7 @@ export class PropertyService
 {
   constructor(
     @InjectRepository(Properties)
-    private propertiesRepository: Repository<Properties>,
+    private propertiesRepository: PropertiesRepository,
     @InjectRepository(PropertiesService)
     private propertiesServicesRepository: Repository<PropertiesService>,
     @InjectRepository(Services)
