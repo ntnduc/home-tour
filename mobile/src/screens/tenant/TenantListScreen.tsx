@@ -106,8 +106,8 @@ const TenantListScreen = ({ navigation }: RoomListScreenProps) => {
             return (
               <TenantCardComponent
                 tenantInfo={item}
-                onUpdate={() => {
-                  navigation.navigate("UpdateTenant", { tenantId: item.id });
+                onUpdate={(id) => {
+                  navigation.navigate("UpdateTenant", { tenantId: id });
                 }}
               />
             );

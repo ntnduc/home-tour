@@ -9,7 +9,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 const TenantCardComponent = (props: {
   tenantInfo: PropertyListResponse;
-  onUpdate: () => void;
+  onUpdate: (id: string) => void;
 }) => {
   const { tenantInfo, onUpdate } = props;
 
@@ -44,8 +44,12 @@ const TenantCardComponent = (props: {
 
   return (
     <CardComponent
+      className="mt-3"
       title={tenantInfo.name}
       actions={["edit", "delete"]}
+      onActionPress={(key) => {
+        if (key === "edit") onUpdate(tenantInfo.id);
+      }}
       statusBadge={{ ...status }}
     >
       <View className="flex flex-col ">

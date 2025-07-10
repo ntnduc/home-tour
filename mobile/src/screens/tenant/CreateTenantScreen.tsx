@@ -12,7 +12,7 @@ import { ComboOption } from "@/types/comboOption";
 import { PropertyCreateRequest } from "@/types/property";
 import { formatCurrency, generateId } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
 
 import { createProperty } from "@/api/property/property.api";
@@ -35,13 +35,11 @@ import ServiceSelectedSearchComponent from "./component/ServiceSelectedSearchCom
 const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
-  const uniqueId = useId();
 
   const [location, setLocation] = useState<ComboOption<string, string>[]>([]);
   const [cities, setCities] = useState<ComboOption<string, string>[]>([]);
   const [wards, setWards] = useState<ComboOption<string, string>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
   const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
   const [isLoadingWard, setIsLoadingWard] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
@@ -469,8 +467,8 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
                                     ServiceCalculateMethod.FREE
                                       ? "0"
                                       : value
-                                        ? formatCurrency(value.toString())
-                                        : ""
+                                      ? formatCurrency(value.toString())
+                                      : ""
                                   }
                                   onChangeText={(text) => {
                                     const numericValue = text.replace(
