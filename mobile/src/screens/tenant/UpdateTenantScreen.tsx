@@ -1,9 +1,16 @@
+import {
+  getComboDistricts,
+  getComboProvinces,
+  getComboWards,
+} from "@/api/location/location.api";
+import { getProperty } from "@/api/property/property.api";
 import { ComboBox } from "@/components/ComboBox";
 import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
 import { createStyles } from "@/styles/StyleCreateTenantScreent";
 import { ComboOption } from "@/types/comboOption";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
 import {
   Alert,
@@ -49,6 +56,7 @@ const mockProperty = {
 
 type UpdateTenantScreenProps = {
   navigation: any;
+  id: string;
 };
 
 type ServiceType = {
@@ -58,9 +66,44 @@ type ServiceType = {
   calculationMethod: string;
 };
 
-const UpdateTenantScreen = ({ navigation }: UpdateTenantScreenProps) => {
+const UpdateTenantScreen = ({ navigation, id }: UpdateTenantScreenProps) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const featchData = async () => {
+      const responseForm = await getProperty(id);
+      if (!responseForm?.data || !responseForm?.success) {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: "Không tìm thấy thông tin!",
+        });
+        navigation.back();
+        return;
+      }
+      const formData = responseForm.data;
+
+      const fetch = [
+        getComboProvinces(),
+        getComboDistricts(formData.provinceCode),
+        getComboWards(formData.districtCode),
+      ];
+
+      axios
+        .all(fetch)
+        .then(([responseProvince, responseDistricts, responseWards]) => {})
+        .catch(() => {
+          Toast.show({
+            type: "error",
+            text1: "Lỗi",
+            text2: "Không lấy được vị trí!",
+          });
+        });
+    };
+  });
 
   // Mock options cho ComboBox
   const cities: ComboOption<string, string>[] = [

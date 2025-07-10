@@ -8,7 +8,7 @@ export interface Service {
   icon?: string;
 }
 
-export interface ServiceCreateRequest {
+export interface ServiceCreateOrUpdateRequest {
   id?: string;
   name: string;
   icon?: string;

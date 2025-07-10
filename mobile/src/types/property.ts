@@ -1,4 +1,4 @@
-import { Service, ServiceCreateRequest } from "./service";
+import { Service, ServiceCreateOrUpdateRequest } from "./service";
 
 export enum PropertyRoomsStatus {
   FULL = "FULL",
@@ -23,8 +23,14 @@ export interface Property {
 
 export interface PropertyCreateRequest
   extends Omit<Property, "id" | "services"> {
-  services: ServiceCreateRequest[];
+  services: ServiceCreateOrUpdateRequest[];
 }
+
+export interface PropertyUpdateRequest extends Omit<Property, "services"> {
+  service: ServiceCreateOrUpdateRequest[];
+}
+
+export interface PropertyDetail extends Property {}
 
 export interface PropertyListRequest {
   page?: number;

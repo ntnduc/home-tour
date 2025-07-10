@@ -5,6 +5,7 @@ import { BasePagingResponse } from "@/types/base.response";
 import {
   Property,
   PropertyCreateRequest,
+  PropertyDetail,
   PropertyListResponse,
 } from "@/types/property";
 
@@ -33,6 +34,16 @@ export const getListProperty = async (
       sortOrder,
     },
   });
+
+  return response.data;
+};
+
+export const getProperty = async (
+  id: string
+): Promise<ApiResponse<PropertyDetail>> => {
+  const response = await privateApi.get<ApiResponse<PropertyDetail>>(
+    `/property/${id}`
+  );
 
   return response.data;
 };

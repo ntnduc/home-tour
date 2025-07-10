@@ -18,7 +18,7 @@ import { Controller, FieldErrors, useForm } from "react-hook-form";
 import { createProperty } from "@/api/property/property.api";
 import { getServiceDefault } from "@/api/service/service.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
-import { ServiceCreateRequest } from "@/types/service";
+import { ServiceCreateOrUpdateRequest } from "@/types/service";
 import {
   Alert,
   SafeAreaView,
@@ -63,6 +63,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
 
   const services = watch("services");
 
+  //#region Fetch data
   useEffect(() => {
     featchData().finally(() => {
       setIsLoading(false);
@@ -80,7 +81,7 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
         price: service.price,
         calculationMethod: service.calculationMethod,
         icon: service.icon,
-      })) as ServiceCreateRequest[];
+      })) as ServiceCreateOrUpdateRequest[];
 
       setValue("services", servicesDefault);
     }
@@ -109,6 +110,9 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
     setIsLoadingWard(false);
   };
 
+  //#endregion
+
+  //#region Handle service
   const handleAddService = () => {
     const newService = {
       name: "",
@@ -163,6 +167,8 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
         setIsLoading(false);
       });
   };
+
+  //#endregion
 
   const onError = (errors: FieldErrors<PropertyCreateRequest>) => {
     Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
