@@ -10,6 +10,7 @@ import { Rooms } from './entities/rooms.entity';
 import { PropertiesServiceService } from './properties-service.service';
 import { PropertyController } from './property.controller';
 import { PropertyService } from './property.service';
+import { PropertiesServiceRepository } from './repositories/properties-service.repository';
 import { PropertiesRepository } from './repositories/properties.repository';
 import { RoomsController } from './rooms.controller';
 import { RoomsService } from './rooms.service';
@@ -31,12 +32,14 @@ import { RoomsService } from './rooms.service';
     PropertiesServiceService,
     RoomsService,
     PropertiesRepository,
+    PropertiesServiceRepository,
   ],
   exports: [
     PropertyService,
     PropertiesServiceService,
     RoomsService,
     PropertiesRepository,
+    PropertiesServiceRepository,
   ],
   controllers: [PropertyController, RoomsController],
 })

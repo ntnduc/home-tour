@@ -10,6 +10,7 @@ import { Provinces } from '../location/entities/Provinces.entity';
 import { Wards } from '../location/entities/Wards.entity';
 import { CreateServiceDto } from '../services/dto/services.create.dto';
 import { Services } from '../services/entities/services.entity';
+import { ServicesRepository } from '../services/repositories/services.repository';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
 import { PropertyDetailDto } from './dto/properties-dto/property.detail.dto';
 import { PropertyListDto } from './dto/properties-dto/property.list.dto';
@@ -17,7 +18,9 @@ import { PropertyUpdateDto } from './dto/properties-dto/property.update.dto';
 import { PropertiesService } from './entities/properties-service.entity';
 import { Properties } from './entities/properties.entity';
 import { Rooms } from './entities/rooms.entity';
+import { PropertiesServiceRepository } from './repositories/properties-service.repository';
 import { PropertiesRepository } from './repositories/properties.repository';
+import { RoomsRepository } from './repositories/rooms.repository';
 import { RoomsService } from './rooms.service';
 
 @Injectable()
@@ -42,11 +45,11 @@ export class PropertyService
     @InjectRepository(Properties)
     private propertiesRepository: PropertiesRepository,
     @InjectRepository(PropertiesService)
-    private propertiesServicesRepository: Repository<PropertiesService>,
+    private propertiesServicesRepository: PropertiesServiceRepository,
     @InjectRepository(Services)
-    private servicesRepository: Repository<Services>,
+    private servicesRepository: ServicesRepository,
     @InjectRepository(Rooms)
-    private roomsRepository: Repository<Rooms>,
+    private roomsRepository: RoomsRepository,
     @InjectRepository(Provinces)
     private provincesRepository: Repository<Provinces>,
     @InjectRepository(Districts)
@@ -54,9 +57,10 @@ export class PropertyService
     @InjectRepository(Wards)
     private wardsRepository: Repository<Wards>,
 
+    //#region Inject services
     private readonly dataSource: DataSource,
-
     private readonly roomService: RoomsService,
+    //#endregion
   ) {
     super(
       propertiesRepository,
