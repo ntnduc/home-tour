@@ -75,6 +75,7 @@ export class PropertyService
       PropertyUpdateDto,
     );
   }
+
   override async create(propertyCreateDto: PropertyCreateDto) {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -83,7 +84,7 @@ export class PropertyService
 
     try {
       const propertyEntity = propertyCreateDto.getEntity();
-      const property = await this.propertiesRepository.create(propertyEntity);
+      const property = this.propertiesRepository.create(propertyEntity);
       await queryRunner.manager.save(property);
 
       //  Create services
@@ -165,14 +166,124 @@ export class PropertyService
       await queryRunner.release();
     }
   }
+
+  override async update(dto: PropertyUpdateDto): Promise<PropertyDetailDto> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Lấy property hiện tại (bao gồm relations services)
+      const property = await this.propertiesRepository.findOne({
+        where: { id: dto.id },
+        relations: ['services', 'services.service'],
+      });
+      if (!property) throw new NotFoundException('Property not found');
+
+      // 2. So sánh danh sách service cũ và mới
+      const oldServiceIds = property.services.map((s) => s.serviceId as string);
+
+      const newServiceIds =
+        dto.services
+          ?.map((s) => s.id as string)
+          .filter((id): id is string => !!id) || [];
+
+      // 2.1. Service cần xoá
+      const removeServiceIds = oldServiceIds.filter(
+        (id) => !newServiceIds.includes(id),
+      );
+
+      if (removeServiceIds.length) {
+        await this.propertiesServicesRepository
+          .createQueryBuilder()
+          .delete()
+          .where('propertyId = :propertyId AND serviceId IN (:...serviceIds)', {
+            propertyId: property.id,
+            serviceIds: removeServiceIds,
+          })
+          .execute();
+      }
+
+      // 2.2. Service cần thêm mới (serviceId chưa có trong property)
+      const addServiceDtos = (
+        (dto.services || []) as CreateServiceDto[]
+      ).filter((s) => !oldServiceIds.includes(s.id as string));
+      // Nếu service là mới hoàn toàn (chưa có id) thì tạo mới ở bảng service
+      const newServiceEntities = addServiceDtos
+        .filter((s) => !s.id)
+        .map((s) => s.getEntity());
+      let createdServices: Services[] = [];
+      if (newServiceEntities.length) {
+        createdServices =
+          await this.servicesRepository.save(newServiceEntities);
+      }
+      // Mapping lại id cho các service vừa tạo
+      addServiceDtos.forEach((s) => {
+        if (!s.id) {
+          const created = createdServices.find((cs) => cs.name === s.name);
+          if (created) s.id = created.id;
+        }
+      });
+
+      // Tạo mapping property-service cho các service mới
+      const newMappings = addServiceDtos.map((s) => {
+        const mapping = new PropertiesService();
+        mapping.propertyId = property.id;
+        mapping.serviceId = s.id as string;
+        mapping.calculationMethod = s.calculationMethod;
+        mapping.name = s.name;
+        mapping.price = s.price;
+        return mapping;
+      });
+      if (newMappings.length) {
+        await this.propertiesServicesRepository.save(newMappings);
+      }
+
+      // 2.3. Service cần cập nhật (có trong cả hai, nhưng thông tin khác)
+      const updateServiceDtos = (
+        (dto.services || []) as CreateServiceDto[]
+      ).filter((s) => oldServiceIds.includes(s.id as string));
+      for (const s of updateServiceDtos) {
+        await this.propertiesServicesRepository
+          .createQueryBuilder()
+          .update()
+          .set({
+            calculationMethod: s.calculationMethod,
+            name: s.name,
+            price: s.price,
+          })
+          .where('propertyId = :propertyId AND serviceId = :serviceId', {
+            propertyId: property.id,
+            serviceId: s.id as string,
+          })
+          .execute();
+      }
+
+      // 3. Cập nhật các field khác của property
+      const updatedEntity = dto.getEntity(property);
+      const cloneUpdatedEntity = Object.assign({}, updatedEntity);
+      if (cloneUpdatedEntity.services) {
+        cloneUpdatedEntity.services = undefined;
+      }
+      await this.propertiesRepository.update(property.id, cloneUpdatedEntity);
+
+      // 4. Trả về detailDto
+      const result = await this.get(property.id);
+      return result;
+    } catch (err) {
+      console.log('💞💓💗💞💓💗 ~ overrideupdate ~ err:', err);
+      console.error('Update property error:', err);
+      await queryRunner.rollbackTransaction();
+      throw new BadGatewayException('Lỗi khi cập nhật căn hộ!');
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   override async get(id: string): Promise<PropertyDetailDto> {
     const property = await this.propertiesRepository.findOne({
       where: { id },
-      relations: {
-        services: {
-          service: true,
-        },
-      },
+      relations: ['services', 'services.service'],
     });
     if (!property) {
       throw new NotFoundException('Property not found');
@@ -248,6 +359,8 @@ export class PropertyService
     return result;
   }
 
+  //#region support function
+
   private statusRooms(rooms: Rooms[]): PropertyRoomsStatus {
     if (rooms.length === 0) return PropertyRoomsStatus.EMPTY;
     const countRoomsOccupied = rooms.filter(
@@ -258,4 +371,6 @@ export class PropertyService
       ? PropertyRoomsStatus.FULL
       : PropertyRoomsStatus.PARTIAL;
   }
+
+  //#endregion
 }

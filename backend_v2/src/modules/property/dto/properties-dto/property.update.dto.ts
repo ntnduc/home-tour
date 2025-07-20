@@ -1,4 +1,5 @@
 import { BaseUpdateDto } from 'src/common/base/dto/update.dto';
+import { CreateServiceDto } from 'src/modules/services/dto/services.create.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Properties } from '../../entities/properties.entity';
 
@@ -26,6 +27,8 @@ export class PropertyUpdateDto extends BaseUpdateDto<Properties> {
   defaultRoomRent: number;
 
   paymentDate: number;
+
+  services?: CreateServiceDto[];
 
   getEntity(entity: Properties): QueryDeepPartialEntity<Properties> {
     entity.ownerId = this.ownerId;

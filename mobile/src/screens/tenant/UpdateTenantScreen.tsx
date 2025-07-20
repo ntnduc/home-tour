@@ -139,7 +139,7 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
             text1: "Thành công",
             text2: "Cập nhật tòa nhà thành công!",
           });
-          // navigation.goBack && navigation.goBack();
+          navigation.goBack && navigation.goBack();
         } else {
           Toast.show({
             type: "error",
@@ -152,7 +152,7 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
         Toast.show({
           type: "error",
           text1: "Lỗi",
-          text2: err.message,
+          text2: err.response.data.message,
         });
       })
       .finally(() => {
@@ -323,6 +323,7 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
                 style={styles.addServiceButton}
                 onPress={handleAddService}
               >
+                <Ionicons name="add-circle-outline" size={20} color="#fff" />
                 <Text style={styles.addServiceButtonText}>Thêm dịch vụ</Text>
               </TouchableOpacity>
             </XStack>
