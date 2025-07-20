@@ -271,7 +271,6 @@ export class PropertyService
       const result = await this.get(property.id);
       return result;
     } catch (err) {
-      console.log('💞💓💗💞💓💗 ~ overrideupdate ~ err:', err);
       console.error('Update property error:', err);
       await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Lỗi khi cập nhật căn hộ!');
