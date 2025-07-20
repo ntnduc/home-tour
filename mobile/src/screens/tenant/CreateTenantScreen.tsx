@@ -19,13 +19,7 @@ import { createProperty } from "@/api/property/property.api";
 import { getServiceDefault } from "@/api/service/service.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
 import { ServiceCreateOrUpdateRequest } from "@/types/service";
-import {
-  Alert,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, SafeAreaView, Text, TouchableOpacity } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
 import { XStack, YStack, useTheme as useTamaguiTheme } from "tamagui";
@@ -522,25 +516,17 @@ const CreateTenantScreen = ({ navigation }: { navigation: any }) => {
           </YStack>
         </SafeAreaView>
       </KeyboardAwareScrollView>
-      <View
-        style={{
-          padding: 16,
-          paddingBottom: 32,
-          backgroundColor: theme.background?.val ?? "#fff",
-        }}
-      >
-        <ActionButtonBottom
-          actions={[
-            {
-              label: "Tạo căn hộ",
-              onPress: handleSubmit(onSubmit, onError),
-              variant: "primary",
-              isLoading: isLoading,
-              icon: "checkmark-circle",
-            },
-          ]}
-        />
-      </View>
+      <ActionButtonBottom
+        actions={[
+          {
+            label: "Tạo căn hộ",
+            onPress: handleSubmit(onSubmit, onError),
+            variant: "primary",
+            isLoading: isLoading,
+            icon: "checkmark-circle",
+          },
+        ]}
+      />
     </>
   );
 };

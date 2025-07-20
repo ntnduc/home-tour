@@ -7,6 +7,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface ActionButton {
   label: string;
@@ -64,8 +65,16 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
   actions,
   containerStyle,
 }) => {
+  const theme = useTamaguiTheme();
   return (
-    <View className={` ${containerStyle || ""}`}>
+    <View
+      className={` ${containerStyle || ""}`}
+      style={{
+        paddingHorizontal: 16,
+        paddingBottom: 32,
+        backgroundColor: theme.background?.val ?? "#fff",
+      }}
+    >
       {actions.map((action, index) => (
         <TouchableOpacity
           key={`${action.label}-${index}`}

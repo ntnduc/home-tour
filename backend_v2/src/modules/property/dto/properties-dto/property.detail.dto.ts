@@ -1,4 +1,5 @@
 import { BaseDetailDto } from 'src/common/base/dto/detail.dto';
+import { ServiceDetailDto } from 'src/modules/services/dto/services.detail.dto';
 import { Properties } from '../../entities/properties.entity';
 
 export class PropertyDetailDto extends BaseDetailDto<Properties> {
@@ -19,8 +20,10 @@ export class PropertyDetailDto extends BaseDetailDto<Properties> {
   longitude?: number;
 
   numberFloor?: number;
-
+  defaultRoomRent: number;
   totalRoom?: number;
+  paymentDate: number;
+  services: ServiceDetailDto[];
 
   fromEntity(entity: Properties): void {
     this.id = entity.id;
@@ -34,5 +37,7 @@ export class PropertyDetailDto extends BaseDetailDto<Properties> {
     this.longitude = entity.longitude;
     this.numberFloor = entity.numberFloor;
     this.totalRoom = entity.totalRoom;
+    this.defaultRoomRent = entity.defaultRoomRent;
+    this.paymentDate = entity.paymentDate;
   }
 }

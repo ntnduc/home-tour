@@ -23,6 +23,10 @@ export class PropertyUpdateDto extends BaseUpdateDto<Properties> {
 
   totalRoom: number;
 
+  defaultRoomRent: number;
+
+  paymentDate: number;
+
   getEntity(entity: Properties): QueryDeepPartialEntity<Properties> {
     entity.ownerId = this.ownerId;
     entity.name = this.name;
@@ -34,6 +38,8 @@ export class PropertyUpdateDto extends BaseUpdateDto<Properties> {
     entity.longitude = this.longitude;
     entity.numberFloor = this.numberFloor;
     entity.totalRoom = this.totalRoom;
+    entity.defaultRoomRent = this.defaultRoomRent;
+    entity.paymentDate = this.paymentDate;
     return entity;
   }
 }

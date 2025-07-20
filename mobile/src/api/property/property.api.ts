@@ -7,6 +7,7 @@ import {
   PropertyCreateRequest,
   PropertyDetail,
   PropertyListResponse,
+  PropertyUpdateRequest,
 } from "@/types/property";
 
 export const createProperty = async (data: PropertyCreateRequest) => {
@@ -43,6 +44,18 @@ export const getProperty = async (
 ): Promise<ApiResponse<PropertyDetail>> => {
   const response = await privateApi.get<ApiResponse<PropertyDetail>>(
     `/property/${id}`
+  );
+
+  return response.data;
+};
+
+export const updateProperty = async (
+  id: string,
+  data: PropertyUpdateRequest
+): Promise<ApiResponse<PropertyDetail>> => {
+  const response = await privateApi.put<ApiResponse<PropertyDetail>>(
+    "/property",
+    data
   );
 
   return response.data;

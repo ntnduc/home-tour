@@ -9,7 +9,7 @@ export interface Service {
 }
 
 export interface ServiceCreateOrUpdateRequest {
-  id?: string;
+  id: string;
   name: string;
   icon?: string;
   price: number;

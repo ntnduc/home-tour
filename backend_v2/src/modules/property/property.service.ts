@@ -1,4 +1,8 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { IBaseService } from 'src/common/base/crud/IService';
@@ -9,6 +13,7 @@ import { Districts } from '../location/entities/Districts.entity';
 import { Provinces } from '../location/entities/Provinces.entity';
 import { Wards } from '../location/entities/Wards.entity';
 import { CreateServiceDto } from '../services/dto/services.create.dto';
+import { ServiceDetailDto } from '../services/dto/services.detail.dto';
 import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
@@ -159,6 +164,31 @@ export class PropertyService
     } finally {
       await queryRunner.release();
     }
+  }
+  override async get(id: string): Promise<PropertyDetailDto> {
+    const property = await this.propertiesRepository.findOne({
+      where: { id },
+      relations: {
+        services: {
+          service: true,
+        },
+      },
+    });
+    if (!property) {
+      throw new NotFoundException('Property not found');
+    }
+
+    const result = new PropertyDetailDto();
+
+    const services = property.services.map((service) => {
+      const serviceDto = new ServiceDetailDto();
+      serviceDto.fromEntity(service.service);
+      return serviceDto;
+    });
+    result.services = services;
+    result.fromEntity(property);
+
+    return result;
   }
 
   override async specQuery(): Promise<SelectQueryBuilder<Properties>> {

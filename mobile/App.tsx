@@ -34,6 +34,19 @@ export default function App() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const queryClient = new QueryClient();
 
+  if (typeof window !== "undefined" && !window.matchMedia) {
+    window.matchMedia = () => ({
+      matches: false,
+      addListener: () => {},
+      removeListener: () => {},
+      media: "",
+      onchange: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => true,
+    });
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={config}>

@@ -27,10 +27,12 @@ export interface PropertyCreateRequest
 }
 
 export interface PropertyUpdateRequest extends Omit<Property, "services"> {
-  service: ServiceCreateOrUpdateRequest[];
+  services: ServiceCreateOrUpdateRequest[];
 }
 
-export interface PropertyDetail extends Property {}
+export interface PropertyDetail extends Property {
+  services: Service[];
+}
 
 export interface PropertyListRequest {
   page?: number;
@@ -41,4 +43,19 @@ export interface PropertyListRequest {
 export interface PropertyListResponse extends Property {
   statusRooms?: PropertyRoomsStatus;
   totalRoomOccupied?: number;
+}
+
+export function mapPropertyDetailToUpdateRequest(
+  propertyDetail: PropertyDetail
+): PropertyUpdateRequest {
+  return {
+    ...propertyDetail,
+    services: propertyDetail.services.map((service) => ({
+      id: service.id,
+      name: service.name,
+      price: service.price,
+      icon: service.icon,
+      calculationMethod: service.calculationMethod,
+    })),
+  };
 }

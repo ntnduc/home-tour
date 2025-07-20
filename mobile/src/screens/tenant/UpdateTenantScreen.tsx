@@ -3,56 +3,29 @@ import {
   getComboProvinces,
   getComboWards,
 } from "@/api/location/location.api";
-import { getProperty } from "@/api/property/property.api";
+import { getProperty, updateProperty } from "@/api/property/property.api";
+import ActionButtonBottom from "@/components/ActionButtonBottom";
 import { ComboBox } from "@/components/ComboBox";
 import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
+import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { createStyles } from "@/styles/StyleCreateTenantScreent";
 import { ComboOption } from "@/types/comboOption";
+import {
+  mapPropertyDetailToUpdateRequest,
+  PropertyUpdateRequest,
+} from "@/types/property";
+import { ServiceCreateOrUpdateRequest } from "@/types/service";
+import { formatCurrency, generateId } from "@/utils/appUtil";
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
-import {
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity } from "react-native";
 import Toast from "react-native-toast-message";
 import { useTheme as useTamaguiTheme, XStack, YStack } from "tamagui";
-
-// Mock data mẫu
-const mockProperty = {
-  name: "Tòa nhà A",
-  provinceCode: "01",
-  districtCode: "001",
-  wardCode: "00001",
-  address: "123 Đường ABC, Quận 1",
-  defaultRoomRent: 7000000,
-  paymentDate: 5,
-  numberFloor: 5,
-  services: [
-    {
-      index: 0,
-      name: "Nước",
-      price: 10000,
-      calculationMethod: "PER_UNIT_SIMPLE",
-    },
-    {
-      index: 1,
-      name: "Điện",
-      price: 3500,
-      calculationMethod: "PER_UNIT_SIMPLE",
-    },
-    {
-      index: 2,
-      name: "Wifi",
-      price: 150000,
-      calculationMethod: "FIXED_PER_ROOM",
-    },
-  ],
-};
+import CalculatorMethodComponent from "./component/CalculatorMethodComponent";
+import ServiceSelectedSearchComponent from "./component/ServiceSelectedSearchComponent";
 
 type UpdateTenantScreenProps = {
   navigation: any;
@@ -71,6 +44,13 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
   const styles = createStyles(theme);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [initialData, setInitialData] = useState<PropertyUpdateRequest>();
+  const [cities, setCities] = useState<ComboOption<string, string>[]>([]);
+  const [districts, setDistricts] = useState<ComboOption<string, string>[]>([]);
+  const [wards, setWards] = useState<ComboOption<string, string>[]>([]);
+  const [activeDropdown, setActiveDropdown] = useState<
+    "provinceCode" | "districtCode" | "wardCode" | null
+  >(null);
 
   useEffect(() => {
     const featchData = async () => {
@@ -84,7 +64,9 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
         navigation.goBack && navigation.goBack();
         return;
       }
-      const formData = responseForm.data;
+      const formData = mapPropertyDetailToUpdateRequest(responseForm.data);
+
+      setInitialData(formData);
 
       const fetch = [
         getComboProvinces(),
@@ -94,7 +76,11 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
 
       axios
         .all(fetch)
-        .then(([responseProvince, responseDistricts, responseWards]) => {})
+        .then(([responseProvince, responseDistricts, responseWards]) => {
+          setCities(responseProvince.data || []);
+          setDistricts(responseDistricts.data || []);
+          setWards(responseWards.data || []);
+        })
         .catch(() => {
           Toast.show({
             type: "error",
@@ -107,70 +93,71 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
     featchData().finally(() => {
       setIsLoading(false);
     });
-  });
-
-  // Mock options cho ComboBox
-  const cities: ComboOption<string, string>[] = [
-    { key: "01", label: "Hà Nội", value: "01" },
-    { key: "79", label: "Hồ Chí Minh", value: "79" },
-  ];
-  const districts: ComboOption<string, string>[] = [
-    { key: "001", label: "Quận 1", value: "001" },
-    { key: "002", label: "Quận 2", value: "002" },
-  ];
-  const wards: ComboOption<string, string>[] = [
-    { key: "00001", label: "Phường A", value: "00001" },
-    { key: "00002", label: "Phường B", value: "00002" },
-  ];
-
-  const [activeDropdown, setActiveDropdown] = useState<
-    "provinceCode" | "districtCode" | "wardCode" | null
-  >(null);
+  }, [route.params.tenantId]);
 
   const {
     control,
     handleSubmit,
-    setValue,
     watch,
+    setValue,
     formState: { errors },
-  } = useForm({
-    defaultValues: mockProperty,
+  } = useForm<PropertyUpdateRequest>({
+    values: initialData,
   });
 
-  const services: ServiceType[] = watch("services");
+  const services: ServiceCreateOrUpdateRequest[] = watch("services");
 
   const handleAddService = () => {
-    const currentServices: ServiceType[] = watch("services");
+    const currentServices: ServiceCreateOrUpdateRequest[] = watch("services");
     setValue("services", [
       ...currentServices,
       {
-        index: currentServices.length,
+        id: generateId(),
         name: "",
         price: 0,
-        calculationMethod: "FIXED_PER_ROOM",
+        calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
       },
     ]);
   };
 
-  const handleRemoveService = (index: number) => {
-    const currentServices: ServiceType[] = watch("services");
-    setValue(
-      "services",
-      currentServices.filter((service) => service.index !== index)
+  const handleRemoveService = (id: string) => {
+    const newServices = [...(services ?? [])];
+    newServices.splice(
+      newServices.findIndex((service) => service.id === id),
+      1
     );
+    setValue("services", newServices);
   };
 
-  const onSubmit = (data: typeof mockProperty) => {
+  const onSubmit = (data: PropertyUpdateRequest) => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      Toast.show({
-        type: "success",
-        text1: "Thành công",
-        text2: "Cập nhật tòa nhà thành công!",
+    updateProperty(route.params.tenantId, data)
+      .then((res) => {
+        if (res.success) {
+          Toast.show({
+            type: "success",
+            text1: "Thành công",
+            text2: "Cập nhật tòa nhà thành công!",
+          });
+          // navigation.goBack && navigation.goBack();
+        } else {
+          Toast.show({
+            type: "error",
+            text1: "Lỗi",
+            text2: res.message,
+          });
+        }
+      })
+      .catch((err) => {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: err.message,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-      navigation.goBack && navigation.goBack();
-    }, 1000);
   };
 
   const onError = (errors: FieldErrors) => {
@@ -180,8 +167,13 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
   if (isLoading) return <Loading />;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background?.val }}>
-      <ScrollView>
+    <>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          backgroundColor: theme.background?.val,
+        }}
+      >
         <YStack padding="$4" space="$4">
           <Controller
             control={control}
@@ -340,83 +332,113 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
               padding="$3"
               borderRadius="$4"
             >
-              {services.map((service, index) => (
-                <YStack
-                  key={index}
-                  space="$2"
-                  backgroundColor="#fff"
-                  padding="$3"
-                  borderRadius="$4"
-                  borderWidth={1}
-                  borderColor="#e9ecef"
-                  marginBottom="$2"
-                  style={{ position: "relative" }}
-                >
-                  <TouchableOpacity
-                    style={styles.removeServiceItemButton}
-                    onPress={() => handleRemoveService(service.index)}
+              {services &&
+                services?.map((service, index) => (
+                  <YStack
+                    key={index}
+                    space="$2"
+                    backgroundColor="#fff"
+                    padding="$3"
+                    borderRadius="$4"
+                    borderWidth={1}
+                    borderColor="#e9ecef"
+                    marginBottom="$2"
+                    style={{ position: "relative" }}
                   >
-                    <Text style={{ color: "#fff", fontWeight: "bold" }}>X</Text>
-                  </TouchableOpacity>
-                  <XStack space="$2" alignItems="center">
-                    <YStack space="$2" flex={1}>
-                      <Controller
-                        control={control}
-                        name={`services.${service.index}.name`}
-                        render={({ field: { onChange, value } }) => (
-                          <InputBase
-                            placeholder="Tên dịch vụ"
-                            value={value}
-                            onChangeText={onChange}
-                          />
+                    <TouchableOpacity
+                      style={styles.removeServiceItemButton}
+                      onPress={() => handleRemoveService(service.id)}
+                    >
+                      <Ionicons name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+                    <XStack space="$2" alignItems="center">
+                      <YStack space="$2" flex={1}>
+                        <Controller
+                          control={control}
+                          name={`services.${index}`}
+                          render={({ field: { onChange, value } }) => (
+                            <ServiceSelectedSearchComponent
+                              value={value as any}
+                              onChange={onChange}
+                              error={errors.services?.[index]?.name?.message}
+                            />
+                          )}
+                        />
+                        <Controller
+                          control={control}
+                          name={`services.${index}.price`}
+                          rules={{ required: "Vui lòng nhập giá dịch vụ" }}
+                          render={({ field: { onChange, value } }) => (
+                            <InputBase
+                              placeholder="Giá"
+                              disabled={
+                                service.calculationMethod ===
+                                ServiceCalculateMethod.FREE
+                              }
+                              icon="cash-outline"
+                              iconProps={{
+                                color: "#007AFF",
+                              }}
+                              value={
+                                service.calculationMethod ===
+                                ServiceCalculateMethod.FREE
+                                  ? "0"
+                                  : value
+                                  ? formatCurrency(value.toString())
+                                  : ""
+                              }
+                              onChangeText={(text) => {
+                                const numericValue = text.replace(
+                                  /[^0-9]/g,
+                                  ""
+                                );
+                                onChange(numericValue);
+                              }}
+                              keyboardType="numeric"
+                              error={errors.services?.[index]?.price?.message}
+                            />
+                          )}
+                        />
+                        {errors.services?.[index]?.price && (
+                          <Text style={styles.errorText}>
+                            {errors.services[index]?.price?.message}
+                          </Text>
                         )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`services.${service.index}.price`}
-                        rules={{ required: "Vui lòng nhập giá dịch vụ" }}
-                        render={({ field: { onChange, value } }) => (
-                          <InputBase
-                            placeholder="Giá"
-                            value={value?.toString()}
-                            onChangeText={onChange}
-                            keyboardType="numeric"
-                            error={
-                              errors.services?.[service.index]?.price?.message
-                            }
-                          />
-                        )}
-                      />
-                      <Controller
-                        control={control}
-                        name={`services.${service.index}.calculationMethod`}
-                        render={({ field: { onChange, value } }) => (
-                          <InputBase
-                            placeholder="Cách tính tiền (ví dụ: PER_UNIT_SIMPLE)"
-                            value={value}
-                            onChangeText={onChange}
-                          />
-                        )}
-                      />
-                    </YStack>
-                  </XStack>
-                </YStack>
-              ))}
+                        <Controller
+                          control={control}
+                          name={`services.${index}.calculationMethod`}
+                          render={({ field: { onChange, value } }) => (
+                            <CalculatorMethodComponent
+                              value={value}
+                              onChange={(newMethod) => {
+                                onChange(newMethod);
+                                if (newMethod === ServiceCalculateMethod.FREE) {
+                                  setValue(`services.${index}.price`, 0);
+                                }
+                              }}
+                            />
+                          )}
+                        />
+                      </YStack>
+                    </XStack>
+                  </YStack>
+                ))}
             </YStack>
           </YStack>
         </YStack>
-        <YStack padding="$4">
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSubmit(onSubmit, onError)}
-          >
-            <XStack space="$2" alignItems="center">
-              <Text style={styles.submitButtonText}>Cập nhật tòa nhà</Text>
-            </XStack>
-          </TouchableOpacity>
-        </YStack>
       </ScrollView>
-    </SafeAreaView>
+      <ActionButtonBottom
+        actions={[
+          {
+            label: "Cập nhật tòa nhà",
+            onPress: handleSubmit(onSubmit, onError),
+            variant: "primary",
+            isLoading: isLoading,
+            icon: "checkmark-circle",
+          },
+        ]}
+      />
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 import { getListService } from "@/api/service/service.api";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import { createStyles } from "@/styles/component/StyleComboBox";
-import { ServiceCreateRequest } from "@/types/service";
+import { ServiceCreateOrUpdateRequest } from "@/types/service";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
@@ -13,9 +13,9 @@ const ServiceSelectedSearchComponent = ({
   error,
   onChange,
 }: {
-  value: ServiceCreateRequest;
+  value: ServiceCreateOrUpdateRequest;
   error?: string;
-  onChange: (services: ServiceCreateRequest) => void;
+  onChange: (services: ServiceCreateOrUpdateRequest) => void;
 }) => {
   const ICON_DEFAULT = "apps-outline";
 
@@ -24,7 +24,7 @@ const ServiceSelectedSearchComponent = ({
 
   const [search, setSearch] = useState("");
   const [valueSelected, setValueSelected] = useState<
-    ServiceCreateRequest | string
+    ServiceCreateOrUpdateRequest | string
   >(value);
   const [hideResults, setHideResults] = useState(true);
 
@@ -86,7 +86,7 @@ const ServiceSelectedSearchComponent = ({
       icon={
         typeof valueSelected === "string"
           ? ICON_DEFAULT
-          : ((valueSelected?.icon as any) ?? ICON_DEFAULT)
+          : (valueSelected?.icon as any) ?? ICON_DEFAULT
       }
       iconProps={{
         color: "#007AFF",
