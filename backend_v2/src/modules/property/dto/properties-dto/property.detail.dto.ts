@@ -18,7 +18,6 @@ export class PropertyDetailDto extends BaseDetailDto<Properties> {
   latitude?: number;
 
   longitude?: number;
-
   numberFloor?: number;
   defaultRoomRent: number;
   totalRoom?: number;

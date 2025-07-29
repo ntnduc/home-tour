@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 import { isMethodOverridden } from '../../utils';
 import { BaseCreateDto } from '../dto/create.dto';
 import { BaseDetailDto } from '../dto/detail.dto';
@@ -11,6 +11,7 @@ import { BaseFilterDto } from '../dto/filter.dto';
 import { BaseListDto } from '../dto/list.dto';
 import { BaseUpdateDto } from '../dto/update.dto';
 import { BaseEntity } from '../Entity/BaseEntity';
+import { BaseRepository } from '../repositories/BaseRepository';
 import { IBaseService } from './IService';
 import { PaginateResult } from './search.crud';
 
@@ -24,7 +25,7 @@ export class BaseService<
 > implements IBaseService<TEntity, TDetailDto, TListDto, TCreateDto, TUpdateDto>
 {
   constructor(
-    protected readonly genericRepository: Repository<TEntity>,
+    protected readonly genericRepository: BaseRepository<TEntity>,
     protected readonly detailDto: new () => TDetailDto,
     protected readonly listDto: new () => TListDto,
     protected readonly createDto: new () => TCreateDto,
@@ -99,6 +100,7 @@ export class BaseService<
         id: id as any,
       },
     });
+
     if (!entity) {
       throw new NotFoundException('Không tìm thấy dữ liệu!');
     }

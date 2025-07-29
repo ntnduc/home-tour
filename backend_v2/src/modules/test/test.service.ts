@@ -1,7 +1,6 @@
-import { BadGatewayException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { BadGatewayException, Injectable } from '@nestjs/common';
 import { BaseService } from 'src/common/base/crud/base.service';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { TestMappingCreateDto } from './dto/test-mapping.create.dto';
 import { TestCreateDto } from './dto/test.create.dto';
 import { TestDetailDto } from './dto/test.detail.dto';
@@ -11,7 +10,11 @@ import { TestChild } from './entities/test-child.entity';
 import { TestContent } from './entities/test-content.entity';
 import { TestMapping } from './entities/test-mapping.entity';
 import { Test } from './entities/test.entity';
+import { TestContentRepository } from './repositories/test.content.repository';
+import { TestMappingRepository } from './repositories/test.mapping.repository';
+import { TestRepository } from './repositories/test.repository';
 
+@Injectable()
 export class TestService extends BaseService<
   Test,
   TestDetailDto,
@@ -20,12 +23,9 @@ export class TestService extends BaseService<
   TestUpdateDto
 > {
   constructor(
-    @InjectRepository(Test)
-    private testRepository: Repository<Test>,
-    @InjectRepository(TestContent)
-    private testContentRepository: Repository<TestContent>,
-    @InjectRepository(TestMapping)
-    private testMappingRepository: Repository<TestMapping>,
+    private testRepository: TestRepository,
+    private testContentRepository: TestContentRepository,
+    private testMappingRepository: TestMappingRepository,
     private readonly dataSource: DataSource,
   ) {
     super(

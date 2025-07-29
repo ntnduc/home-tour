@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { RoomStatus } from 'src/common/enums/room.enum';
-import { Repository } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
 import { RoomDetailDto } from './dto/room-dto/room.detail.dto';
 import { RoomListDto } from './dto/room-dto/room.list.dto';
 import { RoomUpdateDto } from './dto/room-dto/room.update.dto';
 import { RoomCreateDto } from './dto/room-dto/rooms.create.dto';
 import { Rooms } from './entities/rooms.entity';
+import { RoomsRepository } from './repositories/rooms.repository';
 
 @Injectable()
 export class RoomsService extends BaseService<
@@ -20,7 +21,7 @@ export class RoomsService extends BaseService<
 > {
   constructor(
     @InjectRepository(Rooms)
-    private readonly roomsRepository: Repository<Rooms>,
+    private readonly roomsRepository: RoomsRepository,
   ) {
     super(
       roomsRepository,
@@ -31,6 +32,11 @@ export class RoomsService extends BaseService<
     );
   }
 
+  override async specQuery(): Promise<SelectQueryBuilder<Rooms>> {
+    const query = this.roomsRepository.createQueryBuilder('entity');
+    query.leftJoinAndSelect('entity.property', 'property');
+    return query;
+  }
   public getRoomsDefaultFromTotalNumberRooms(
     property: PropertyCreateDto,
   ): RoomCreateDto[] {

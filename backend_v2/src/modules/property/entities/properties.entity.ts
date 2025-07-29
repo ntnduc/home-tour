@@ -2,6 +2,9 @@ import { IsInt, IsNotEmpty, Max, Min } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
 import { User } from '../../users/entities/user.entity';
+import { Districts } from './../../location/entities/Districts.entity';
+import { Provinces } from './../../location/entities/Provinces.entity';
+import { Wards } from './../../location/entities/Wards.entity';
 import { PropertiesService } from './properties-service.entity';
 import { Rooms } from './rooms.entity';
 
@@ -59,4 +62,16 @@ export class Properties extends BaseEntity {
 
   @OneToMany(() => Rooms, (rooms) => rooms.property)
   rooms: Rooms[];
+
+  @ManyToOne(() => Provinces)
+  @JoinColumn({ name: 'provinceCode' })
+  provinces: Provinces;
+
+  @ManyToOne(() => Districts)
+  @JoinColumn({ name: 'districtCode' })
+  districts: Districts;
+
+  @ManyToOne(() => Wards)
+  @JoinColumn({ name: 'wardCode' })
+  wards: Wards;
 }

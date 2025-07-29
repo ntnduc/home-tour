@@ -22,24 +22,24 @@ export class StickAuthGaurd implements CanActivate {
     if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest<Request>();
+
     const authHeader = request.headers['authorization'];
 
     const hasAuth = !!authHeader;
-
     if (!hasAuth)
       throw new UnauthorizedException('Authorization token không hợp lệ');
 
     try {
       const token = authHeader.replace('Bearer ', '');
+
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-
       (request as any).token = token;
       (request as any).user = payload;
 
       return true;
-    } catch {
+    } catch (e) {
       throw new UnauthorizedException('Authorization token không hợp lệ');
     }
   }

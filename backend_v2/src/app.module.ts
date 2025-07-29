@@ -7,6 +7,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import databaseConfig from './config/database.config';
 import { DatabaseConfig } from './config/database.interface';
 import { AuthModule } from './modules/auth/auth.module';
+import { CurrentUserModule } from './modules/current.user';
 import { LocationModule } from './modules/location/location.module';
 import { PropertyModule } from './modules/property/property.module';
 import { ReportModule } from './modules/report/report.module';
@@ -43,6 +44,7 @@ import { UsersModule } from './modules/users/users.module';
     }),
     UsersModule,
     AuthModule,
+    CurrentUserModule,
     LocationModule,
     PropertyModule,
     TestModule,

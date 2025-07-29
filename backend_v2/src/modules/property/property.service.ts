@@ -6,9 +6,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { IBaseService } from 'src/common/base/crud/IService';
+import { ComboOptionWithExtra } from 'src/common/base/dto/option.dto';
 import { PropertyRoomsStatus } from 'src/common/enums/property.enum';
 import { RoomStatus } from 'src/common/enums/room.enum';
 import { DataSource, In, Repository, SelectQueryBuilder } from 'typeorm';
+import { CurrentUserService } from '../current.user';
 import { Districts } from '../location/entities/Districts.entity';
 import { Provinces } from '../location/entities/Provinces.entity';
 import { Wards } from '../location/entities/Wards.entity';
@@ -47,13 +49,8 @@ export class PropertyService
     >
 {
   constructor(
-    @InjectRepository(Properties)
     private propertiesRepository: PropertiesRepository,
-    @InjectRepository(PropertiesService)
-    private propertiesServicesRepository: PropertiesServiceRepository,
-    @InjectRepository(Services)
     private servicesRepository: ServicesRepository,
-    @InjectRepository(Rooms)
     private roomsRepository: RoomsRepository,
     @InjectRepository(Provinces)
     private provincesRepository: Repository<Provinces>,
@@ -65,6 +62,8 @@ export class PropertyService
     //#region Inject services
     private readonly dataSource: DataSource,
     private readonly roomService: RoomsService,
+    private readonly currentUserService: CurrentUserService,
+    private propertiesServicesRepository: PropertiesServiceRepository,
     //#endregion
   ) {
     super(
@@ -74,6 +73,29 @@ export class PropertyService
       PropertyCreateDto,
       PropertyUpdateDto,
     );
+  }
+
+  async getComboProperty() {
+    const userId = this.currentUserService.getCurrentUserId();
+    const properties = await this.propertiesRepository.find({
+      where: { ownerId: userId },
+    });
+
+    const result = properties.map((property) => {
+      const comboOption = new ComboOptionWithExtra<
+        string,
+        string,
+        PropertyDetailDto
+      >();
+      const dto = new PropertyDetailDto();
+      dto.fromEntity(property);
+      comboOption.label = property.name ?? '';
+      comboOption.value = property.id;
+      comboOption.extra = dto;
+      return comboOption;
+    });
+
+    return result;
   }
 
   override async create(propertyCreateDto: PropertyCreateDto) {
@@ -303,6 +325,7 @@ export class PropertyService
 
   override async specQuery(): Promise<SelectQueryBuilder<Properties>> {
     const query = this.propertiesRepository.createQueryBuilder('entity');
+
     query.leftJoinAndSelect('entity.rooms', 'rooms');
     query.leftJoinAndSelect('entity.services', 'services');
     return query;

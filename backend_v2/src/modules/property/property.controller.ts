@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { BaseController } from 'src/common/base/crud/base.controller';
@@ -38,5 +38,13 @@ export class PropertyController extends BaseController<
     const currentUser = (request as any).user;
     createdDto.ownerId = currentUser.userId;
     return await super.create(request, createdDto);
+  }
+
+  @Get('combo')
+  @ApiOperation({ summary: 'Get combo property' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 409, description: 'Entity already exists.' })
+  async getComboProperty() {
+    return await this.propertyService.getComboProperty();
   }
 }

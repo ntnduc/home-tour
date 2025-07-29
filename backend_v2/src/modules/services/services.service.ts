@@ -1,5 +1,5 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { SelectQueryBuilder } from 'typeorm';
 import { BaseService } from './../../common/base/crud/base.service';
 import { BaseFilterDto } from './../../common/base/dto/filter.dto';
 import { removeAccents } from './../../common/utils';
@@ -8,7 +8,9 @@ import { ServiceDetailDto } from './dto/services.detail.dto';
 import { ServiceListDto } from './dto/services.list.dto';
 import { UpdateServiceDto } from './dto/services.update.dto';
 import { Services } from './entities/services.entity';
+import { ServicesRepository } from './repositories/services.repository';
 
+@Injectable()
 export class ServicesService extends BaseService<
   Services,
   ServiceDetailDto,
@@ -16,10 +18,7 @@ export class ServicesService extends BaseService<
   CreateServiceDto,
   UpdateServiceDto
 > {
-  constructor(
-    @InjectRepository(Services)
-    private readonly serviceRepository: Repository<Services>,
-  ) {
+  constructor(private readonly serviceRepository: ServicesRepository) {
     super(
       serviceRepository,
       ServiceDetailDto,

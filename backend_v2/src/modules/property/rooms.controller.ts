@@ -9,7 +9,7 @@ import { Rooms } from './entities/rooms.entity';
 import { RoomsService } from './rooms.service';
 
 @ApiTags('Room')
-@Controller('rooms')
+@Controller('api/rooms')
 export class RoomsController extends BaseController<
   RoomsService,
   Rooms,

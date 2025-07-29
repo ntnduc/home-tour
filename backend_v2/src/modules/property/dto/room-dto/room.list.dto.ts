@@ -1,37 +1,19 @@
-import { IsNumber, IsString } from 'class-validator';
 import { BaseListDto } from 'src/common/base/dto/list.dto';
 import { Rooms } from '../../entities/rooms.entity';
+import { PropertyDetailDto } from '../properties-dto/property.detail.dto';
 
 export class RoomListDto extends BaseListDto<Rooms> {
-  @IsString()
   propertyId: string;
-
-  @IsString()
   name: string;
-
-  @IsString()
   status: string;
-
-  @IsNumber()
   area?: number;
-
-  @IsNumber()
   rentAmount: number;
-
-  @IsNumber()
   maxOccupancy?: number;
-
-  @IsString()
   floor?: string;
-
-  @IsNumber()
   defaultDepositAmount: number;
-
-  @IsNumber()
   defaultPaymentDueDay: number;
-
-  @IsString()
   description?: string;
+  property?: PropertyDetailDto;
 
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
@@ -45,5 +27,10 @@ export class RoomListDto extends BaseListDto<Rooms> {
     this.defaultDepositAmount = entity.defaultDepositAmount;
     this.defaultPaymentDueDay = entity.defaultPaymentDueDay;
     this.description = entity.description;
+    if (entity.property) {
+      const propertyDto = new PropertyDetailDto();
+      propertyDto.fromEntity(entity.property);
+      this.property = propertyDto;
+    }
   }
 }
