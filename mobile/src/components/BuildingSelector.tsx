@@ -1,89 +1,37 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import {
-  FlatList,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-interface Building {
+export interface Building {
   id: string;
   name: string;
   address: string;
   roomCount: number;
 }
 
-interface BuildingSelectorProps {
+export interface BuildingSelectorProps {
   buildings: Building[];
   selectedBuilding: string | null;
   onSelectBuilding: (buildingId: string | null) => void;
+  onOpen?: (buildings: any, selectedBuildingData: any) => void;
 }
 
 const BuildingSelector = ({
   buildings,
   selectedBuilding,
   onSelectBuilding,
+  onOpen,
 }: BuildingSelectorProps) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   const selectedBuildingData = selectedBuilding
     ? buildings.find((b) => b.id === selectedBuilding)
     : null;
-
-  const handleSelectBuilding = (buildingId: string | null) => {
-    onSelectBuilding(buildingId);
-    setIsModalVisible(false);
-  };
-
-  const renderBuildingItem = ({ item }: { item: Building }) => (
-    <TouchableOpacity
-      style={[
-        styles.buildingItem,
-        selectedBuilding === item.id && styles.selectedBuildingItem,
-      ]}
-      onPress={() => handleSelectBuilding(item.id)}
-    >
-      <View style={styles.buildingInfo}>
-        <Text
-          style={[
-            styles.buildingName,
-            selectedBuilding === item.id && styles.selectedBuildingName,
-          ]}
-        >
-          {item.name}
-        </Text>
-        <Text
-          style={[
-            styles.buildingAddress,
-            selectedBuilding === item.id && styles.selectedBuildingAddress,
-          ]}
-        >
-          {item.address}
-        </Text>
-        <Text
-          style={[
-            styles.roomCount,
-            selectedBuilding === item.id && styles.selectedRoomCount,
-          ]}
-        >
-          {item.roomCount} phòng
-        </Text>
-      </View>
-      {selectedBuilding === item.id && (
-        <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
-      )}
-    </TouchableOpacity>
-  );
 
   return (
     <View className="mx-2">
       <TouchableOpacity
         className="mb-2"
         style={styles.selector}
-        onPress={() => setIsModalVisible(true)}
+        onPress={() => onOpen && onOpen(buildings, selectedBuildingData)}
       >
         <View style={styles.selectorContent}>
           <Ionicons name="business-outline" size={16} color="#007AFF" />
@@ -98,82 +46,6 @@ const BuildingSelector = ({
         </View>
         <Ionicons name="chevron-down" size={16} color="#666" />
       </TouchableOpacity>
-
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Chọn tòa nhà</Text>
-              <TouchableOpacity
-                onPress={() => setIsModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            <FlatList
-              data={[
-                {
-                  id: null,
-                  name: "Tất cả tòa nhà",
-                  address: "",
-                  roomCount: buildings.reduce((sum, b) => sum + b.roomCount, 0),
-                },
-                ...buildings,
-              ]}
-              renderItem={({ item }) =>
-                item.id === null ? (
-                  <TouchableOpacity
-                    style={[
-                      styles.buildingItem,
-                      selectedBuilding === null && styles.selectedBuildingItem,
-                    ]}
-                    onPress={() => handleSelectBuilding(null)}
-                  >
-                    <View style={styles.buildingInfo}>
-                      <Text
-                        style={[
-                          styles.buildingName,
-                          selectedBuilding === null &&
-                            styles.selectedBuildingName,
-                        ]}
-                      >
-                        Tất cả tòa nhà
-                      </Text>
-                      <Text
-                        style={[
-                          styles.roomCount,
-                          selectedBuilding === null && styles.selectedRoomCount,
-                        ]}
-                      >
-                        {item.roomCount} phòng
-                      </Text>
-                    </View>
-                    {selectedBuilding === null && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color="#007AFF"
-                      />
-                    )}
-                  </TouchableOpacity>
-                ) : (
-                  renderBuildingItem({ item: item as Building })
-                )
-              }
-              keyExtractor={(item) => item.id || "all"}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalList}
-            />
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };

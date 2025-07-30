@@ -1,6 +1,7 @@
+import AppSheet, { AppSheetRef } from "@/components/AppSheet/AppSheet";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -21,6 +22,7 @@ import {
   PaymentStatus,
 } from "../../types/payment";
 import HeaderComponents from "../common/HeaderComponents";
+import BuildingFilterComponent from "./components/BuildingFilterComponent";
 import RoomCardItemComponent from "./components/RoomCardItemComponents";
 import styles from "./styles/StyleRoomList";
 
@@ -327,13 +329,14 @@ const statusColor = {
 };
 
 const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
+  const refAppSheet = useRef<AppSheetRef>(null);
+
   const [search, setSearch] = useState("");
   const [visibleCount, setVisibleCount] = useState(5);
   const [filterPayment, setFilterPayment] = useState<PaymentStatus | null>(
     null
   );
   const [selectedBuilding, setSelectedBuilding] = useState<string>("Tất cả");
-  const [showContractModal, setShowContractModal] = useState(false);
 
   const filteredRooms = mockRoomList.filter(
     (room) =>
@@ -582,6 +585,22 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           selectedBuilding={
             selectedBuilding === "Tất cả" ? null : selectedBuilding
           }
+          onOpen={(buildings, selectedBuildingData) => {
+            refAppSheet.current?.open(
+              <BuildingFilterComponent
+                buildings={buildings}
+                selectedBuilding={selectedBuildingData}
+                onSelectBuilding={function (buildingId: string | null): void {
+                  throw new Error("Function not implemented.");
+                }}
+              />,
+              {
+                header: {
+                  title: "Chọn toà nhà",
+                },
+              }
+            );
+          }}
           onSelectBuilding={(buildingId) =>
             setSelectedBuilding(buildingId === null ? "Tất cả" : buildingId)
           }
@@ -635,6 +654,7 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
           onEndReachedThreshold={0.2}
         />
       </View>
+      <AppSheet ref={refAppSheet} />
     </SafeAreaView>
   );
 };

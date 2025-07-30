@@ -50,6 +50,7 @@ const TenantCardComponent = (props: {
       onActionPress={(key) => {
         if (key === "edit") onUpdate(tenantInfo.id);
       }}
+      classNameBadge="absolute right-[-80] top-[-35] "
       statusBadge={{ ...status }}
     >
       <View className="flex flex-col ">

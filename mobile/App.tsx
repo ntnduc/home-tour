@@ -20,6 +20,7 @@ import config from "./tamagui.config";
 import RoomDetailScreen from "@/screens/room/RoomDetailScreen";
 import UpdateTenantScreen from "@/screens/tenant/UpdateTenantScreen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./global.css";
 import ContractDetailScreen from "./src/screens/contract/ContractDetailScreen";
 import ContractListScreen from "./src/screens/contract/ContractListScreen";
@@ -48,131 +49,133 @@ export default function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TamaguiProvider config={config}>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Login"
-            screenOptions={{
-              gestureEnabled: true,
-              animation: "slide_from_right",
-              title: "Trở lại",
-            }}
-          >
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="OTPVerification"
-              component={OTPVerificationScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={RegisterScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="MainTabs"
-              component={TabNavigator}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="RoomList"
-              component={RoomListScreen}
-              options={{ title: "Danh Sách Phòng" }}
-            />
-            <Stack.Screen
-              name="RoomDetail"
-              component={RoomDetailScreen}
-              options={{ title: "Chi Tiết Căn Hộ" }}
-            />
-            <Stack.Screen
-              name="CreateTenant"
-              component={CreateTenantScreen}
-              options={{ title: "Tạo Căn Hộ" }}
-            />
-            <Stack.Screen
-              name="UpdateRoom"
-              component={UpdateRoomScreen}
-              options={{ title: "Cập Nhật Phòng" }}
-            />
-            <Stack.Screen
-              name="InvoiceDetail"
-              component={InvoiceDetailScreen}
-              options={({ navigation, route }) => {
-                const isFromHistory = route.params?.fromHistory;
+    <GestureHandlerRootView>
+      <QueryClientProvider client={queryClient}>
+        <TamaguiProvider config={config}>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName="Login"
+              screenOptions={{
+                gestureEnabled: true,
+                animation: "slide_from_right",
+                title: "Trở lại",
+              }}
+            >
+              <Stack.Screen
+                name="Login"
+                component={LoginScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="OTPVerification"
+                component={OTPVerificationScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Register"
+                component={RegisterScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="MainTabs"
+                component={TabNavigator}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="RoomList"
+                component={RoomListScreen}
+                options={{ title: "Danh Sách Phòng" }}
+              />
+              <Stack.Screen
+                name="RoomDetail"
+                component={RoomDetailScreen}
+                options={{ title: "Chi Tiết Căn Hộ" }}
+              />
+              <Stack.Screen
+                name="CreateTenant"
+                component={CreateTenantScreen}
+                options={{ title: "Tạo Căn Hộ" }}
+              />
+              <Stack.Screen
+                name="UpdateRoom"
+                component={UpdateRoomScreen}
+                options={{ title: "Cập Nhật Phòng" }}
+              />
+              <Stack.Screen
+                name="InvoiceDetail"
+                component={InvoiceDetailScreen}
+                options={({ navigation, route }) => {
+                  const isFromHistory = route.params?.fromHistory;
 
-                return {
-                  title: "Chi Tiết Hóa Đơn",
-                  headerRight: () =>
-                    !isFromHistory ? (
-                      <TouchableOpacity
-                        style={{ marginRight: 16 }}
-                        onPress={() => navigation.navigate("InvoiceHistory")}
-                      >
-                        <Ionicons
-                          name="time-outline"
-                          size={24}
-                          color="#007AFF"
-                        />
-                      </TouchableOpacity>
-                    ) : null,
-                };
-              }}
-            />
-            <Stack.Screen
-              name="InvoiceHistory"
-              component={InvoiceHistoryScreen}
-              options={({ navigation }) => ({
-                title: "Lịch Sử Hóa Đơn",
-                headerRight: () => (
-                  <TouchableOpacity
-                    style={{ marginRight: 16 }}
-                    onPress={() => {
-                      // TODO: Mở modal filter
-                      console.log("Open filter modal");
-                    }}
-                  >
-                    <Ionicons name="filter" size={24} color="#007AFF" />
-                  </TouchableOpacity>
-                ),
-              })}
-            />
-            <Stack.Screen
-              name="CreateContract"
-              component={CreateContractScreen}
-              options={{ title: "Tạo Hợp Đồng" }}
-            />
-            <Stack.Screen
-              name="ContractDetail"
-              component={ContractDetailScreen}
-              options={{ title: "Chi Tiết Hợp Đồng" }}
-            />
-            <Stack.Screen
-              name="TerminateContract"
-              component={TerminateContractScreen}
-              options={{ title: "Hủy Hợp Đồng" }}
-            />
-            <Stack.Screen
-              name="ContractList"
-              component={ContractListScreen}
-              options={{ title: "Danh Sách Hợp Đồng" }}
-            />
-            <Stack.Screen
-              name="UpdateTenant"
-              component={UpdateTenantScreen}
-              options={{
-                title: "Cập Nhật Căn Hộ",
-              }}
-            />
-          </Stack.Navigator>
-          <StatusBar style="auto" />
-        </NavigationContainer>
-        <Toast />
-      </TamaguiProvider>
-    </QueryClientProvider>
+                  return {
+                    title: "Chi Tiết Hóa Đơn",
+                    headerRight: () =>
+                      !isFromHistory ? (
+                        <TouchableOpacity
+                          style={{ marginRight: 16 }}
+                          onPress={() => navigation.navigate("InvoiceHistory")}
+                        >
+                          <Ionicons
+                            name="time-outline"
+                            size={24}
+                            color="#007AFF"
+                          />
+                        </TouchableOpacity>
+                      ) : null,
+                  };
+                }}
+              />
+              <Stack.Screen
+                name="InvoiceHistory"
+                component={InvoiceHistoryScreen}
+                options={({ navigation }) => ({
+                  title: "Lịch Sử Hóa Đơn",
+                  headerRight: () => (
+                    <TouchableOpacity
+                      style={{ marginRight: 16 }}
+                      onPress={() => {
+                        // TODO: Mở modal filter
+                        console.log("Open filter modal");
+                      }}
+                    >
+                      <Ionicons name="filter" size={24} color="#007AFF" />
+                    </TouchableOpacity>
+                  ),
+                })}
+              />
+              <Stack.Screen
+                name="CreateContract"
+                component={CreateContractScreen}
+                options={{ title: "Tạo Hợp Đồng" }}
+              />
+              <Stack.Screen
+                name="ContractDetail"
+                component={ContractDetailScreen}
+                options={{ title: "Chi Tiết Hợp Đồng" }}
+              />
+              <Stack.Screen
+                name="TerminateContract"
+                component={TerminateContractScreen}
+                options={{ title: "Hủy Hợp Đồng" }}
+              />
+              <Stack.Screen
+                name="ContractList"
+                component={ContractListScreen}
+                options={{ title: "Danh Sách Hợp Đồng" }}
+              />
+              <Stack.Screen
+                name="UpdateTenant"
+                component={UpdateTenantScreen}
+                options={{
+                  title: "Cập Nhật Căn Hộ",
+                }}
+              />
+            </Stack.Navigator>
+            <StatusBar style="auto" />
+          </NavigationContainer>
+          <Toast />
+        </TamaguiProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

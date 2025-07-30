@@ -1,3 +1,4 @@
+import { RoomListResponse } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
@@ -19,7 +20,7 @@ type RootStackParamList = {
 
 type CreateContractScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
-  route: { params: { room: any } };
+  route: { params: { room: RoomListResponse } };
 };
 
 const CreateContractScreen = ({
@@ -232,7 +233,11 @@ const CreateContractScreen = ({
               Họ và tên *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.tenantName ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.tenantName
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="person"
@@ -261,7 +266,11 @@ const CreateContractScreen = ({
               Số điện thoại *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.tenantPhone ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.tenantPhone
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="call"
@@ -291,7 +300,11 @@ const CreateContractScreen = ({
               Email
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.tenantEmail ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.tenantEmail
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="mail"
@@ -322,7 +335,11 @@ const CreateContractScreen = ({
               CMND/CCCD *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.tenantIdCard ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.tenantIdCard
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="card"
@@ -352,7 +369,11 @@ const CreateContractScreen = ({
               Địa chỉ *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.tenantAddress ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.tenantAddress
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="location"
@@ -388,7 +409,11 @@ const CreateContractScreen = ({
               Ngày bắt đầu *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.startDate ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.startDate
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="calendar"
@@ -417,7 +442,9 @@ const CreateContractScreen = ({
               Ngày kết thúc *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.endDate ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.endDate ? "border-red-300 bg-red-50" : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="calendar"
@@ -453,7 +480,11 @@ const CreateContractScreen = ({
               Tiền thuê hàng tháng *
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.monthlyRent ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.monthlyRent
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="cash"
@@ -488,7 +519,9 @@ const CreateContractScreen = ({
               Tiền cọc
             </Text>
             <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.deposit ? "border-red-300 bg-red-50" : "border-gray-200"}`}
+              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
+                errors.deposit ? "border-red-300 bg-red-50" : "border-gray-200"
+              }`}
             >
               <Ionicons
                 name="shield-checkmark"

@@ -2,6 +2,7 @@ import { privateApi } from "@/services/api";
 import { ApiResponse } from "@/types/api";
 import { BasePagingRequest } from "@/types/base.request";
 import { BasePagingResponse } from "@/types/base.response";
+import { ComboOptionWithExtra } from "@/types/comboOption";
 import {
   Property,
   PropertyCreateRequest,
@@ -57,6 +58,16 @@ export const updateProperty = async (
     "/property",
     data
   );
+
+  return response.data;
+};
+
+export const getComboProperty = async (): Promise<
+  ApiResponse<ComboOptionWithExtra<string, string, PropertyDetail>[]>
+> => {
+  const response = await privateApi.get<
+    ApiResponse<ComboOptionWithExtra<string, string, PropertyDetail>[]>
+  >("/property/combo");
 
   return response.data;
 };

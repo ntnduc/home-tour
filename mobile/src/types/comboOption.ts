@@ -3,3 +3,10 @@ export interface ComboOption<K, T> {
   value: T;
   label?: string;
 }
+
+export interface ComboOptionWithExtra<K, T, E> {
+  key: K;
+  value: T;
+  label?: string;
+  extra?: E;
+}

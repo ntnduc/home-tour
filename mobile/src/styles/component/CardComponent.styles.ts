@@ -78,8 +78,8 @@ const styles = StyleSheet.create({
     // marginLeft: 8,
     alignSelf: "center",
     position: "absolute",
-    right: -80,
-    top: -35,
+    // right: -80,
+    // top: -35,
   },
   statusText: {
     fontSize: 12,
@@ -87,9 +87,9 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    color: '#6B7280', // màu phụ
+    color: "#6B7280", // màu phụ
     marginTop: 2,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });
 

@@ -1,5 +1,5 @@
 import { CARD_ACTION_PRESETS } from "@/components/CardActionsPresets";
-import styles from "@/components/CardComponent.styles";
+import styles from "@/styles/component/CardComponent.styles";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -41,6 +41,7 @@ export type CardComponentProps = {
   header?: React.ReactNode;
   footer?: React.ReactNode;
   onActionPress?: (key: string) => void;
+  classNameBadge?: string;
   statusBadge?: {
     key: string;
     label?: string;
@@ -80,6 +81,7 @@ const CardComponent = (props: CardComponentProps) => {
     footer,
     onActionPress,
     statusBadge,
+    classNameBadge,
   } = props;
 
   // Helper: build action config từ string preset hoặc object
@@ -133,13 +135,16 @@ const CardComponent = (props: CardComponentProps) => {
               {title ? <Text style={styles.title}>{title}</Text> : null}
               {description &&
                 (typeof description === "string" ? (
-                  <Text style={[styles.description, descriptionStyle]}>{description}</Text>
+                  <Text style={[styles.description, descriptionStyle]}>
+                    {description}
+                  </Text>
                 ) : (
                   description
                 ))}
             </View>
             {badge && (
               <View
+                className={classNameBadge || ""}
                 style={[
                   styles.statusBadge,
                   { backgroundColor: badge.bg, marginLeft: 8 },
