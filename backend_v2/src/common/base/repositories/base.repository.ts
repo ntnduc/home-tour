@@ -7,7 +7,7 @@ import {
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
-import { BaseEntity } from '../Entity/BaseEntity';
+import { BaseEntity } from '../Entity/base.entity';
 
 export abstract class BaseRepository<
   T extends BaseEntity,

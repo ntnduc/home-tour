@@ -10,8 +10,8 @@ import { BaseDetailDto } from '../dto/detail.dto';
 import { BaseFilterDto } from '../dto/filter.dto';
 import { BaseListDto } from '../dto/list.dto';
 import { BaseUpdateDto } from '../dto/update.dto';
-import { BaseEntity } from '../Entity/BaseEntity';
-import { BaseRepository } from '../repositories/BaseRepository';
+import { BaseEntity } from '../Entity/base.entity';
+import { BaseRepository } from '../repositories/base.repository';
 import { IBaseService } from './IService';
 import { PaginateResult } from './search.crud';
 

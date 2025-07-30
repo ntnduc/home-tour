@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
+import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { TestMapping } from './test-mapping.entity';
 
 @Entity('test-content')

@@ -1,6 +1,6 @@
 import { IsNumber } from 'class-validator';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
-import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
+import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { ServiceCalculationMethod } from '../../../common/enums/service.enum';
 import { removeAccents } from '../../../common/utils';
 import { PropertiesService } from '../../property/entities/properties-service.entity';

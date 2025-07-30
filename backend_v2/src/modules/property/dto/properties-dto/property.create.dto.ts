@@ -13,10 +13,6 @@ import { CreateServiceDto } from 'src/modules/services/dto/services.create.dto';
 import { Properties } from '../../entities/properties.entity';
 
 export class PropertyCreateDto extends BaseCreateDto<Properties> {
-  @IsOptional()
-  @IsString()
-  ownerId?: string;
-
   @IsString()
   name: string;
 
@@ -62,7 +58,6 @@ export class PropertyCreateDto extends BaseCreateDto<Properties> {
 
   getEntity(): Properties {
     const entity = new Properties();
-    entity.ownerId = this.ownerId ?? '';
     entity.name = this.name;
     entity.address = this.address;
     entity.provinceCode = this.provinceCode;

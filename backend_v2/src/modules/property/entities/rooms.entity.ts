@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { BaseEntity } from '../../../common/base/Entity/BaseEntity';
+import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { RoomStatus } from './../../../common/enums/room.enum';
 import { Properties } from './properties.entity';
 
