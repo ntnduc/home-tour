@@ -65,7 +65,7 @@ export const login = async (phoneNumber: string, otp: string) => {
 
 export const logout = async () => {
   try {
-    await privateApi.post("/auth/logout");
+    await privateApi.get("/auth/logout");
   } catch (error) {
     console.error("logout:", JSON.stringify(error));
   }

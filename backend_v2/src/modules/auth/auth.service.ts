@@ -39,7 +39,7 @@ export class AuthService {
     const otp = await this.otpRepository.findOne({
       where: {
         phoneNumber: formattedPhoneNumber,
-        code,
+        code: code,
         isUsed: false,
         expiresAt: MoreThan(new Date()),
       },
@@ -47,6 +47,9 @@ export class AuthService {
 
     if (!otp) {
       throw new BadRequestException('Invalid OTP');
+    }
+    if (otp.code !== code) {
+      throw new BadRequestException('OTP không đúng!');
     }
 
     otp.isUsed = true;

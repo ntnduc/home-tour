@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SelectQueryBuilder } from 'typeorm';
+import { getMetadataArgsStorage, SelectQueryBuilder } from 'typeorm';
 import { isMethodOverridden } from '../../utils';
 import { BaseCreateDto } from '../dto/create.dto';
 import { BaseDetailDto } from '../dto/detail.dto';
@@ -49,13 +49,27 @@ export class BaseService<
     query: SelectQueryBuilder<TEntity>,
     filter: BaseFilterDto<TEntity>,
   ) {
+    const metadata = getMetadataArgsStorage().filterColumns(
+      this.genericRepository.target as Function,
+    );
+    const entityColumns = metadata.map((column) => column.propertyName);
+
+    if (filter && filter.filters) {
+      const filterObj = filter.filters;
+      Object.keys(filterObj).forEach((key) => {
+        if (entityColumns.includes(key)) {
+          query.andWhere(`entity.${key} = :${key}`, { [key]: filterObj[key] });
+        }
+      });
+    }
+
     return { query, filter };
   }
 
   async getAll(
     filter: BaseFilterDto<TEntity>,
   ): Promise<PaginateResult<TListDto>> {
-    const { globalKey, filter: filterDto, sort, limit, offset } = filter;
+    const { globalKey, filters: filterDto, sort, limit, offset } = filter;
     let query = await this.specQuery();
 
     query.skip(offset);
@@ -70,11 +84,12 @@ export class BaseService<
     if (isApplyFilterOverridden) {
       ({ query, filter } = await this.applyFilter(query, filter));
     } else {
-      if (globalKey) {
-        query.andWhere('entity.name ILIKE :globalKey', {
-          globalKey: `%${globalKey}%`,
-        });
-      }
+      ({ query, filter } = await this.applyFilter(query, filter));
+    }
+    if (globalKey) {
+      query.andWhere('entity.name ILIKE :globalKey', {
+        globalKey: `%${globalKey}%`,
+      });
     }
 
     if (filterDto) {
@@ -90,6 +105,7 @@ export class BaseService<
     }
 
     const [items, total] = await query.getManyAndCount();
+
     const listDto = await this.beautifyResult(items);
     return new PaginateResult(listDto, total, limit, offset);
   }

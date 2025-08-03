@@ -14,7 +14,6 @@ export class PropertiesRepository extends BaseRepository<Properties> {
     query: SelectQueryBuilder<Properties>,
   ): SelectQueryBuilder<Properties> {
     const currentUserId = RequestContextService.getUserId();
-
     query.andWhere(`${query.alias}.ownerId = :currentUserId`, {
       currentUserId,
     });

@@ -25,8 +25,12 @@ export class AuthController {
 
   @Post('verify-otp')
   @AllowAnonymous()
-  async verifyOTP(@Body() body: { phoneNumber: string; code: string }) {
-    return this.authService.verifyOTP(body.phoneNumber, body.code);
+  async verifyOTP(@Body() body: { phoneNumber: string; otp: string }) {
+    console.log(
+      '💞💓💗💞💓💗 ~ AuthController ~ verifyOTP ~ phoneNumber:',
+      body,
+    );
+    return this.authService.verifyOTP(body.phoneNumber, body.otp);
   }
 
   @UseGuards(AuthGuard('jwt-temp'))
