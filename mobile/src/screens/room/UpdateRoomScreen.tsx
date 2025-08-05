@@ -210,12 +210,28 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   readOnly
-                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                  placeholder="Nhập tên gợi nhớ"
                   value={value}
                   showClear={false}
                   onChangeText={onChange}
                   icon="business"
                   label="Toà nhà"
+                />
+              )}
+            />
+          </View>
+
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="floor"
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  placeholder="Tầng"
+                  value={value}
+                  onChangeText={onChange}
+                  icon="layers"
+                  label="Tầng"
                 />
               )}
             />
@@ -262,7 +278,27 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             </View>
           </View>
 
-          {/* Số người thuê */}
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="rentAmount"
+              rules={{ required: "VNĐ/tháng" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  type="number"
+                  placeholder="VNĐ/tháng"
+                  value={value ? formatCurrency(value.toString()) : ""}
+                  keyboardType="numeric"
+                  required
+                  onChangeText={onChange}
+                  icon="cash"
+                  label="Giá thuê mặc định"
+                  error={erroForms.rentAmount?.message}
+                />
+              )}
+            />
+          </View>
+
           <View className="mb-3">
             <Controller
               control={control}
@@ -276,8 +312,8 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                   keyboardType="numeric"
                   required
                   onChangeText={onChange}
-                  icon="cash"
-                  label="Giá thuê mặc định"
+                  icon="wallet"
+                  label="Tiền cọc"
                   error={erroForms.defaultDepositAmount?.message}
                 />
               )}
