@@ -25,7 +25,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
 
   const {
     handleSubmit,
-    formState: { isLoading, isValid, defaultValues, errors: erroForms },
+    formState: { isLoading, defaultValues, errors: erroForms },
     control,
   } = useForm<RoomDetailResponse>({
     defaultValues: async () => {
@@ -277,7 +277,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                   required
                   onChangeText={onChange}
                   icon="cash"
-                  label="Giá thuê"
+                  label="Giá thuê mặc định"
                   error={erroForms.defaultDepositAmount?.message}
                 />
               )}
