@@ -24,3 +24,11 @@ export interface Room {
 }
 
 export interface RoomListResponse extends Room {}
+
+export interface RoomDetailResponse extends Room {
+  propertyName?: string;
+}
+
+export interface RoomUpdateRequest extends Room {
+  propertyName?: string;
+}

@@ -67,6 +67,7 @@ const Input: React.FC<InputProps> = ({
   onBlur,
   returnKeyType,
   onSubmitEditing,
+  readOnly,
   iconProps,
   onClear,
   showClear = true,
@@ -132,6 +133,7 @@ const Input: React.FC<InputProps> = ({
             inputStyles,
             { borderColor: error ? "#ff3b30" : "#ddd" },
           ]}
+          readOnly={readOnly}
           onChangeText={handleChangeText}
           placeholder={placeholder ?? `Nhập ${label}...`}
           keyboardType={type === "number" ? "numeric" : keyboardType}

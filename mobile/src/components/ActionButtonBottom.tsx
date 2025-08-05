@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   ActivityIndicator,
   Text,
@@ -13,6 +13,7 @@ interface ActionButton {
   label: string;
   onPress: () => void | Promise<void>;
   icon?: keyof typeof Ionicons.glyphMap;
+  iconElement?: ReactNode;
   variant?: "primary" | "secondary" | "danger";
   isLoading?: boolean;
   disabled?: boolean;
@@ -45,7 +46,7 @@ const getTextStyle = (variant: ActionButton["variant"] = "primary") => {
 
   const variantStyles = {
     primary: "text-white",
-    secondary: "text-gray-600",
+    secondary: "text-gray-600 font-medium text-sm",
     danger: "text-white",
   };
 
@@ -89,13 +90,17 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
               size="small"
             />
           ) : (
-            action.icon && (
-              <Ionicons
-                name={action.icon}
-                size={20}
-                color={getIconColor(action.variant)}
-              />
-            )
+            <>
+              {action.iconElement
+                ? action.iconElement
+                : action.icon && (
+                    <Ionicons
+                      name={action.icon}
+                      size={18}
+                      color={getIconColor(action.variant)}
+                    />
+                  )}
+            </>
           )}
           <Text className={getTextStyle(action.variant)}>
             {action.isLoading ? "Đang xử lý..." : action.label}

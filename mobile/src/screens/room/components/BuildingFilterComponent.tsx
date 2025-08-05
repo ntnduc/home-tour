@@ -1,4 +1,3 @@
-import { Building, BuildingSelectorProps } from "@/components/BuildingSelector";
 import { ComboOptionWithExtra } from "@/types/comboOption";
 import { PropertyDetail } from "@/types/property";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,49 +5,60 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
-  buildings: ComboOptionWithExtra<string, string, PropertyDetail>[];
-  selectedBuilding?: string;
-  onSelectedBuiling?: (buildingId: string, building: PropertyDetail) => void;
+  buildings: ComboOptionWithExtra<string | null, string, PropertyDetail>[];
+  selectedBuilding?: string | null;
+  onSelectedBuiling?: (
+    buildingId: string | null,
+    building?: PropertyDetail
+  ) => void;
 };
 
 const BuildingFilterComponent = ({
   buildings,
   selectedBuilding,
-  onSelectBuilding,
-}: BuildingSelectorProps) => {
+  onSelectedBuiling,
+}: Props) => {
   const renderBuildingItem = ({
     item,
     index,
   }: {
-    item: Building;
+    item: ComboOptionWithExtra<string, string, PropertyDetail>;
     index: number;
   }) => {
-    if (!item.id)
+    if (!item.value)
       return (
         <TouchableOpacity
           key={index}
           style={[
             styles.buildingItem,
-            selectedBuilding === item.id && styles.selectedBuildingItem,
+            selectedBuilding === item.value && styles.selectedBuildingItem,
           ]}
           onPress={() => {
-            //TODO: handle selected room
+            onSelectedBuiling && onSelectedBuiling(null);
           }}
         >
           <View style={styles.buildingInfo}>
             <Text
               style={[
                 styles.buildingName,
-                selectedBuilding === item.id && styles.selectedBuildingName,
+                selectedBuilding === item.value && styles.selectedBuildingName,
               ]}
             >
-              {item.name}
+              {item.label}
             </Text>
           </View>
-          {selectedBuilding === item.id && (
+          {selectedBuilding === item.value && (
             <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
           )}
         </TouchableOpacity>
+      );
+
+    const extraData = item.extra;
+    if (!extraData)
+      return (
+        <View>
+          <Text>Không có dữ liệu!</Text>
+        </View>
       );
 
     return (
@@ -56,31 +66,31 @@ const BuildingFilterComponent = ({
         key={index}
         style={[
           styles.buildingItem,
-          selectedBuilding === item.id && styles.selectedBuildingItem,
+          selectedBuilding === item.value && styles.selectedBuildingItem,
         ]}
         onPress={() => {
-          //TODO: handle selected room
+          onSelectedBuiling && onSelectedBuiling(item.value, extraData);
         }}
       >
         <View style={styles.buildingInfo}>
           <Text
             style={[
               styles.buildingName,
-              selectedBuilding === item.id && styles.selectedBuildingName,
+              selectedBuilding === item.value && styles.selectedBuildingName,
             ]}
           >
-            {item.name}
+            {extraData?.name}
           </Text>
           <Text
             style={[
               styles.buildingAddress,
-              selectedBuilding === item.id && styles.selectedBuildingAddress,
+              selectedBuilding === item.value && styles.selectedBuildingAddress,
             ]}
           >
-            {item?.address}
+            {extraData?.address}
           </Text>
         </View>
-        {selectedBuilding === item.id && (
+        {selectedBuilding === item.value && (
           <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
         )}
       </TouchableOpacity>
@@ -89,19 +99,16 @@ const BuildingFilterComponent = ({
 
   const data = [
     {
-      id: null,
-      name: "Tất cả tòa nhà",
-      address: "",
-      roomCount: buildings.reduce((sum, b) => sum + b.roomCount, 0),
+      value: null,
+      label: "Tất cả tòa nhà",
+      extra: null,
     },
     ...buildings,
   ];
 
   return (
     <View className="h-full ">
-      {data.map((item, index) =>
-        renderBuildingItem({ item: item as Building, index })
-      )}
+      {data.map((item: any, index) => renderBuildingItem({ item, index }))}
     </View>
   );
 };

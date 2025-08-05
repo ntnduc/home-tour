@@ -1,3 +1,5 @@
+import { ComboOptionWithExtra } from "@/types/comboOption";
+import { PropertyDetail } from "@/types/property";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -10,37 +12,35 @@ export interface Building {
 }
 
 export interface BuildingSelectorProps {
-  buildings: Building[];
+  buildings: ComboOptionWithExtra<string, string, PropertyDetail>[];
   selectedBuilding: string | null;
-  onSelectBuilding: (buildingId: string | null) => void;
-  onOpen?: (buildings: any, selectedBuildingData: any) => void;
+  onOpen?: () => void;
 }
 
 const BuildingSelector = ({
   buildings,
   selectedBuilding,
-  onSelectBuilding,
   onOpen,
 }: BuildingSelectorProps) => {
   const selectedBuildingData = selectedBuilding
-    ? buildings.find((b) => b.id === selectedBuilding)
+    ? buildings.find((b) => b.value && b.extra && b.value === selectedBuilding)
     : null;
+
+  const buildingDto = selectedBuildingData?.extra;
 
   return (
     <View className="mx-2">
       <TouchableOpacity
         className="mb-2"
         style={styles.selector}
-        onPress={() => onOpen && onOpen(buildings, selectedBuildingData)}
+        onPress={() => onOpen && onOpen()}
       >
         <View style={styles.selectorContent}>
           <Ionicons name="business-outline" size={16} color="#007AFF" />
           <View style={styles.selectorText}>
             <Text style={styles.selectorLabel}>Tòa nhà</Text>
             <Text style={styles.selectorValue}>
-              {selectedBuildingData
-                ? selectedBuildingData.name
-                : "Tất cả tòa nhà"}
+              {selectedBuildingData ? buildingDto?.name : "Tất cả tòa nhà"}
             </Text>
           </View>
         </View>

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { RoomStatus } from 'src/common/enums/room.enum';
 import { SelectQueryBuilder } from 'typeorm';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
+import { PropertyDetailDto } from './dto/properties-dto/property.detail.dto';
 import { RoomDetailDto } from './dto/room-dto/room.detail.dto';
 import { RoomListDto } from './dto/room-dto/room.list.dto';
 import { RoomUpdateDto } from './dto/room-dto/room.update.dto';
@@ -30,7 +31,7 @@ export class RoomsService extends BaseService<
 
   override async specQuery(): Promise<SelectQueryBuilder<Rooms>> {
     const query = this.roomsRepository.createQueryBuilder('entity');
-    query.leftJoinAndSelect('entity.property', 'property');
+
     query.orderBy('property.name', 'ASC');
     return query;
   }
@@ -43,6 +44,29 @@ export class RoomsService extends BaseService<
     });
     return super.beautifyResult(items);
   }
+
+  override async get(id: string): Promise<RoomDetailDto> {
+    const entity = await this.genericRepository.findOne({
+      where: {
+        id: id as any,
+      },
+    });
+
+    if (!entity) {
+      throw new NotFoundException('Không tìm thấy dữ liệu!');
+    }
+
+    const dto = new RoomDetailDto();
+    dto.fromEntity(entity);
+    if (entity.property) {
+      const property = new PropertyDetailDto();
+      property.fromEntity(entity.property);
+      dto.property = property;
+    }
+
+    return dto;
+  }
+
   public getRoomsDefaultFromTotalNumberRooms(
     property: PropertyCreateDto,
   ): RoomCreateDto[] {

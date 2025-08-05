@@ -271,7 +271,7 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
                 label="Giá thuê mặc định"
                 required={true}
                 placeholder="Nhập giá thuê mặc định"
-                value={value?.toString()}
+                value={value ? formatCurrency(value.toString()) : ""}
                 onChangeText={onChange}
                 keyboardType="numeric"
                 error={errors.defaultRoomRent?.message}

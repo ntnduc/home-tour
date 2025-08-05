@@ -1,41 +1,51 @@
-import { Ionicons } from "@expo/vector-icons";
+import { getRoom, updateRoom } from "@/api/room/room.api";
+import ActionButtonBottom from "@/components/ActionButtonBottom";
+import CardContent from "@/components/CardContent";
+import InputBase from "@/components/Input";
+import { RoomDetailResponse, RoomUpdateRequest } from "@/types/room";
+import { formatCurrency } from "@/utils/appUtil";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, ScrollView, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 type RootStackParamList = {
-  UpdateRoom: { room: any };
+  UpdateRoom: { roomId: string };
   RoomList: undefined;
 };
 
 type UpdateRoomScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
-  route: { params: { room: any } };
+  route: { params: { roomId: any } };
 };
 
 const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
-  const { room } = route.params;
-  const [isLoading, setIsLoading] = useState(false);
+  const { roomId } = route.params;
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: room.name,
-    building: room.building,
-    price: room.price.toString(),
-    area: room.area.toString(),
-    description: room.description || "",
-    status: room.status,
-    maxTenants: room.tenants || 0,
+  const {
+    handleSubmit,
+    formState: { isLoading, isValid, defaultValues, errors: erroForms },
+    control,
+  } = useForm<RoomDetailResponse>({
+    defaultValues: async () => {
+      try {
+        const data = await getRoom(roomId);
+        if (!data.data) return {} as any;
+
+        return data.data;
+      } catch (error: any) {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: error.response.data?.message
+            ? error.response.data?.message
+            : "Không tìm thấy dữ liệu",
+        });
+        navigation.goBack();
+      }
+    },
   });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const statusOptions = [
     {
@@ -58,62 +68,46 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
     },
   ];
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Tên phòng không được để trống";
+  const handleSave = async (data: RoomUpdateRequest) => {
+    try {
+      updateRoom(data)
+        .then((reponse) => {
+          Toast.show({
+            type: "success",
+            text1: "Thành công",
+            text2: "Cập nhật đã thành công",
+          });
+          navigation.goBack();
+        })
+        .catch(() => {
+          Toast.show({
+            type: "error",
+            text1: "Thất bại",
+            text2: "Vui lòng thử lại sau!",
+          });
+        });
+    } catch (error) {
+      console.error("💞💓💗💞💓💗 ~ handleSave ~ error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Thất bại",
+        text2: "Vui lòng thử lại sau!",
+      });
     }
-
-    if (!formData.building.trim()) {
-      newErrors.building = "Tòa nhà không được để trống";
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      newErrors.price = "Giá thuê phải lớn hơn 0";
-    }
-
-    if (!formData.area || parseFloat(formData.area) <= 0) {
-      newErrors.area = "Diện tích phải lớn hơn 0";
-    }
-
-    if (parseInt(formData.maxTenants) < 0) {
-      newErrors.maxTenants = "Số người thuê không được âm";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
-    if (!validateForm()) {
-      Alert.alert("Lỗi", "Vui lòng kiểm tra lại thông tin");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // TODO: Gọi API cập nhật phòng
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-
-      Alert.alert("Thành công", "Đã cập nhật thông tin phòng thành công!", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("RoomList"),
-        },
-      ]);
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể cập nhật thông tin phòng");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleError = () => {
+    Toast.show({
+      type: "error",
+      text1: "Lỗi",
+      text2: "Hãy nhập đầy đủ thông tin lại thông tin!",
+    });
   };
 
   const handleDelete = () => {
     Alert.alert(
       "Xác nhận xóa",
-      `Bạn có chắc chắn muốn xóa phòng "${room.name}"?\n\nHành động này không thể hoàn tác.`,
+      `Bạn có chắc chắn muốn xóa phòng "${null}"?\n\nHành động này không thể hoàn tác.`,
       [
         {
           text: "Hủy",
@@ -123,7 +117,6 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           text: "Xóa",
           style: "destructive",
           onPress: async () => {
-            setIsLoading(true);
             try {
               // TODO: Gọi API xóa phòng
               await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -136,19 +129,11 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             } catch (error) {
               Alert.alert("Lỗi", "Không thể xóa phòng");
             } finally {
-              setIsLoading(false);
             }
           },
         },
       ]
     );
-  };
-
-  const updateFormData = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
   };
 
   return (
@@ -158,23 +143,27 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
         showsVerticalScrollIndicator={false}
       >
         {/* Compact Header */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+        <CardContent>
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <Text className="text-xl font-bold text-gray-900 mb-1">
-                {room.name}
+                {defaultValues?.name}
               </Text>
               <Text className="text-sm text-gray-600 mb-2">
-                {room.building}
+                {defaultValues?.property?.name}
               </Text>
               <View className="flex-row items-center">
                 <View
-                  className={`px-3 py-1 rounded-full ${getStatusBgClass(room.status)}`}
+                  className={`px-3 py-1 rounded-full ${getStatusBgClass(
+                    "Đang thuê"
+                  )}`}
                 >
                   <Text
-                    className={`text-xs font-semibold ${getStatusTextClass(room.status)}`}
+                    className={`text-xs font-semibold ${getStatusTextClass(
+                      "Đang thuê"
+                    )}`}
                   >
-                    {room.status}
+                    Đang thuê
                   </Text>
                 </View>
               </View>
@@ -182,176 +171,122 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             <View className="items-end">
               <Text className="text-xs text-gray-500 mb-1">Giá hiện tại</Text>
               <Text className="text-lg font-bold text-blue-600">
-                {room.price.toLocaleString()}đ
+                {defaultValues?.rentAmount?.toLocaleString()}đ
               </Text>
             </View>
           </View>
-        </View>
+        </CardContent>
 
         {/* Compact Form */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+        <CardContent>
           <Text className="text-lg font-bold text-gray-900 mb-4">
             Thông tin cơ bản
           </Text>
 
-          {/* Tên phòng */}
           <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Tên phòng *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.name ? "border-red-300 bg-red-50" : "border-gray-200"}`}
-            >
-              <Ionicons
-                name="home"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.name}
-                onChangeText={(value) => updateFormData("name", value)}
-                placeholder="Nhập tên phòng"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-            {errors.name && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.name}
-              </Text>
-            )}
+            <Controller
+              control={control}
+              name="name"
+              rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                  value={value}
+                  required
+                  onChangeText={onChange}
+                  icon="home"
+                  label="Tên gợi nhớ"
+                  error={erroForms.name?.message}
+                />
+              )}
+            />
           </View>
 
           {/* Tòa nhà */}
           <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Tòa nhà *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.building ? "border-red-300 bg-red-50" : "border-gray-200"}`}
-            >
-              <Ionicons
-                name="business"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.building}
-                onChangeText={(value) => updateFormData("building", value)}
-                placeholder="Nhập tên tòa nhà"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-            {errors.building && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.building}
-              </Text>
-            )}
+            <Controller
+              control={control}
+              name="propertyName"
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  readOnly
+                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                  value={value}
+                  showClear={false}
+                  onChangeText={onChange}
+                  icon="business"
+                  label="Toà nhà"
+                />
+              )}
+            />
           </View>
 
           {/* Giá và Diện tích - 2 cột */}
           <View className="flex-row gap-3">
             <View className="flex-1 mb-3">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">
-                Giá thuê *
-              </Text>
-              <View
-                className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.price ? "border-red-300 bg-red-50" : "border-gray-200"}`}
-              >
-                <Ionicons
-                  name="cash"
-                  size={18}
-                  color="#6B7280"
-                  className="mr-3"
-                />
-                <TextInput
-                  className="flex-1 text-base text-gray-900"
-                  value={formData.price}
-                  onChangeText={(value) =>
-                    updateFormData("price", value.replace(/[^0-9]/g, ""))
-                  }
-                  placeholder="VNĐ/tháng"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="numeric"
-                />
-              </View>
-              {errors.price && (
-                <Text className="text-xs text-red-500 mt-1 ml-1">
-                  {errors.price}
-                </Text>
-              )}
+              <Controller
+                control={control}
+                name="maxOccupancy"
+                render={({ field: { onChange, value } }) => (
+                  <InputBase
+                    type="number"
+                    placeholder="Số người"
+                    value={value?.toString()}
+                    keyboardType="numeric"
+                    onChangeText={onChange}
+                    icon="people"
+                    label="Số người"
+                    error={erroForms.maxOccupancy?.message}
+                  />
+                )}
+              />
             </View>
 
             <View className="flex-1 mb-3">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">
-                Diện tích *
-              </Text>
-              <View
-                className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.area ? "border-red-300 bg-red-50" : "border-gray-200"}`}
-              >
-                <Ionicons
-                  name="resize"
-                  size={18}
-                  color="#6B7280"
-                  className="mr-3"
-                />
-                <TextInput
-                  className="flex-1 text-base text-gray-900"
-                  value={formData.area}
-                  onChangeText={(value) =>
-                    updateFormData("area", value.replace(/[^0-9]/g, ""))
-                  }
-                  placeholder="m²"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="numeric"
-                />
-              </View>
-              {errors.area && (
-                <Text className="text-xs text-red-500 mt-1 ml-1">
-                  {errors.area}
-                </Text>
-              )}
+              <Controller
+                control={control}
+                name="area"
+                render={({ field: { onChange, value } }) => (
+                  <InputBase
+                    type="number"
+                    placeholder="Diện tích"
+                    value={value?.toString()}
+                    keyboardType="numeric"
+                    onChangeText={onChange}
+                    icon="resize"
+                    label="Diện tích"
+                    error={erroForms.area?.message}
+                  />
+                )}
+              />
             </View>
           </View>
 
           {/* Số người thuê */}
           <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Số người thuê tối đa
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${errors.maxTenants ? "border-red-300 bg-red-50" : "border-gray-200"}`}
-            >
-              <Ionicons
-                name="people"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.maxTenants.toString()}
-                onChangeText={(value) =>
-                  updateFormData("maxTenants", value.replace(/[^0-9]/g, ""))
-                }
-                placeholder="Nhập số người tối đa"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-              />
-            </View>
-            {errors.maxTenants && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.maxTenants}
-              </Text>
-            )}
+            <Controller
+              control={control}
+              name="defaultDepositAmount"
+              rules={{ required: "VNĐ/tháng" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  type="number"
+                  placeholder="VNĐ/tháng"
+                  value={value ? formatCurrency(value.toString()) : ""}
+                  keyboardType="numeric"
+                  required
+                  onChangeText={onChange}
+                  icon="cash"
+                  label="Giá thuê"
+                  error={erroForms.defaultDepositAmount?.message}
+                />
+              )}
+            />
           </View>
-        </View>
+        </CardContent>
 
         {/* Trạng thái - Compact */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+        {/* <CardContent>
           <Text className="text-lg font-bold text-gray-900 mb-3">
             Trạng thái phòng
           </Text>
@@ -386,56 +321,47 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
+        </CardContent> */}
 
         {/* Mô tả - Compact */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-3">Mô tả</Text>
-          <View className="bg-gray-50 rounded-lg border border-gray-200">
-            <TextInput
-              className="p-3 text-base text-gray-900 min-h-[80px]"
-              value={formData.description}
-              onChangeText={(value) => updateFormData("description", value)}
-              placeholder="Nhập mô tả về phòng (tùy chọn)"
-              placeholderTextColor="#9CA3AF"
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
-        </View>
+        <CardContent>
+          <Controller
+            control={control}
+            name="description"
+            rules={{ required: "Mô tả" }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                type="area"
+                placeholder="Mô tả"
+                value={value ? formatCurrency(value.toString()) : ""}
+                required
+                onChangeText={onChange}
+                label="Mô tả"
+                error={erroForms.description?.message}
+              />
+            )}
+          />
+        </CardContent>
       </ScrollView>
 
-      {/* Compact Action Buttons */}
-      <View className="p-4 bg-white border-t border-gray-200">
-        {/* Primary Action - Save Button */}
-        <TouchableOpacity
-          className="flex-row items-center justify-center py-4 px-6 rounded-xl bg-blue-600 mb-3 shadow-sm"
-          onPress={handleSave}
-          disabled={isLoading}
-        >
-          <Ionicons
-            name={isLoading ? "hourglass" : "checkmark-circle"}
-            size={20}
-            color="#FFFFFF"
-          />
-          <Text className="text-white font-semibold text-base ml-2">
-            {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Secondary Action - Delete Button */}
-        <TouchableOpacity
-          className="flex-row items-center justify-center py-3 px-6 rounded-xl border border-gray-300 bg-white"
-          onPress={handleDelete}
-          disabled={isLoading}
-        >
-          <Ionicons name="trash-outline" size={18} color="#6B7280" />
-          <Text className="text-gray-600 font-medium text-sm ml-2">
-            Xóa phòng
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <ActionButtonBottom
+        actions={[
+          {
+            label: "Lưu thay đổi",
+            onPress: handleSubmit(handleSave, handleError),
+            variant: "primary",
+            isLoading: isLoading,
+            icon: "checkmark-circle",
+          },
+          {
+            label: "Xoá phòng",
+            onPress: handleSubmit(handleSave, handleError),
+            variant: "secondary",
+            isLoading: isLoading,
+            icon: "trash-outline",
+          },
+        ]}
+      />
     </View>
   );
 };

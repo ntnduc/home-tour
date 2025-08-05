@@ -45,6 +45,10 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
   @IsString()
   description?: string;
 
+  @IsString()
+  @IsOptional()
+  propertyName?: string;
+
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
     this.propertyId = entity.propertyId;
@@ -61,5 +65,8 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
     this.updatedAt = entity.updatedAt;
     this.createdBy = entity.createdBy;
     this.updatedBy = entity.updatedBy;
+    if (entity.property) {
+      this.propertyName = entity.property.name;
+    }
   }
 }

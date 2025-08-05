@@ -14,6 +14,7 @@ export class RoomsRepository extends BaseRepository<Rooms> {
     query: SelectQueryBuilder<Rooms>,
   ): SelectQueryBuilder<Rooms> {
     const currentUserId = RequestContextService.getUserId();
+    query.leftJoinAndSelect(`${query.alias}.property`, 'property');
     query.andWhere('property.ownerId = :currentUserId', {
       currentUserId,
     });

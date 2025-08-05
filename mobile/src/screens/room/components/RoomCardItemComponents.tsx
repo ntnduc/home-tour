@@ -1,4 +1,7 @@
 import CardComponent from "@/screens/common/CardComponent";
+import { colors } from "@/theme/colors";
+import { RoomListResponse, RoomStatus } from "@/types/room";
+import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -13,29 +16,60 @@ const statusColor = {
   "Đang sửa": { bg: "#EF444420", color: "#EF4444" },
 };
 
-const RoomCardItemComponent = ({
-  item,
-  navigation,
-  getInvoiceForRoom,
-  getContractForRoom,
-  formatDate,
-  getDaysUntilDue,
-  PaymentStatus,
-  PAYMENT_STATUS_COLOR,
-  PAYMENT_STATUS_LABEL,
-  colors,
-}: any) => {
-  const status = statusColor[item.status as keyof typeof statusColor] || {
-    bg: "#EAF4FF",
-    color: "#007AFF",
-  };
+type Props = {
+  item: RoomListResponse;
+  navigation: any;
+};
 
-  const invoice = getInvoiceForRoom(item.id);
-  const contract = getContractForRoom(item.id);
-  const paymentStatusColor = item.paymentStatus
-    ? PAYMENT_STATUS_COLOR[item.paymentStatus as typeof PaymentStatus]
-    : null;
-  const daysUntilDue = item.dueDate ? getDaysUntilDue(item.dueDate) : null;
+const RoomCardItemComponent = ({ item, navigation }: Props) => {
+  const contract = {
+    id: 1,
+    roomId: 1,
+    roomName: "Phòng 101",
+    buildingName: "Tòa Sunrise",
+    tenantName: "Nguyễn Văn A",
+    tenantPhone: "0123456789",
+    tenantEmail: "nguyenvana@email.com",
+    tenantIdCard: "123456789",
+    tenantAddress: "123 Đường ABC, Quận 1, TP.HCM",
+    startDate: "2024-01-01",
+    endDate: "2024-12-31",
+    monthlyRent: 3500000,
+    deposit: 3500000,
+    status: "ACTIVE",
+    createdAt: "2024-01-01",
+    signedAt: "2024-01-01",
+    services: [
+      {
+        id: 1,
+        name: "Điện",
+        price: 3500,
+        calculationMethod: "PER_UNIT_SIMPLE",
+        isIncluded: true,
+      },
+      {
+        id: 2,
+        name: "Nước",
+        price: 15000,
+        calculationMethod: "PER_UNIT_SIMPLE",
+        isIncluded: true,
+      },
+      {
+        id: 3,
+        name: "Wifi",
+        price: 100000,
+        calculationMethod: "FIXED_PER_ROOM",
+        isIncluded: true,
+      },
+      {
+        id: 4,
+        name: "Gửi xe",
+        price: 25000,
+        calculationMethod: "FIXED_PER_ROOM",
+        isIncluded: true,
+      },
+    ],
+  };
 
   return (
     <CardComponent
@@ -43,9 +77,11 @@ const RoomCardItemComponent = ({
       title={item.name}
       actions={["edit", "delete"]}
       onActionPress={(key) => {
-        console.log("💞💓💗💞💓💗 ~ onActionPress ~ key:", key);
+        if (key === "edit") {
+          navigation.navigate("UpdateRoom", { roomId: item.id });
+        }
       }}
-      description={item.building}
+      description={item.property?.name}
     >
       <View
         style={{
@@ -64,17 +100,19 @@ const RoomCardItemComponent = ({
             </View>
           </View> */}
           {/* <Text style={styles.buildingName}>{item.building}</Text> */}
-          <Text style={styles.price}>{item.price.toLocaleString()}đ/tháng</Text>
+          <Text style={styles.price}>
+            {item.rentAmount?.toLocaleString() ?? ""}đ/tháng
+          </Text>
           <View style={styles.roomInfoRow}>
             <Text style={styles.roomInfoText}>Diện tích: {item.area}m²</Text>
-            <Text style={styles.roomInfoText}>👤 {item.tenants}</Text>
+            <Text style={styles.roomInfoText}>👤 {item.maxOccupancy}</Text>
           </View>
           {item.description && (
             <Text style={styles.roomDesc}>{item.description}</Text>
           )}
 
           {/* Thông tin hợp đồng cho phòng đang thuê */}
-          {contract && item.status === "Đang thuê" && (
+          {contract && item.status === RoomStatus.OCCUPIED && (
             <View style={styles.contractInfo}>
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Người thuê:</Text>
@@ -91,7 +129,7 @@ const RoomCardItemComponent = ({
           )}
 
           {/* Thông tin thanh toán */}
-          {item.paymentStatus && paymentStatusColor && (
+          {/* {item.paymentStatus && paymentStatusColor && (
             <View style={styles.paymentInfo}>
               <View style={styles.paymentRow}>
                 <Text style={styles.paymentLabel}>Trạng thái thanh toán:</Text>
@@ -107,7 +145,7 @@ const RoomCardItemComponent = ({
                       { color: paymentStatusColor.color },
                     ]}
                   >
-                    {PAYMENT_STATUS_LABEL[item.paymentStatus]}
+                    {PAYMENT_STATUS_LABEL[item.paymentStatus as PaymentStatus]}
                   </Text>
                 </View>
               </View>
@@ -148,12 +186,12 @@ const RoomCardItemComponent = ({
                 </View>
               )}
             </View>
-          )}
+          )} */}
         </View>
       </View>
 
       {/* Nút hành động hợp đồng */}
-      {item.status === "Trống" ? (
+      {item.status === RoomStatus.AVAILABLE ? (
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.createContractBtn}
@@ -169,7 +207,7 @@ const RoomCardItemComponent = ({
             <Text style={styles.createContractBtnText}>Tạo hợp đồng</Text>
           </TouchableOpacity>
         </View>
-      ) : item.status === "Đang thuê" && contract ? (
+      ) : item.status === RoomStatus.OCCUPIED && contract ? (
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.viewContractBtn}
@@ -201,14 +239,13 @@ const RoomCardItemComponent = ({
       ) : null}
 
       {/* Nút hành động thanh toán */}
-      {item.paymentStatus &&
+      {/* {item.paymentStatus &&
         (item.paymentStatus === PaymentStatus.PENDING ||
           item.paymentStatus === PaymentStatus.OVERDUE) && (
           <View style={styles.actionRow}>
             <TouchableOpacity
               style={styles.invoiceBtn}
               onPress={() => {
-                const invoice = getInvoiceForRoom(item.id);
                 if (invoice) {
                   navigation.navigate("InvoiceDetail", {
                     invoice,
@@ -227,7 +264,6 @@ const RoomCardItemComponent = ({
             <TouchableOpacity
               style={styles.payBtn}
               onPress={() => {
-                const invoice = getInvoiceForRoom(item.id);
                 if (invoice) {
                   navigation.navigate("InvoiceDetail", {
                     invoice,
@@ -244,7 +280,7 @@ const RoomCardItemComponent = ({
               <Text style={styles.payBtnText}>Thanh toán</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )} */}
     </CardComponent>
   );
 };
