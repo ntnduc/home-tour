@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, ScrollView, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
 
 type RootStackParamList = {
@@ -137,192 +138,200 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <ScrollView
-        className="flex-1 px-4 py-3"
+    <>
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        extraScrollHeight={100}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        enableAutomaticScroll={true}
       >
-        {/* Compact Header */}
-        <CardContent>
-          <View className="flex-row justify-between items-start">
-            <View className="flex-1">
-              <Text className="text-xl font-bold text-gray-900 mb-1">
-                {defaultValues?.name}
-              </Text>
-              <Text className="text-sm text-gray-600 mb-2">
-                {defaultValues?.property?.name}
-              </Text>
-              <View className="flex-row items-center">
-                <View
-                  className={`px-3 py-1 rounded-full ${getStatusBgClass(
-                    "Đang thuê"
-                  )}`}
-                >
-                  <Text
-                    className={`text-xs font-semibold ${getStatusTextClass(
+        <ScrollView
+          className="flex-1 px-4 py-3"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Compact Header */}
+          <CardContent>
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-gray-900 mb-1">
+                  {defaultValues?.name}
+                </Text>
+                <Text className="text-sm text-gray-600 mb-2">
+                  {defaultValues?.property?.name}
+                </Text>
+                <View className="flex-row items-center">
+                  <View
+                    className={`px-3 py-1 rounded-full ${getStatusBgClass(
                       "Đang thuê"
                     )}`}
                   >
-                    Đang thuê
-                  </Text>
+                    <Text
+                      className={`text-xs font-semibold ${getStatusTextClass(
+                        "Đang thuê"
+                      )}`}
+                    >
+                      Đang thuê
+                    </Text>
+                  </View>
                 </View>
               </View>
+              <View className="items-end">
+                <Text className="text-xs text-gray-500 mb-1">Giá hiện tại</Text>
+                <Text className="text-lg font-bold text-blue-600">
+                  {defaultValues?.rentAmount?.toLocaleString()}đ
+                </Text>
+              </View>
             </View>
-            <View className="items-end">
-              <Text className="text-xs text-gray-500 mb-1">Giá hiện tại</Text>
-              <Text className="text-lg font-bold text-blue-600">
-                {defaultValues?.rentAmount?.toLocaleString()}đ
-              </Text>
-            </View>
-          </View>
-        </CardContent>
+          </CardContent>
 
-        {/* Compact Form */}
-        <CardContent>
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Thông tin cơ bản
-          </Text>
+          {/* Compact Form */}
+          <CardContent>
+            <Text className="text-lg font-bold text-gray-900 mb-4">
+              Thông tin cơ bản
+            </Text>
 
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="name"
-              rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
-                  value={value}
-                  required
-                  onChangeText={onChange}
-                  icon="home"
-                  label="Tên gợi nhớ"
-                  error={erroForms.name?.message}
-                />
-              )}
-            />
-          </View>
-
-          {/* Tòa nhà */}
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="propertyName"
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  readOnly
-                  placeholder="Nhập tên gợi nhớ"
-                  value={value}
-                  showClear={false}
-                  onChangeText={onChange}
-                  icon="business"
-                  label="Toà nhà"
-                />
-              )}
-            />
-          </View>
-
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="floor"
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Tầng"
-                  value={value}
-                  onChangeText={onChange}
-                  icon="layers"
-                  label="Tầng"
-                />
-              )}
-            />
-          </View>
-
-          {/* Giá và Diện tích - 2 cột */}
-          <View className="flex-row gap-3">
-            <View className="flex-1 mb-3">
+            <View className="mb-3">
               <Controller
                 control={control}
-                name="maxOccupancy"
+                name="name"
+                rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
                 render={({ field: { onChange, value } }) => (
                   <InputBase
-                    type="number"
-                    placeholder="Số người"
-                    value={value?.toString()}
-                    keyboardType="numeric"
+                    placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                    value={value}
+                    required
                     onChangeText={onChange}
-                    icon="people"
-                    label="Số người"
-                    error={erroForms.maxOccupancy?.message}
+                    icon="home"
+                    label="Tên gợi nhớ"
+                    error={erroForms.name?.message}
                   />
                 )}
               />
             </View>
 
-            <View className="flex-1 mb-3">
+            {/* Tòa nhà */}
+            <View className="mb-3">
               <Controller
                 control={control}
-                name="area"
+                name="propertyName"
                 render={({ field: { onChange, value } }) => (
                   <InputBase
-                    type="number"
-                    placeholder="Diện tích"
-                    value={value?.toString()}
-                    keyboardType="numeric"
+                    readOnly
+                    placeholder="Nhập tên gợi nhớ"
+                    value={value}
+                    showClear={false}
                     onChangeText={onChange}
-                    icon="resize"
-                    label="Diện tích"
-                    error={erroForms.area?.message}
+                    icon="business"
+                    label="Toà nhà"
                   />
                 )}
               />
             </View>
-          </View>
 
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="rentAmount"
-              rules={{ required: "VNĐ/tháng" }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  type="number"
-                  placeholder="VNĐ/tháng"
-                  value={value ? formatCurrency(value.toString()) : ""}
-                  keyboardType="numeric"
-                  required
-                  onChangeText={onChange}
-                  icon="cash"
-                  label="Giá thuê mặc định"
-                  error={erroForms.rentAmount?.message}
+            <View className="mb-3">
+              <Controller
+                control={control}
+                name="floor"
+                render={({ field: { onChange, value } }) => (
+                  <InputBase
+                    placeholder="Tầng"
+                    type="number"
+                    value={value}
+                    onChangeText={onChange}
+                    icon="layers"
+                    label="Tầng"
+                  />
+                )}
+              />
+            </View>
+
+            {/* Giá và Diện tích - 2 cột */}
+            <View className="flex-row gap-3">
+              <View className="flex-1 mb-3">
+                <Controller
+                  control={control}
+                  name="maxOccupancy"
+                  render={({ field: { onChange, value } }) => (
+                    <InputBase
+                      type="number"
+                      placeholder="Số người"
+                      value={value?.toString()}
+                      keyboardType="numeric"
+                      onChangeText={onChange}
+                      icon="people"
+                      label="Số người"
+                      error={erroForms.maxOccupancy?.message}
+                    />
+                  )}
                 />
-              )}
-            />
-          </View>
+              </View>
 
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="defaultDepositAmount"
-              rules={{ required: "VNĐ/tháng" }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  type="number"
-                  placeholder="VNĐ/tháng"
-                  value={value ? formatCurrency(value.toString()) : ""}
-                  keyboardType="numeric"
-                  required
-                  onChangeText={onChange}
-                  icon="wallet"
-                  label="Tiền cọc"
-                  error={erroForms.defaultDepositAmount?.message}
+              <View className="flex-1 mb-3">
+                <Controller
+                  control={control}
+                  name="area"
+                  render={({ field: { onChange, value } }) => (
+                    <InputBase
+                      type="number"
+                      placeholder="Diện tích"
+                      value={value?.toString()}
+                      keyboardType="numeric"
+                      onChangeText={onChange}
+                      icon="resize"
+                      label="Diện tích"
+                      error={erroForms.area?.message}
+                    />
+                  )}
                 />
-              )}
-            />
-          </View>
-        </CardContent>
+              </View>
+            </View>
 
-        {/* Trạng thái - Compact */}
-        {/* <CardContent>
+            <View className="mb-3">
+              <Controller
+                control={control}
+                name="rentAmount"
+                rules={{ required: "VNĐ/tháng" }}
+                render={({ field: { onChange, value } }) => (
+                  <InputBase
+                    type="number"
+                    placeholder="VNĐ/tháng"
+                    value={value ? formatCurrency(value.toString()) : ""}
+                    keyboardType="numeric"
+                    required
+                    onChangeText={onChange}
+                    icon="cash"
+                    label="Giá thuê mặc định"
+                    error={erroForms.rentAmount?.message}
+                  />
+                )}
+              />
+            </View>
+
+            <View className="mb-3">
+              <Controller
+                control={control}
+                name="defaultDepositAmount"
+                rules={{ required: "VNĐ/tháng" }}
+                render={({ field: { onChange, value } }) => (
+                  <InputBase
+                    type="number"
+                    placeholder="VNĐ/tháng"
+                    value={value ? formatCurrency(value.toString()) : ""}
+                    keyboardType="numeric"
+                    required
+                    onChangeText={onChange}
+                    icon="wallet"
+                    label="Tiền cọc"
+                    error={erroForms.defaultDepositAmount?.message}
+                  />
+                )}
+              />
+            </View>
+          </CardContent>
+
+          {/* Trạng thái - Compact */}
+          {/* <CardContent>
           <Text className="text-lg font-bold text-gray-900 mb-3">
             Trạng thái phòng
           </Text>
@@ -359,26 +368,25 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           </View>
         </CardContent> */}
 
-        {/* Mô tả - Compact */}
-        <CardContent>
-          <Controller
-            control={control}
-            name="description"
-            rules={{ required: "Mô tả" }}
-            render={({ field: { onChange, value } }) => (
-              <InputBase
-                type="area"
-                placeholder="Mô tả"
-                value={value ? formatCurrency(value.toString()) : ""}
-                required
-                onChangeText={onChange}
-                label="Mô tả"
-                error={erroForms.description?.message}
-              />
-            )}
-          />
-        </CardContent>
-      </ScrollView>
+          {/* Mô tả - Compact */}
+          <CardContent>
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  type="area"
+                  placeholder="Mô tả"
+                  value={value ? formatCurrency(value.toString()) : ""}
+                  onChangeText={onChange}
+                  label="Mô tả"
+                  error={erroForms.description?.message}
+                />
+              )}
+            />
+          </CardContent>
+        </ScrollView>
+      </KeyboardAwareScrollView>
 
       <ActionButtonBottom
         actions={[
@@ -398,7 +406,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           },
         ]}
       />
-    </View>
+    </>
   );
 };
 
