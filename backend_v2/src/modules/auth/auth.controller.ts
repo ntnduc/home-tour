@@ -26,10 +26,6 @@ export class AuthController {
   @Post('verify-otp')
   @AllowAnonymous()
   async verifyOTP(@Body() body: { phoneNumber: string; otp: string }) {
-    console.log(
-      '💞💓💗💞💓💗 ~ AuthController ~ verifyOTP ~ phoneNumber:',
-      body,
-    );
     return this.authService.verifyOTP(body.phoneNumber, body.otp);
   }
 

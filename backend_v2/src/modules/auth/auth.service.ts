@@ -128,6 +128,8 @@ export class AuthService {
     if (!token) {
       throw new BadRequestException('Invalid refresh token');
     }
+    (token.isRevoked = true),
+      await this.tokenRepository.update(token.id, token);
 
     const { userId, phoneNumber } = this.jwtService.decode(token.refreshToken);
 
