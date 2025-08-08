@@ -1,13 +1,5 @@
 import { IsInt, IsNotEmpty, Max, Min } from 'class-validator';
-import { RequestContextService } from 'src/common/base/context/request-context.service';
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { Districts } from './../../location/entities/Districts.entity';
@@ -82,10 +74,4 @@ export class Properties extends BaseEntity {
   @ManyToOne(() => Wards)
   @JoinColumn({ name: 'wardCode' })
   wards: Wards;
-
-  @BeforeInsert()
-  setOwnerUser() {
-    const currentUserId = RequestContextService.getUserId();
-    this.ownerId = currentUserId?.toString() ?? '';
-  }
 }

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RbacModule } from '../rbac/rbac.module';
 import { TestChild } from './entities/test-child.entity';
 import { TestContent } from './entities/test-content.entity';
 import { TestMapping } from './entities/test-mapping.entity';
@@ -14,6 +15,7 @@ import { TestService } from './test.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Test, TestChild, TestContent, TestMapping]),
+    RbacModule,
   ],
   providers: [
     TestService,

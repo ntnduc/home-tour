@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
+import { RbacService } from '../rbac/rbac.service';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { ReponseOtpVerify } from './dto/auth.dto';
@@ -22,6 +23,8 @@ export class AuthService {
     private userService: UsersService,
     @Inject(JwtService)
     private jwtService: JwtService,
+    @Inject(RbacService)
+    private rbacService: RbacService,
   ) {}
 
   async requestSendOTP(phoneNumber: string): Promise<boolean> {
@@ -201,20 +204,25 @@ export class AuthService {
     userId: string,
     phoneNumber: string,
   ): Promise<Token> {
-    const accessToken = this.jwtService.sign(
-      {
-        userId,
-        phoneNumber,
-      },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '120m',
-      },
-    );
+    // Get user's roles and properties for JWT payload
+    const userProperties =
+      await this.rbacService.generateUserProperties(userId);
+
+    const accessTokenPayload = {
+      sub: userId, // Standard JWT subject claim
+      phoneNumber,
+      properties: userProperties, // Array of { propertyId, role, permissions }
+      iat: Math.floor(Date.now() / 1000),
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '120m',
+    });
 
     const refreshToken = this.jwtService.sign(
       {
-        userId,
+        sub: userId,
         phoneNumber,
       },
       {

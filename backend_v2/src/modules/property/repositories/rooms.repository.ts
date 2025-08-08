@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { RequestContextService } from 'src/common/base/context/request-context.service';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
+import { RequestContextService } from '../../../common/base/context/request-context.service';
 import { BaseRepository } from '../../../common/base/repositories/base.repository';
 import { Rooms } from '../entities/rooms.entity';
 

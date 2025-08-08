@@ -106,6 +106,10 @@ export class PropertyService
 
     try {
       const propertyEntity = propertyCreateDto.getEntity();
+      // Set ownerId from current user
+      const currentUserId = this.currentUserService.getCurrentUserId();
+      propertyEntity.ownerId = currentUserId;
+
       const property = this.propertiesRepository.create(propertyEntity);
       await queryRunner.manager.save(property);
 

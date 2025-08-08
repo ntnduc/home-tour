@@ -1,0 +1,105 @@
+Tài liệu Đặc tả Nghiệp vụ - Hệ thống Quản lý Phòng trọ
+Phiên bản: 1.0
+Ngày: 07/08/2025
+1. Tổng quan
+1.1. Mục tiêu của Hệ thống
+Xây dựng một nền tảng tập trung để số hóa và tự động hóa toàn bộ quy trình quản lý, vận hành và kinh doanh phòng trọ. Hệ thống hướng tới việc giải quyết các vấn đề sau:
+Tối ưu hóa vận hành: Giảm thiểu công việc thủ công (ghi chép sổ sách, tính toán hóa đơn) cho chủ trọ và nhân viên.
+Minh bạch tài chính: Cung cấp báo cáo doanh thu, chi phí, công nợ một cách chính xác và tức thời.
+Nâng cao trải nghiệm người thuê: Cung cấp kênh giao tiếp, thanh toán và yêu cầu hỗ trợ thuận tiện, minh bạch cho người thuê.
+Tăng cường bảo mật và kiểm soát: Quản lý quyền truy cập của nhân viên, đảm bảo an toàn dữ liệu.
+1.2. Phạm vi của Hệ thống
+Trong phạm vi: Quản lý đa nhà trọ, quản lý phòng, quản lý dịch vụ, quản lý hợp đồng và người thuê, quản lý tài chính (hóa đơn, thanh toán), quản lý yêu cầu bảo trì, quản lý người dùng và phân quyền, hệ thống báo cáo và thông báo.
+Ngoài phạm vi (cho phiên bản đầu): Tích hợp với các cổng thanh toán tự động, quản lý tài sản/thiết bị trong phòng, ứng dụng di động riêng biệt (native app).
+2. Đối tượng Sử dụng và Vai trò (RBAC)
+Hệ thống định nghĩa các vai trò người dùng với các quyền hạn khác nhau để đảm bảo an ninh và phân công công việc hợp lý.
+Vai trò
+Mô tả
+Quyền hạn tiêu biểu
+Quản trị viên (Admin)
+Người có quyền cao nhất, quản lý toàn bộ hệ thống.
+Tạo và quản lý tài khoản Chủ trọ, cấu hình hệ thống, xem mọi báo cáo.
+Chủ trọ (Owner)
+Người sở hữu một hoặc nhiều nhà trọ.
+Tạo/quản lý nhà trọ, phòng, dịch vụ của mình. Xem báo cáo tài chính tổng quan của các nhà trọ mình sở hữu. Quản lý nhân viên.
+Quản lý nhà trọ (Property Manager)
+Nhân viên được Chủ trọ giao quản lý một hoặc nhiều nhà trọ cụ thể.
+Quản lý phòng, hợp đồng, ghi chỉ số điện nước, xử lý yêu cầu bảo trì trong phạm vi nhà trọ được giao.
+Kế toán (Accountant)
+Nhân viên phụ trách các vấn đề tài chính.
+Tạo hóa đơn, ghi nhận thanh toán, quản lý và theo dõi công nợ.
+Người thuê (Tenant)
+Khách hàng thuê phòng.
+Xem thông tin hợp đồng, hóa đơn của mình. Thanh toán hóa đơn, tạo yêu cầu sửa chữa, nhận thông báo.
+
+3. Các Luồng Nghiệp vụ Chính
+3.1. Nghiệp vụ Quản lý Nhà trọ & Phòng
+Tạo nhà trọ mới:
+Người thực hiện: Chủ trọ.
+Mô tả: Chủ trọ đăng nhập và tạo một nhà trọ mới bằng cách nhập các thông tin cơ bản (tên, địa chỉ, mô tả).
+Quản lý phòng:
+Người thực hiện: Chủ trọ, Quản lý nhà trọ.
+Mô tả: Trong một nhà trọ đã tạo, người dùng có thể thêm các phòng mới với thông tin chi tiết (số phòng, diện tích, giá thuê, số người tối đa). Có thể chỉnh sửa thông tin hoặc vô hiệu hóa phòng khi không còn sử dụng.
+Cập nhật trạng thái phòng:
+Mô tả: Trạng thái của phòng được cập nhật tự động hoặc thủ công:
+AVAILABLE (Trống) -> PENDING_DEPOSIT (Chờ cọc) khi có người đặt.
+PENDING_DEPOSIT -> OCCUPIED (Đang thuê) khi hợp đồng được kích hoạt.
+OCCUPIED -> AVAILABLE khi hợp đồng kết thúc và người thuê trả phòng.
+MAINTENANCE (Bảo trì) khi phòng đang được sửa chữa.
+3.2. Nghiệp vụ Quản lý Dịch vụ & Ghi chỉ số
+Thiết lập dịch vụ:
+Người thực hiện: Chủ trọ.
+Mô tả: Chủ trọ định nghĩa các dịch vụ cho nhà trọ của mình (ví dụ: Internet, Gửi xe). Với mỗi dịch vụ, chủ trọ thiết lập cách tính (cố định, theo đầu người, theo đơn vị) và mức giá mặc định. Đối với dịch vụ điện/nước, có thể thiết lập giá theo bậc thang.
+Ghi chỉ số hàng tháng:
+Người thực hiện: Quản lý nhà trọ.
+Mô tả: Vào cuối mỗi kỳ, quản lý đi ghi chỉ số điện, nước của từng phòng và nhập vào hệ thống. Hệ thống sẽ tự động lấy chỉ số cũ của tháng trước để tính lượng tiêu thụ.
+3.3. Nghiệp vụ Quản lý Hợp đồng & Người thuê
+Tạo hợp đồng mới:
+Người thực hiện: Quản lý nhà trọ.
+Mô tả: Khi có khách thuê phòng, quản lý tạo một hợp đồng mới.
+Các bước: Chọn phòng (phải ở trạng thái AVAILABLE), nhập thông tin người thuê chính, thêm thông tin người ở cùng (nếu có), điền các điều khoản (ngày bắt đầu, ngày kết thúc, giá thuê thỏa thuận, tiền cọc).
+Quản lý vòng đời hợp đồng:
+Mô tả: Hợp đồng có các trạng thái: PENDING_START (Chờ bắt đầu), ACTIVE (Hiệu lực), ENDED (Kết thúc đúng hạn), TERMINATED_EARLY (Kết thúc trước hạn). Hệ thống sẽ gửi thông báo khi hợp đồng sắp hết hạn.
+Thanh lý hợp đồng:
+Người thực hiện: Quản lý nhà trọ.
+Mô tả: Khi hợp đồng kết thúc, quản lý thực hiện thủ tục trả phòng, xác nhận tình trạng phòng, tính toán các chi phí cuối cùng và hoàn trả tiền cọc (nếu có). Trạng thái phòng được chuyển về AVAILABLE.
+3.4. Nghiệp vụ Quản lý Tài chính
+Tạo hóa đơn tự động:
+Người thực hiện: Hệ thống, Kế toán (có thể tạo thủ công).
+Mô tả: Vào ngày đã định sẵn hàng tháng, hệ thống tự động quét các hợp đồng đang ACTIVE và tạo hóa đơn cho kỳ thanh toán tiếp theo.
+Chi tiết hóa đơn: Hóa đơn bao gồm: tiền thuê cố định, tiền các dịch vụ cố định, tiền điện/nước (dựa trên chỉ số đã ghi), nợ cũ từ kỳ trước (nếu có).
+Gửi hóa đơn và nhắc nợ:
+Mô tả: Sau khi hóa đơn được tạo và xác nhận, hệ thống gửi thông báo (qua app, email) cho người thuê. Hệ thống cũng tự động gửi thông báo nhắc nhở khi sắp đến hạn hoặc đã quá hạn thanh toán.
+Ghi nhận thanh toán:
+Người thực hiện: Kế toán, Quản lý nhà trọ.
+Mô tả: Khi người thuê thanh toán (tiền mặt hoặc chuyển khoản), người có trách nhiệm sẽ vào hệ thống ghi nhận khoản thanh toán cho hóa đơn tương ứng. Trạng thái hóa đơn được cập nhật (ví dụ: từ SENT -> PAID).
+3.5. Nghiệp vụ Quản lý Bảo trì, Sửa chữa
+Tạo yêu cầu:
+Người thực hiện: Người thuê, Quản lý nhà trọ.
+Mô tả: Người thuê đăng nhập và tạo một yêu cầu sửa chữa mới, mô tả sự cố và có thể đính kèm hình ảnh.
+Xử lý yêu cầu:
+Người thực hiện: Quản lý nhà trọ.
+Mô tả: Quản lý tiếp nhận yêu cầu, đánh giá mức độ ưu tiên, và có thể gán cho một nhân viên kỹ thuật (nếu có). Quản lý cập nhật trạng thái của yêu cầu (IN_PROGRESS, COMPLETED) để người thuê theo dõi.
+3.6. Báo cáo và Thống kê
+Người thực hiện: Chủ trọ, Admin.
+Mô tả: Hệ thống cung cấp các báo cáo trực quan để hỗ trợ ra quyết định:
+Báo cáo Doanh thu: Xem tổng doanh thu theo tháng/quý/năm, lọc theo từng nhà trọ.
+Báo cáo Tỷ lệ lấp đầy: Biểu đồ thể hiện phần trăm số phòng đang được cho thuê so với tổng số phòng.
+Báo cáo Công nợ: Danh sách các hóa đơn quá hạn và tổng số tiền chưa thanh toán.
+4. Yêu cầu Phi chức năng
+Yêu cầu
+Mô tả chi tiết
+Tính bảo mật (Security)
+- Mật khẩu người dùng phải được mã hóa một chiều (hashing).<br>- Phân quyền truy cập nghiêm ngặt theo vai trò (RBAC).<br>- Dữ liệu nhạy cảm cần được bảo vệ.
+Tính hiệu quả (Performance)
+- Thời gian tải trang chính dưới 3 giây.<br>- Các thao tác nghiệp vụ (tạo hóa đơn, ghi nhận thanh toán) phải được xử lý dưới 2 giây.
+Tính khả dụng (Availability)
+- Hệ thống phải hoạt động 99.5% thời gian. Có kế hoạch sao lưu dữ liệu định kỳ.
+Tính dễ sử dụng (Usability)
+- Giao diện người dùng (UI) phải sạch sẽ, trực quan và nhất quán.<br>- Luồng thao tác phải logic và dễ hiểu cho người không rành công nghệ.
+Tính tương thích (Compatibility)
+- Hoạt động tốt trên các trình duyệt web phổ biến: Chrome, Firefox, Safari, Edge phiên bản mới nhất.<br>- Giao diện phải có tính đáp ứng (responsive), hiển thị tốt trên cả máy tính và thiết bị di động.
+
+
+
+

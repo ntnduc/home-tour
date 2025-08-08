@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Properties } from '../../property/entities/properties.entity';
+import { UserRole } from '../../rbac/entities/user-role.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -35,4 +36,7 @@ export class User {
 
   @OneToMany(() => Properties, (property) => property.owner)
   properties: Properties[];
+
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoles: UserRole[];
 }

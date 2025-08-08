@@ -4,6 +4,7 @@ import { CurrentUserModule } from '../current.user';
 import { Districts } from '../location/entities/Districts.entity';
 import { Provinces } from '../location/entities/Provinces.entity';
 import { Wards } from '../location/entities/Wards.entity';
+import { RbacModule } from '../rbac/rbac.module';
 import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { PropertiesService } from './entities/properties-service.entity';
@@ -30,6 +31,7 @@ import { RoomsService } from './rooms.service';
       Wards,
     ]),
     CurrentUserModule,
+    RbacModule,
   ],
   providers: [
     PropertyService,
