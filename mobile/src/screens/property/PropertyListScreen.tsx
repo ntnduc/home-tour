@@ -1,8 +1,9 @@
-import { getListTenant, TenantListResponse } from "@/api/tenant/tenant.api";
+import { getListProperty } from "@/api/property/property.api";
 import FabButton from "@/components/FabButton";
 import Loading from "@/components/Loading";
 import { ApiResponse } from "@/types/api";
 import { BasePagingResponse } from "@/types/base.response";
+import { PropertyListResponse } from "@/types/property";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -19,24 +20,24 @@ import {
 import { RootStackParamList } from "../../navigation/types";
 import { colors } from "../../theme/colors";
 import HeaderComponents from "../common/HeaderComponents";
-import TenantCardComponent from "./components/TenantCardComponent";
+import PropertyCardComponent from "./components/PropertyCardComponent";
 
-type TenantListScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "TenantList">;
+type PropertyListScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, "PropertyList">;
 };
 
-const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
+const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
   const [search, setSearch] = useState("");
 
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
     useInfiniteQuery<
-      ApiResponse<BasePagingResponse<TenantListResponse>>,
+      ApiResponse<BasePagingResponse<PropertyListResponse>>,
       Error
     >({
-      queryKey: ["tenants", 1, 5, search],
+      queryKey: ["properties", 1, 5, search],
       initialPageParam: 1,
       queryFn: ({ pageParam }) =>
-        getListTenant({
+        getListProperty({
           limit: 5,
           offset: ((pageParam as number) - 1) * 5,
           globalKey: search,
@@ -55,31 +56,38 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
   );
 
   const flatData = data?.pages.flatMap((page) => page.data?.items) || [];
-  const totalTenants = flatData.length;
-  let activeContracts = 0;
+  const totalBuildings = flatData.length;
+  let totalRooms = 0;
   flatData.forEach((item) => {
-    if (item?.contractStatus === "active") activeContracts++;
+    totalRooms += item?.totalRoom ?? 0;
   });
-  let totalRevenue = 0;
+  let totalTenants = 0;
   flatData.forEach((item) => {
-    if (item?.contractStatus === "active")
-      totalRevenue += item?.rentAmount ?? 0;
+    totalTenants += item?.totalRoomOccupied ?? 0;
   });
 
   const handleSearch = (text: string) => {
     setSearch(text);
   };
 
-  const handleCreateTenant = () => {
-    navigation.navigate("CreateTenant");
+  const handleCreateProperty = () => {
+    navigation.navigate("CreateProperty");
   };
 
-  const handleTenantPress = (tenantId: string) => {
-    navigation.navigate("TenantDetail", { tenantId });
+  const handlePropertyPress = (propertyId: string) => {
+    navigation.navigate("PropertyDetail", { propertyId });
   };
 
-  const handleUpdateTenant = (tenantId: string) => {
-    navigation.navigate("UpdateTenant", { tenantId });
+  const handleUpdateProperty = (propertyId: string) => {
+    navigation.navigate("UpdateProperty", { propertyId });
+  };
+
+  const handleViewRooms = (propertyId: string) => {
+    navigation.navigate("RoomList", { propertyId });
+  };
+
+  const handleAddRoom = (propertyId: string) => {
+    navigation.navigate("CreateRoom", { propertyId });
   };
 
   return (
@@ -87,10 +95,10 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
       <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
       <View>
         <HeaderComponents
-          title="Quản lý khách thuê"
+          title="Quản lý tài sản"
           isSearch
           searchConfig={{
-            placeholder: "Tìm kiếm khách thuê...",
+            placeholder: "Tìm kiếm tài sản...",
             onSearch: handleSearch,
             className: "mx-2",
           }}
@@ -103,13 +111,15 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
       )}
       {!isLoading && (
         <FlatList
-          data={flatData as TenantListResponse[]}
+          data={flatData as PropertyListResponse[]}
           renderItem={({ item }) => {
             return (
-              <TenantCardComponent
-                tenant={item}
-                onPress={() => handleTenantPress(item.id)}
-                onUpdate={() => handleUpdateTenant(item.id)}
+              <PropertyCardComponent
+                property={item}
+                onPress={() => handlePropertyPress(item.id)}
+                onEdit={() => handleUpdateProperty(item.id)}
+                onViewRooms={() => handleViewRooms(item.id)}
+                onAddRoom={() => handleAddRoom(item.id)}
               />
             );
           }}
@@ -130,9 +140,9 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
                   { backgroundColor: colors.primary.light },
                 ]}
               >
-                <Text style={styles.statsIcon}>👤</Text>
-                <Text style={styles.statsValue}>{totalTenants}</Text>
-                <Text style={styles.statsLabel}>Khách thuê</Text>
+                <Text style={styles.statsIcon}>🏢</Text>
+                <Text style={styles.statsValue}>{totalBuildings}</Text>
+                <Text style={styles.statsLabel}>Tài sản</Text>
               </View>
               <View
                 style={[
@@ -140,9 +150,9 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
                   { backgroundColor: colors.status.success + "20" },
                 ]}
               >
-                <Text style={styles.statsIcon}>📋</Text>
-                <Text style={styles.statsValue}>{activeContracts}</Text>
-                <Text style={styles.statsLabel}>Hợp đồng</Text>
+                <Text style={styles.statsIcon}>🔑</Text>
+                <Text style={styles.statsValue}>{totalRooms}</Text>
+                <Text style={styles.statsLabel}>Phòng</Text>
               </View>
               <View
                 style={[
@@ -150,11 +160,9 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
                   { backgroundColor: colors.status.warning + "20" },
                 ]}
               >
-                <Text style={styles.statsIcon}>💰</Text>
-                <Text style={styles.statsValue}>
-                  {totalRevenue.toLocaleString()}
-                </Text>
-                <Text style={styles.statsLabel}>Doanh thu</Text>
+                <Text style={styles.statsIcon}>👤</Text>
+                <Text style={styles.statsValue}>{totalTenants}</Text>
+                <Text style={styles.statsLabel}>Đã thuê</Text>
               </View>
             </View>
           }
@@ -163,7 +171,7 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
           ListEmptyComponent={
             <View className="items-center mt-10">
               <Text style={{ color: colors.text.secondary }}>
-                Không tìm thấy khách thuê phù hợp.
+                Không tìm thấy tài sản phù hợp.
               </Text>
             </View>
           }
@@ -173,7 +181,7 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
         icon="add"
         iconSize={32}
         iconStyle={{ marginTop: -2 }}
-        onPress={handleCreateTenant}
+        onPress={handleCreateProperty}
       />
     </SafeAreaView>
   );
@@ -212,11 +220,6 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: 2,
   },
-
-  statusRow: {
-    marginTop: 8,
-    marginBottom: 8,
-  },
 });
 
-export default TenantListScreen;
+export default PropertyListScreen;

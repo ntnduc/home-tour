@@ -1,17 +1,21 @@
 import {
-  CanActivate,
   ExecutionContext,
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { BaseGuard } from '../../../common/guards/base.guard';
 import { PROPERTY_ACCESS_KEY } from '../decorators/property-access.decorator';
 
 @Injectable()
-export class PropertyAccessGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+export class PropertyAccessGuard extends BaseGuard {
+  constructor(reflector: Reflector) {
+    super(reflector);
+  }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  protected async canActivateGuard(
+    context: ExecutionContext,
+  ): Promise<boolean> {
     const requirePropertyAccess = this.reflector.getAllAndOverride<boolean>(
       PROPERTY_ACCESS_KEY,
       [context.getHandler(), context.getClass()],

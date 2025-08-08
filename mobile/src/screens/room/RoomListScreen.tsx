@@ -8,7 +8,7 @@ import { ComboOptionWithExtra } from "@/types/comboOption";
 import { PropertyDetail } from "@/types/property";
 import { RoomListResponse } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -24,30 +24,21 @@ import {
 } from "react-native";
 import BuildingSelector from "../../components/BuildingSelector";
 import PaymentSummary from "../../components/PaymentSummary";
+import { RootStackParamList } from "../../navigation/types";
 import { colors } from "../../theme/colors";
-import { Invoice, PaymentStatus } from "../../types/payment";
+import { PaymentStatus } from "../../types/payment";
 import HeaderComponents from "../common/HeaderComponents";
 import BuildingFilterComponent from "./components/BuildingFilterComponent";
 import RoomCardItemComponent from "./components/RoomCardItemComponents";
 import styles from "./styles/StyleRoomList";
 
-type RootStackParamList = {
-  RoomList: undefined;
-  RoomDetail: { roomId: number };
-  UpdateRoom: { roomId: any };
-  InvoiceDetail: { invoice: Invoice; fromHistory?: boolean };
-  InvoiceHistory: undefined;
-  // Contract management routes
-  CreateContract: { room: any };
-  ContractDetail: { contract: any };
-  TerminateContract: { contract: any };
-};
-
 type RoomListScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList>;
+  navigation: NativeStackNavigationProp<RootStackParamList, "RoomList">;
+  route: RouteProp<RootStackParamList, "RoomList">;
 };
 
-const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
+const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
+  const { propertyId } = route.params || {};
   const refAppSheet = useRef<AppSheetRef>(null);
 
   const [search, setSearch] = useState("");
@@ -85,8 +76,12 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
         const options = [...(data ?? [])];
         setComboProperty(options);
       })
-      .catch(() => {
+      .catch((error) => {
         // Nothing
+        console.error(
+          "💞💓💗💞💓💗 ~ error:",
+          JSON.stringify(error.response.data.message)
+        );
         return [];
       })
       .finally(() => {

@@ -134,9 +134,9 @@ export class AuthService {
     (token.isRevoked = true),
       await this.tokenRepository.update(token.id, token);
 
-    const { userId, phoneNumber } = this.jwtService.decode(token.refreshToken);
+    const { sub, phoneNumber } = this.jwtService.decode(token.refreshToken);
 
-    const newToken = await this.generateToken(userId, phoneNumber);
+    const newToken = await this.generateToken(sub, phoneNumber);
 
     return {
       accessToken: newToken.accessToken,

@@ -1,14 +1,19 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../../../common/enums/role.enum';
+import { BaseGuard } from '../../../common/guards/base.guard';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
-export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+export class RolesGuard extends BaseGuard {
+  constructor(reflector: Reflector) {
+    super(reflector);
+  }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+  protected async canActivateGuard(
+    context: ExecutionContext,
+  ): Promise<boolean> {
+    const requiredRoles = this.reflector?.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -23,7 +28,6 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    // Get user roles from JWT token
     const userProperties = user.properties || [];
     const userRoles = userProperties.map((property: any) => property.role);
 

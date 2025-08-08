@@ -15,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Permission, Role } from 'src/common/enums/role.enum';
+import { PermissionTreeService } from '../../common/services/permission-tree.service';
 import { StickAuthGaurd } from '../auth/jwt-auth.guard';
 import { RequirePermissions } from './decorators/permissions.decorator';
 import { Roles } from './decorators/roles.decorator';
@@ -32,7 +33,10 @@ import { RbacService } from './rbac.service';
 @Controller('api/rbac')
 @UseGuards(StickAuthGaurd, RolesGuard, PermissionsGuard)
 export class RbacController {
-  constructor(private readonly rbacService: RbacService) {}
+  constructor(
+    private readonly rbacService: RbacService,
+    private readonly permissionTreeService: PermissionTreeService,
+  ) {}
 
   // Role Management
   @Post('roles')
@@ -231,6 +235,57 @@ export class RbacController {
     await this.rbacService.initializeDefaultRolesAndPermissions();
     return {
       message: 'Default roles and permissions initialized successfully',
+    };
+  }
+
+  // Permission Tree Management
+  @Get('permissions/tree')
+  @ApiOperation({ summary: 'Get permission tree structure' })
+  @ApiResponse({
+    status: 200,
+    description: 'Permission tree retrieved successfully',
+  })
+  @Roles(Role.ADMIN, Role.OWNER)
+  @RequirePermissions(Permission.VIEW_USER)
+  async getPermissionTree() {
+    return {
+      data: this.permissionTreeService.getPermissionTree(),
+      message: 'Permission tree retrieved successfully',
+    };
+  }
+
+  @Get('permissions/category/:category')
+  @ApiOperation({ summary: 'Get permissions by category' })
+  @ApiResponse({
+    status: 200,
+    description: 'Category permissions retrieved successfully',
+  })
+  @Roles(Role.ADMIN, Role.OWNER)
+  @RequirePermissions(Permission.VIEW_USER)
+  async getPermissionsByCategory(@Param('category') category: string) {
+    const categoryPermissions =
+      this.permissionTreeService.getPermissionsByCategory(category);
+    return {
+      data: categoryPermissions,
+      message: `Permissions for category '${category}' retrieved successfully`,
+    };
+  }
+
+  @Post('permissions/validate')
+  @ApiOperation({ summary: 'Validate permissions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Permissions validated successfully',
+  })
+  @Roles(Role.ADMIN, Role.OWNER)
+  @RequirePermissions(Permission.VIEW_USER)
+  async validatePermissions(@Body() body: { permissions: string[] }) {
+    const result = this.permissionTreeService.validatePermissions(
+      body.permissions,
+    );
+    return {
+      data: result,
+      message: 'Permissions validated successfully',
     };
   }
 }

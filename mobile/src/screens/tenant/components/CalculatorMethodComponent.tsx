@@ -2,7 +2,7 @@ import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
   ServiceCalculateMethod,
 } from "@/constant/service.constant";
-import { createStyles } from "@/styles/StyleCreateTenantScreent";
+import { createStyles } from "@/styles/StyleCreateTenantScreen";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Alert, Text, TouchableOpacity } from "react-native";

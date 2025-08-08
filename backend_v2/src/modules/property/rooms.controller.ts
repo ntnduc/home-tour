@@ -1,10 +1,7 @@
-import { Controller, UseGuards } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BaseController } from 'src/common/base/crud/base.controller';
-import { StickAuthGaurd } from '../auth/jwt-auth.guard';
-import { PermissionsGuard } from '../rbac/guards/permissions.guard';
-import { PropertyAccessGuard } from '../rbac/guards/property-access.guard';
-import { RolesGuard } from '../rbac/guards/roles.guard';
+import { AutoCrudPermissions } from 'src/common/decorators/crud-permissions.decorator';
 import { RoomDetailDto } from './dto/room-dto/room.detail.dto';
 import { RoomListDto } from './dto/room-dto/room.list.dto';
 import { RoomUpdateDto } from './dto/room-dto/room.update.dto';
@@ -15,7 +12,7 @@ import { RoomsService } from './rooms.service';
 @ApiTags('Room')
 @ApiBearerAuth()
 @Controller('api/rooms')
-@UseGuards(StickAuthGaurd, RolesGuard, PermissionsGuard, PropertyAccessGuard)
+@AutoCrudPermissions('ROOM')
 export class RoomsController extends BaseController<
   RoomsService,
   Rooms,

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PermissionTreeService } from '../../common/services/permission-tree.service';
 import { PermissionEntity } from './entities/permission.entity';
 import { RolePermission } from './entities/role-permission.entity';
 import { RoleEntity } from './entities/role.entity';
@@ -28,10 +29,17 @@ import { UserRoleRepository } from './repositories/user-role.repository';
     RoleRepository,
     PermissionRepository,
     UserRoleRepository,
+    PermissionTreeService,
     RolesGuard,
     PermissionsGuard,
     PropertyAccessGuard,
   ],
-  exports: [RbacService, RolesGuard, PermissionsGuard, PropertyAccessGuard],
+  exports: [
+    RbacService,
+    PermissionTreeService,
+    RolesGuard,
+    PermissionsGuard,
+    PropertyAccessGuard,
+  ],
 })
 export class RbacModule {}

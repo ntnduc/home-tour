@@ -4,7 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionFilter } from './common/filter/http-exception.filter';
+import { PermissionTreeService } from './common/services/permission-tree.service';
 import { StickAuthGaurd } from './modules/auth/jwt-auth.guard';
+import { PermissionsGuard } from './modules/rbac/guards/permissions.guard';
+import { PropertyAccessGuard } from './modules/rbac/guards/property-access.guard';
+import { RolesGuard } from './modules/rbac/guards/roles.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,8 +28,13 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionFilter());
 
   const jwtService = app.get(JwtService);
+  const permissionTreeService = app.get(PermissionTreeService);
+
   const reflector = app.get(Reflector);
   app.useGlobalGuards(new StickAuthGaurd(jwtService, reflector));
+  app.useGlobalGuards(new RolesGuard(reflector));
+  app.useGlobalGuards(new PropertyAccessGuard(reflector));
+  app.useGlobalGuards(new PermissionsGuard(reflector, permissionTreeService));
 
   // Swagger setup
   const config = new DocumentBuilder()

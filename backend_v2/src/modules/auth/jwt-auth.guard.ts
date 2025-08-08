@@ -1,26 +1,20 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { ALLOW_ANONYMOUS_KEY } from 'src/common/decorators/allow-anonymous.decorator';
+import { BaseGuard } from 'src/common/guards/base.guard';
 
-export class StickAuthGaurd implements CanActivate {
+export class StickAuthGaurd extends BaseGuard {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly reflector: Reflector,
-  ) {}
+    reflector: Reflector,
+  ) {
+    super(reflector);
+  }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(
-      ALLOW_ANONYMOUS_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-    if (isPublic) return true;
-
+  protected async canActivateGuard(
+    context: ExecutionContext,
+  ): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
     const authHeader = request.headers['authorization'];
@@ -31,7 +25,6 @@ export class StickAuthGaurd implements CanActivate {
 
     try {
       const token = authHeader.replace('Bearer ', '');
-
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });

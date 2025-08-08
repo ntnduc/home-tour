@@ -214,6 +214,7 @@ export class RbacService {
   // JWT Token helpers
   async generateUserProperties(userId: string): Promise<UserProperty[]> {
     const userRoles = await this.userRoleRepository.findByUserId(userId);
+
     const properties: UserProperty[] = [];
 
     for (const userRole of userRoles) {

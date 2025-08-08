@@ -5,7 +5,7 @@ import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import styles from "../styles/StyleRoomCardItemCompoent";
+import styles from "../styles/StyleRoomCardItemComponent";
 
 const statusColor = {
   "Đang thuê": {
