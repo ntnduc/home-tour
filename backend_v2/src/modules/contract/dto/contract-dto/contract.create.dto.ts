@@ -12,6 +12,8 @@ import {
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
 import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
+import { ContractPropertyCreateDto } from '../contract-properties-dto/contract-property.create.dto';
+import { ContractServiceCreateDto } from '../contract-services-dto/contract-service.create.dto';
 
 export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsUUID()
@@ -61,11 +63,11 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
 
   @IsArray()
   @IsOptional()
-  contractProperties?: any[];
+  contractProperties?: ContractPropertyCreateDto[];
 
   @IsArray()
   @IsOptional()
-  contractServices?: any[];
+  contractServices?: ContractServiceCreateDto[];
 
   getEntity(): Contracts {
     const entity = new Contracts();
@@ -81,6 +83,16 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     entity.contractScanURL = this.contractScanURL;
     entity.status = this.status ?? ContractStatus.PENDING_START;
     entity.notes = this.notes;
+    if (this.contractProperties) {
+      this.contractProperties.forEach((property) => {
+        entity.contractProperties.push(property.getEntity());
+      });
+    }
+    if (this.contractServices) {
+      this.contractServices.forEach((service) => {
+        entity.contractServices.push(service.getEntity());
+      });
+    }
     return entity;
   }
 }

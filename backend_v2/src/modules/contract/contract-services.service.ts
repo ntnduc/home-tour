@@ -64,8 +64,7 @@ export class ContractServicesService {
         serviceEntity = new ContractServices();
         serviceEntity.contractId = createDto.contractId!;
         serviceEntity.serviceId = propertyService.serviceId;
-        serviceEntity.customPrice =
-          createDto.customPrice || propertyService.price;
+        serviceEntity.price = createDto.price ?? propertyService.price;
         serviceEntity.isEnabled = createDto.isEnabled ?? true;
         serviceEntity.notes = createDto.notes;
       } else {
@@ -199,10 +198,7 @@ export class ContractServicesService {
     return result;
   }
 
-  async updatePrice(
-    id: string,
-    customPrice: number,
-  ): Promise<ContractServices> {
+  async updatePrice(id: string, price: number): Promise<ContractServices> {
     const service = await this.contractServicesRepository.findOne({
       where: { id },
     });
@@ -211,7 +207,7 @@ export class ContractServicesService {
       throw new NotFoundException('Dịch vụ hợp đồng không tồn tại');
     }
 
-    await this.contractServicesRepository.update({ id }, { customPrice });
+    await this.contractServicesRepository.update({ id }, { price: price });
 
     const result = await this.contractServicesRepository.findOne({
       where: { id },
@@ -259,7 +255,7 @@ export class ContractServicesService {
           const contractService = new ContractServices();
           contractService.contractId = contractId;
           contractService.serviceId = propertyService.serviceId;
-          contractService.customPrice = propertyService.price;
+          contractService.price = propertyService.price;
           contractService.isEnabled = true; // Default enabled when cloning
           contractService.notes = `Cloned from property service: ${propertyService.service?.name}`;
 

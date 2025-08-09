@@ -4,6 +4,8 @@ import { ContractStatus } from '../../../common/enums/contract.enum';
 import { Properties } from '../../property/entities/properties.entity';
 import { Rooms } from '../../property/entities/rooms.entity';
 import { User } from '../../users/entities/user.entity';
+import { ContractProperties } from './contract-properties.entity';
+import { ContractServices } from './contract-services.entity';
 
 @Entity('contracts')
 export class Contracts extends BaseEntity {
@@ -63,9 +65,15 @@ export class Contracts extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
-  @OneToMany('ContractProperties', 'contract')
-  contractProperties: any[];
+  @OneToMany(
+    () => ContractProperties,
+    (contractProperties) => contractProperties.contract,
+  )
+  contractProperties: ContractProperties[];
 
-  @OneToMany('ContractServices', 'contract')
-  contractServices: any[];
+  @OneToMany(
+    () => ContractServices,
+    (contractServices) => contractServices.contract,
+  )
+  contractServices: ContractServices[];
 }

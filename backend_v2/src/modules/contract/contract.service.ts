@@ -241,7 +241,7 @@ export class ContractService
           const contractService = {
             contractId: contractId,
             serviceId: propertyService.serviceId,
-            customPrice: serviceDto.customPrice || propertyService.price,
+            price: serviceDto.price ?? propertyService.price,
             isEnabled: serviceDto.isEnabled ?? true,
             notes: serviceDto.notes,
           };

@@ -1,5 +1,10 @@
-import { Controller } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { BaseController } from 'src/common/base/crud/base.controller';
 import { AutoCrudPermissions } from 'src/common/decorators/crud-permissions.decorator';
 import { RoomDetailDto } from './dto/room-dto/room.detail.dto';
@@ -29,5 +34,13 @@ export class RoomsController extends BaseController<
       RoomCreateDto,
       RoomUpdateDto,
     );
+  }
+
+  @Get(':id/services')
+  @ApiOperation({ summary: 'Get room services' })
+  @ApiResponse({ status: 200, description: 'Room services' })
+  @ApiResponse({ status: 404, description: 'Room not found' })
+  async getRoomServices(@Param('id') id: string) {
+    return await this.roomsService.getRoomServices(id);
   }
 }

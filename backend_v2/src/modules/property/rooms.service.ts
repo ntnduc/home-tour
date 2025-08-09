@@ -4,6 +4,7 @@ import { RoomStatus } from 'src/common/enums/room.enum';
 import { SelectQueryBuilder } from 'typeorm';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
 import { PropertyDetailDto } from './dto/properties-dto/property.detail.dto';
+import { RoomServiceDetailDto } from './dto/room-dto/room-service.detail.dto';
 import { RoomDetailDto } from './dto/room-dto/room.detail.dto';
 import { RoomListDto } from './dto/room-dto/room.list.dto';
 import { RoomUpdateDto } from './dto/room-dto/room.update.dto';
@@ -64,6 +65,21 @@ export class RoomsService extends BaseService<
       dto.property = property;
     }
 
+    return dto;
+  }
+
+  public async getRoomServices(id: string): Promise<RoomServiceDetailDto> {
+    const entity = await this.genericRepository.findOne({
+      where: { id: id as any },
+      relations: ['property', 'property.services', 'property.services.service'],
+    });
+
+    if (!entity) {
+      throw new NotFoundException('Không tìm thấy phòng!');
+    }
+
+    const dto = new RoomServiceDetailDto();
+    dto.fromEntity(entity);
     return dto;
   }
 

@@ -61,7 +61,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
       name: string;
       icon?: string;
     };
-    customPrice?: number;
+    price?: number;
     isEnabled: boolean;
     notes?: string;
   }>;
@@ -128,7 +128,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
           name: ls.service?.name || '',
           icon: ls.service?.icon,
         },
-        customPrice: ls.customPrice,
+        price: ls.price,
         isEnabled: ls.isEnabled,
         notes: ls.notes,
       })) || [];
