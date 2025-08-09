@@ -1,0 +1,78 @@
+Nghiệp Vụ & Cấu Trúc Dữ Liệu Quản Lý Hợp Đồng Thuê
+** LƯU Ý **
+  - Các entity bên dưới sẽ để tên Primary key của các bảng là tên của bảng kèm + ID. Khi tạo entity kế thừa từ BaseEntity và các PK sẽ là ID nên không cần tạo field đó bên trong entity khi dev.
+  
+Dựa trên yêu cầu thay đổi của bạn và thông tin từ các nguồn đã cung cấp, tôi sẽ điều chỉnh và bổ sung nghiệp vụ quản lý hợp đồng như sau:
+Nghiệp vụ quản lý hợp đồng trong Hệ thống Quản lý Phòng trọ vẫn giữ các bước chính là tạo mới, quản lý vòng đời và thanh lý hợp đồng thuê, đồng thời lưu trữ chi tiết các thông tin liên quan trong cơ sở dữ liệu [1, 2]. Tuy nhiên, có một số điều chỉnh về cấu trúc dữ liệu và khả năng của hệ thống như bạn yêu cầu.
+I. Luồng nghiệp vụ Quản lý Hợp đồng & Người thuê
+1. Tạo hợp đồng mới:
+• Người thực hiện: Chủ yếu là Quản lý nhà trọ [2].
+• Mô tả: Khi có khách thuê phòng, quản lý sẽ tạo một hợp đồng mới [2].
+• Các bước:
+    ◦ Chọn phòng, phòng này phải ở trạng thái "Trống" (AVAILABLE) [2].
+    ◦ Nhập thông tin của người thuê chính. Một người dùng có thể đứng tên trên nhiều hợp đồng khác nhau [3].
+    ◦ Thêm thông tin của những người cùng ở (nếu có). Hệ thống hiện tại không yêu cầu lưu mối quan hệ cụ thể của người ở cùng với người thuê chính (xem phần điều chỉnh bảng LeaseTenants bên dưới) [4-6].
+    ◦ Điền các điều khoản của hợp đồng như ngày bắt đầu, ngày kết thúc, giá thuê đã thỏa thuận và số tiền đặt cọc [2].
+    ◦ Cấu hình các dịch vụ áp dụng riêng cho hợp đồng này (nếu có, xem bảng LeaseServices đề xuất bên dưới).
+2. Quản lý vòng đời hợp đồng:
+• Hợp đồng có các trạng thái như: PENDING_START (Chờ bắt đầu), ACTIVE (Hiệu lực), ENDED (Kết thúc đúng hạn), TERMINATED_EARLY (Kết thúc trước hạn), EXPIRED [2, 7-9].
+• Hệ thống sẽ gửi thông báo khi hợp đồng sắp hết hạn để nhắc nhở [2, 10].
+3. Thanh lý hợp đồng:
+• Người thực hiện: Quản lý nhà trọ [2].
+• Mô tả: Khi hợp đồng kết thúc, quản lý thực hiện thủ tục trả phòng [2].
+• Các bước:
+    ◦ Xác nhận tình trạng phòng.
+    ◦ Tính toán các chi phí cuối cùng (ví dụ: các hóa đơn chưa thanh toán) [2].
+    ◦ Hoàn trả tiền cọc (nếu có) [2].
+    ◦ Trạng thái của phòng được chuyển về "Trống" (AVAILABLE) [2].
+II. Các Bảng dữ liệu hỗ trợ nghiệp vụ hợp đồng và điều chỉnh theo yêu cầu
+1. Bảng: Leases (Hợp đồng thuê)
+• Nhiệm vụ: Lưu trữ thông tin pháp lý và các thỏa thuận chính của một hợp đồng cho thuê [7-9].
+• Điều chỉnh theo yêu cầu "không ràng buộc 1 người chỉ được đứng tên 1 hợp đồng":
+    ◦ Trong cấu trúc database hiện tại, trường PrimaryTenantUserID trong bảng Leases không có ràng buộc UNIQUE [7-9]. Điều này cho phép một UserID có thể đóng vai trò là PrimaryTenantUserID cho nhiều hợp đồng thuê khác nhau, đáp ứng yêu cầu của bạn [3].
+• Các trường dữ liệu chính:
+    ◦ LeaseID: Khóa chính, ID duy nhất cho mỗi hợp đồng [7-9].
+    ◦ RoomID: Khóa ngoại, liên kết đến phòng được cho thuê trong hợp đồng này [7-9].
+    ◦ PrimaryTenantUserID: Khóa ngoại, người thuê đứng tên chính trên hợp đồng [7-9].
+    ◦ LandlordUserID: Khóa ngoại, chủ nhà hoặc người đại diện ký hợp đồng [7-9].
+    ◦ StartDate, EndDate: Ngày bắt đầu và kết thúc hiệu lực của hợp đồng. EndDate có thể là NULL nếu hợp đồng không có thời hạn hoặc chưa xác định [7-9].
+    ◦ RentAmountAgreed: Giá thuê cuối cùng đã được hai bên thỏa thuận trong hợp đồng, có thể khác với Rooms.RentAmount hoặc Properties.DefaultRoomRent [3, 7-9].
+    ◦ DepositAmountPaid: Số tiền cọc mà người thuê đã thanh toán [7-9]. Mặc định là 0 [8].
+    ◦ PaymentDueDay: Ngày hạn thanh toán hàng tháng được quy định trong hợp đồng (ví dụ: ngày 1, 5). Giá trị này ghi đè Rooms.DefaultPaymentDueDay [7-9].
+    ◦ ContractScanURL: Đường dẫn đến file scan hoặc ảnh chụp của hợp đồng giấy (nếu có) [7-9].
+    ◦ Status: Trạng thái của hợp đồng (ví dụ: ACTIVE, ENDED, TERMINATED_EARLY, PENDING_START, EXPIRED) [7-9]. Mặc định là PENDING_START [8].
+    ◦ Notes: Ghi chú nội bộ về hợp đồng [8].
+    ◦ CreatedAt, UpdatedAt: Dấu thời gian tạo và cập nhật hợp đồng [8].
+2. Bảng: LeaseTenants (Người cùng thuê)
+• Nhiệm vụ: Lưu danh sách tất cả những người cùng ở trong một phòng theo một hợp đồng [4-6].
+• Điều chỉnh theo yêu cầu "không cần lưu mối quan hệ của người thuê với người ở cùng":
+    ◦ Trong cấu trúc database hiện tại, bảng LeaseTenants có trường RelationshipToPrimary để lưu mối quan hệ với người thuê chính (ví dụ: "Bạn cùng phòng", "Vợ/Chồng") [4-6]. Nếu không cần thiết, trường này có thể được loại bỏ hoặc thiết lập là NULLable và không bắt buộc nhập liệu.
+• Các trường dữ liệu chính (sau điều chỉnh):
+    ◦ LeaseTenantID: Khóa chính [4-6].
+    ◦ LeaseID: Khóa ngoại, liên kết đến hợp đồng thuê [4-6].
+    ◦ TenantUserID: Khóa ngoại, liên kết đến người dùng là người ở cùng [4-6].
+    ◦ MoveInDate, MoveOutDate: Ngày người này dọn vào và dọn ra. MoveOutDate sẽ được cập nhật khi họ rời đi [4-6].
+    ◦ IsActiveInLease: Cờ xác định người này có còn đang ở theo hợp đồng này không. Mặc định là TRUE [4-6].
+    ◦ Có ràng buộc UNIQUE (LeaseID, TenantUserID) để đảm bảo mỗi người chỉ được thêm một lần vào một hợp đồng cụ thể [4-6].
+3. Bảng mới đề xuất: LeaseServices (Dịch vụ của Hợp đồng)
+• Điều chỉnh theo yêu cầu "thêm bảng lưu dịch vụ của hợp đồng với các thông tin giống với dịch vụ của tòa nhà":
+    ◦ Để cho phép cấu hình dịch vụ riêng biệt cho từng hợp đồng, một bảng mới LeaseServices có thể được thêm vào. Bảng này sẽ ghi đè các thiết lập dịch vụ ở cấp độ nhà trọ (PropertyServices) và cấp độ phòng (RoomServices) [9, 11-13]. Điều này đặc biệt hữu ích cho các thỏa thuận hoặc khuyến mãi dịch vụ cụ thể chỉ áp dụng trong một hợp đồng nhất định.
+• Nhiệm vụ: Cho phép cấu hình các dịch vụ cụ thể được áp dụng cho một hợp đồng thuê cụ thể, ghi đè lên các thiết lập dịch vụ ở cấp độ nhà trọ và phòng.
+• Các trường dữ liệu chính:
+    ◦ LeaseServiceID: Khóa chính, ID duy nhất cho mỗi bản ghi dịch vụ hợp đồng.
+    ◦ LeaseID: Khóa ngoại, liên kết đến hợp đồng (Leases.LeaseID).
+    ◦ ServiceID: Khóa ngoại, liên kết đến loại dịch vụ (Services.ServiceID).
+    ◦ CustomPrice: Mức giá tùy chỉnh cho dịch vụ này trong hợp đồng (ví dụ: WiFi giảm giá cho hợp đồng này). Nếu có giá trị, nó sẽ được ưu tiên sử dụng để tính hóa đơn thay vì giá từ RoomServices.CustomPrice hoặc PropertyServices.DefaultPrice.
+    ◦ IsEnabled: Cờ xác định dịch vụ này có được kích hoạt cho hợp đồng này hay không. Nếu FALSE, dịch vụ sẽ không được tính phí hoặc cung cấp cho hợp đồng này, ghi đè RoomServices.IsEnabled.
+    ◦ Notes: Ghi chú nội bộ về dịch vụ trong hợp đồng.
+    ◦ Có ràng buộc UNIQUE (LeaseID, ServiceID) để đảm bảo mỗi dịch vụ chỉ được cấu hình một lần cho một hợp đồng.
+
+III. Logic của dev
+1. Phần tạo dịch vụ cho hợp đồng.
+  - Trường hợp 1: Dịch vụ được clone từ trong property service và không có thay đổi hoặc có thay đổi về giá:
+    + DTO: sẽ chưa id của property service đó và kèm với các update.
+  - Trường hợp 2: Dịch vụ được tạo mới hoàn toàn:
+    + Tham khảo service property.sevice hàm create hoặc update để biết luồng tạo mới dịch vụ.
+    + Tạo mới dịch vụ trong property trước rồi mới clone dịch vụ qua cho hợp đồng.
+2. Rule
+  - Tạo module lease và đảm bảo đúng rule đã được mô tả trước trong .cursor
