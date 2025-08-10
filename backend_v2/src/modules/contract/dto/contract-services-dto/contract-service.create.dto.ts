@@ -17,7 +17,8 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
   contractId?: string;
 
   @IsUUID()
-  serviceId: string;
+  @IsOptional()
+  serviceId?: string;
 
   @IsNumber()
   @Min(0)
@@ -32,7 +33,6 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
   @IsOptional()
   notes?: string;
 
-  // Thêm field để xử lý trường hợp clone từ property service
   @IsUUID()
   @IsOptional()
   propertyServiceId?: string;
@@ -40,13 +40,26 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
   @IsEnum(ServiceCalculationMethod)
   calculationMethod: ServiceCalculationMethod;
 
+  @IsBoolean()
+  @IsOptional()
+  isNew?: boolean;
+
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isSelectedFromService?: boolean;
+
   getEntity(): ContractServices {
     const entity = new ContractServices();
     if (this.contractId) entity.contractId = this.contractId;
-    entity.serviceId = this.serviceId;
     entity.price = this.price ?? 0;
     entity.isEnabled = this.isEnabled ?? true;
     entity.notes = this.notes;
+    if (this.propertyServiceId)
+      entity.propertyServiceId = this.propertyServiceId;
     entity.calculationMethod = this.calculationMethod;
     return entity;
   }

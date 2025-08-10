@@ -1,18 +1,9 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { Properties } from '../../property/entities/properties.entity';
 import { UserRole } from '../../rbac/entities/user-role.entity';
 @Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class User extends BaseEntity {
   @Column({ unique: true })
   phone: string;
 
@@ -27,12 +18,6 @@ export class User {
 
   @Column({ default: false })
   isActive: boolean;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @OneToMany(() => Properties, (property) => property.owner)
   properties: Properties[];

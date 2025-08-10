@@ -5,6 +5,7 @@ import { BasePagingResponse } from "@/types/base.response";
 import {
   RoomDetailResponse,
   RoomListResponse,
+  RoomServiceDetailResponse,
   RoomUpdateRequest,
 } from "@/types/room";
 
@@ -39,6 +40,13 @@ export const updateRoom = async (data: RoomUpdateRequest) => {
   const response = await privateApi.put<ApiResponse<RoomDetailResponse>>(
     "/rooms",
     data
+  );
+  return response.data;
+};
+
+export const getRoomService = async (id: string) => {
+  const response = await privateApi.get<ApiResponse<RoomServiceDetailResponse>>(
+    `/rooms/${id}/services`
   );
   return response.data;
 };

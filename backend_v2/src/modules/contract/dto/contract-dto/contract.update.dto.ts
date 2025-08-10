@@ -21,12 +21,6 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
   @IsUUID()
   roomId?: string;
 
-  // propertyId không được phép update - chỉ set khi tạo mới
-
-  @IsOptional()
-  @IsUUID()
-  primaryTenantUserId?: string;
-
   @IsOptional()
   @IsUUID()
   landlordUserId?: string;
@@ -71,8 +65,6 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
     const updateData: QueryDeepPartialEntity<Contracts> = {};
 
     if (this.roomId) updateData.roomId = this.roomId;
-    if (this.primaryTenantUserId)
-      updateData.primaryTenantUserId = this.primaryTenantUserId;
     if (this.landlordUserId) updateData.landlordUserId = this.landlordUserId;
     if (this.startDate) updateData.startDate = new Date(this.startDate);
     if (this.endDate) updateData.endDate = new Date(this.endDate);

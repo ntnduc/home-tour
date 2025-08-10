@@ -37,12 +37,15 @@ export class ContractServicesRepository extends BaseRepository<ContractServices>
 
   async findByContractIdAndServiceId(
     contractId: string,
-    serviceId: string,
+    propertyServiceId: string,
   ): Promise<ContractServices | null> {
     return this.createQueryBuilder('contractService')
-      .leftJoinAndSelect('contractService.service', 'service')
+      .leftJoinAndSelect('contractService.propertyService', 'propertyService')
+      .leftJoinAndSelect('propertyService.service', 'service')
       .where('contractService.contractId = :contractId', { contractId })
-      .andWhere('contractService.serviceId = :serviceId', { serviceId })
+      .andWhere('contractService.propertyServiceId = :propertyServiceId', {
+        propertyServiceId,
+      })
       .getOne();
   }
 }

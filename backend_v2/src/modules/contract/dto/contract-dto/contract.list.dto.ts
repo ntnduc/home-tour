@@ -7,8 +7,12 @@ export class ContractListDto extends BaseListDto<Contracts> {
   roomId: string;
   roomName: string;
   propertyName: string;
-  primaryTenantName: string;
-  primaryTenantPhone: string;
+  primaryPropertyUser: {
+    id: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
   landlordName: string;
   startDate: Date;
   endDate?: Date;
@@ -26,8 +30,17 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.roomId = entity.roomId;
     this.roomName = entity.room?.name || '';
     this.propertyName = entity.room?.property?.name || '';
-    this.primaryTenantName = entity.primaryTenant?.fullName || '';
-    this.primaryTenantPhone = entity.primaryTenant?.phone || '';
+    this.primaryPropertyUser = {
+      id:
+        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
+          ?.property?.id || '',
+      fullName:
+        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
+          ?.property?.fullName || '',
+      phone:
+        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
+          ?.property?.phone || '',
+    };
     this.landlordName = entity.landlord?.fullName || '';
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
@@ -36,7 +49,8 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.paymentDueDay = entity.paymentDueDay;
     this.status = entity.status;
     this.totalProperties =
-      entity.contractProperties?.filter((p) => p.isActiveInContract).length || 0;
+      entity.contractProperties?.filter((p) => p.isActiveInContract).length ||
+      0;
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
   }

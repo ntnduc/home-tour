@@ -28,7 +28,6 @@ export class ContractServicesService {
     await queryRunner.startTransaction();
 
     try {
-      // Kiểm tra hợp đồng tồn tại
       const contract = await this.contractsRepository.findOne({
         where: { id: createDto.contractId },
       });
@@ -37,11 +36,10 @@ export class ContractServicesService {
         throw new NotFoundException('Hợp đồng không tồn tại');
       }
 
-      // Kiểm tra dịch vụ chưa được thêm vào hợp đồng này
       const existingService =
         await this.contractServicesRepository.findByContractIdAndServiceId(
           createDto.contractId!,
-          createDto.serviceId,
+          createDto.propertyServiceId!,
         );
 
       if (existingService) {
@@ -50,8 +48,7 @@ export class ContractServicesService {
 
       let serviceEntity: ContractServices;
 
-      if (createDto.propertyServiceId) {
-        // Trường hợp 1: Clone từ property service
+      if (createDto.propertyServiceId && createDto.isNew) {
         const propertyService = await this.propertiesServiceRepository.findOne({
           where: { id: createDto.propertyServiceId },
           relations: ['service'],
@@ -63,15 +60,23 @@ export class ContractServicesService {
 
         serviceEntity = new ContractServices();
         serviceEntity.contractId = createDto.contractId!;
-        serviceEntity.serviceId = propertyService.serviceId;
+        serviceEntity.propertyServiceId = propertyService.id;
         serviceEntity.price = createDto.price ?? propertyService.price;
         serviceEntity.isEnabled = createDto.isEnabled ?? true;
         serviceEntity.notes = createDto.notes;
-      } else {
-        // Trường hợp 2: Tạo mới hoàn toàn
-        // Kiểm tra service tồn tại
+      } else if (createDto.propertyServiceId && !createDto.isNew) {
         const service = await this.servicesRepository.findOne({
-          where: { id: createDto.serviceId },
+          where: { id: createDto.propertyServiceId },
+        });
+
+        if (!service) {
+          throw new NotFoundException('Dịch vụ không tồn tại');
+        }
+
+        serviceEntity = createDto.getEntity();
+      } else {
+        const service = await this.servicesRepository.findOne({
+          where: { id: createDto.propertyServiceId },
         });
 
         if (!service) {
@@ -254,7 +259,7 @@ export class ContractServicesService {
         if (!existingService) {
           const contractService = new ContractServices();
           contractService.contractId = contractId;
-          contractService.serviceId = propertyService.serviceId;
+          contractService.propertyServiceId = propertyService.id;
           contractService.price = propertyService.price;
           contractService.isEnabled = true; // Default enabled when cloning
           contractService.notes = `Cloned from property service: ${propertyService.service?.name}`;

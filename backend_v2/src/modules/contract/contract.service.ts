@@ -4,16 +4,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ContractStatus } from 'src/common/enums/contract.enum';
-import { DataSource, EntityManager, SelectQueryBuilder } from 'typeorm';
+import { DataSource, EntityManager, In, SelectQueryBuilder } from 'typeorm';
 import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
 import { RoomStatus } from '../../common/enums/room.enum';
+import { AuthService } from '../auth/auth.service';
+import { PropertiesService } from '../property/entities/properties-service.entity';
 import { PropertiesServiceRepository } from '../property/repositories/properties-service.repository';
 import { RoomsRepository } from '../property/repositories/rooms.repository';
+import { ServiceDetailDto } from '../services/dto/services.detail.dto';
+import { Services } from '../services/entities/services.entity';
+import { ServicesRepository } from '../services/repositories/services.repository';
+import { User } from '../users/entities/user.entity';
+import { UserRepository } from '../users/repositories/user.repository';
 import { ContractCreateDto } from './dto/contract-dto/contract.create.dto';
 import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
 import { ContractListDto } from './dto/contract-dto/contract.list.dto';
 import { ContractUpdateDto } from './dto/contract-dto/contract.update.dto';
+import { ContractPropertyCreateDto } from './dto/contract-properties-dto/contract-property.create.dto';
 import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
 import { Contracts } from './entities/contracts.entity';
 import { ContractsRepository } from './repositories/contracts.repository';
@@ -40,6 +48,8 @@ export class ContractService
     private readonly contractsRepository: ContractsRepository,
     private readonly roomsRepository: RoomsRepository,
     private readonly propertiesServiceRepository: PropertiesServiceRepository,
+    private readonly servicesRepository: ServicesRepository,
+    private readonly userRepository: UserRepository,
     private readonly dataSource: DataSource,
   ) {
     super(
@@ -57,10 +67,13 @@ export class ContractService
       .leftJoinAndSelect('contract.property', 'property')
       .leftJoinAndSelect('contract.room', 'room')
       .leftJoinAndSelect('room.property', 'roomProperty')
-      .leftJoinAndSelect('contract.primaryTenant', 'primaryTenant')
+      .leftJoinAndSelect('contract.primaryPropertyUser', 'primaryPropertyUser')
       .leftJoinAndSelect('contract.landlord', 'landlord')
       .leftJoinAndSelect('contract.contractProperties', 'contractProperties')
-      .leftJoinAndSelect('contractProperties.property', 'contractProperty');
+      .leftJoinAndSelect('contractProperties.property', 'contractProperty')
+      .leftJoinAndSelect('contract.contractServices', 'contractServices')
+      .leftJoinAndSelect('contractServices.propertyService', 'propertyService')
+      .leftJoinAndSelect('propertyService.service', 'service');
 
     return query;
   }
@@ -84,7 +97,6 @@ export class ContractService
         throw new BadRequestException('Phòng không ở trạng thái trống');
       }
 
-      // Kiểm tra không có hợp đồng ACTIVE nào cho phòng này
       const activeContractExists =
         await this.contractsRepository.findActiveContractByRoomId(
           createDto.roomId,
@@ -94,35 +106,35 @@ export class ContractService
         throw new BadRequestException('Phòng đã có hợp đồng đang hoạt động');
       }
 
-      // Tạo hợp đồng
       const contractEntity = createDto.getEntity();
       const savedContract = await queryRunner.manager.save(
         Contracts,
         contractEntity,
       );
 
-      // Tạo contract properties nếu có
       if (
         createDto.contractProperties &&
         createDto.contractProperties.length > 0
       ) {
-        for (const propertyDto of createDto.contractProperties) {
-          propertyDto.contractId = savedContract.id;
-          const propertyEntity = propertyDto.getEntity();
-          await queryRunner.manager.save(propertyEntity);
-        }
+        await this.createContractProperties(
+          savedContract.id,
+          createDto.contractProperties,
+          savedContract,
+          queryRunner.manager,
+        );
+      } else {
+        throw new BadRequestException('Phải có ít nhất 1 người thuê');
       }
 
-      // Tạo contract services nếu có
       if (createDto.contractServices && createDto.contractServices.length > 0) {
         await this.createContractServices(
           savedContract.id,
           createDto.contractServices,
+          savedContract,
           queryRunner.manager,
         );
       }
 
-      // Cập nhật trạng thái phòng nếu hợp đồng ACTIVE
       if (savedContract.status === ContractStatus.ACTIVE) {
         await queryRunner.manager.update(
           'rooms',
@@ -133,7 +145,6 @@ export class ContractService
 
       await queryRunner.commitTransaction();
 
-      // Lấy thông tin chi tiết hợp đồng vừa tạo
       const detailContract = await this.contractsRepository.findWithRelations(
         savedContract.id,
       );
@@ -227,10 +238,11 @@ export class ContractService
   private async createContractServices(
     contractId: string,
     contractServicesDto: ContractServiceCreateDto[],
+    contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {
     for (const serviceDto of contractServicesDto) {
-      if (serviceDto.propertyServiceId) {
+      if (serviceDto.propertyServiceId && !serviceDto.isNew) {
         // Trường hợp 1: Clone từ property service
         const propertyService = await this.propertiesServiceRepository.findOne({
           where: { id: serviceDto.propertyServiceId },
@@ -240,7 +252,7 @@ export class ContractService
         if (propertyService) {
           const contractService = {
             contractId: contractId,
-            serviceId: propertyService.serviceId,
+            propertyServiceId: propertyService.id,
             price: serviceDto.price ?? propertyService.price,
             isEnabled: serviceDto.isEnabled ?? true,
             notes: serviceDto.notes,
@@ -248,11 +260,84 @@ export class ContractService
           await manager.save('contract_services', contractService);
         }
       } else {
-        // Trường hợp 2: Tạo mới hoàn toàn
-        serviceDto.contractId = contractId;
-        const serviceEntity = serviceDto.getEntity();
-        await manager.save(serviceEntity);
+        const newService = new ServiceDetailDto();
+        if (!serviceDto.isSelectedFromService && !serviceDto.serviceId) {
+          const serviceEntity = new Services();
+          serviceEntity.name = serviceDto.name ?? '';
+          serviceEntity.isActive = true;
+          serviceEntity.isDefaultSelected = true;
+          serviceEntity.calculationMethod = serviceDto.calculationMethod;
+          serviceEntity.price = serviceDto.price ?? 0;
+          const service = await manager.save(serviceEntity);
+          newService.fromEntity(service);
+        } else {
+          const service = await this.servicesRepository.findOne({
+            where: { id: serviceDto.serviceId, isActive: true },
+          });
+
+          if (!service) {
+            throw new NotFoundException('Dịch vụ không tồn tại');
+          }
+          newService.fromEntity(service);
+        }
+
+        const newPropertyService = new PropertiesService();
+        newPropertyService.propertyId = contract.propertyId ?? '';
+        newPropertyService.serviceId = newService.id;
+        newPropertyService.price = serviceDto.price ?? 0;
+        newPropertyService.calculationMethod = serviceDto.calculationMethod;
+        await manager.save(newPropertyService);
+
+        serviceDto.propertyServiceId = newPropertyService.id;
+        const newContractService = serviceDto.getEntity();
+        await manager.save(newContractService);
       }
+    }
+  }
+
+  private async createContractProperties(
+    contractId: string,
+    contractPropertiesDto: ContractPropertyCreateDto[],
+    contract: Contracts,
+    manager: EntityManager,
+  ): Promise<void> {
+    const findPrimaryPropertyUser = contractPropertiesDto.find(
+      (property) => property.isPrimaryPropertyUser,
+    );
+
+    if (!findPrimaryPropertyUser) {
+      throw new BadRequestException('Phải có ít nhất 1 người thuê chính');
+    }
+
+    contractPropertiesDto.forEach((property) => {
+      if (property.isPrimaryPropertyUser) {
+        property.phone = AuthService.formatPhoneNumber(property.phone);
+      }
+    });
+
+    const phones = contractPropertiesDto.map((x) => x.phone);
+
+    const findUserExist = await this.userRepository.find({
+      where: { phone: In(phones) },
+    });
+
+    for (const propertyDto of contractPropertiesDto) {
+      const findUser = findUserExist.find((x) => x.phone === propertyDto.phone);
+
+      if (findUser) {
+        propertyDto.propertyUserId = findUser.id;
+      } else {
+        const user = new User();
+        user.phone = propertyDto.phone;
+        user.fullName = propertyDto.name;
+        user.isPhoneVerified = false;
+        user.isActive = true;
+        await manager.save(user);
+        propertyDto.propertyUserId = user.id;
+      }
+      propertyDto.contractId = contractId;
+      const propertyEntity = propertyDto.getEntity();
+      await manager.save(propertyEntity);
     }
   }
 

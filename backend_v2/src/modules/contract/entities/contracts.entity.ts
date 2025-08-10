@@ -24,13 +24,6 @@ export class Contracts extends BaseEntity {
   roomId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'primaryTenantUserId' })
-  primaryTenant: User;
-
-  @Column()
-  primaryTenantUserId: string;
-
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'landlordUserId' })
   landlord: User;
 

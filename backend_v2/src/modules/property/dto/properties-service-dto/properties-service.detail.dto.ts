@@ -15,12 +15,8 @@ export class PropertyServiceDetailDto extends BaseDetailDto<PropertiesService> {
 
   fromEntity(entity: PropertiesService): void {
     this.propertyId = entity.propertyId;
-    this.serviceId = entity.serviceId;
     this.calculationMethod = entity.calculationMethod;
     this.price = entity.price;
     this.name = entity.name;
-    if (!this.name && entity.service) {
-      this.name = entity.service.name;
-    }
   }
 }

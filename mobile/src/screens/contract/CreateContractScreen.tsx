@@ -1,145 +1,106 @@
-import { RoomListResponse } from "@/types/room";
-import { Ionicons } from "@expo/vector-icons";
+import ActionButtonBottom from "@/components/ActionButtonBottom";
+import CardContent from "@/components/CardContent";
+import DatePicker from "@/components/DatePicker";
+import Input from "@/components/Input";
+import Loading from "@/components/Loading";
+import { ServiceCalculateMethod } from "@/constant/service.constant";
+import { ContractService } from "@/types/contract-service";
+import { formatCurrency } from "@/utils/appUtil";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { ServiceCalculateMethod } from "../../constant/service.constant";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Toast from "react-native-toast-message";
+import { getRoomService } from "../../api/room/room.api";
 import { ContractCreateRequest } from "../../types/contract";
+import { RoomServiceDetailResponse, RoomStatus } from "../../types/room";
 
 type RootStackParamList = {
-  CreateContract: { room: any };
+  CreateContract: { roomId: string };
   RoomList: undefined;
 };
 
 type CreateContractScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
-  route: { params: { room: RoomListResponse } };
+  route: { params: { roomId: string } };
 };
 
 const CreateContractScreen = ({
   navigation,
   route,
 }: CreateContractScreenProps) => {
-  const { room } = route.params;
+  const { roomId } = route.params;
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRoomData, setIsLoadingRoomData] = useState(true);
+  const [roomData, setRoomData] = useState<RoomServiceDetailResponse | null>(
+    null
+  );
 
-  // Form state
-  const [formData, setFormData] = useState<ContractCreateRequest>({
-    roomId: room.id,
-    tenantName: "",
-    tenantPhone: "",
-    tenantEmail: "",
-    tenantIdCard: "",
-    tenantAddress: "",
-    startDate: "",
-    endDate: "",
-    monthlyRent: room.price,
-    deposit: room.price,
-    services: [
-      {
-        id: 1,
-        name: "Điện",
-        price: 3500,
-        calculationMethod: ServiceCalculateMethod.PER_UNIT_SIMPLE,
-        isIncluded: true,
-      },
-      {
-        id: 2,
-        name: "Nước",
-        price: 15000,
-        calculationMethod: ServiceCalculateMethod.PER_UNIT_SIMPLE,
-        isIncluded: true,
-      },
-      {
-        id: 3,
-        name: "Wifi",
-        price: 100000,
-        calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
-        isIncluded: true,
-      },
-      {
-        id: 4,
-        name: "Gửi xe",
-        price: 25000,
-        calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
-        isIncluded: true,
-      },
-    ],
-    notes: "",
+  const {
+    handleSubmit,
+    control,
+    watch,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = useForm<ContractCreateRequest>({
+    defaultValues: {
+      roomId: roomId,
+      contractServices: roomData?.services.map((service) => ({
+        isEnabled: true,
+        isNew: false,
+        isSelectedFromService: false,
+        price: service.price,
+        propertyServiceId: service.propertyServiceId,
+        calculationMethod: service.calculationMethod,
+        notes: "",
+      })),
+    },
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const fetchRoomData = async () => {
+      try {
+        setIsLoadingRoomData(true);
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+        const roomServiceResponse = await getRoomService(roomId);
 
-    if (!formData.tenantName.trim()) {
-      newErrors.tenantName = "Tên người thuê không được để trống";
-    }
-
-    if (!formData.tenantPhone.trim()) {
-      newErrors.tenantPhone = "Số điện thoại không được để trống";
-    } else if (
-      !/^[0-9]{10,11}$/.test(formData.tenantPhone.replace(/\s/g, ""))
-    ) {
-      newErrors.tenantPhone = "Số điện thoại không hợp lệ";
-    }
-
-    if (formData.tenantEmail && !/\S+@\S+\.\S+/.test(formData.tenantEmail)) {
-      newErrors.tenantEmail = "Email không hợp lệ";
-    }
-
-    if (!formData.tenantIdCard.trim()) {
-      newErrors.tenantIdCard = "CMND/CCCD không được để trống";
-    } else if (
-      !/^[0-9]{9,12}$/.test(formData.tenantIdCard.replace(/\s/g, ""))
-    ) {
-      newErrors.tenantIdCard = "CMND/CCCD không hợp lệ";
-    }
-
-    if (!formData.tenantAddress.trim()) {
-      newErrors.tenantAddress = "Địa chỉ không được để trống";
-    }
-
-    if (!formData.startDate) {
-      newErrors.startDate = "Ngày bắt đầu không được để trống";
-    }
-
-    if (!formData.endDate) {
-      newErrors.endDate = "Ngày kết thúc không được để trống";
-    } else if (formData.startDate && formData.endDate) {
-      const startDate = new Date(formData.startDate);
-      const endDate = new Date(formData.endDate);
-      if (endDate <= startDate) {
-        newErrors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
+        if (roomServiceResponse.success && roomServiceResponse.data) {
+          setRoomData(roomServiceResponse.data);
+          if (
+            roomServiceResponse.data?.services &&
+            roomServiceResponse.data?.services.length > 0
+          ) {
+            const contractServices = roomServiceResponse.data?.services.map(
+              (service) => ({
+                isEnabled: true,
+                isNew: false,
+                isSelectedFromService: false,
+                price: service.price,
+                propertyServiceId: service.propertyServiceId,
+                calculationMethod: service.calculationMethod,
+                notes: "",
+              })
+            ) as ContractService[];
+            setValue("contractServices", contractServices);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching room data:", error);
+        Alert.alert("Lỗi", "Không thể tải thông tin phòng và dịch vụ");
+      } finally {
+        setIsLoadingRoomData(false);
       }
-    }
+    };
 
-    if (formData.monthlyRent <= 0) {
-      newErrors.monthlyRent = "Tiền thuê phải lớn hơn 0";
+    if (roomId) {
+      fetchRoomData();
     }
-
-    if (formData.deposit < 0) {
-      newErrors.deposit = "Tiền cọc không được âm";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [roomId]);
 
   const handleSave = async () => {
-    if (!validateForm()) {
-      Alert.alert("Lỗi", "Vui lòng kiểm tra lại thông tin");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -159,75 +120,87 @@ const CreateContractScreen = ({
     }
   };
 
-  const updateFormData = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
+  if (isLoading || isLoadingRoomData) {
+    return <Loading />;
+  }
 
-  const updateService = (index: number, field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      services: prev.services.map((service, i) =>
-        i === index ? { ...service, [field]: value } : service
-      ),
-    }));
-  };
+  if (!isLoadingRoomData && roomData?.status !== RoomStatus.AVAILABLE) {
+    Toast.show({
+      type: "error",
+      text1: "Lỗi",
+      text2: "Phòng đã được cho thuê!",
+    });
+    navigation.goBack();
+  }
 
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString("vi-VN");
-  };
-
-  const calculateTotalDeposit = () => {
-    return (
-      formData.deposit +
-      formData.services
-        .filter((service) => service.isIncluded)
-        .reduce((sum, service) => sum + service.price, 0)
-    );
-  };
+  const contractServices = getValues("contractServices");
+  const watchContractServices = watch("contractServices");
+  console.log(
+    "💞💓💗💞💓💗 ~ CreateContractScreen ~ watchContractServices:",
+    watchContractServices
+  );
+  console.log(
+    "💞💓💗💞💓💗 ~ CreateContractScreen ~ contractServices:",
+    contractServices
+  );
 
   return (
     <View className="flex-1 bg-gray-50">
-      <ScrollView
-        className="flex-1 px-4 py-3"
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        extraScrollHeight={100}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        enableAutomaticScroll={true}
       >
-        {/* Header với thông tin phòng */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <View className="flex-row justify-between items-start">
-            <View className="flex-1">
-              <Text className="text-xl font-bold text-gray-900 mb-1">
-                {room.name}
-              </Text>
-              <Text className="text-sm text-gray-600 mb-2">
-                {room.building}
-              </Text>
-              <View className="flex-row items-center">
-                <View className="px-3 py-1 rounded-full bg-orange-100">
-                  <Text className="text-xs font-semibold text-orange-700">
-                    Trống
-                  </Text>
-                </View>
+        <ScrollView
+          className="flex-1 px-4 py-3"
+          showsVerticalScrollIndicator={false}
+        >
+          <CardContent>
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-gray-900 mb-1">
+                  {roomData?.name || "Tên phòng"}
+                </Text>
+                <Text className="text-sm text-gray-600 mb-2">
+                  {roomData?.property?.name || "Tên tòa nhà"}
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-xs text-gray-500 mb-1">Giá thuê</Text>
+                <Text className="text-lg font-bold text-blue-600">
+                  {formatCurrency(roomData?.rentAmount?.toString() || "0")}
+                  đ/tháng
+                </Text>
               </View>
             </View>
-            <View className="items-end">
-              <Text className="text-xs text-gray-500 mb-1">Giá thuê</Text>
-              <Text className="text-lg font-bold text-blue-600">
-                {formatCurrency(room.price)}đ/tháng
-              </Text>
-            </View>
-          </View>
-        </View>
+          </CardContent>
 
-        {/* Thông tin người thuê */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+          {/* Thông tin người thuê */}
+          {/* <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
           <Text className="text-lg font-bold text-gray-900 mb-4">
             Thông tin người thuê
           </Text>
 
-          {/* Tên người thuê */}
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="user"
+              rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                  value={value}
+                  required
+                  onChangeText={onChange}
+                  icon="home"
+                  label="Tên gợi nhớ"
+                  error={erroForms.name?.message}
+                />
+              )}
+            />
+          </View>
           <View className="mb-3">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Họ và tên *
@@ -260,7 +233,6 @@ const CreateContractScreen = ({
             )}
           </View>
 
-          {/* Số điện thoại */}
           <View className="mb-3">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Số điện thoại *
@@ -294,7 +266,6 @@ const CreateContractScreen = ({
             )}
           </View>
 
-          {/* Email */}
           <View className="mb-3">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Email
@@ -329,7 +300,6 @@ const CreateContractScreen = ({
             )}
           </View>
 
-          {/* CMND/CCCD */}
           <View className="mb-3">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               CMND/CCCD *
@@ -363,7 +333,6 @@ const CreateContractScreen = ({
             )}
           </View>
 
-          {/* Địa chỉ */}
           <View className="mb-3">
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Địa chỉ *
@@ -395,214 +364,249 @@ const CreateContractScreen = ({
               </Text>
             )}
           </View>
-        </View>
+        </View> */}
 
-        {/* Thời hạn thuê */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Thời hạn thuê
-          </Text>
-
-          {/* Ngày bắt đầu */}
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Ngày bắt đầu *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.startDate
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="calendar"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.startDate}
-                onChangeText={(value) => updateFormData("startDate", value)}
-                placeholder="DD/MM/YYYY"
-                placeholderTextColor="#9CA3AF"
+          <CardContent title="Thời hạn thuê">
+            <View className="mb-3">
+              <Controller
+                control={control}
+                name="startDate"
+                rules={{ required: "Vui lòng chọn ngày bắt đầu" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <DatePicker
+                    label="Ngày bắt đầu"
+                    value={value}
+                    showClear={false}
+                    onChange={onChange}
+                    placeholder="Chọn ngày bắt đầu"
+                    required
+                    minDate={
+                      watch("endDate")
+                        ? new Date(watch("endDate") ?? "")
+                        : new Date()
+                    }
+                    error={error?.message}
+                    icon="calendar"
+                  />
+                )}
               />
             </View>
-            {errors.startDate && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.startDate}
-              </Text>
-            )}
-          </View>
 
-          {/* Ngày kết thúc */}
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Ngày kết thúc *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.endDate ? "border-red-300 bg-red-50" : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="calendar"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.endDate}
-                onChangeText={(value) => updateFormData("endDate", value)}
-                placeholder="DD/MM/YYYY"
-                placeholderTextColor="#9CA3AF"
+            <View>
+              <Controller
+                control={control}
+                name="endDate"
+                rules={{ required: "Vui lòng chọn ngày kết thúc" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <DatePicker
+                    label="Ngày kết thúc (tùy chọn)"
+                    value={value}
+                    onChange={onChange}
+                    placeholder="Chọn ngày kết thúc"
+                    error={error?.message}
+                    icon="calendar"
+                    minDate={
+                      watch("startDate")
+                        ? new Date(watch("startDate") ?? "")
+                        : new Date()
+                    }
+                  />
+                )}
               />
             </View>
-            {errors.endDate && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.endDate}
-              </Text>
-            )}
-          </View>
-        </View>
+          </CardContent>
 
-        {/* Thông tin thanh toán */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Thông tin thanh toán
-          </Text>
-
-          {/* Tiền thuê hàng tháng */}
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Tiền thuê hàng tháng *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.monthlyRent
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="cash"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.monthlyRent.toString()}
-                onChangeText={(value) =>
-                  updateFormData(
-                    "monthlyRent",
-                    parseInt(value.replace(/[^0-9]/g, "")) || 0
-                  )
-                }
-                placeholder="VNĐ/tháng"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
+          <CardContent title="Thông tin thanh toán">
+            <View className="mb-3">
+              <Controller
+                control={control}
+                name="rentAmountAgreed"
+                rules={{ required: "Vui lòng nhập tiền thuê hàng tháng" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <Input
+                    label="Tiền thuê hàng tháng"
+                    value={value ? formatCurrency(value.toString()) : ""}
+                    onChangeText={onChange}
+                    placeholder="Nhập tiền thuê hàng tháng"
+                    error={error?.message}
+                    icon="cash"
+                    keyboardType="numeric"
+                    returnKeyType="done"
+                    returnKeyLabel="Xong"
+                  />
+                )}
               />
             </View>
-            {errors.monthlyRent && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.monthlyRent}
-              </Text>
-            )}
-          </View>
 
-          {/* Tiền cọc */}
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Tiền cọc
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.deposit ? "border-red-300 bg-red-50" : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="shield-checkmark"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.deposit.toString()}
-                onChangeText={(value) =>
-                  updateFormData(
-                    "deposit",
-                    parseInt(value.replace(/[^0-9]/g, "")) || 0
-                  )
-                }
-                placeholder="VNĐ"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
+            <View className="mb-3">
+              <Controller
+                control={control}
+                name="depositAmountPaid"
+                rules={{ required: "Vui lòng nhập tiền cọc" }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <Input
+                    label="Tiền cọc"
+                    value={value ? formatCurrency(value.toString()) : ""}
+                    onChangeText={onChange}
+                    placeholder="Nhập tiền cọc"
+                    error={error?.message}
+                    icon="shield-checkmark"
+                    keyboardType="numeric"
+                    returnKeyType="done"
+                    returnKeyLabel="Xong"
+                  />
+                )}
               />
             </View>
-            {errors.deposit && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.deposit}
+
+            <View className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+              <Text className="text-sm font-semibold text-blue-800 mb-1">
+                Tổng tiền cọc (bao gồm dịch vụ):
               </Text>
+              <Text className="text-lg font-bold text-blue-600">
+                {formatCurrency("1000")}đ
+              </Text>
+            </View>
+          </CardContent>
+
+          <CardContent title="Dịch vụ bao gồm">
+            <Controller
+              control={control}
+              name="contractServices"
+              render={({ field: { value } }) => {
+                console.log("💞💓💗💞💓💗 ~ value:", value);
+                return (
+                  <View className="flex-1 ">
+                    {value?.map((service) => (
+                      <View key={service.propertyServiceId} className="mb-3">
+                        <Text style={{ color: "red" }}>{service.price}</Text>
+                      </View>
+                    ))}
+                  </View>
+                );
+              }}
+            />
+            {!roomData?.services || roomData?.services.length === 0 ? (
+              <View className="flex-row justify-center items-center py-4">
+                <Text className="text-gray-500">Không có dịch vụ nào</Text>
+              </View>
+            ) : (
+              <View className="flex-1">
+                {getValues("contractServices")?.map((service) => (
+                  <View key={service.propertyServiceId} className="mb-3">
+                    <View key={service.id} className="mb-3">
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center flex-1">
+                          <TouchableOpacity className="mr-3" onPress={() => {}}>
+                            <Ionicons
+                              name="checkbox"
+                              size={20}
+                              color={"#007AFF"}
+                            />
+                          </TouchableOpacity>
+                          <View className="flex-1">
+                            <Text className="text-base font-medium text-gray-900">
+                              123
+                            </Text>
+                            <Text className="text-sm text-gray-600">
+                              {formatCurrency(service.price.toString())}đ
+                              {service.calculationMethod ===
+                              ServiceCalculateMethod.PER_UNIT_SIMPLE
+                                ? "/đơn vị"
+                                : "/phòng/tháng"}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
             )}
-          </View>
+          </CardContent>
 
-          {/* Tổng tiền cọc */}
-          <View className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-            <Text className="text-sm font-semibold text-blue-800 mb-1">
-              Tổng tiền cọc (bao gồm dịch vụ):
-            </Text>
-            <Text className="text-lg font-bold text-blue-600">
-              {formatCurrency(calculateTotalDeposit())}đ
-            </Text>
-          </View>
-        </View>
-
-        {/* Dịch vụ bao gồm */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+          {/* <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
           <Text className="text-lg font-bold text-gray-900 mb-4">
             Dịch vụ bao gồm
           </Text>
 
-          {formData.services.map((service, index) => (
-            <View key={service.id} className="mb-3">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center flex-1">
-                  <TouchableOpacity
-                    className="mr-3"
-                    onPress={() =>
-                      updateService(index, "isIncluded", !service.isIncluded)
-                    }
-                  >
-                    <Ionicons
-                      name={service.isIncluded ? "checkbox" : "square-outline"}
-                      size={20}
-                      color={service.isIncluded ? "#007AFF" : "#6B7280"}
-                    />
-                  </TouchableOpacity>
-                  <View className="flex-1">
-                    <Text className="text-base font-medium text-gray-900">
-                      {service.name}
-                    </Text>
-                    <Text className="text-sm text-gray-600">
-                      {formatCurrency(service.price)}đ
-                      {service.calculationMethod ===
-                      ServiceCalculateMethod.PER_UNIT_SIMPLE
-                        ? "/đơn vị"
-                        : "/phòng/tháng"}
-                    </Text>
+          {isLoadingRoomData ? (
+            <View className="flex-row justify-center items-center py-4">
+              <Text className="text-gray-500">Đang tải dịch vụ...</Text>
+            </View>
+          ) : formData.services.length > 0 ? (
+            formData.services.map((service, index) => (
+              <View key={service.id} className="mb-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center flex-1">
+                    <TouchableOpacity
+                      className="mr-3"
+                      onPress={() =>
+                        updateService(index, "isIncluded", !service.isIncluded)
+                      }
+                    >
+                      <Ionicons
+                        name={
+                          service.isIncluded ? "checkbox" : "square-outline"
+                        }
+                        size={20}
+                        color={service.isIncluded ? "#007AFF" : "#6B7280"}
+                      />
+                    </TouchableOpacity>
+                    <View className="flex-1">
+                      <Text className="text-base font-medium text-gray-900">
+                        {service.name}
+                      </Text>
+                      <Text className="text-sm text-gray-600">
+                        {formatCurrency(service.price)}đ
+                        {service.calculationMethod ===
+                        ServiceCalculateMethod.PER_UNIT_SIMPLE
+                          ? "/đơn vị"
+                          : "/phòng/tháng"}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
+            ))
+          ) : (
+            <View className="flex-row justify-center items-center py-4">
+              <Text className="text-gray-500">Không có dịch vụ nào</Text>
             </View>
-          ))}
-        </View>
+          )}
+        </View> */}
 
-        {/* Ghi chú */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+          <CardContent title="Điều khoảng bổ sung">
+            <Controller
+              control={control}
+              name="notes"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  type="area"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Nhập điều khoảng bổ sung (tùy chọn)"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              )}
+            />
+          </CardContent>
+
+          {/* <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
           <Text className="text-lg font-bold text-gray-900 mb-3">Ghi chú</Text>
           <View className="bg-gray-50 rounded-lg border border-gray-200">
             <TextInput
@@ -616,13 +620,21 @@ const CreateContractScreen = ({
               textAlignVertical="top"
             />
           </View>
-        </View>
-      </ScrollView>
-
-      {/* Action Buttons - Bottom Sheet Style */}
-      <View className="bg-white border-t border-gray-200 px-4 py-3">
+        </View> */}
+        </ScrollView>
+      </KeyboardAwareScrollView>
+      <ActionButtonBottom
+        actions={[
+          {
+            label: "Tạo hợp đồng",
+            icon: "checkmark-circle",
+            isLoading,
+            onPress: handleSave,
+          },
+        ]}
+      />
+      {/* <View className="bg-white border-t border-gray-200 px-4 py-3">
         <View className="flex-row gap-3">
-          {/* Cancel Button */}
           <TouchableOpacity
             className="flex-1 flex-row items-center justify-center py-3 px-4 rounded-xl border border-gray-300 bg-white"
             onPress={() => navigation.goBack()}
@@ -634,7 +646,6 @@ const CreateContractScreen = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Save Button */}
           <TouchableOpacity
             className="flex-1 flex-row items-center justify-center py-3 px-4 rounded-xl bg-blue-500"
             onPress={handleSave}
@@ -650,7 +661,7 @@ const CreateContractScreen = ({
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
 
       {/* Back Button */}
       {/* <TouchableOpacity

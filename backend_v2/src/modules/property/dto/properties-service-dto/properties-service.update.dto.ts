@@ -9,10 +9,6 @@ export class UpdatePropertyServiceDto extends BaseUpdateDto<PropertiesService> {
   @IsOptional()
   propertyId?: string;
 
-  @IsString()
-  @IsOptional()
-  serviceId?: string;
-
   @IsEnum(ServiceCalculationMethod)
   @IsOptional()
   calculationMethod?: ServiceCalculationMethod;
@@ -26,7 +22,6 @@ export class UpdatePropertyServiceDto extends BaseUpdateDto<PropertiesService> {
   ): QueryDeepPartialEntity<PropertiesService> {
     if (this.propertyId) entity.propertyId = this.propertyId;
     if (this.price) entity.price = this.price;
-    if (this.serviceId) entity.serviceId = this.serviceId;
     if (this.calculationMethod)
       entity.calculationMethod = this.calculationMethod;
     return entity;

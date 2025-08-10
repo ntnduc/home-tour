@@ -18,26 +18,24 @@ import {
 import { Modalize, ModalizeProps } from "react-native-modalize";
 
 type HeaderConfig = {
+  element?: ReactNode;
   title: string;
   style?: StyleProp<ViewStyle>;
   className?: string;
+  height?: number;
+  onClose?: () => void;
 };
 
-interface AppSheetProps extends Omit<ModalizeProps, "ref"> {
+export interface AppSheetProps extends Omit<ModalizeProps, "ref"> {
   // children?: ReactNode;
   classNameContent?: string;
   styleContent?: StyleProp<ViewStyle>;
-  headerConfig?: HeaderConfig;
+  header?: HeaderConfig;
 }
 
 export interface AppSheetRef {
-  open: (children?: ReactNode, config?: ConfigAppSheet) => void;
+  open: (children?: ReactNode, config?: AppSheetProps) => void;
   close: () => void;
-}
-
-interface ConfigAppSheet {
-  height?: number;
-  header?: HeaderConfig;
 }
 
 const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
@@ -48,7 +46,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
 
   const [state, setState] = useState<{
     dynamicChildren: ReactNode | null;
-    config: ConfigAppSheet | null;
+    config: AppSheetProps | null;
   }>({
     dynamicChildren: null,
     config: null,
@@ -61,29 +59,41 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
     close,
   }));
 
-  const open = (children: ReactNode, config?: ConfigAppSheet) => {
+  const open = (children: ReactNode, config?: AppSheetProps) => {
     if (children) {
       setState({ dynamicChildren: children, config: config || null });
     }
-    modalizeRef.current?.open();
+    setTimeout(() => {
+      modalizeRef.current?.open();
+    }, 100);
   };
 
   const close = () => {
     modalizeRef.current?.close();
-    // Reset dynamic children when closing
+    state.config?.onClose?.();
+    setTimeout(() => {
+      setState({ dynamicChildren: null, config: null });
+    }, 100);
   };
 
-  const header = (headerConfig?: HeaderConfig) => (
-    <View
-      className={headerConfig?.className}
-      style={[styles.header, headerConfig?.style]}
-    >
-      <Text style={styles.headerTitle}>{headerConfig?.title}</Text>
-      <TouchableOpacity onPress={close}>
-        <Ionicons name="close" size={24} color="#666" />
-      </TouchableOpacity>
-    </View>
-  );
+  const header = (headerConfig?: HeaderConfig) => {
+    return (
+      <>
+        {headerConfig?.element && headerConfig?.element}
+        {!headerConfig?.element && (
+          <View
+            className={headerConfig?.className}
+            style={[styles.header, headerConfig?.style]}
+          >
+            <Text style={styles.headerTitle}>{headerConfig?.title}</Text>
+            <TouchableOpacity onPress={close}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </>
+    );
+  };
 
   const renderChildren = state.dynamicChildren || (
     <View>
@@ -96,17 +106,19 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
   return (
     <Modalize
       ref={modalizeRef}
-      adjustToContentHeight
-      {...modalizeProps}
       handleStyle={{
         display: "none",
       }}
+      modalHeight={300}
+      {...modalizeProps}
+      {...config}
+      withReactModal={true}
+      HeaderComponent={config?.header && header(config?.header)}
     >
       <View
         className={props.classNameContent}
         style={[styles.content, props.styleContent]}
       >
-        {config?.header && header(config.header)}
         <View className="h-full">{renderChildren}</View>
       </View>
     </Modalize>
@@ -115,9 +127,11 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
 
 const styles = StyleSheet.create({
   header: {
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    height: 60,
     padding: 10,
     lineHeight: 22,
     borderBottomWidth: 1,
@@ -125,8 +139,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    lineHeight: 44,
+    fontWeight: 600,
     color: "#222",
   },
   content: {

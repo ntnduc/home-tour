@@ -196,7 +196,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
           <TouchableOpacity
             style={styles.createContractBtn}
             onPress={() => {
-              navigation.navigate("CreateContract", { room: item });
+              navigation.navigate("CreateContract", { roomId: item.id });
             }}
           >
             <Ionicons

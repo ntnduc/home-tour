@@ -1,6 +1,6 @@
 import { getComboProperty } from "@/api/property/property.api";
 import { getListRoom } from "@/api/room/room.api";
-import AppSheet, { AppSheetRef } from "@/components/AppSheet/AppSheet";
+import { useGlobalAppSheet } from "@/components/GlobalAppSheet";
 import Loading from "@/components/Loading";
 import { ApiResponse } from "@/types/api";
 import { BasePagingResponse } from "@/types/base.response";
@@ -11,13 +11,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   RefreshControl,
   SafeAreaView,
   ScrollView,
-  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -39,8 +38,8 @@ type RoomListScreenProps = {
 
 const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
   const { propertyId } = route.params || {};
-  const refAppSheet = useRef<AppSheetRef>(null);
 
+  const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
   const [search, setSearch] = useState("");
   const [filterPayment, setFilterPayment] = useState<PaymentStatus | null>(
     null
@@ -210,8 +209,6 @@ const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      {/* Header cố định */}
       <View style={styles.fixedHeader}>
         <HeaderComponents
           className="px-2 mb-2"
@@ -228,16 +225,17 @@ const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
             selectedBuilding === "Tất cả" ? null : selectedBuilding
           }
           onOpen={() => {
-            refAppSheet.current?.open(
+            openAppSheet(
               <BuildingFilterComponent
                 buildings={comboProperty ?? []}
                 selectedBuilding={selectedBuilding}
                 onSelectedBuiling={(id) => {
                   setSelectedBuilding(id);
-                  refAppSheet.current?.close();
+                  closeAppSheet();
                 }}
               />,
               {
+                adjustToContentHeight: false,
                 header: {
                   title: "Chọn toà nhà",
                 },
@@ -297,7 +295,6 @@ const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
           />
         </View>
       )}
-      <AppSheet ref={refAppSheet} />
     </SafeAreaView>
   );
 };

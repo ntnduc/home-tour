@@ -69,10 +69,10 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
   const theme = useTamaguiTheme();
   return (
     <View
-      className={` ${containerStyle || ""}`}
+      className={` ${
+        containerStyle || "bg-white border-t border-gray-200 px-6 pb-5 pt-3"
+      }`}
       style={{
-        paddingHorizontal: 16,
-        paddingBottom: 32,
         backgroundColor: theme.background?.val ?? "#fff",
       }}
     >

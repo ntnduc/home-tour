@@ -20,7 +20,7 @@ export class ContractServiceUpdateDto
 
   @IsOptional()
   @IsUUID()
-  serviceId?: string;
+  propertyServiceId?: string;
 
   @IsOptional()
   @IsNumber()
@@ -44,7 +44,8 @@ export class ContractServiceUpdateDto
   ): QueryDeepPartialEntity<ContractServices> {
     const updateData: QueryDeepPartialEntity<ContractServices> = {};
 
-    if (this.serviceId) updateData.serviceId = this.serviceId;
+    if (this.propertyServiceId)
+      updateData.propertyServiceId = this.propertyServiceId;
     if (this.price !== undefined) updateData.price = this.price;
     if (this.isEnabled !== undefined) updateData.isEnabled = this.isEnabled;
     if (this.notes !== undefined) updateData.notes = this.notes;

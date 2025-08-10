@@ -186,11 +186,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           </CardContent>
 
           {/* Compact Form */}
-          <CardContent>
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              Thông tin cơ bản
-            </Text>
-
+          <CardContent title="Thông tin cơ bản">
             <View className="mb-3">
               <Controller
                 control={control}
@@ -276,7 +272,6 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                       type="number"
                       placeholder="Diện tích"
                       value={value?.toString()}
-                      keyboardType="numeric"
                       onChangeText={onChange}
                       icon="resize"
                       label="Diện tích"
@@ -321,7 +316,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                     keyboardType="numeric"
                     required
                     onChangeText={onChange}
-                    icon="wallet"
+                    icon="shield-checkmark"
                     label="Tiền cọc"
                     error={erroForms.defaultDepositAmount?.message}
                   />
@@ -369,21 +364,27 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
         </CardContent> */}
 
           {/* Mô tả - Compact */}
-          <CardContent>
+          <CardContent title="Ghi chú">
             <Controller
               control={control}
               name="description"
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   type="area"
-                  placeholder="Mô tả"
+                  placeholder="Điều khoản bổ sung"
                   value={value ? formatCurrency(value.toString()) : ""}
                   onChangeText={onChange}
-                  label="Mô tả"
+                  label=""
                   error={erroForms.description?.message}
                 />
               )}
             />
+          </CardContent>
+          <CardContent
+            title="Dịch vụ mặc định"
+            description="Bạn có thể thêm hoặc chỉnh sửa dịch vụ khi tạo hợp đồng!"
+          >
+            <Text>123</Text>
           </CardContent>
         </ScrollView>
       </KeyboardAwareScrollView>

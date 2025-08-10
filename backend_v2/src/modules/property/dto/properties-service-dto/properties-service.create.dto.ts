@@ -8,10 +8,6 @@ export class CreatePropertyServiceDto extends BaseCreateDto<PropertiesService> {
   @IsNotEmpty()
   propertyId: string;
 
-  @IsString()
-  @IsNotEmpty()
-  serviceId: string;
-
   @IsEnum(ServiceCalculationMethod)
   @IsNotEmpty()
   calculationMethod: ServiceCalculationMethod;
@@ -23,7 +19,6 @@ export class CreatePropertyServiceDto extends BaseCreateDto<PropertiesService> {
   getEntity(): PropertiesService {
     const entity = new PropertiesService();
     entity.propertyId = this.propertyId;
-    entity.serviceId = this.serviceId;
     entity.calculationMethod = this.calculationMethod;
     entity.price = this.price;
     return entity;

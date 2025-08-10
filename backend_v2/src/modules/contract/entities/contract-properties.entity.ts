@@ -1,3 +1,4 @@
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { User } from '../../users/entities/user.entity';
@@ -18,6 +19,16 @@ export class ContractProperties extends BaseEntity {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'propertyUserId' })
   property: User;
+
+  @Column({ default: '' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @Column({ default: false })
+  @IsBoolean()
+  @IsNotEmpty()
+  isPrimaryPropertyUser: boolean;
 
   @Column()
   propertyUserId: string;

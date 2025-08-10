@@ -1,4 +1,5 @@
 import { PropertyDetail } from "./property";
+import { PropertyServiceDetail } from "./property-service";
 
 export enum RoomStatus {
   AVAILABLE = "AVAILABLE",
@@ -31,4 +32,9 @@ export interface RoomDetailResponse extends Room {
 
 export interface RoomUpdateRequest extends Room {
   propertyName?: string;
+}
+
+export interface RoomServiceDetailResponse extends RoomDetailResponse {
+  services: PropertyServiceDetail[];
+  property: PropertyDetail;
 }

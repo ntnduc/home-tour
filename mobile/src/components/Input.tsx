@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   NativeSyntheticEvent,
-  ReturnKeyTypeOptions,
   StyleProp,
   Text,
   TextInput,
@@ -39,7 +38,6 @@ interface InputProps extends TextInputProps {
   disabled?: boolean;
   inputStyles?: StyleProp<ViewStyle>;
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
-  returnKeyType?: ReturnKeyTypeOptions;
   onSubmitEditing?: (
     e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
   ) => void;
@@ -65,12 +63,12 @@ const Input: React.FC<InputProps> = ({
   disabled = false,
   inputStyles,
   onBlur,
-  returnKeyType,
   onSubmitEditing,
   readOnly,
   iconProps,
   onClear,
   showClear = true,
+  ...props
 }) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -126,7 +124,6 @@ const Input: React.FC<InputProps> = ({
         <TextInput
           className={`flex-1 ${type === "area" ? "h-20" : ""}`}
           value={value}
-          returnKeyType={returnKeyType}
           onSubmitEditing={onSubmitEditing}
           style={[
             styles.input,
@@ -142,6 +139,7 @@ const Input: React.FC<InputProps> = ({
           numberOfLines={type === "area" ? numberOfLines : 1}
           editable={!disabled}
           onBlur={(e) => onBlur?.(e)}
+          {...props}
         />
         {value && showClear && !disabled && (
           <Ionicons

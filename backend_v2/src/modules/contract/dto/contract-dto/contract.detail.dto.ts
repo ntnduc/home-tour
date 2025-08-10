@@ -18,8 +18,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
       address: string;
     };
   };
-  primaryTenantUserId: string;
-  primaryTenant: {
+  primaryPropertyUser: {
     id: string;
     fullName: string;
     phone: string;
@@ -83,12 +82,16 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
         address: entity.room?.property?.address || '',
       },
     };
-    this.primaryTenantUserId = entity.primaryTenantUserId;
-    this.primaryTenant = {
-      id: entity.primaryTenant?.id || '',
-      fullName: entity.primaryTenant?.fullName || '',
-      phone: entity.primaryTenant?.phone || '',
-      email: entity.primaryTenant?.email,
+    this.primaryPropertyUser = {
+      id:
+        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
+          ?.property?.id || '',
+      fullName:
+        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
+          ?.property?.fullName || '',
+      phone:
+        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
+          ?.property?.phone || '',
     };
     this.landlordUserId = entity.landlordUserId;
     this.landlord = {
@@ -122,11 +125,11 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractServices =
       entity.contractServices?.map((ls) => ({
         id: ls.id,
-        serviceId: ls.serviceId,
+        serviceId: ls.propertyServiceId,
         service: {
-          id: ls.service?.id || '',
-          name: ls.service?.name || '',
-          icon: ls.service?.icon,
+          id: ls.propertyService?.service?.id || '',
+          name: ls.propertyService?.service?.name || '',
+          icon: ls.propertyService?.service?.icon,
         },
         price: ls.price,
         isEnabled: ls.isEnabled,

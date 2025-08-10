@@ -1,80 +1,204 @@
-export interface Contract {
-  id: number;
-  roomId: number;
-  roomName: string;
-  buildingName: string;
-  tenantName: string;
-  tenantPhone: string;
-  tenantEmail?: string;
-  tenantIdCard: string;
-  tenantAddress: string;
-  startDate: string;
-  endDate: string;
-  monthlyRent: number;
-  deposit: number;
-  status: ContractStatus;
-  createdAt: string;
-  signedAt?: string;
-  terminatedAt?: string;
-  terminationReason?: string;
-  notes?: string;
-  services: ContractService[];
+import { ContractProperty } from "./contract-property";
+import { ContractService } from "./contract-service";
+
+export enum ContractStatus {
+  PENDING_START = "PENDING_START",
+  ACTIVE = "ACTIVE",
+  ENDED = "ENDED",
+  TERMINATED_EARLY = "TERMINATED_EARLY",
+  EXPIRED = "EXPIRED",
 }
 
-export interface ContractService {
-  id: number;
-  name: string;
-  price: number;
-  calculationMethod: string;
-  isIncluded: boolean;
+export interface Contract {
+  id: string;
+  propertyId: string;
+  roomId: string;
+  landlordUserId: string;
+  startDate: string;
+  endDate?: string;
+  rentAmountAgreed: number;
+  depositAmountPaid: number;
+  paymentDueDay: number;
+  contractScanURL?: string;
+  status: ContractStatus;
+  notes?: string;
+  contractProperties: ContractProperty[];
+  contractServices: ContractService[];
+  room?: {
+    id: string;
+    name: string;
+    area?: number;
+    rentAmount: number;
+    maxOccupancy?: number;
+    floor?: string;
+    property: {
+      id: string;
+      name: string;
+      address: string;
+    };
+  };
+  primaryPropertyUser?: {
+    id: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
+  landlord?: {
+    id: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
 }
 
 export interface ContractCreateRequest {
-  roomId: number;
-  tenantName: string;
-  tenantPhone: string;
-  tenantEmail?: string;
-  tenantIdCard: string;
-  tenantAddress: string;
+  propertyId: string;
+  roomId: string;
+  landlordUserId: string;
   startDate: string;
-  endDate: string;
-  monthlyRent: number;
-  deposit: number;
-  services: ContractService[];
+  endDate?: string;
+  rentAmountAgreed: number;
+  depositAmountPaid?: number;
+  paymentDueDay: number;
+  contractScanURL?: string;
+  status?: ContractStatus;
+  notes?: string;
+  contractProperties?: ContractProperty[];
+  contractServices?: ContractService[];
+}
+
+export interface ContractUpdateRequest {
+  id: string;
+  propertyId?: string;
+  roomId?: string;
+  landlordUserId?: string;
+  startDate?: string;
+  endDate?: string;
+  rentAmountAgreed?: number;
+  depositAmountPaid?: number;
+  paymentDueDay?: number;
+  contractScanURL?: string;
+  status?: ContractStatus;
   notes?: string;
 }
 
-export enum ContractStatus {
-  DRAFT = "DRAFT",
-  ACTIVE = "ACTIVE",
-  EXPIRED = "EXPIRED",
-  TERMINATED = "TERMINATED",
-  PENDING_SIGNATURE = "PENDING_SIGNATURE",
+export interface ContractDetailResponse {
+  id: string;
+  propertyId: string;
+  roomId: string;
+  landlordUserId: string;
+  startDate: string;
+  endDate?: string;
+  rentAmountAgreed: number;
+  depositAmountPaid: number;
+  paymentDueDay: number;
+  contractScanURL?: string;
+  status: ContractStatus;
+  notes?: string;
+  room: {
+    id: string;
+    name: string;
+    area?: number;
+    rentAmount: number;
+    maxOccupancy?: number;
+    floor?: string;
+    property: {
+      id: string;
+      name: string;
+      address: string;
+    };
+  };
+  primaryPropertyUser: {
+    id: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
+  landlord: {
+    id: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+  };
+  contractProperties: Array<{
+    id: string;
+    propertyUserId: string;
+    property: {
+      id: string;
+      fullName: string;
+      phone: string;
+      email?: string;
+    };
+    moveInDate?: string;
+    moveOutDate?: string;
+    isActiveInContract: boolean;
+  }>;
+  contractServices: Array<{
+    id: string;
+    serviceId: string;
+    service: {
+      id: string;
+      name: string;
+      icon?: string;
+    };
+    price?: number;
+    isEnabled: boolean;
+    notes?: string;
+  }>;
+}
+
+export interface ContractListResponse {
+  id: string;
+  propertyId: string;
+  roomId: string;
+  landlordUserId: string;
+  startDate: string;
+  endDate?: string;
+  rentAmountAgreed: number;
+  depositAmountPaid: number;
+  paymentDueDay: number;
+  contractScanURL?: string;
+  status: ContractStatus;
+  notes?: string;
+  room: {
+    id: string;
+    name: string;
+    property: {
+      id: string;
+      name: string;
+      address: string;
+    };
+  };
+  primaryPropertyUser: {
+    id: string;
+    fullName: string;
+    phone: string;
+  };
 }
 
 export const CONTRACT_STATUS_LABEL: Record<ContractStatus, string> = {
-  [ContractStatus.DRAFT]: "Nháp",
+  [ContractStatus.PENDING_START]: "Chờ bắt đầu",
   [ContractStatus.ACTIVE]: "Đang hiệu lực",
+  [ContractStatus.ENDED]: "Đã kết thúc",
+  [ContractStatus.TERMINATED_EARLY]: "Đã kết thúc sớm",
   [ContractStatus.EXPIRED]: "Hết hạn",
-  [ContractStatus.TERMINATED]: "Đã kết thúc",
-  [ContractStatus.PENDING_SIGNATURE]: "Chờ ký",
 };
 
 export const CONTRACT_STATUS_COLOR: Record<
   ContractStatus,
   { bg: string; color: string }
 > = {
-  [ContractStatus.DRAFT]: { bg: "#F3F4F6", color: "#6B7280" },
+  [ContractStatus.PENDING_START]: { bg: "#F3F4F6", color: "#6B7280" },
   [ContractStatus.ACTIVE]: { bg: "#E9F9EF", color: "#34C759" },
-  [ContractStatus.EXPIRED]: { bg: "#FFECEC", color: "#FF3B30" },
-  [ContractStatus.TERMINATED]: { bg: "#F3F4F6", color: "#6B7280" },
-  [ContractStatus.PENDING_SIGNATURE]: { bg: "#FFF6E5", color: "#FF9500" },
+  [ContractStatus.ENDED]: { bg: "#FFECEC", color: "#FF3B30" },
+  [ContractStatus.TERMINATED_EARLY]: { bg: "#F3F4F6", color: "#6B7280" },
+  [ContractStatus.EXPIRED]: { bg: "#FFF6E5", color: "#FF9500" },
 };
 
 export const CONTRACT_STATUS_ICON: Record<ContractStatus, string> = {
-  [ContractStatus.DRAFT]: "document-outline",
+  [ContractStatus.PENDING_START]: "document-outline",
   [ContractStatus.ACTIVE]: "checkmark-circle",
-  [ContractStatus.EXPIRED]: "time-outline",
-  [ContractStatus.TERMINATED]: "close-circle",
-  [ContractStatus.PENDING_SIGNATURE]: "ellipse-outline",
+  [ContractStatus.ENDED]: "time-outline",
+  [ContractStatus.TERMINATED_EARLY]: "close-circle",
+  [ContractStatus.EXPIRED]: "ellipse-outline",
 };

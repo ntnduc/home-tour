@@ -11,6 +11,7 @@ import { RbacModule } from '../rbac/rbac.module';
 import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { User } from '../users/entities/user.entity';
+import { UserRepository } from '../users/repositories/user.repository';
 import { ContractPropertiesController } from './contract-properties.controller';
 import { ContractPropertiesService } from './contract-properties.service';
 import { ContractServicesController } from './contract-services.controller';
@@ -53,6 +54,7 @@ import { ContractsRepository } from './repositories/contracts.repository';
     ContractPropertiesRepository,
     ContractServicesRepository,
     ContractsRepository,
+    UserRepository,
   ],
   exports: [
     ContractService,
