@@ -11,11 +11,10 @@ export class Services extends BaseEntity {
   name: string;
 
   @Column({
-    type: 'enum',
-    enum: ServiceCalculationMethod,
+    type: 'text',
     default: ServiceCalculationMethod.FIXED_PER_ROOM,
   })
-  calculationMethod: ServiceCalculationMethod;
+  calculationMethod: string;
 
   @Column({ nullable: true, default: 'apps-outline' })
   icon: string;

@@ -4,4 +4,5 @@ export enum ServiceCalculationMethod {
   PER_UNIT_SIMPLE = 'PER_UNIT_SIMPLE',
   PER_UNIT_TIERED = 'PER_UNIT_TIERED',
   FREE = 'FREE',
+  FIXED_PER_NUMBER = 'FIXED_PER_NUMBER',
 }
