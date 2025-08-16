@@ -43,10 +43,8 @@ export class PropertiesService extends BaseEntity {
   price: number;
 
   @Column({
-    type: 'enum',
-    enum: ServiceCalculationMethod,
+    type: 'text',
     default: ServiceCalculationMethod.FREE,
-    enumName: 'service_calculation_method',
   })
-  calculationMethod: ServiceCalculationMethod;
+  calculationMethod: string;
 }
