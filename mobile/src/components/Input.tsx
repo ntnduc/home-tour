@@ -9,6 +9,7 @@ import {
   TextInputFocusEventData,
   TextInputProps,
   TextInputSubmitEditingEventData,
+  TextStyle,
   View,
   ViewStyle,
 } from "react-native";
@@ -37,6 +38,8 @@ interface InputProps extends TextInputProps {
   icon?: keyof typeof Ionicons.glyphMap;
   disabled?: boolean;
   inputStyles?: StyleProp<ViewStyle>;
+  labelStyles?: StyleProp<TextStyle>;
+  labelClassName?: string;
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
   onSubmitEditing?: (
     e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
@@ -44,6 +47,7 @@ interface InputProps extends TextInputProps {
   iconProps?: InputIconProps;
   onClear?: () => void;
   showClear?: boolean;
+  [key: string]: any;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -68,6 +72,8 @@ const Input: React.FC<InputProps> = ({
   iconProps,
   onClear,
   showClear = true,
+  labelStyles,
+  labelClassName,
   ...props
 }) => {
   const theme = useTamaguiTheme();
@@ -102,7 +108,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <View className="bg-white rounded-xl shadow-sm">
       {label && (
-        <Text style={styles.label}>
+        <Text style={[styles.label, labelStyles]} className={labelClassName}>
           {label}
           {required && <Text style={styles.requiredText}> *</Text>}
         </Text>
@@ -132,7 +138,7 @@ const Input: React.FC<InputProps> = ({
           ]}
           readOnly={readOnly}
           onChangeText={handleChangeText}
-          placeholder={placeholder ?? `Nhập ${label}...`}
+          placeholder={placeholder ?? `Nhập ${label?.toLowerCase()}...`}
           keyboardType={type === "number" ? "numeric" : keyboardType}
           placeholderTextColor="#9CA3AF"
           multiline={type === "area"}

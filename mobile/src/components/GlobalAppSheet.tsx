@@ -2,7 +2,7 @@ import React, { createContext, useContext, useRef } from "react";
 import AppSheet, { AppSheetProps, AppSheetRef } from "./AppSheet/AppSheet";
 
 interface GlobalAppSheetContextType {
-  openAppSheet: (children: React.ReactNode, config?: any) => void;
+  openAppSheet: (children: React.ReactNode, config?: AppSheetProps) => void;
   closeAppSheet: () => void;
 }
 

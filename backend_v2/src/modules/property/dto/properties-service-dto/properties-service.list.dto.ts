@@ -8,6 +8,7 @@ export class PropertyServiceListDto extends BaseListDto<PropertiesService> {
 
   fromEntity(entity: PropertiesService): void {
     this.propertyId = entity.propertyId;
-    this.calculationMethod = entity.calculationMethod;
+    this.calculationMethod =
+      entity.calculationMethod as ServiceCalculationMethod;
   }
 }

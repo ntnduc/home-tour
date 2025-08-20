@@ -31,6 +31,7 @@ export interface AppSheetProps extends Omit<ModalizeProps, "ref"> {
   classNameContent?: string;
   styleContent?: StyleProp<ViewStyle>;
   header?: HeaderConfig;
+  modalHeight?: number;
 }
 
 export interface AppSheetRef {
@@ -109,7 +110,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
       handleStyle={{
         display: "none",
       }}
-      modalHeight={300}
+      modalHeight={config?.modalHeight || 300}
       {...modalizeProps}
       {...config}
       withReactModal={true}

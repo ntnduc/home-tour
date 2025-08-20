@@ -1,5 +1,6 @@
 import { getListService } from "@/api/service/service.api";
 import AutocompleteInput from "@/components/AutocompleteInput";
+import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { createStyles } from "@/styles/component/StyleComboBox";
 import { ServiceCreateOrUpdateRequest } from "@/types/service";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,12 +11,14 @@ import { Text, useTheme as useTamaguiTheme } from "tamagui";
 
 const ServiceSelectedSearchComponent = ({
   value,
+  service,
   error,
   onChange,
 }: {
-  value: ServiceCreateOrUpdateRequest;
+  value?: string;
+  service?: ServiceCreateOrUpdateRequest;
   error?: string;
-  onChange: (services: ServiceCreateOrUpdateRequest) => void;
+  onChange: (services: ServiceCreateOrUpdateRequest | string) => void;
 }) => {
   const ICON_DEFAULT = "apps-outline";
 
@@ -23,17 +26,23 @@ const ServiceSelectedSearchComponent = ({
   const styles = createStyles(theme);
 
   const [search, setSearch] = useState("");
-  const [valueSelected, setValueSelected] = useState<
-    ServiceCreateOrUpdateRequest | string
-  >(value);
+  const [serviceSelected, setServiceSelected] = useState<
+    ServiceCreateOrUpdateRequest | null | undefined
+  >(service);
   const [hideResults, setHideResults] = useState(true);
 
   const onSelectedService = (service: any) => {
-    setValueSelected(service);
+    setServiceSelected(service);
     setHideResults(true);
     onChange({
       name: service?.name ?? service,
       ...service,
+      serviceId: service?.id ?? null,
+      id: null,
+      price:
+        service.calculationMethod === ServiceCalculateMethod.FREE
+          ? 0
+          : undefined,
     });
   };
 
@@ -50,11 +59,12 @@ const ServiceSelectedSearchComponent = ({
 
   const handleChangeText = (text: string) => {
     setSearch(text);
-    setValueSelected(text);
-    onChange({
-      ...value,
-      name: text,
-    });
+    if (service) {
+      setServiceSelected({ ...service, name: text });
+      onChange({ ...service, name: text });
+    } else {
+      onChange(text);
+    }
 
     if (data?.data?.items && data?.data?.items?.length > 0) {
       setHideResults(false);
@@ -73,9 +83,7 @@ const ServiceSelectedSearchComponent = ({
     <AutocompleteInput
       hideResults={hideResults}
       onChangeText={handleChangeText}
-      value={
-        typeof valueSelected === "string" ? valueSelected : valueSelected?.name
-      }
+      value={value}
       placeholder="Nhập tên dịch vụ"
       error={error}
       data={data?.data?.items ?? []}
@@ -83,11 +91,7 @@ const ServiceSelectedSearchComponent = ({
       onSubmitEditing={() => {
         setHideResults(true);
       }}
-      icon={
-        typeof valueSelected === "string"
-          ? ICON_DEFAULT
-          : (valueSelected?.icon as any) ?? ICON_DEFAULT
-      }
+      icon={service && service?.icon ? (service.icon as any) : ICON_DEFAULT}
       iconProps={{
         color: "#007AFF",
       }}

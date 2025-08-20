@@ -55,7 +55,7 @@ export const createStyles = (theme: any) =>
     addServiceButton: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.blue10?.val ?? "#6a5af9",
+      backgroundColor: theme.blue10?.val ?? "#3b82f6",
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 20,

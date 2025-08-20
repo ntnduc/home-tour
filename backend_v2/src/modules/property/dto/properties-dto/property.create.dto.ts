@@ -9,8 +9,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { BaseCreateDto } from 'src/common/base/dto/create.dto';
-import { CreateServiceDto } from 'src/modules/services/dto/services.create.dto';
 import { Properties } from '../../entities/properties.entity';
+import { PropertiesCreateOrUpdateDto } from '../properties-service-dto/properties-create-or-update.dto';
 
 export class PropertyCreateDto extends BaseCreateDto<Properties> {
   @IsString()
@@ -37,8 +37,8 @@ export class PropertyCreateDto extends BaseCreateDto<Properties> {
   longitude?: string;
 
   @ValidateNested({ each: true })
-  @Type(() => CreateServiceDto)
-  services?: Array<CreateServiceDto>;
+  @Type(() => PropertiesCreateOrUpdateDto)
+  services?: PropertiesCreateOrUpdateDto[];
 
   @IsNumber()
   defaultRoomRent: number;

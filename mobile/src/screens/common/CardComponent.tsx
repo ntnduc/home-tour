@@ -33,7 +33,7 @@ export type CardComponentProps = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   className?: string;
-  title?: string;
+  title?: string | React.ReactNode;
   description?: string | React.ReactNode;
   descriptionStyle?: StyleProp<any>;
   actions?: (CardActionConfig | string)[];
@@ -124,15 +124,19 @@ const CardComponent = (props: CardComponentProps) => {
       style={[styles.card, style]}
       className={`rounded-xl p-4 mb-4 ${className || ""}`}
     >
-      {/* Header */}
       {header !== undefined ? (
         header
       ) : title || actions || renderActions ? (
         <View style={styles.header}>
-          {/* Hàng trên: title + status badge */}
           <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
             <View style={{ flex: 1 }}>
-              {title ? <Text style={styles.title}>{title}</Text> : null}
+              {title ? (
+                typeof title === "string" ? (
+                  <Text style={styles.title}>{title}</Text>
+                ) : (
+                  title
+                )
+              ) : null}
               {description &&
                 (typeof description === "string" ? (
                   <Text style={[styles.description, descriptionStyle]}>
@@ -184,10 +188,8 @@ const CardComponent = (props: CardComponentProps) => {
         </View>
       ) : null}
 
-      {/* Body */}
       <View style={styles.body}>{children}</View>
 
-      {/* Footer */}
       {footer ? <View style={styles.footer}>{footer}</View> : null}
     </View>
   );

@@ -6,13 +6,17 @@ export interface Service {
   price: number;
   calculationMethod: ServiceCalculateMethod;
   icon?: string;
+  serviceId?: string;
 }
 
 export interface ServiceCreateOrUpdateRequest {
-  id: string;
+  id?: string;
   name: string;
   icon?: string;
   price: number;
+  serviceId?: string;
+  isNew?: boolean;
+  fieldId?: string;
   calculationMethod: ServiceCalculateMethod;
 }
 

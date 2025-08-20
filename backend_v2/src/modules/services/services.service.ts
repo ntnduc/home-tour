@@ -6,7 +6,7 @@ import { removeAccents } from './../../common/utils';
 import { CreateServiceDto } from './dto/services.create.dto';
 import { ServiceDetailDto } from './dto/services.detail.dto';
 import { ServiceListDto } from './dto/services.list.dto';
-import { UpdateServiceDto } from './dto/services.update.dto';
+import { ServiceUpdateDto } from './dto/services.update.dto';
 import { Services } from './entities/services.entity';
 import { ServicesRepository } from './repositories/services.repository';
 
@@ -16,7 +16,7 @@ export class ServicesService extends BaseService<
   ServiceDetailDto,
   ServiceListDto,
   CreateServiceDto,
-  UpdateServiceDto
+  ServiceUpdateDto
 > {
   constructor(private readonly serviceRepository: ServicesRepository) {
     super(
@@ -24,7 +24,7 @@ export class ServicesService extends BaseService<
       ServiceDetailDto,
       ServiceListDto,
       CreateServiceDto,
-      UpdateServiceDto,
+      ServiceUpdateDto,
     );
   }
 

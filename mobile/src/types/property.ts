@@ -28,6 +28,7 @@ export interface PropertyCreateRequest
 
 export interface PropertyUpdateRequest extends Omit<Property, "services"> {
   services: ServiceCreateOrUpdateRequest[];
+  removeServiceIds?: string[];
 }
 
 export interface PropertyDetail extends Property {
@@ -52,6 +53,7 @@ export function mapPropertyDetailToUpdateRequest(
     ...propertyDetail,
     services: propertyDetail.services.map((service) => ({
       id: service.id,
+      serviceId: service.serviceId,
       name: service.name,
       price: service.price,
       icon: service.icon,

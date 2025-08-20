@@ -4,7 +4,7 @@ import { BaseUpdateDto } from '../../../common/base/dto/update.dto';
 import { Services } from '../entities/services.entity';
 import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 
-export class UpdateServiceDto extends BaseUpdateDto<Services> {
+export class ServiceUpdateDto extends BaseUpdateDto<Services> {
   @IsOptional()
   name?: string;
 

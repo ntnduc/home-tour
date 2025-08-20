@@ -50,9 +50,9 @@ export const AutocompleteInput = React.forwardRef(
       onShowResults,
       onStartShouldSetResponderCapture = () => false,
       renderResultList: ResultList = FlatList,
-      renderTextInput: customRenderTextInput = (props) => (
-        <Input {...props} keyboardType="default" />
-      ),
+      renderTextInput: customRenderTextInput = (props) => {
+        return <Input {...props} height={30} keyboardType="default" />;
+      },
       flatListProps,
       style,
       label,
@@ -131,7 +131,6 @@ const iosStyles = StyleSheet.create({
   },
   inputContainer: {},
   input: {
-    backgroundColor: "white",
     height: 40,
     paddingLeft: 3,
   },

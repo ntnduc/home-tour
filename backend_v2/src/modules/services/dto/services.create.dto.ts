@@ -18,6 +18,10 @@ export class CreateServiceDto extends BaseCreateDto<Services> {
   @IsString()
   name: string;
 
+  @IsString()
+  @IsOptional()
+  serviceId?: string;
+
   @IsEnum(ServiceCalculationMethod, {
     message: 'Phương thức tính không hợp lệ!',
   })

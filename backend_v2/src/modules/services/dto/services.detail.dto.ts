@@ -8,12 +8,14 @@ export class ServiceDetailDto extends BaseDetailDto<Services> {
   defaultUnitName: string;
   price: number;
   icon?: string;
+  serviceId: string;
 
   fromEntity(entity: Services): void {
     this.name = entity.name;
     this.id = entity.id;
     this.icon = entity.icon;
-    this.calculationMethod = entity.calculationMethod;
+    this.calculationMethod =
+      entity.calculationMethod as ServiceCalculationMethod;
     this.defaultUnitName = entity.defaultUnitName;
     this.createdBy = entity.createdBy;
     this.updatedBy = entity.updatedBy;

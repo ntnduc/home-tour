@@ -1,7 +1,9 @@
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
 import { BaseUpdateDto } from 'src/common/base/dto/update.dto';
-import { CreateServiceDto } from 'src/modules/services/dto/services.create.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { Properties } from '../../entities/properties.entity';
+import { PropertiesCreateOrUpdateDto } from '../properties-service-dto/properties-create-or-update.dto';
 
 export class PropertyUpdateDto extends BaseUpdateDto<Properties> {
   ownerId: string;
@@ -28,7 +30,11 @@ export class PropertyUpdateDto extends BaseUpdateDto<Properties> {
 
   paymentDate: number;
 
-  services?: CreateServiceDto[];
+  @ValidateNested({ each: true })
+  @Type(() => PropertiesCreateOrUpdateDto)
+  services?: PropertiesCreateOrUpdateDto[];
+
+  removeServiceIds?: string[];
 
   getEntity(entity: Properties): QueryDeepPartialEntity<Properties> {
     entity.ownerId = this.ownerId;

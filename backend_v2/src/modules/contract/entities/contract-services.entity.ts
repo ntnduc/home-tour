@@ -31,8 +31,6 @@ export class ContractServices extends BaseEntity {
 
   @Column({
     type: 'decimal',
-    precision: 15,
-    scale: 2,
     nullable: false,
     default: 0,
   })
