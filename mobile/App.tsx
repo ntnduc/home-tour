@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import { TamaguiProvider } from "tamagui";
@@ -52,6 +51,7 @@ import InvoiceDetailScreen from "./src/screens/invoice/InvoiceDetailScreen";
 import InvoiceHistoryScreen from "./src/screens/invoice/InvoiceHistoryScreen";
 
 // Config
+import { TouchableOpacity } from "react-native";
 import config from "./tamagui.config";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

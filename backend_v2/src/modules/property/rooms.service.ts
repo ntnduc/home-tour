@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseService } from 'src/common/base/crud/base.service';
 import { RoomStatus } from 'src/common/enums/room.enum';
 import { SelectQueryBuilder } from 'typeorm';
+import { ContractServiceDetailDto } from '../contract/dto/contract-services-dto/contract-service.detail.dto';
+import { ContractsRepository } from '../contract/repositories/contracts.repository';
 import { PropertyCreateDto } from './dto/properties-dto/property.create.dto';
 import { PropertyDetailDto } from './dto/properties-dto/property.detail.dto';
 import { RoomServiceDetailDto } from './dto/room-dto/room-service.detail.dto';
@@ -10,6 +12,7 @@ import { RoomListDto } from './dto/room-dto/room.list.dto';
 import { RoomUpdateDto } from './dto/room-dto/room.update.dto';
 import { RoomCreateDto } from './dto/room-dto/rooms.create.dto';
 import { Rooms } from './entities/rooms.entity';
+import { PropertiesServiceRepository } from './repositories/properties-service.repository';
 import { RoomsRepository } from './repositories/rooms.repository';
 
 @Injectable()
@@ -20,7 +23,11 @@ export class RoomsService extends BaseService<
   RoomCreateDto,
   RoomUpdateDto
 > {
-  constructor(private readonly roomsRepository: RoomsRepository) {
+  constructor(
+    private readonly roomsRepository: RoomsRepository,
+    private readonly contractsRepository: ContractsRepository,
+    private readonly propertiesServiceRepository: PropertiesServiceRepository,
+  ) {
     super(
       roomsRepository,
       RoomDetailDto,
@@ -51,35 +58,70 @@ export class RoomsService extends BaseService<
       where: {
         id: id as any,
       },
+      relations: ['property', 'property.services', 'property.services.service'],
     });
 
     if (!entity) {
       throw new NotFoundException('Không tìm thấy dữ liệu!');
     }
-
     const dto = new RoomDetailDto();
     dto.fromEntity(entity);
-    if (entity.property) {
-      const property = new PropertyDetailDto();
-      property.fromEntity(entity.property);
-      dto.property = property;
-    }
 
     return dto;
   }
 
   public async getRoomServices(id: string): Promise<RoomServiceDetailDto> {
     const entity = await this.genericRepository.findOne({
-      where: { id: id as any },
+      where: {
+        id: id as any,
+      },
       relations: ['property', 'property.services', 'property.services.service'],
     });
 
     if (!entity) {
-      throw new NotFoundException('Không tìm thấy phòng!');
+      throw new NotFoundException('Không tìm thấy dữ liệu!');
     }
-
     const dto = new RoomServiceDetailDto();
     dto.fromEntity(entity);
+
+    const contract = await this.contractsRepository.findOne({
+      where: {
+        roomId: entity.id,
+      },
+      relations: ['contractServices', 'contractServices.propertyService'],
+    });
+
+    if (
+      contract &&
+      contract.contractServices &&
+      contract.contractServices.length > 0
+    ) {
+      dto.contractServices = contract.contractServices.map((service) => {
+        const contractServiceDetailDto = new ContractServiceDetailDto();
+        contractServiceDetailDto.fromEntity(service);
+        return contractServiceDetailDto;
+      });
+    } else {
+      if (
+        entity.property &&
+        entity.property.services &&
+        entity.property.services.length > 0
+      ) {
+        const propertyServices = entity.property.services;
+        dto.contractServices = propertyServices.map((service) => {
+          const contractServiceDetailDto = new ContractServiceDetailDto();
+          contractServiceDetailDto.fromPropertyService(service);
+          return contractServiceDetailDto;
+        });
+      }
+    }
+
+    if (entity.property) {
+      const property = new PropertyDetailDto();
+      property.fromEntity(entity.property);
+      dto.property = property;
+    }
+
     return dto;
   }
 

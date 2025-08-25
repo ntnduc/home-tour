@@ -8,12 +8,18 @@ import {
 import { BaseDetailDto } from 'src/common/base/dto/detail.dto';
 import { Rooms } from '../../entities/rooms.entity';
 import { PropertyDetailDto } from '../properties-dto/property.detail.dto';
+import { ContractServiceDetailDto } from './../../../contract/dto/contract-services-dto/contract-service.detail.dto';
 
 export class RoomDetailDto extends BaseDetailDto<Rooms> {
   @IsOptional()
   @ValidateNested()
   @Type(() => PropertyDetailDto)
   property?: PropertyDetailDto;
+
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => ContractServiceDetailDto)
+  contractServices?: ContractServiceDetailDto[];
 
   @IsString()
   propertyId: string;

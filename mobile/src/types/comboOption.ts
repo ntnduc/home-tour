@@ -9,4 +9,5 @@ export interface ComboOptionWithExtra<K, T, E> {
   value: T;
   label?: string;
   extra?: E | null;
+  [key: string]: any;
 }

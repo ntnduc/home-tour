@@ -1,6 +1,7 @@
 import { ComboOptionWithExtra } from "@/types/comboOption";
 import { PropertyDetail } from "@/types/property";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -107,9 +108,9 @@ const BuildingFilterComponent = ({
   ];
 
   return (
-    <View className="h-full ">
+    <BottomSheetScrollView>
       {data.map((item: any, index) => renderBuildingItem({ item, index }))}
-    </View>
+    </BottomSheetScrollView>
   );
 };
 

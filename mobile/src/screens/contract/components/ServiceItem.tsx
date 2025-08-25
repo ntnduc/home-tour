@@ -5,17 +5,17 @@ import {
   ServiceCalculateMethod,
 } from "@/constant/service.constant";
 import CardComponent from "@/screens/common/CardComponent";
-import { ContractService } from "@/types/contract-service";
+import { ContractServiceCreateRequest } from "@/types/contract-service";
 import { formatCurrency } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
 
 interface ServiceItemProps {
-  service: ContractService;
+  service: ContractServiceCreateRequest;
   index: number;
   onEdit: () => void;
-  onChange: (service: ContractService) => void;
+  onChange: (service: ContractServiceCreateRequest) => void;
 }
 
 const ServiceItem: React.FC<ServiceItemProps> = ({
@@ -25,7 +25,6 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
   onChange,
 }) => {
   const getActions = () => {
-    if (service.isNew) return ["edit", "delete"];
     return ["edit"];
   };
 
@@ -41,13 +40,13 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
             }
             checked={service.isEnabled}
           />
-          <Text className="font-semibold text-lg">{service.name}</Text>
+          <Text className="font-semibold text-lg">{service?.name}</Text>
         </View>
       }
       description={
         <View className="flex-row items-center mt-1">
           <Text className="text-sm text-gray-600">
-            {formatCurrency(service.price.toString() ?? "0") + "đ "}
+            {formatCurrency(service?.price?.toString() ?? "0") + "đ "}
           </Text>
           <Ionicons
             name={
@@ -100,11 +99,11 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
             </Text>
           </View>
 
-          {service.isNew && (
+          {/* {service.isNew && (
             <View className="bg-blue-100 px-2 py-1 rounded-full">
               <Text className="text-xs font-medium text-blue-700">Mới</Text>
             </View>
-          )}
+          )} */}
         </View>
       </View>
     </CardComponent>

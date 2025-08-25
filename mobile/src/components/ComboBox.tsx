@@ -1,19 +1,14 @@
 import { createStyles } from "@/styles/component/StyleComboBox";
-import { ComboOption } from "@/types/comboOption";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useEffect, useState } from "react";
-import {
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Text, View } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 import { useTheme as useTamaguiTheme } from "tamagui";
+import { InputIconProps } from "./Input";
 
 interface ComboBoxProps<T> {
   value: T;
-  options: ComboOption<T, string>[];
+  options: T[];
   onChange: (value: T) => void;
   placeholder?: string;
   error?: string;
@@ -21,7 +16,17 @@ interface ComboBoxProps<T> {
   onFocus?: () => void;
   isActive?: boolean;
   label?: string;
+  disabled?: boolean;
   required?: boolean;
+  isSearch?: boolean;
+  nestedScrollEnabled?: boolean;
+  scrollEnabled?: boolean;
+  icon?:
+    | React.ReactElement
+    | keyof typeof Ionicons.glyphMap
+    | ((value: T, options: T[], visible?: boolean) => React.ReactElement | null)
+    | keyof typeof Ionicons.glyphMap;
+  iconProps?: InputIconProps;
 }
 
 export const ComboBox = <T,>({
@@ -31,49 +36,92 @@ export const ComboBox = <T,>({
   placeholder = "Chọn...",
   error,
   isLoading = false,
-  onFocus,
   isActive = false,
   label,
   required = false,
+  isSearch = true,
+  disabled = false,
+  icon,
+  iconProps,
 }: ComboBoxProps<T>) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!isActive) {
-      setShowDropdown(false);
+      setOpen(false);
     }
   }, [isActive]);
 
-  const selectedOption = options.find((option) => option.key === value);
-
   const handleSelect = (key: T) => {
     onChange(key);
-    setShowDropdown(false);
-    setSearchText("");
+    setOpen(false);
   };
-
-  const handleToggleDropdown = () => {
-    if (!showDropdown && onFocus) {
-      onFocus();
-    }
-    setShowDropdown(!showDropdown);
-  };
-
-  const filteredOptions = options.filter((option) =>
-    option.label?.toLowerCase().includes(searchText.toLowerCase())
-  );
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <View style={styles.skeletonText} />
-        <View style={styles.skeletonIcon} />
+      <View style={styles.container}>
+        <View
+          style={{
+            padding: 12,
+            backgroundColor: "#f5f5f5",
+            borderRadius: 8,
+            minHeight: 48,
+          }}
+        >
+          <View
+            style={{
+              height: 20,
+              width: "70%",
+              backgroundColor: "#e0e0e0",
+              borderRadius: 4,
+            }}
+          />
+        </View>
       </View>
     );
   }
+
+  const _renderIcons = (visible?: boolean): React.ReactElement | null => {
+    if (!icon) return null;
+    if (typeof icon === "string") {
+      return (
+        <Ionicons
+          name={icon as keyof typeof Ionicons.glyphMap}
+          size={18}
+          color={"#6B7280"}
+          className="mr-3 ml-[-1px]"
+          {...iconProps}
+        />
+      );
+    }
+    if (typeof icon === "function") {
+      const _renderIconType = icon(value, options, visible);
+      if (typeof _renderIconType === "string") {
+        return (
+          <Ionicons
+            name={_renderIconType as keyof typeof Ionicons.glyphMap}
+            size={18}
+            color={"#6B7280"}
+            className="mr-3 ml-[-1px]"
+            {...iconProps}
+          />
+        );
+      }
+
+      return _renderIconType as React.ReactElement;
+    }
+    return React.cloneElement(
+      icon as React.ReactElement,
+      {
+        size: 18,
+        color: "#6B7280",
+        className: "mr-3 ml-[-1px]",
+        ...iconProps,
+      } as any
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -82,63 +130,39 @@ export const ComboBox = <T,>({
           {label} {required && <Text style={{ color: "red" }}>*</Text>}
         </Text>
       )}
-      <TouchableOpacity
-        style={[styles.selectInput, error && styles.errorInput]}
-        onPress={handleToggleDropdown}
-      >
-        <Text style={[styles.selectText, error && styles.errorText]}>
-          {selectedOption?.label || placeholder}
-        </Text>
-        <Ionicons
-          name="chevron-down"
-          size={20}
-          color={error ? "#ff3b30" : "#666"}
-        />
-      </TouchableOpacity>
 
-      {showDropdown && (
-        <View style={styles.dropdownContainer}>
-          <View style={styles.searchInputContainer}>
-            <Ionicons
-              name="search"
-              size={20}
-              color="#666"
-              style={styles.searchIcon}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Tìm kiếm..."
-              placeholderTextColor="#999"
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-          </View>
-          <ScrollView style={{ maxHeight: 250 }}>
-            {filteredOptions.map((option) => (
-              <TouchableOpacity
-                key={String(option.key)}
-                style={[
-                  styles.item,
-                  value === option.key && styles.itemSelected,
-                ]}
-                onPress={() => handleSelect(option.key)}
-              >
-                <Text
-                  style={[
-                    styles.itemText,
-                    value === option.key && styles.itemTextSelected,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-            {filteredOptions.length === 0 && (
-              <Text style={styles.noResults}>Không tìm thấy kết quả</Text>
-            )}
-          </ScrollView>
-        </View>
-      )}
+      <Dropdown
+        value={value as any}
+        data={options}
+        onChange={(callback) => {
+          if (typeof callback === "function") {
+            const newValue = callback(value as any);
+            if (newValue !== undefined && newValue !== null) {
+              handleSelect(newValue);
+            }
+          } else {
+            handleSelect(callback as T);
+          }
+        }}
+        placeholder={placeholder}
+        style={[
+          styles.selectInput,
+          error && styles.errorInput,
+          { borderWidth: 1, borderColor: error ? "#ff3b30" : "#e0e0e0" },
+        ]}
+        autoScroll={true}
+        containerStyle={styles.dropdownContainer}
+        search={isSearch}
+        selectedTextStyle={styles.itemTextSelected}
+        itemTextStyle={styles.itemText}
+        iconStyle={styles.iconRight}
+        renderLeftIcon={_renderIcons}
+        disable={isLoading || disabled}
+        placeholderStyle={{ color: "#999" }}
+        labelField="label"
+        valueField="key"
+      />
+
       {error && (
         <Text className="mt-1" style={styles.errorText}>
           {error}

@@ -4,13 +4,13 @@ import DatePicker from "@/components/DatePicker";
 import { useGlobalAppSheet } from "@/components/GlobalAppSheet";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
-import { ContractService } from "@/types/contract-service";
+import { ContractServiceDetailResponse } from "@/types/contract-service";
 import { formatCurrency, generateId } from "@/utils/appUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
 import { getRoomService } from "../../api/room/room.api";
@@ -39,83 +39,52 @@ const CreateContractScreen = ({
   const { openAppSheet } = useGlobalAppSheet();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingRoomData, setIsLoadingRoomData] = useState(true);
   const [roomData, setRoomData] = useState<RoomServiceDetailResponse | null>(
     null
   );
 
-  const {
-    handleSubmit,
-    control,
-    watch,
-    getValues,
-    setValue,
-    formState: { errors },
-  } = useForm<ContractCreateRequest>({
-    defaultValues: {
-      roomId: roomId,
-      contractServices: roomData?.services.map((service, index) => ({
-        id: service?.id ?? index.toString(),
-        isEnabled: true,
-        isNew: false,
-        isSelectedFromService: false,
-        price: service.price,
-        propertyServiceId: service.propertyServiceId,
-        calculationMethod: service.calculationMethod,
-        notes: "",
-      })),
-    },
-  });
+  const { control, watch, getValues, setValue, reset } =
+    useForm<ContractCreateRequest>();
 
-  const openServiceForm = (service?: ContractService, isNew?: boolean) => {
-    console.log("💞💓💗💞💓💗 ~ openServiceForm ~ service:", service);
-    openAppSheet(<ContractServiceComponent />, {
+  const openServiceForm = (
+    service: ContractServiceDetailResponse,
+    isNew?: boolean
+  ) => {
+    openAppSheet(<ContractServiceComponent contractService={service} />, {
+      snapPoints: ["90%"],
       header: {
-        title: isNew ? "Thêm dịch vụ" : "Cập nhật dịch vụ",
+        title: "Cập nhật dịch vụ",
       },
-      closeSnapPointStraightEnabled: true,
-      modalHeight: 700,
     });
   };
 
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
-        setIsLoadingRoomData(true);
+        setIsLoading(true);
 
         const roomServiceResponse = await getRoomService(roomId);
 
         if (roomServiceResponse.success && roomServiceResponse.data) {
-          setRoomData(roomServiceResponse.data);
-          if (
-            roomServiceResponse.data?.services &&
-            roomServiceResponse.data?.services.length > 0
-          ) {
-            const contractServices = roomServiceResponse.data?.services.map(
-              (service) => ({
-                isEnabled: true,
-                isNew: false,
-                name: service.name,
-                isSelectedFromService: false,
-                price: service.price,
-                propertyServiceId: service.propertyServiceId,
-                calculationMethod: service.calculationMethod,
-                notes: "",
-              })
-            ) as ContractService[];
-            setValue("contractServices", contractServices);
-            setValue("rentAmountAgreed", roomServiceResponse.data.rentAmount);
-            setValue(
-              "depositAmountPaid",
-              roomServiceResponse.data.defaultDepositAmount
-            );
-          }
+          const room = roomServiceResponse.data;
+          setRoomData(room);
+          reset({
+            roomId: room.id,
+            propertyId: room.propertyId,
+            rentAmountAgreed: room.rentAmount,
+            depositAmountPaid: room.defaultDepositAmount,
+            paymentDueDay: room.defaultPaymentDueDay,
+            contractServices: room.contractServices,
+          });
         }
       } catch (error) {
         console.error("Error fetching room data:", error);
         Alert.alert("Lỗi", "Không thể tải thông tin phòng và dịch vụ");
+        setTimeout(() => {
+          navigation.goBack();
+        }, 500);
       } finally {
-        setIsLoadingRoomData(false);
+        setIsLoading(false);
       }
     };
 
@@ -143,17 +112,22 @@ const CreateContractScreen = ({
     }
   };
 
-  if (isLoading || isLoadingRoomData) {
+  if (isLoading) {
     return <Loading />;
   }
 
-  if (!isLoadingRoomData && roomData?.status !== RoomStatus.AVAILABLE) {
+  if (!roomData) {
+    return <Loading />;
+  }
+
+  if (roomData.status !== RoomStatus.AVAILABLE) {
     Toast.show({
       type: "error",
       text1: "Lỗi",
-      text2: "Phòng đã được cho thuê!",
+      text2: "Phòng không khả dụng!",
     });
     navigation.goBack();
+    return null;
   }
 
   return (
@@ -189,193 +163,7 @@ const CreateContractScreen = ({
           </View>
         </CardContent>
 
-        {/* <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Thông tin người thuê
-          </Text>
-
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="user"
-              rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
-                  value={value}
-                  required
-                  onChangeText={onChange}
-                  icon="home"
-                  label="Tên gợi nhớ"
-                  error={erroForms.name?.message}
-                />
-              )}
-            />
-          </View>
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Họ và tên *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.tenantName
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="person"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.tenantName}
-                onChangeText={(value) => updateFormData("tenantName", value)}
-                placeholder="Nhập họ và tên"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-            {errors.tenantName && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.tenantName}
-              </Text>
-            )}
-          </View>
-
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Số điện thoại *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.tenantPhone
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="call"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.tenantPhone}
-                onChangeText={(value) => updateFormData("tenantPhone", value)}
-                placeholder="Nhập số điện thoại"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="phone-pad"
-              />
-            </View>
-            {errors.tenantPhone && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.tenantPhone}
-              </Text>
-            )}
-          </View>
-
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Email
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.tenantEmail
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="mail"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.tenantEmail}
-                onChangeText={(value) => updateFormData("tenantEmail", value)}
-                placeholder="Nhập email (tùy chọn)"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-            {errors.tenantEmail && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.tenantEmail}
-              </Text>
-            )}
-          </View>
-
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              CMND/CCCD *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.tenantIdCard
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="card"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.tenantIdCard}
-                onChangeText={(value) => updateFormData("tenantIdCard", value)}
-                placeholder="Nhập số CMND/CCCD"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-              />
-            </View>
-            {errors.tenantIdCard && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.tenantIdCard}
-              </Text>
-            )}
-          </View>
-
-          <View className="mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">
-              Địa chỉ *
-            </Text>
-            <View
-              className={`flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border ${
-                errors.tenantAddress
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-200"
-              }`}
-            >
-              <Ionicons
-                name="location"
-                size={18}
-                color="#6B7280"
-                className="mr-3"
-              />
-              <TextInput
-                className="flex-1 text-base text-gray-900"
-                value={formData.tenantAddress}
-                onChangeText={(value) => updateFormData("tenantAddress", value)}
-                placeholder="Nhập địa chỉ"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-            {errors.tenantAddress && (
-              <Text className="text-xs text-red-500 mt-1 ml-1">
-                {errors.tenantAddress}
-              </Text>
-            )}
-          </View>
-        </View> */}
+        {/* THÔNG TIN NGƯỜI THUÊ COMPONENT CÓ TRONG NOTE */}
 
         <CardContent title="Thời hạn thuê">
           <View className="mb-3">
@@ -504,31 +292,31 @@ const CreateContractScreen = ({
               </Text>
             </View>
           }
-          description="Quản lý các dịch vụ cho hợp đồng"
-          renderActions={() => {
-            return (
-              <View className="flex-row items-center justify-between mb-4">
-                <TouchableOpacity
-                  onPress={() => {
-                    openServiceForm(undefined, true);
-                  }}
-                  className="flex-row items-center bg-blue-500 px-4 py-2 rounded-xl shadow-sm"
-                  style={{
-                    shadowColor: "#3B82F6",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                    elevation: 5,
-                  }}
-                >
-                  <Ionicons name="add-circle" size={20} color="white" />
-                  <Text className="text-white font-semibold ml-2">
-                    Thêm dịch vụ
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
+          description="Bạn muốn thêm dịch vụ mới hãy tạo dịch vụ trong tòa nhà!"
+          // renderActions={() => {
+          //   return (
+          //     <View className="flex-row items-center justify-between mb-4">
+          //       <TouchableOpacity
+          //         onPress={() => {
+          //           openServiceForm(undefined, true);
+          //         }}
+          //         className="flex-row items-center bg-blue-500 px-4 py-2 rounded-xl shadow-sm"
+          //         style={{
+          //           shadowColor: "#3B82F6",
+          //           shadowOffset: { width: 0, height: 2 },
+          //           shadowOpacity: 0.25,
+          //           shadowRadius: 3.84,
+          //           elevation: 5,
+          //         }}
+          //       >
+          //         <Ionicons name="add-circle" size={20} color="white" />
+          //         <Text className="text-white font-semibold ml-2">
+          //           Thêm dịch vụ
+          //         </Text>
+          //       </TouchableOpacity>
+          //     </View>
+          //   );
+          // }}
         >
           <Controller
             control={control}
@@ -548,7 +336,7 @@ const CreateContractScreen = ({
                       Chưa có dịch vụ nào
                     </Text>
                     <Text className="text-gray-400 text-sm text-center">
-                      Nhấn "Thêm dịch vụ" để bắt đầu
+                      Hãy tạo thêm dịch vụ trong cập nhật tòa nhà
                     </Text>
                   </View>
                 );
@@ -557,12 +345,23 @@ const CreateContractScreen = ({
               return (
                 <View key={generateId()} className="space-y-3">
                   {value?.map((service, index) => (
-                    <View key={`service-${service.id || index}-${index}`}>
+                    <View
+                      key={`service-${
+                        service.propertyServiceId || index
+                      }-${index}`}
+                    >
                       <ServiceItem
-                        key={`service-item-${service.id || index}-${index}`}
+                        key={`service-item-${
+                          service.propertyServiceId || index
+                        }-${index}`}
                         service={service}
                         index={index}
-                        onEdit={() => openServiceForm(service, false)}
+                        onEdit={() =>
+                          openServiceForm(
+                            service as ContractServiceDetailResponse,
+                            false
+                          )
+                        }
                         onChange={(service) => {
                           onChange(
                             value.map((s, i) => (i === index ? service : s))

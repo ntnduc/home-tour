@@ -16,10 +16,6 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
   @IsOptional()
   contractId?: string;
 
-  @IsUUID()
-  @IsOptional()
-  serviceId?: string;
-
   @IsNumber()
   @Min(0)
   @IsOptional()

@@ -1,5 +1,9 @@
 import { ContractProperty } from "./contract-property";
-import { ContractService } from "./contract-service";
+import {
+  ContractService,
+  ContractServiceCreateRequest,
+  ContractServiceDetailResponse,
+} from "./contract-service";
 
 export enum ContractStatus {
   PENDING_START = "PENDING_START",
@@ -64,7 +68,7 @@ export interface ContractCreateRequest {
   status?: ContractStatus;
   notes?: string;
   contractProperties?: ContractProperty[];
-  contractServices?: ContractService[];
+  contractServices?: ContractServiceCreateRequest[];
 }
 
 export interface ContractUpdateRequest {
@@ -133,18 +137,7 @@ export interface ContractDetailResponse {
     moveOutDate?: string;
     isActiveInContract: boolean;
   }>;
-  contractServices: Array<{
-    id: string;
-    serviceId: string;
-    service: {
-      id: string;
-      name: string;
-      icon?: string;
-    };
-    price?: number;
-    isEnabled: boolean;
-    notes?: string;
-  }>;
+  contractServices: ContractServiceDetailResponse[];
 }
 
 export interface ContractListResponse {

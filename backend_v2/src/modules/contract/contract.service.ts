@@ -97,10 +97,12 @@ export class ContractService
         throw new BadRequestException('Phòng không ở trạng thái trống');
       }
 
-      const activeContractExists =
-        await this.contractsRepository.findActiveContractByRoomId(
-          createDto.roomId,
-        );
+      const activeContractExists = await this.contractsRepository.findOne({
+        where: {
+          roomId: createDto.roomId,
+          status: ContractStatus.ACTIVE,
+        },
+      });
 
       if (activeContractExists) {
         throw new BadRequestException('Phòng đã có hợp đồng đang hoạt động');
@@ -145,9 +147,14 @@ export class ContractService
 
       await queryRunner.commitTransaction();
 
-      const detailContract = await this.contractsRepository.findWithRelations(
-        savedContract.id,
-      );
+      const detailContract = await this.contractsRepository.findOne({
+        where: { id: savedContract.id },
+        relations: [
+          'contractServices',
+          'contractServices.propertyService',
+          'contractServices.propertyService.service',
+        ],
+      });
       const detailDto = new ContractDetailDto();
       detailDto.fromEntity(detailContract!);
       return detailDto;
@@ -192,8 +199,14 @@ export class ContractService
       await queryRunner.commitTransaction();
 
       // Lấy thông tin chi tiết hợp đồng sau khi cập nhật
-      const detailContract =
-        await this.contractsRepository.findWithRelations(id);
+      const detailContract = await this.contractsRepository.findOne({
+        where: { id },
+        relations: [
+          'contractServices',
+          'contractServices.propertyService',
+          'contractServices.propertyService.service',
+        ],
+      });
       const detailDto = new ContractDetailDto();
       detailDto.fromEntity(detailContract!);
       return detailDto;
@@ -205,35 +218,35 @@ export class ContractService
     }
   }
 
-  async findById(id: string): Promise<ContractDetailDto> {
-    const contract = await this.contractsRepository.findWithRelations(id);
-    if (!contract) {
-      throw new NotFoundException('Hợp đồng không tồn tại');
-    }
+  // async findById(id: string): Promise<ContractDetailDto> {
+  //   const contract = await this.contractsRepository.findWithRelations(id);
+  //   if (!contract) {
+  //     throw new NotFoundException('Hợp đồng không tồn tại');
+  //   }
 
-    const detailDto = new ContractDetailDto();
-    detailDto.fromEntity(contract);
-    return detailDto;
-  }
+  //   const detailDto = new ContractDetailDto();
+  //   detailDto.fromEntity(contract);
+  //   return detailDto;
+  // }
 
-  async findByRoomId(roomId: string): Promise<ContractListDto[]> {
-    const contracts = await this.contractsRepository.findByRoomId(roomId);
-    return this.beautifyResult(contracts);
-  }
+  // async findByRoomId(roomId: string): Promise<ContractListDto[]> {
+  //   const contracts = await this.contractsRepository.findByRoomId(roomId);
+  //   return this.beautifyResult(contracts);
+  // }
 
-  async findActiveContractByRoomId(
-    roomId: string,
-  ): Promise<ContractDetailDto | null> {
-    const contract =
-      await this.contractsRepository.findActiveContractByRoomId(roomId);
-    if (!contract) {
-      return null;
-    }
+  // async findActiveContractByRoomId(
+  //   roomId: string,
+  // ): Promise<ContractDetailDto | null> {
+  //   const contract =
+  //     await this.contractsRepository.findActiveContractByRoomId(roomId);
+  //   if (!contract) {
+  //     return null;
+  //   }
 
-    const detailDto = new ContractDetailDto();
-    detailDto.fromEntity(contract);
-    return detailDto;
-  }
+  //   const detailDto = new ContractDetailDto();
+  //   detailDto.fromEntity(contract);
+  //   return detailDto;
+  // }
 
   private async createContractServices(
     contractId: string,
@@ -243,7 +256,6 @@ export class ContractService
   ): Promise<void> {
     for (const serviceDto of contractServicesDto) {
       if (serviceDto.propertyServiceId && !serviceDto.isNew) {
-        // Trường hợp 1: Clone từ property service
         const propertyService = await this.propertiesServiceRepository.findOne({
           where: { id: serviceDto.propertyServiceId },
           relations: ['service'],
@@ -261,7 +273,7 @@ export class ContractService
         }
       } else {
         const newService = new ServiceDetailDto();
-        if (!serviceDto.isSelectedFromService && !serviceDto.serviceId) {
+        if (!serviceDto.isSelectedFromService) {
           const serviceEntity = new Services();
           serviceEntity.name = serviceDto.name ?? '';
           serviceEntity.isActive = true;
@@ -272,7 +284,7 @@ export class ContractService
           newService.fromEntity(service);
         } else {
           const service = await this.servicesRepository.findOne({
-            where: { id: serviceDto.serviceId, isActive: true },
+            where: { id: serviceDto.propertyServiceId, isActive: true },
           });
 
           if (!service) {

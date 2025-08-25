@@ -1,5 +1,12 @@
-import { IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { BaseDetailDto } from 'src/common/base/dto/detail.dto';
+import { ContractServiceDetailDto } from 'src/modules/contract/dto/contract-services-dto/contract-service.detail.dto';
 import { Rooms } from '../../entities/rooms.entity';
 import { PropertyDetailDto } from '../properties-dto/property.detail.dto';
 import { PropertyServiceDetailDto } from '../properties-service-dto/properties-service.detail.dto';
@@ -37,6 +44,11 @@ export class RoomServiceDetailDto extends BaseDetailDto<Rooms> {
   description?: string;
 
   property: PropertyDetailDto;
+
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => ContractServiceDetailDto)
+  contractServices?: ContractServiceDetailDto[];
 
   fromEntity(entity: Rooms): void {
     this.id = entity.id;

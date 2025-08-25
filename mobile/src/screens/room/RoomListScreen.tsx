@@ -235,9 +235,9 @@ const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
                 }}
               />,
               {
-                adjustToContentHeight: false,
+                snapPoints: ["40%"],
                 header: {
-                  title: "Chọn toà nhà",
+                  title: "Chọn tòa nhà",
                 },
               }
             );

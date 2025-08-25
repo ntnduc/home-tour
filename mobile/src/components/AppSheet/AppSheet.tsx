@@ -1,8 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
+import BottomSheet, {
+  BottomSheetProps,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import React, {
   forwardRef,
   ReactNode,
+  useCallback,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
 import {
@@ -10,12 +16,11 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
   View,
   ViewStyle,
 } from "react-native";
-
-import { Modalize, ModalizeProps } from "react-native-modalize";
+import AppSheetBackdropComponent from "./AppSheetBackdropComponent";
+import AppSheetHandleComponent from "./AppSheetHandleComponent";
 
 type HeaderConfig = {
   element?: ReactNode;
@@ -26,24 +31,25 @@ type HeaderConfig = {
   onClose?: () => void;
 };
 
-export interface AppSheetProps extends Omit<ModalizeProps, "ref"> {
+export interface AppSheetProps
+  extends Omit<BottomSheetProps, "ref" | "children"> {
   // children?: ReactNode;
   classNameContent?: string;
   styleContent?: StyleProp<ViewStyle>;
   header?: HeaderConfig;
-  modalHeight?: number;
+  children?: ReactNode;
 }
 
 export interface AppSheetRef {
-  open: (children?: ReactNode, config?: AppSheetProps) => void;
+  open: (children: ReactNode, config?: AppSheetProps) => void;
   close: () => void;
 }
 
 const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
-  const { children: defaultChildren, ...modalizeProps } = props;
-  const modalizeRef = React.useRef<Modalize>(null);
+  const { children: defaultChildren, ...bottomSheetProps } = props;
 
-  // const [dynamicChildren, setDynamicChildren] = useState<ReactNode>(null);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const isOpeningRef = useRef(false);
 
   const [state, setState] = useState<{
     dynamicChildren: ReactNode | null;
@@ -53,29 +59,32 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
     config: null,
   });
 
-  const { height } = useWindowDimensions();
-
   useImperativeHandle(ref, () => ({
     open,
     close,
   }));
 
-  const open = (children: ReactNode, config?: AppSheetProps) => {
-    if (children) {
-      setState({ dynamicChildren: children, config: config || null });
-    }
-    setTimeout(() => {
-      modalizeRef.current?.open();
-    }, 100);
-  };
-
-  const close = () => {
-    modalizeRef.current?.close();
-    state.config?.onClose?.();
-    setTimeout(() => {
+  const open = useCallback((children: ReactNode, config?: AppSheetProps) => {
+    if (children && !isOpeningRef.current) {
+      isOpeningRef.current = true;
       setState({ dynamicChildren: null, config: null });
-    }, 100);
-  };
+      setTimeout(() => {
+        setState({ dynamicChildren: children, config: config || null });
+        setTimeout(() => {
+          bottomSheetRef.current?.expand();
+          isOpeningRef.current = false;
+        }, 50);
+      }, 50);
+    }
+  }, []);
+
+  const close = useCallback(() => {
+    bottomSheetRef.current?.close();
+    if (state.config?.onClose) {
+      state.config.onClose();
+    }
+    setState({ dynamicChildren: null, config: null });
+  }, []);
 
   const header = (headerConfig?: HeaderConfig) => {
     return (
@@ -96,33 +105,50 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
     );
   };
 
-  const renderChildren = state.dynamicChildren || (
-    <View>
-      <Text>Chưa có nội dung</Text>
-    </View>
+  const renderChildren = (() => {
+    if (state.dynamicChildren) {
+      if (state.config?.header) {
+        return (
+          <>
+            <BottomSheetView>{header(state.config.header)}</BottomSheetView>
+            {state.dynamicChildren}
+          </>
+        );
+      }
+      return state.dynamicChildren;
+    } else {
+      return (
+        <BottomSheetView>
+          <Text>Chưa có nội dung</Text>
+        </BottomSheetView>
+      );
+    }
+  })();
+
+  const config = state.config || {};
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <AppSheetBackdropComponent {...props} onBackdropPress={close} />
+    ),
+    [close]
   );
 
-  const config = state.config;
-
   return (
-    <Modalize
-      ref={modalizeRef}
-      handleStyle={{
-        display: "none",
-      }}
-      modalHeight={config?.modalHeight || 300}
-      {...modalizeProps}
+    <BottomSheet
+      ref={bottomSheetRef}
+      index={-1}
+      enablePanDownToClose
+      onClose={close}
+      snapPoints={["50%"]}
+      backdropComponent={renderBackdrop}
+      handleComponent={AppSheetHandleComponent}
+      enableOverDrag={false}
+      enableHandlePanningGesture={true}
       {...config}
-      withReactModal={true}
-      HeaderComponent={config?.header && header(config?.header)}
     >
-      <View
-        className={props.classNameContent}
-        style={[styles.content, props.styleContent]}
-      >
-        <View className="h-full">{renderChildren}</View>
-      </View>
-    </Modalize>
+      {renderChildren}
+    </BottomSheet>
   );
 });
 
@@ -146,7 +172,11 @@ const styles = StyleSheet.create({
   content: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: "70%",
+    maxHeight: "95%",
+    backgroundColor: "#fff",
+  },
+  backdrop: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
 

@@ -54,20 +54,20 @@ export class ContractController extends BaseController<
     );
   }
 
-  @Get('room/:roomId')
-  @ApiOperation({ summary: 'Get contracts by room ID' })
-  @ApiResponse({ status: 200, description: 'List of contracts for the room.' })
-  async getContractsByRoomId(@Param('roomId') roomId: string) {
-    return await this.contractService.findByRoomId(roomId);
-  }
+  // @Get('room/:roomId')
+  // @ApiOperation({ summary: 'Get contracts by room ID' })
+  // @ApiResponse({ status: 200, description: 'List of contracts for the room.' })
+  // async getContractsByRoomId(@Param('roomId') roomId: string) {
+  //   return await this.contractService.findByRoomId(roomId);
+  // }
 
-  @Get('room/:roomId/active')
-  @ApiOperation({ summary: 'Get active contract by room ID' })
-  @ApiResponse({ status: 200, description: 'Active contract for the room.' })
-  @ApiResponse({ status: 404, description: 'No active contract found.' })
-  async getActiveContractByRoomId(@Param('roomId') roomId: string) {
-    return await this.contractService.findActiveContractByRoomId(roomId);
-  }
+  // @Get('room/:roomId/active')
+  // @ApiOperation({ summary: 'Get active contract by room ID' })
+  // @ApiResponse({ status: 200, description: 'Active contract for the room.' })
+  // @ApiResponse({ status: 404, description: 'No active contract found.' })
+  // async getActiveContractByRoomId(@Param('roomId') roomId: string) {
+  //   return await this.contractService.findActiveContractByRoomId(roomId);
+  // }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update contract status' })

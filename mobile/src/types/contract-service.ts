@@ -9,27 +9,17 @@ export interface ContractService {
   calculationMethod: ServiceCalculateMethod;
   isEnabled: boolean;
   notes?: string;
-  isNew?: boolean;
   name?: string;
-  isSelectedFromService?: boolean;
-  service?: {
-    id: string;
-    name: string;
-    icon?: string;
-  };
 }
 
 export interface ContractServiceCreateRequest {
-  contractId?: string;
-  serviceId?: string;
   propertyServiceId?: string;
   price?: number;
   calculationMethod: ServiceCalculateMethod;
   isEnabled?: boolean;
   notes?: string;
-  isNew?: boolean;
   name?: string;
-  isSelectedFromService?: boolean;
+  fieldId?: string;
 }
 
 export interface ContractServiceUpdateRequest {
@@ -41,10 +31,7 @@ export interface ContractServiceUpdateRequest {
   calculationMethod?: ServiceCalculateMethod;
 }
 
-export interface ContractServiceDetailResponse extends ContractService {
-  service: {
-    id: string;
-    name: string;
-    icon?: string;
-  };
+export interface ContractServiceDetailResponse
+  extends Omit<ContractService, "contractId"> {
+  contractId?: string;
 }

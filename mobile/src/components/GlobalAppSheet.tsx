@@ -28,7 +28,7 @@ export const GlobalAppSheetProvider: React.FC<GlobalAppSheetProviderProps> = ({
   children,
 }) => {
   const appSheetRef = useRef<AppSheetRef>(null);
-  const openAppSheet = (children: React.ReactNode, config?: AppSheetProps) => {
+  const openAppSheet = (children?: React.ReactNode, config?: AppSheetProps) => {
     appSheetRef.current?.open(children, config);
   };
 

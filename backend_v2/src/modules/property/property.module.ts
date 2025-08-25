@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ContractsRepository } from '../contract/repositories/contracts.repository';
 import { CurrentUserModule } from '../current.user';
 import { Districts } from '../location/entities/Districts.entity';
 import { Provinces } from '../location/entities/Provinces.entity';
@@ -41,6 +42,7 @@ import { RoomsService } from './rooms.service';
     PropertiesServiceRepository,
     RoomsRepository,
     ServicesRepository,
+    ContractsRepository,
   ],
   exports: [
     PropertyService,

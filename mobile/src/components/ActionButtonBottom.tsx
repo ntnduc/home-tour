@@ -23,6 +23,7 @@ interface ActionButton {
 interface ActionButtonBottomProps {
   actions: ActionButton[];
   containerStyle?: ViewStyle;
+  className?: string;
 }
 
 const getButtonStyle = (
@@ -65,16 +66,16 @@ const getIconColor = (variant: ActionButton["variant"] = "primary") => {
 const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
   actions,
   containerStyle,
+  className,
 }) => {
   const theme = useTamaguiTheme();
   return (
     <View
-      className={` ${
-        containerStyle || "bg-white border-t border-gray-200 px-6 pb-5 pt-3"
-      }`}
-      style={{
-        backgroundColor: theme.background?.val ?? "#fff",
-      }}
+      className={`bg-white border-t border-gray-200 px-6 pb-5 pt-3 ${className}`}
+      style={[
+        { backgroundColor: theme.background?.val ?? "#fff" },
+        containerStyle,
+      ]}
     >
       {actions.map((action, index) => (
         <TouchableOpacity
