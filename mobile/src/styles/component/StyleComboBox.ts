@@ -57,4 +57,26 @@ export const createStyles = (theme: any) =>
     },
 
     itemTextSelected: {},
+    searchInputContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: "#f0f0f0",
+    },
+    searchIcon: {
+      marginRight: 8,
+    },
+    searchInput: {
+      flex: 1,
+      paddingVertical: 12,
+      fontSize: 16,
+    },
+    noResults: {
+      padding: 16,
+      textAlign: "center",
+      color: "#666",
+      fontSize: 14,
+    },
   });

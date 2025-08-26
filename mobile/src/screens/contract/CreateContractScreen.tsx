@@ -163,8 +163,6 @@ const CreateContractScreen = ({
           </View>
         </CardContent>
 
-        {/* THÔNG TIN NGƯỜI THUÊ COMPONENT CÓ TRONG NOTE */}
-
         <CardContent title="Thời hạn thuê">
           <View className="mb-3">
             <Controller
@@ -293,30 +291,6 @@ const CreateContractScreen = ({
             </View>
           }
           description="Bạn muốn thêm dịch vụ mới hãy tạo dịch vụ trong tòa nhà!"
-          // renderActions={() => {
-          //   return (
-          //     <View className="flex-row items-center justify-between mb-4">
-          //       <TouchableOpacity
-          //         onPress={() => {
-          //           openServiceForm(undefined, true);
-          //         }}
-          //         className="flex-row items-center bg-blue-500 px-4 py-2 rounded-xl shadow-sm"
-          //         style={{
-          //           shadowColor: "#3B82F6",
-          //           shadowOffset: { width: 0, height: 2 },
-          //           shadowOpacity: 0.25,
-          //           shadowRadius: 3.84,
-          //           elevation: 5,
-          //         }}
-          //       >
-          //         <Ionicons name="add-circle" size={20} color="white" />
-          //         <Text className="text-white font-semibold ml-2">
-          //           Thêm dịch vụ
-          //         </Text>
-          //       </TouchableOpacity>
-          //     </View>
-          //   );
-          // }}
         >
           <Controller
             control={control}

@@ -1,7 +1,7 @@
 import { createStyles } from "@/styles/component/StyleComboBox";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Text, TextInput, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { useTheme as useTamaguiTheme } from "tamagui";
 import { InputIconProps } from "./Input";
@@ -19,6 +19,7 @@ interface ComboBoxProps<T> {
   disabled?: boolean;
   required?: boolean;
   isSearch?: boolean;
+  onSearch?: (text: string) => void;
   nestedScrollEnabled?: boolean;
   scrollEnabled?: boolean;
   icon?:
@@ -41,12 +42,14 @@ export const ComboBox = <T,>({
   required = false,
   isSearch = true,
   disabled = false,
+  onSearch,
   icon,
   iconProps,
 }: ComboBoxProps<T>) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
   const [open, setOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     if (!isActive) {
@@ -57,6 +60,7 @@ export const ComboBox = <T,>({
   const handleSelect = (key: T) => {
     onChange(key);
     setOpen(false);
+    setSearchText("");
   };
 
   if (isLoading) {
@@ -83,25 +87,36 @@ export const ComboBox = <T,>({
     );
   }
 
-  const _renderIcons = (visible?: boolean): React.ReactElement | null => {
-    if (!icon) return null;
-    if (typeof icon === "string") {
+  const _renderSearch = useCallback(
+    (onSearch: (text: string) => void) => {
       return (
-        <Ionicons
-          name={icon as keyof typeof Ionicons.glyphMap}
-          size={18}
-          color={"#6B7280"}
-          className="mr-3 ml-[-1px]"
-          {...iconProps}
-        />
+        <View style={styles.searchInputContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="#666"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm..."
+            placeholderTextColor="#999"
+            value={searchText}
+            onChangeText={onSearch}
+          />
+        </View>
       );
-    }
-    if (typeof icon === "function") {
-      const _renderIconType = icon(value, options, visible);
-      if (typeof _renderIconType === "string") {
+    },
+    [searchText, value, options]
+  );
+
+  const _renderIcons = useCallback(
+    (visible?: boolean): React.ReactElement | null => {
+      if (!icon) return null;
+      if (typeof icon === "string") {
         return (
           <Ionicons
-            name={_renderIconType as keyof typeof Ionicons.glyphMap}
+            name={icon as keyof typeof Ionicons.glyphMap}
             size={18}
             color={"#6B7280"}
             className="mr-3 ml-[-1px]"
@@ -109,19 +124,38 @@ export const ComboBox = <T,>({
           />
         );
       }
+      if (typeof icon === "function") {
+        const _renderIconType = icon(value, options, visible);
+        if (typeof _renderIconType === "string") {
+          return (
+            <Ionicons
+              name={_renderIconType as keyof typeof Ionicons.glyphMap}
+              size={18}
+              color={"#6B7280"}
+              className="mr-3 ml-[-1px]"
+              {...iconProps}
+            />
+          );
+        }
 
-      return _renderIconType as React.ReactElement;
-    }
-    return React.cloneElement(
-      icon as React.ReactElement,
-      {
-        size: 18,
-        color: "#6B7280",
-        className: "mr-3 ml-[-1px]",
-        ...iconProps,
-      } as any
-    );
-  };
+        return _renderIconType as React.ReactElement;
+      }
+      return React.cloneElement(
+        icon as React.ReactElement,
+        {
+          size: 18,
+          color: "#6B7280",
+          className: "mr-3 ml-[-1px]",
+          ...iconProps,
+        } as any
+      );
+    },
+    [icon, value, options, iconProps, disabled, isLoading]
+  );
+
+  const _renderEmpty = useCallback(() => {
+    return <Text style={styles.noResults}>Không tìm thấy kết quả</Text>;
+  }, [value, options, disabled, isLoading]);
 
   return (
     <View style={styles.container}>
@@ -157,6 +191,14 @@ export const ComboBox = <T,>({
         itemTextStyle={styles.itemText}
         iconStyle={styles.iconRight}
         renderLeftIcon={_renderIcons}
+        renderInputSearch={_renderSearch}
+        onChangeText={(text) => {
+          onSearch?.(text);
+          setSearchText(text);
+        }}
+        flatListProps={{
+          ListEmptyComponent: _renderEmpty,
+        }}
         disable={isLoading || disabled}
         placeholderStyle={{ color: "#999" }}
         labelField="label"
