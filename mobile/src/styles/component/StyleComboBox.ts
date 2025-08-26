@@ -31,9 +31,9 @@ export const createStyles = (theme: any) =>
     },
     dropdownContainer: {
       backgroundColor: "#fff",
-      borderRadius: 12,
+      borderRadius: 8,
       borderWidth: 1,
-      borderColor: "#e0e0e0",
+      borderColor: "#e5e7eb",
       marginTop: 4,
       overflow: "hidden",
       shadowColor: "#000",
@@ -50,10 +50,6 @@ export const createStyles = (theme: any) =>
     itemText: {
       fontSize: 16,
       color: "#333",
-    },
-
-    iconRight: {
-      marginRight: 12,
     },
 
     itemTextSelected: {},

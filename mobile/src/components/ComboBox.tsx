@@ -7,7 +7,7 @@ import { useTheme as useTamaguiTheme } from "tamagui";
 import { InputIconProps } from "./Input";
 
 interface ComboBoxProps<T> {
-  value: T;
+  value?: T | string | null | undefined | number;
   options: T[];
   onChange: (value: T) => void;
   placeholder?: string;
@@ -25,7 +25,11 @@ interface ComboBoxProps<T> {
   icon?:
     | React.ReactElement
     | keyof typeof Ionicons.glyphMap
-    | ((value: T, options: T[], visible?: boolean) => React.ReactElement | null)
+    | ((
+        value: T | string | null | undefined | number,
+        options: T[],
+        visible?: boolean
+      ) => React.ReactElement | null)
     | keyof typeof Ionicons.glyphMap;
   iconProps?: InputIconProps;
 }
@@ -63,7 +67,7 @@ export const ComboBox = <T,>({
     setSearchText("");
   };
 
-  if (isLoading) {
+  const _renderLoading = useCallback(() => {
     return (
       <View style={styles.container}>
         <View
@@ -85,7 +89,7 @@ export const ComboBox = <T,>({
         </View>
       </View>
     );
-  }
+  }, [isLoading]);
 
   const _renderSearch = useCallback(
     (onSearch: (text: string) => void) => {
@@ -110,7 +114,7 @@ export const ComboBox = <T,>({
     [searchText, value, options]
   );
 
-  const _renderIcons = useCallback(
+  const _renderLeftIcons = useCallback(
     (visible?: boolean): React.ReactElement | null => {
       if (!icon) return null;
       if (typeof icon === "string") {
@@ -153,6 +157,31 @@ export const ComboBox = <T,>({
     [icon, value, options, iconProps, disabled, isLoading]
   );
 
+  const _renderRightIcons = useCallback(
+    (visible?: boolean) => {
+      if (disabled) return null;
+      if (visible) {
+        return (
+          <Ionicons
+            name="chevron-up"
+            size={18}
+            color={"#6B7280"}
+            className="mr-3 "
+          />
+        );
+      }
+      return (
+        <Ionicons
+          name="chevron-down"
+          size={18}
+          color={"#6B7280"}
+          className="mr-3 "
+        />
+      );
+    },
+    [open, disabled]
+  );
+
   const _renderEmpty = useCallback(() => {
     return <Text style={styles.noResults}>Không tìm thấy kết quả</Text>;
   }, [value, options, disabled, isLoading]);
@@ -165,50 +194,58 @@ export const ComboBox = <T,>({
         </Text>
       )}
 
-      <Dropdown
-        value={value as any}
-        data={options}
-        onChange={(callback) => {
-          if (typeof callback === "function") {
-            const newValue = callback(value as any);
-            if (newValue !== undefined && newValue !== null) {
-              handleSelect(newValue);
-            }
-          } else {
-            handleSelect(callback as T);
-          }
-        }}
-        placeholder={placeholder}
-        style={[
-          styles.selectInput,
-          error && styles.errorInput,
-          { borderWidth: 1, borderColor: error ? "#ff3b30" : "#e0e0e0" },
-        ]}
-        autoScroll={true}
-        containerStyle={styles.dropdownContainer}
-        search={isSearch}
-        selectedTextStyle={styles.itemTextSelected}
-        itemTextStyle={styles.itemText}
-        iconStyle={styles.iconRight}
-        renderLeftIcon={_renderIcons}
-        renderInputSearch={_renderSearch}
-        onChangeText={(text) => {
-          onSearch?.(text);
-          setSearchText(text);
-        }}
-        flatListProps={{
-          ListEmptyComponent: _renderEmpty,
-        }}
-        disable={isLoading || disabled}
-        placeholderStyle={{ color: "#999" }}
-        labelField="label"
-        valueField="key"
-      />
+      {isLoading ? (
+        _renderLoading()
+      ) : (
+        <>
+          <Dropdown
+            value={value as any}
+            data={options}
+            onChange={(callback) => {
+              if (typeof callback === "function") {
+                const newValue = callback(value, options);
+                if (newValue !== undefined && newValue !== null) {
+                  handleSelect(newValue);
+                }
+              } else {
+                handleSelect(callback as T);
+              }
+            }}
+            placeholder={placeholder}
+            style={[
+              styles.selectInput,
+              error && styles.errorInput,
+              { borderWidth: 1, borderColor: error ? "#ff3b30" : "#e5e7eb" },
+              disabled ? { backgroundColor: "#f3f4f6" } : {},
+            ]}
+            autoScroll={true}
+            containerStyle={styles.dropdownContainer}
+            search={isSearch}
+            selectedTextStyle={styles.itemTextSelected}
+            itemTextStyle={styles.itemText}
+            keyboardAvoiding={true}
+            renderLeftIcon={_renderLeftIcons}
+            renderInputSearch={_renderSearch}
+            renderRightIcon={_renderRightIcons}
+            onChangeText={(text) => {
+              onSearch?.(text);
+              setSearchText(text);
+            }}
+            flatListProps={{
+              ListEmptyComponent: _renderEmpty,
+            }}
+            disable={isLoading || disabled}
+            placeholderStyle={{ color: "#999" }}
+            labelField="label"
+            valueField="key"
+          />
 
-      {error && (
-        <Text className="mt-1" style={styles.errorText}>
-          {error}
-        </Text>
+          {error && (
+            <Text className="mt-1" style={styles.errorText}>
+              {error}
+            </Text>
+          )}
+        </>
       )}
     </View>
   );

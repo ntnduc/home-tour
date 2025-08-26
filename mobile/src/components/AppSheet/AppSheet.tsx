@@ -24,7 +24,7 @@ import AppSheetHandleComponent from "./AppSheetHandleComponent";
 
 type HeaderConfig = {
   element?: ReactNode;
-  title: string;
+  title?: string;
   style?: StyleProp<ViewStyle>;
   className?: string;
   height?: number;
@@ -33,7 +33,6 @@ type HeaderConfig = {
 
 export interface AppSheetProps
   extends Omit<BottomSheetProps, "ref" | "children"> {
-  // children?: ReactNode;
   classNameContent?: string;
   styleContent?: StyleProp<ViewStyle>;
   header?: HeaderConfig;

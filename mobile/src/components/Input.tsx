@@ -114,9 +114,9 @@ const Input: React.FC<InputProps> = ({
         </Text>
       )}
       <View
-        className={`flex flex-row items-center content-center justify-center bg-gray-50 rounded-lg px-3 py-2 border ${
+        className={`flex flex-row items-center content-center justify-center  rounded-lg px-3 py-2 border ${
           error ? "border-red-300 bg-red-50" : "border-gray-200"
-        }`}
+        } ${disabled ? "bg-gray-100" : "bg-white"}`}
       >
         {icon && (
           <Ionicons

@@ -75,16 +75,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         }}
       />,
       {
-        panGestureEnabled: false,
-        closeOnOverlayTap: false,
-        adjustToContentHeight: false,
-        modalHeight: 290,
-        modalStyle: {
-          alignItems: "center",
-          justifyContent: "center",
-          maxWidth: "100%",
-          width: "100%",
-        },
+        handleHeight: 300,
         header: {
           element: (
             <View className="flex-row justify-between items-center border-b border-gray-200 w-full p-4 rounded-t-2xl">
@@ -123,10 +114,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
         </Text>
       )}
       <View
-        className={`flex flex-row items-center content-center justify-center
-           bg-gray-50 rounded-lg px-3 py-2 border 
-           ${error ? "border-red-300 bg-red-50" : "border-gray-200"}
-           ${disabled ? "opacity-50" : ""}`}
+        className={`flex flex-row items-center content-center justify-center rounded-lg px-3 py-2 border ${
+          error ? "border-red-300 bg-red-50" : "border-gray-200"
+        } ${disabled ? "bg-gray-100" : ""}`}
         style={inputStyles}
       >
         <TouchableOpacity

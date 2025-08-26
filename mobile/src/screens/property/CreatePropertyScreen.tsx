@@ -221,22 +221,24 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             control={control}
             name="provinceCode"
             rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
-            render={({ field: { onChange, value } }) => (
-              <ComboBox
-                value={value}
-                options={cities}
-                required={true}
-                onChange={(item) => {
-                  onChange(item);
-                  getDistricts(item);
-                }}
-                placeholder="Chọn thành phố/tỉnh"
-                error={errors.provinceCode?.message}
-                onFocus={() => setActiveDropdown("provinceCode")}
-                isActive={activeDropdown === "provinceCode"}
-                label="Thành phố / Tỉnh"
-              />
-            )}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <ComboBox
+                  value={value}
+                  options={cities}
+                  required={true}
+                  onChange={(item) => {
+                    onChange(item?.value ?? "");
+                    getDistricts(item?.value ?? "");
+                  }}
+                  placeholder="Chọn thành phố/tỉnh"
+                  error={errors.provinceCode?.message}
+                  onFocus={() => setActiveDropdown("provinceCode")}
+                  isActive={activeDropdown === "provinceCode"}
+                  label="Thành phố / Tỉnh"
+                />
+              );
+            }}
           />
 
           <Controller
@@ -245,12 +247,12 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             rules={{ required: "Vui lòng chọn quận/huyện" }}
             render={({ field: { onChange, value } }) => (
               <ComboBox
-                value={value}
+                value={value as any}
                 required={true}
                 options={location}
                 onChange={(item) => {
-                  onChange(item);
-                  getWards(item);
+                  onChange(item?.value ?? "");
+                  getWards(item?.value ?? "");
                 }}
                 placeholder="Chọn quận/huyện"
                 error={errors.districtCode?.message}
@@ -271,7 +273,9 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                 value={value}
                 options={wards}
                 required={true}
-                onChange={onChange}
+                onChange={(item) => {
+                  onChange(item?.value ?? "");
+                }}
                 placeholder="Chọn phường/xã"
                 error={errors.wardCode?.message}
                 isLoading={isLoadingWard}
