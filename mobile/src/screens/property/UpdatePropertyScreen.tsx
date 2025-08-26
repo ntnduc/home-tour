@@ -49,6 +49,8 @@ const UpdatePropertyScreen = ({
   const styles = createStyles(theme);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+  const [isLoadingWard, setIsLoadingWard] = useState(false);
   const [initialData, setInitialData] = useState<PropertyUpdateRequest>();
   const [cities, setCities] = useState<ComboOption<string, string>[]>([]);
   const [districts, setDistricts] = useState<ComboOption<string, string>[]>([]);
@@ -120,6 +122,29 @@ const UpdatePropertyScreen = ({
     name: "services",
     keyName: "fieldId",
   });
+
+  const getDistricts = async (provinceId: string) => {
+    setIsLoadingDistricts(true);
+    setIsLoadingWard(true);
+    const response = await getComboDistricts(provinceId);
+    if (response.success) {
+      setDistricts(response.data ?? []);
+    } else {
+      setDistricts([]);
+    }
+    setWards([]);
+    setIsLoadingDistricts(false);
+    setIsLoadingWard(false);
+  };
+
+  const getWards = async (districtId: string) => {
+    setIsLoadingWard(true);
+    const response = await getComboWards(districtId);
+    if (response.success) {
+      setWards(response.data ?? []);
+    }
+    setIsLoadingWard(false);
+  };
 
   const handleAddService = () => {
     prepend({
@@ -217,7 +242,11 @@ const UpdatePropertyScreen = ({
               <ComboBox
                 value={value}
                 options={cities}
-                onChange={onChange}
+                onChange={(value) => {
+                  onChange(value?.value ?? "");
+                  getDistricts(value?.value ?? "");
+                }}
+                isLoading={isLoadingDistricts}
                 placeholder="Chọn thành phố/tỉnh"
                 error={errors.provinceCode?.message}
                 onFocus={() => setActiveDropdown("provinceCode")}
@@ -235,7 +264,11 @@ const UpdatePropertyScreen = ({
               <ComboBox
                 value={value}
                 options={districts}
-                onChange={onChange}
+                onChange={(value) => {
+                  onChange(value?.value ?? "");
+                  getWards(value?.value ?? "");
+                }}
+                isLoading={isLoadingWard}
                 placeholder="Chọn quận/huyện"
                 error={errors.districtCode?.message}
                 onFocus={() => setActiveDropdown("districtCode")}
@@ -253,7 +286,9 @@ const UpdatePropertyScreen = ({
               <ComboBox
                 value={value}
                 options={wards}
-                onChange={onChange}
+                onChange={(value) => {
+                  onChange(value?.value ?? "");
+                }}
                 placeholder="Chọn phường/xã"
                 error={errors.wardCode?.message}
                 onFocus={() => setActiveDropdown("wardCode")}

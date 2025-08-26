@@ -7,6 +7,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface ActionButton {
@@ -68,13 +69,15 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
   containerStyle,
   className,
 }) => {
+  const { bottom } = useSafeAreaInsets();
   const theme = useTamaguiTheme();
   return (
     <View
-      className={`bg-white border-t border-gray-200 px-6 pb-5 pt-3 ${className}`}
+      className={`bg-white border-t border-gray-200 px-6 pt-3 ${className}`}
       style={[
         { backgroundColor: theme.background?.val ?? "#fff" },
         containerStyle,
+        { paddingBottom: bottom },
       ]}
     >
       {actions.map((action, index) => (

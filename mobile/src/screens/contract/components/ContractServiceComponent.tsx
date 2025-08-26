@@ -1,19 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Text, View } from "react-native";
+import React, { useCallback } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 // Components
 import Input from "@/components/Input";
 
 // Types & Constants
 import { ComboBox } from "@/components/ComboBox";
+import Toggle from "@/components/Toggle";
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
   ServiceCalculateMethod,
 } from "@/constant/service.constant";
+import { createStyles } from "@/styles/component/StyleComboBox";
 import { ContractServiceDetailResponse } from "@/types/contract-service";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Controller, useForm } from "react-hook-form";
+import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface ContractServiceComponentProps {
   onConfirm?: () => void;
@@ -33,20 +36,8 @@ const ContractServiceComponent: React.FC<ContractServiceComponentProps> = ({
   onConfirm,
   contractService,
 }) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, defaultValues },
-  } = useForm<ContractServiceDetailResponse>({
-    defaultValues: contractService,
-  });
-
-  const handleConfirm = () => {
-    const confirm = onConfirm?.();
-    if (confirm) {
-      return;
-    }
-  };
+  const theme = useTamaguiTheme();
+  const styles = createStyles(theme);
 
   const calculationMethodOptions = Object.entries(
     SERVICE_CALCULATE_METHOD_WITH_INFO
@@ -59,22 +50,143 @@ const ContractServiceComponent: React.FC<ContractServiceComponentProps> = ({
     unit: value.unit,
   }));
 
-  const renderCalculationMethodItem = (item: CalculationMethodOption) => (
-    <View className="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-2">
-      <View className="flex-row items-center mb-2">
-        <Ionicons name={item.icon as any} size={20} color="#3B82F6" />
-        <Text className="text-base font-semibold text-gray-800 ml-3 flex-1">
-          {item.label}
-        </Text>
-      </View>
-      <Text className="text-sm text-gray-600 mb-2 ml-8 leading-5">
-        {item.info}
-      </Text>
-      <Text className="text-xs text-gray-500 ml-8 italic">
-        Đơn vị: {item.unit}
-      </Text>
-    </View>
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue: setValueForm,
+    formState: { errors, defaultValues },
+  } = useForm<ContractServiceDetailResponse>({
+    defaultValues: contractService,
+  });
+
+  const calculationMethod = watch("calculationMethod");
+
+  const handleConfirm = () => {
+    const confirm = onConfirm?.();
+    if (confirm) {
+      return;
+    }
+  };
+
+  const _renderItems = useCallback(
+    (item: CalculationMethodOption, selected?: boolean) => {
+      return (
+        <View
+          style={{
+            padding: 17,
+            justifyContent: "space-between",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View className="flex-row items-center">
+            <Ionicons
+              className="mr-4"
+              name={item.icon as any}
+              size={17}
+              color="#6B7280"
+            />
+            <Text style={styles.itemText}>{item.label}</Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                "Thông tin",
+                SERVICE_CALCULATE_METHOD_WITH_INFO[item.key].info
+              );
+            }}
+          >
+            <Ionicons
+              className="mr-1"
+              name={"information-circle-outline"}
+              size={20}
+              color="#3B82F6"
+            />
+          </TouchableOpacity>
+        </View>
+      );
+    },
+    []
   );
+
+  const _renderHelpInfo = useCallback(() => {
+    switch (calculationMethod) {
+      case ServiceCalculateMethod.PER_UNIT_SIMPLE:
+        return (
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="helperValue"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Giá trị cũ"
+                  required={true}
+                  showClear={false}
+                  error={errors.helperValue?.message}
+                  placeholder="Nhập giá trị cũ"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  icon="document-lock"
+                />
+              )}
+            />
+          </View>
+        );
+      case ServiceCalculateMethod.FIXED_PER_PERSON:
+        return (
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="helperValue"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Số lượng"
+                  required={true}
+                  showClear={false}
+                  error={errors.helperValue?.message}
+                  placeholder="Nhập số lượng"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  icon="document-lock"
+                />
+              )}
+            />
+          </View>
+        );
+      case ServiceCalculateMethod.FIXED_PER_NUMBER:
+        return (
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="helperValue"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Số lượng"
+                  required={true}
+                  showClear={false}
+                  error={errors.helperValue?.message}
+                  placeholder="Nhập số lượng"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  icon="document-lock"
+                />
+              )}
+            />
+          </View>
+        );
+      case ServiceCalculateMethod.FREE: {
+        setValueForm("price", 0);
+        return null;
+      }
+
+      default:
+        return null;
+    }
+  }, [calculationMethod]);
 
   return (
     <BottomSheetScrollView className="p-4" nestedScrollEnabled={true}>
@@ -99,25 +211,6 @@ const ContractServiceComponent: React.FC<ContractServiceComponentProps> = ({
       <View className="mb-3">
         <Controller
           control={control}
-          name="price"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label="Giá dịch vụ"
-              required={true}
-              error={errors.price?.message}
-              placeholder="Nhập giá dịch vụ"
-              value={value.toString()}
-              onChangeText={onChange}
-              keyboardType="numeric"
-              icon="cash-outline"
-            />
-          )}
-        />
-      </View>
-
-      <View className="mb-3">
-        <Controller
-          control={control}
           name="calculationMethod"
           render={({ field: { onChange, value } }) => (
             <ComboBox
@@ -125,8 +218,9 @@ const ContractServiceComponent: React.FC<ContractServiceComponentProps> = ({
               options={calculationMethodOptions}
               required={true}
               onChange={(item) => {
-                onChange(item);
+                onChange(item?.key);
               }}
+              renderItem={(item, selected) => _renderItems(item, selected)}
               isSearch={false}
               placeholder="Chọn phương thức tính toán"
               error={errors.calculationMethod?.message}
@@ -161,6 +255,53 @@ const ContractServiceComponent: React.FC<ContractServiceComponentProps> = ({
               }}
             />
           )}
+        />
+      </View>
+
+      {_renderHelpInfo()}
+
+      <View className="mb-3">
+        <Controller
+          control={control}
+          name="price"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Giá dịch vụ"
+              disabled={calculationMethod === ServiceCalculateMethod.FREE}
+              required={true}
+              error={errors.price?.message}
+              placeholder="Nhập giá dịch vụ"
+              value={value.toString()}
+              onChangeText={onChange}
+              keyboardType="numeric"
+              icon="cash-outline"
+            />
+          )}
+        />
+      </View>
+
+      <View className="mb-3">
+        <Controller
+          control={control}
+          name="isEnabled"
+          render={({ field: { onChange, value } }) => {
+            return (
+              <Toggle
+                onPress={() => {
+                  onChange(!value);
+                }}
+                trackBar={{
+                  activeBackgroundColor: "#9ee3fb",
+                  inActiveBackgroundColor: "#3c4145",
+                  borderActiveColor: "#86c3d7",
+                  borderInActiveColor: "#1c1c1c",
+                  borderWidth: 5,
+                  width: 100,
+                }}
+                value={value}
+              />
+            );
+          }}
         />
       </View>
 

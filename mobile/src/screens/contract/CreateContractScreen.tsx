@@ -180,11 +180,7 @@ const CreateContractScreen = ({
                   onChange={onChange}
                   placeholder="Chọn ngày bắt đầu"
                   required
-                  minDate={
-                    watch("endDate")
-                      ? new Date(watch("endDate") ?? "")
-                      : new Date()
-                  }
+                  minDate={new Date()}
                   error={error?.message}
                   icon="calendar"
                 />

@@ -19,6 +19,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppSheetBackdropComponent from "./AppSheetBackdropComponent";
 import AppSheetHandleComponent from "./AppSheetHandleComponent";
 
@@ -37,6 +38,7 @@ export interface AppSheetProps
   styleContent?: StyleProp<ViewStyle>;
   header?: HeaderConfig;
   children?: ReactNode;
+  ignoreBottomInset?: boolean;
 }
 
 export interface AppSheetRef {
@@ -46,6 +48,8 @@ export interface AppSheetRef {
 
 const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
   const { children: defaultChildren, ...bottomSheetProps } = props;
+
+  const insets = useSafeAreaInsets();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const isOpeningRef = useRef(false);
@@ -72,8 +76,8 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
         setTimeout(() => {
           bottomSheetRef.current?.expand();
           isOpeningRef.current = false;
-        }, 50);
-      }, 50);
+        }, 100);
+      }, 100);
     }
   }, []);
 
@@ -104,13 +108,18 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
     );
   };
 
-  const renderChildren = (() => {
+  const _renderChildren = () => {
     if (state.dynamicChildren) {
       if (state.config?.header) {
         return (
           <>
             <BottomSheetView>{header(state.config.header)}</BottomSheetView>
             {state.dynamicChildren}
+            {!state.config?.ignoreBottomInset && (
+              <BottomSheetView>
+                <View style={{ height: insets.bottom }} />
+              </BottomSheetView>
+            )}
           </>
         );
       }
@@ -122,7 +131,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
         </BottomSheetView>
       );
     }
-  })();
+  };
 
   const config = state.config || {};
 
@@ -145,8 +154,9 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
       enableOverDrag={false}
       enableHandlePanningGesture={true}
       {...config}
+      detached={true}
     >
-      {renderChildren}
+      {_renderChildren()}
     </BottomSheet>
   );
 });

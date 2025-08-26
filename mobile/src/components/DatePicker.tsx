@@ -1,6 +1,7 @@
 import { createStyles } from "@/styles/component/StyleInput";
 import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetView } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import {
@@ -10,6 +11,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme as useTamaguiTheme } from "tamagui";
 import { useGlobalAppSheet } from "./GlobalAppSheet";
 
@@ -55,27 +57,43 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const theme = useTamaguiTheme();
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
+  const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
   const handleOpen = () => {
     if (disabled) return;
 
     openAppSheet(
-      <DateTimePicker
-        value={value ? new Date(value) : new Date()}
-        mode="date"
-        locale="vi-VN"
-        display="spinner"
-        maximumDate={maxDate}
-        minimumDate={minDate}
-        onChange={(event, date) => {
-          if (date) {
-            onChange?.(date);
-          }
+      <BottomSheetView
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
         }}
-      />,
+      >
+        <DateTimePicker
+          style={{
+            width: "100%",
+            height: "100%",
+            marginBottom: insets.bottom,
+          }}
+          value={value ? new Date(value) : new Date()}
+          mode="date"
+          locale="vi-VN"
+          display="spinner"
+          maximumDate={maxDate}
+          minimumDate={minDate}
+          onChange={(event, date) => {
+            if (date) {
+              onChange?.(date);
+            }
+          }}
+        />
+      </BottomSheetView>,
       {
-        handleHeight: 300,
+        snapPoints: [300],
+        ignoreBottomInset: true,
         header: {
           element: (
             <View className="flex-row justify-between items-center border-b border-gray-200 w-full p-4 rounded-t-2xl">

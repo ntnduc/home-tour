@@ -52,6 +52,7 @@ import InvoiceHistoryScreen from "./src/screens/invoice/InvoiceHistoryScreen";
 
 // Config
 import { TouchableOpacity } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import config from "./tamagui.config";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -75,189 +76,191 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={config}>
-          <GlobalAppSheetProvider>
-            <NavigationContainer>
-              <Stack.Navigator
-                initialRouteName="Login"
-                screenOptions={{
-                  gestureEnabled: true,
-                  animation: "slide_from_right",
-                  headerBackTitle: "Trở lại",
-                }}
-              >
-                {/* Auth Flow */}
-                <Stack.Screen
-                  name="Login"
-                  component={LoginScreen}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="OTPVerification"
-                  component={OTPVerificationScreen}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="Register"
-                  component={RegisterScreen}
-                  options={{ headerShown: false }}
-                />
-
-                {/* Main App */}
-                <Stack.Screen
-                  name="MainTabs"
-                  component={TabNavigator}
-                  options={{
-                    headerShown: false,
-                    gestureEnabled: false,
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <TamaguiProvider config={config}>
+            <GlobalAppSheetProvider>
+              <NavigationContainer>
+                <Stack.Navigator
+                  initialRouteName="Login"
+                  screenOptions={{
+                    gestureEnabled: true,
+                    animation: "slide_from_right",
+                    headerBackTitle: "Trở lại",
                   }}
-                />
+                >
+                  {/* Auth Flow */}
+                  <Stack.Screen
+                    name="Login"
+                    component={LoginScreen}
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="OTPVerification"
+                    component={OTPVerificationScreen}
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="Register"
+                    component={RegisterScreen}
+                    options={{ headerShown: false }}
+                  />
 
-                {/* Property Management */}
-                <Stack.Screen
-                  name="PropertyList"
-                  component={PropertyListScreen}
-                  options={{ title: "Danh Sách Tài Sản" }}
-                />
-                <Stack.Screen
-                  name="PropertyDetail"
-                  component={PropertyDetailScreen}
-                  options={{ title: "Chi Tiết Tài Sản" }}
-                />
-                <Stack.Screen
-                  name="CreateProperty"
-                  component={CreatePropertyScreen}
-                  options={{ title: "Tạo Tài Sản Mới" }}
-                />
-                <Stack.Screen
-                  name="UpdateProperty"
-                  component={UpdatePropertyScreen}
-                  options={{ title: "Cập Nhật Tài Sản" }}
-                />
+                  {/* Main App */}
+                  <Stack.Screen
+                    name="MainTabs"
+                    component={TabNavigator}
+                    options={{
+                      headerShown: false,
+                      gestureEnabled: false,
+                    }}
+                  />
 
-                {/* Room Management */}
-                <Stack.Screen
-                  name="RoomList"
-                  component={RoomListScreen}
-                  options={{ title: "Danh Sách Phòng" }}
-                />
-                <Stack.Screen
-                  name="RoomDetail"
-                  component={RoomDetailScreen}
-                  options={{ title: "Chi Tiết Phòng" }}
-                />
-                <Stack.Screen
-                  name="CreateRoom"
-                  component={CreateRoomScreen}
-                  options={{ title: "Tạo Phòng Mới" }}
-                />
-                <Stack.Screen
-                  name="UpdateRoom"
-                  component={UpdateRoomScreen}
-                  options={{ title: "Cập Nhật Phòng" }}
-                />
+                  {/* Property Management */}
+                  <Stack.Screen
+                    name="PropertyList"
+                    component={PropertyListScreen}
+                    options={{ title: "Danh Sách Tài Sản" }}
+                  />
+                  <Stack.Screen
+                    name="PropertyDetail"
+                    component={PropertyDetailScreen}
+                    options={{ title: "Chi Tiết Tài Sản" }}
+                  />
+                  <Stack.Screen
+                    name="CreateProperty"
+                    component={CreatePropertyScreen}
+                    options={{ title: "Tạo Tài Sản Mới" }}
+                  />
+                  <Stack.Screen
+                    name="UpdateProperty"
+                    component={UpdatePropertyScreen}
+                    options={{ title: "Cập Nhật Tài Sản" }}
+                  />
 
-                {/* Tenant Management */}
-                <Stack.Screen
-                  name="TenantList"
-                  component={TenantListScreen}
-                  options={{ title: "Danh Sách Khách Thuê" }}
-                />
-                <Stack.Screen
-                  name="TenantDetail"
-                  component={TenantDetailScreen}
-                  options={{ title: "Chi Tiết Khách Thuê" }}
-                />
-                <Stack.Screen
-                  name="CreateTenant"
-                  component={CreateTenantScreen}
-                  options={{ title: "Tạo Khách Thuê Mới" }}
-                />
-                <Stack.Screen
-                  name="UpdateTenant"
-                  component={UpdateTenantScreen}
-                  options={{ title: "Cập Nhật Khách Thuê" }}
-                />
+                  {/* Room Management */}
+                  <Stack.Screen
+                    name="RoomList"
+                    component={RoomListScreen}
+                    options={{ title: "Danh Sách Phòng" }}
+                  />
+                  <Stack.Screen
+                    name="RoomDetail"
+                    component={RoomDetailScreen}
+                    options={{ title: "Chi Tiết Phòng" }}
+                  />
+                  <Stack.Screen
+                    name="CreateRoom"
+                    component={CreateRoomScreen}
+                    options={{ title: "Tạo Phòng Mới" }}
+                  />
+                  <Stack.Screen
+                    name="UpdateRoom"
+                    component={UpdateRoomScreen}
+                    options={{ title: "Cập Nhật Phòng" }}
+                  />
 
-                {/* Contract Management */}
-                <Stack.Screen
-                  name="ContractList"
-                  component={ContractListScreen}
-                  options={{ title: "Danh Sách Hợp Đồng" }}
-                />
-                <Stack.Screen
-                  name="ContractDetail"
-                  component={ContractDetailScreen}
-                  options={{ title: "Chi Tiết Hợp Đồng" }}
-                />
-                <Stack.Screen
-                  name="CreateContract"
-                  component={CreateContractScreen}
-                  options={{ title: "Tạo Hợp Đồng Mới" }}
-                />
-                <Stack.Screen
-                  name="TerminateContract"
-                  component={TerminateContractScreen}
-                  options={{ title: "Chấm Dứt Hợp Đồng" }}
-                />
+                  {/* Tenant Management */}
+                  <Stack.Screen
+                    name="TenantList"
+                    component={TenantListScreen}
+                    options={{ title: "Danh Sách Khách Thuê" }}
+                  />
+                  <Stack.Screen
+                    name="TenantDetail"
+                    component={TenantDetailScreen}
+                    options={{ title: "Chi Tiết Khách Thuê" }}
+                  />
+                  <Stack.Screen
+                    name="CreateTenant"
+                    component={CreateTenantScreen}
+                    options={{ title: "Tạo Khách Thuê Mới" }}
+                  />
+                  <Stack.Screen
+                    name="UpdateTenant"
+                    component={UpdateTenantScreen}
+                    options={{ title: "Cập Nhật Khách Thuê" }}
+                  />
 
-                {/* Invoice Management */}
-                <Stack.Screen
-                  name="InvoiceDetail"
-                  component={InvoiceDetailScreen}
-                  options={({ navigation, route }) => {
-                    const isFromHistory = route.params?.fromHistory;
-                    return {
-                      title: "Chi Tiết Hóa Đơn",
-                      headerRight: () =>
-                        !isFromHistory ? (
-                          <TouchableOpacity
-                            style={{ marginRight: 16 }}
-                            onPress={() =>
-                              navigation.navigate("InvoiceHistory")
-                            }
-                          >
-                            <Ionicons
-                              name="time-outline"
-                              size={24}
-                              color="#007AFF"
-                            />
-                          </TouchableOpacity>
-                        ) : null,
-                    };
-                  }}
-                />
-                <Stack.Screen
-                  name="InvoiceHistory"
-                  component={InvoiceHistoryScreen}
-                  options={({ navigation }) => ({
-                    title: "Lịch Sử Hóa Đơn",
-                    headerRight: () => (
-                      <TouchableOpacity
-                        style={{ marginRight: 16 }}
-                        onPress={() => {
-                          // TODO: Implement filter modal
-                          console.log("Open filter modal");
-                        }}
-                      >
-                        <Ionicons name="filter" size={24} color="#007AFF" />
-                      </TouchableOpacity>
-                    ),
-                  })}
-                />
-                <Stack.Screen
-                  name="CreateInvoice"
-                  component={CreateInvoiceScreen}
-                  options={{ title: "Tạo Hóa Đơn Mới" }}
-                />
-              </Stack.Navigator>
-              <StatusBar style="dark" />
-            </NavigationContainer>
-            <Toast />
-          </GlobalAppSheetProvider>
-        </TamaguiProvider>
-      </QueryClientProvider>
+                  {/* Contract Management */}
+                  <Stack.Screen
+                    name="ContractList"
+                    component={ContractListScreen}
+                    options={{ title: "Danh Sách Hợp Đồng" }}
+                  />
+                  <Stack.Screen
+                    name="ContractDetail"
+                    component={ContractDetailScreen}
+                    options={{ title: "Chi Tiết Hợp Đồng" }}
+                  />
+                  <Stack.Screen
+                    name="CreateContract"
+                    component={CreateContractScreen}
+                    options={{ title: "Tạo Hợp Đồng Mới" }}
+                  />
+                  <Stack.Screen
+                    name="TerminateContract"
+                    component={TerminateContractScreen}
+                    options={{ title: "Chấm Dứt Hợp Đồng" }}
+                  />
+
+                  {/* Invoice Management */}
+                  <Stack.Screen
+                    name="InvoiceDetail"
+                    component={InvoiceDetailScreen}
+                    options={({ navigation, route }) => {
+                      const isFromHistory = route.params?.fromHistory;
+                      return {
+                        title: "Chi Tiết Hóa Đơn",
+                        headerRight: () =>
+                          !isFromHistory ? (
+                            <TouchableOpacity
+                              style={{ marginRight: 16 }}
+                              onPress={() =>
+                                navigation.navigate("InvoiceHistory")
+                              }
+                            >
+                              <Ionicons
+                                name="time-outline"
+                                size={24}
+                                color="#007AFF"
+                              />
+                            </TouchableOpacity>
+                          ) : null,
+                      };
+                    }}
+                  />
+                  <Stack.Screen
+                    name="InvoiceHistory"
+                    component={InvoiceHistoryScreen}
+                    options={({ navigation }) => ({
+                      title: "Lịch Sử Hóa Đơn",
+                      headerRight: () => (
+                        <TouchableOpacity
+                          style={{ marginRight: 16 }}
+                          onPress={() => {
+                            // TODO: Implement filter modal
+                            console.log("Open filter modal");
+                          }}
+                        >
+                          <Ionicons name="filter" size={24} color="#007AFF" />
+                        </TouchableOpacity>
+                      ),
+                    })}
+                  />
+                  <Stack.Screen
+                    name="CreateInvoice"
+                    component={CreateInvoiceScreen}
+                    options={{ title: "Tạo Hóa Đơn Mới" }}
+                  />
+                </Stack.Navigator>
+                <StatusBar style="dark" />
+              </NavigationContainer>
+              <Toast />
+            </GlobalAppSheetProvider>
+          </TamaguiProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

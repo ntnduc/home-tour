@@ -22,6 +22,7 @@ interface ComboBoxProps<T> {
   onSearch?: (text: string) => void;
   nestedScrollEnabled?: boolean;
   scrollEnabled?: boolean;
+  renderItem?: (item: T, selected?: boolean) => React.ReactElement | null;
   icon?:
     | React.ReactElement
     | keyof typeof Ionicons.glyphMap
@@ -49,6 +50,7 @@ export const ComboBox = <T,>({
   onSearch,
   icon,
   iconProps,
+  renderItem,
 }: ComboBoxProps<T>) => {
   const theme = useTamaguiTheme();
   const styles = createStyles(theme);
@@ -227,6 +229,7 @@ export const ComboBox = <T,>({
             renderLeftIcon={_renderLeftIcons}
             renderInputSearch={_renderSearch}
             renderRightIcon={_renderRightIcons}
+            renderItem={renderItem}
             onChangeText={(text) => {
               onSearch?.(text);
               setSearchText(text);

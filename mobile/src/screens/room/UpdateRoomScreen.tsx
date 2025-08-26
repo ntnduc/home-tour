@@ -118,7 +118,6 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Compact Header */}
         <CardContent>
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
@@ -182,6 +181,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   readOnly
+                  disabled
                   placeholder="Nhập tên gợi nhớ"
                   value={value}
                   showClear={false}
