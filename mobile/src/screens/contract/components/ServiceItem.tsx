@@ -10,6 +10,7 @@ import { formatCurrency } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import { useDebounce } from "tamagui";
 
 interface ServiceItemProps {
   service: ContractServiceCreateRequest;
@@ -27,6 +28,10 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
   const getActions = () => {
     return ["edit"];
   };
+
+  const _onChangeHelperValue = useDebounce((text: string) => {
+    onChange({ ...service, helperValue: Number(text) });
+  }, 1000);
 
   return (
     <CardComponent
@@ -76,10 +81,24 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
               color: "#6B7280",
               fontSize: 14,
             }}
+            defaultValue={service.helperValue?.toString()}
             label={`Số ${service.name?.toLocaleLowerCase()} hiện tại`}
-            onChangeText={(text) =>
-              onChange({ ...service, price: Number(text) })
-            }
+            onChangeText={(text) => _onChangeHelperValue(text)}
+          />
+        )}
+      {service.isEnabled &&
+        service.calculationMethod ===
+          ServiceCalculateMethod.FIXED_PER_NUMBER && (
+          <Input
+            required
+            type="number"
+            labelStyles={{
+              color: "#6B7280",
+              fontSize: 14,
+            }}
+            defaultValue={service.helperValue?.toString()}
+            label={`Số lượng`}
+            onChangeText={(text) => _onChangeHelperValue(text)}
           />
         )}
       <View className="mt-3 pt-3 border-t border-gray-100">

@@ -5,7 +5,7 @@ export enum ServiceCalculateMethod {
   FIXED_PER_PERSON = "FIXED_PER_PERSON",
   FIXED_PER_NUMBER = "FIXED_PER_NUMBER",
   PER_UNIT_SIMPLE = "PER_UNIT_SIMPLE",
-  PER_UNIT_TIERED = "PER_UNIT_TIERED",
+  // PER_UNIT_TIERED = "PER_UNIT_TIERED",
   FREE = "FREE",
 }
 
@@ -17,7 +17,7 @@ export const SERVICE_CALCULATE_METHOD_LABEL: Record<
   [ServiceCalculateMethod.FIXED_PER_PERSON]: "Cố định theo người",
   [ServiceCalculateMethod.FIXED_PER_NUMBER]: "Cố định theo số lượng",
   [ServiceCalculateMethod.PER_UNIT_SIMPLE]: "Theo đơn vị đơn giản",
-  [ServiceCalculateMethod.PER_UNIT_TIERED]: "Theo đơn vị phân cấp",
+  // [ServiceCalculateMethod.PER_UNIT_TIERED]: "Theo đơn vị phân cấp",
   [ServiceCalculateMethod.FREE]: "Miễn phí",
 };
 
@@ -48,15 +48,15 @@ export const SERVICE_CALCULATE_METHOD_WITH_INFO: Record<
   [ServiceCalculateMethod.PER_UNIT_SIMPLE]: {
     label: "Theo đơn vị",
     info: "Tính theo số đơn vị sử dụng, ví dụ: số điện, số nước",
-    icon: "calculator-outline",
-    unit: "đơn vị",
-  },
-  [ServiceCalculateMethod.PER_UNIT_TIERED]: {
-    label: "Theo đơn vị phân cấp",
-    info: "Tính theo bậc thang đơn vị, ví dụ: 0-50 số điện: 3.000đ/số, 51-100 số: 4.000đ/số",
     icon: "trending-up-outline",
     unit: "đơn vị",
   },
+  // [ServiceCalculateMethod.PER_UNIT_TIERED]: {
+  //   label: "Theo đơn vị phân cấp",
+  //   info: "Tính theo bậc thang đơn vị, ví dụ: 0-50 số điện: 3.000đ/số, 51-100 số: 4.000đ/số",
+  //   icon: "trending-up-outline",
+  //   unit: "đơn vị",
+  // },
   [ServiceCalculateMethod.FREE]: {
     label: "Miễn phí",
     info: "Không tính phí dịch vụ này",

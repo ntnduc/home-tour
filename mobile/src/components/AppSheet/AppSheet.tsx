@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
+  BottomSheetFooterProps,
   BottomSheetProps,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
@@ -11,19 +11,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from "react-native";
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppSheetBackdropComponent from "./AppSheetBackdropComponent";
 import AppSheetHandleComponent from "./AppSheetHandleComponent";
+import AppSheetHeader from "./AppSheetHeader";
 
-type HeaderConfig = {
+export type HeaderConfig = {
   element?: ReactNode;
   title?: string;
   style?: StyleProp<ViewStyle>;
@@ -39,6 +33,8 @@ export interface AppSheetProps
   header?: HeaderConfig;
   children?: ReactNode;
   ignoreBottomInset?: boolean;
+  ignoreBottomSheetInset?: boolean;
+  renderFooter?: (props: BottomSheetFooterProps) => ReactNode;
 }
 
 export interface AppSheetRef {
@@ -94,15 +90,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
       <>
         {headerConfig?.element && headerConfig?.element}
         {!headerConfig?.element && (
-          <View
-            className={headerConfig?.className}
-            style={[styles.header, headerConfig?.style]}
-          >
-            <Text style={styles.headerTitle}>{headerConfig?.title}</Text>
-            <TouchableOpacity onPress={close}>
-              <Ionicons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
+          <AppSheetHeader {...headerConfig} onClose={close} />
         )}
       </>
     );
@@ -113,7 +101,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
       if (state.config?.header) {
         return (
           <>
-            <BottomSheetView>{header(state.config.header)}</BottomSheetView>
+            {header(state.config.header)}
             {state.dynamicChildren}
             {!state.config?.ignoreBottomInset && (
               <BottomSheetView>
@@ -142,6 +130,10 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
     [close]
   );
 
+  if (config.ignoreBottomSheetInset && state.dynamicChildren) {
+    return <>{state.dynamicChildren}</>;
+  }
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -162,17 +154,6 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
 });
 
 const styles = StyleSheet.create({
-  header: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 60,
-    padding: 10,
-    lineHeight: 22,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
   headerTitle: {
     fontSize: 18,
     fontWeight: 600,

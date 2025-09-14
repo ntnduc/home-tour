@@ -45,6 +45,9 @@ export class ContractServices extends BaseEntity {
   @Column({ default: true })
   isEnabled: boolean;
 
+  @Column({ default: 0, nullable: true })
+  helperValue?: number;
+
   @Column({ type: 'text', nullable: true })
   notes?: string;
 }

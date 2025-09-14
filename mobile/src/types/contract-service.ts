@@ -10,7 +10,7 @@ export interface ContractService {
   isEnabled: boolean;
   notes?: string;
   name?: string;
-  helperValue?: number;
+  helperValue?: number | null;
 }
 
 export interface ContractServiceCreateRequest

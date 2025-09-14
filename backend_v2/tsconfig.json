@@ -8,6 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2023",
     "sourceMap": true,
+    "inlineSourceMap": false,
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
@@ -21,7 +22,11 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false
   },
   "include": [
     "src/**/*"

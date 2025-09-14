@@ -15,7 +15,7 @@ interface ActionButton {
   onPress: () => void | Promise<void>;
   icon?: keyof typeof Ionicons.glyphMap;
   iconElement?: ReactNode;
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary" | "danger" | "success";
   isLoading?: boolean;
   disabled?: boolean;
   customStyle?: ViewStyle;
@@ -38,6 +38,7 @@ const getButtonStyle = (
     primary: "bg-blue-600",
     secondary: "bg-white border border-gray-300",
     danger: "bg-red-600",
+    success: "bg-green-600",
   };
 
   return `${baseStyle} ${variantStyles[variant]} ${customStyle || ""}`;
@@ -50,6 +51,7 @@ const getTextStyle = (variant: ActionButton["variant"] = "primary") => {
     primary: "text-white",
     secondary: "text-gray-600 font-medium text-sm",
     danger: "text-white",
+    success: "text-white",
   };
 
   return `${baseStyle} ${variantStyles[variant]}`;
@@ -60,6 +62,7 @@ const getIconColor = (variant: ActionButton["variant"] = "primary") => {
     primary: "#FFFFFF",
     secondary: "#6B7280",
     danger: "#FFFFFF",
+    success: "#FFFFFF",
   };
   return colors[variant];
 };

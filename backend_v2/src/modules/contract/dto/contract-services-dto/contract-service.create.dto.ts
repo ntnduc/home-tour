@@ -48,6 +48,10 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
   @IsOptional()
   isSelectedFromService?: boolean;
 
+  @IsNumber()
+  @IsOptional()
+  helperValue?: number;
+
   getEntity(): ContractServices {
     const entity = new ContractServices();
     if (this.contractId) entity.contractId = this.contractId;
@@ -57,6 +61,7 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
     if (this.propertyServiceId)
       entity.propertyServiceId = this.propertyServiceId;
     entity.calculationMethod = this.calculationMethod;
+    entity.helperValue = this.helperValue ?? 0;
     return entity;
   }
 }

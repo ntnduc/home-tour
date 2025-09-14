@@ -1,15 +1,14 @@
 import ActionButtonBottom from "@/components/ActionButtonBottom";
 import CardContent from "@/components/CardContent";
 import DatePicker from "@/components/DatePicker";
-import { useGlobalAppSheet } from "@/components/GlobalAppSheet";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
 import { ContractServiceDetailResponse } from "@/types/contract-service";
-import { formatCurrency, generateId } from "@/utils/appUtil";
+import { formatCurrency } from "@/utils/appUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import React, { useEffect, useRef, useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Alert, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
@@ -17,7 +16,9 @@ import { getRoomService } from "../../api/room/room.api";
 import { ContractCreateRequest } from "../../types/contract";
 import { RoomServiceDetailResponse, RoomStatus } from "../../types/room";
 import CardComponent from "../common/CardComponent";
-import ContractServiceComponent from "./components/ContractServiceComponent";
+import ContractServiceComponent, {
+  ContractServiceComponentRef,
+} from "./components/ContractServiceComponent";
 import ServiceItem from "./components/ServiceItem";
 
 type RootStackParamList = {
@@ -36,27 +37,20 @@ const CreateContractScreen = ({
 }: CreateContractScreenProps) => {
   const { roomId } = route.params;
 
-  const { openAppSheet } = useGlobalAppSheet();
-
   const [isLoading, setIsLoading] = useState(false);
   const [roomData, setRoomData] = useState<RoomServiceDetailResponse | null>(
     null
   );
 
-  const { control, watch, getValues, setValue, reset } =
+  const { control, watch, getValues, setValue, reset, setFocus } =
     useForm<ContractCreateRequest>();
+  const { fields: contractServices, update } = useFieldArray({
+    control,
+    name: "contractServices",
+    keyName: "fieldId",
+  });
 
-  const openServiceForm = (
-    service: ContractServiceDetailResponse,
-    isNew?: boolean
-  ) => {
-    openAppSheet(<ContractServiceComponent contractService={service} />, {
-      snapPoints: ["90%"],
-      header: {
-        title: "Cập nhật dịch vụ",
-      },
-    });
-  };
+  const contractServiceRef = useRef<ContractServiceComponentRef>(null);
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -92,6 +86,13 @@ const CreateContractScreen = ({
       fetchRoomData();
     }
   }, [roomId]);
+
+  const openContractServiceForm = (
+    service: ContractServiceDetailResponse,
+    index: number
+  ) => {
+    contractServiceRef.current?.expand(service, index);
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -227,6 +228,7 @@ const CreateContractScreen = ({
               }) => {
                 return (
                   <Input
+                    type="number"
                     label="Tiền thuê hàng tháng"
                     value={value ? formatCurrency(value.toString()) : ""}
                     onChangeText={onChange}
@@ -268,84 +270,59 @@ const CreateContractScreen = ({
             />
           </View>
 
-          <View className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+          {/* <View className="bg-blue-50 rounded-lg p-3 border border-blue-200">
             <Text className="text-sm font-semibold text-blue-800 mb-1">
               Tổng tiền cọc (bao gồm dịch vụ):
             </Text>
             <Text className="text-lg font-bold text-blue-600">
               {formatCurrency("1000")}đ
             </Text>
-          </View>
+          </View> */}
         </CardContent>
 
         <CardComponent
-          title={
-            <View>
-              <Text className="text-[#1F2937] font-semibold text-[17px]">
-                Dịch vụ
-              </Text>
-            </View>
-          }
+          title="Dịch vụ"
           description="Bạn muốn thêm dịch vụ mới hãy tạo dịch vụ trong tòa nhà!"
         >
-          <Controller
-            control={control}
-            name="contractServices"
-            render={({ field: { value, onChange } }) => {
-              if (!value || value.length === 0) {
-                return (
-                  <View className="flex-1 items-center justify-center py-12">
-                    <View className="w-16 h-16 bg-gray-100 rounded-full items-center justify-center mb-3">
-                      <Ionicons
-                        name="construct-outline"
-                        size={24}
-                        color="#9CA3AF"
-                      />
-                    </View>
-                    <Text className="text-gray-500 text-base mb-2">
-                      Chưa có dịch vụ nào
-                    </Text>
-                    <Text className="text-gray-400 text-sm text-center">
-                      Hãy tạo thêm dịch vụ trong cập nhật tòa nhà
-                    </Text>
-                  </View>
-                );
-              }
+          {contractServices.length === 0 ? (
+            <View className="flex-1 items-center justify-center py-12">
+              <View className="w-16 h-16 bg-gray-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name="construct-outline" size={24} color="#9CA3AF" />
+              </View>
+              <Text className="text-gray-500 text-base mb-2">
+                Chưa có dịch vụ nào
+              </Text>
+              <Text className="text-gray-400 text-sm text-center">
+                Hãy tạo thêm dịch vụ trong cập nhật tòa nhà
+              </Text>
+            </View>
+          ) : (
+            contractServices.map((service, index) => (
+              <Controller
+                key={service.fieldId || index}
+                control={control}
+                name={`contractServices.${index}`}
+                render={({ field: { value } }) => (
+                  <ServiceItem
+                    key={`service-item-${
+                      service.propertyServiceId || index
+                    }-${index}`}
+                    service={service}
+                    index={index}
+                    onEdit={() =>
+                      openContractServiceForm(
+                        value as ContractServiceDetailResponse,
+                        index
+                      )
+                    }
+                    onChange={(service) => update(index, service)}
+                  />
+                )}
+              />
+            ))
+          )}
 
-              return (
-                <View key={generateId()} className="space-y-3">
-                  {value?.map((service, index) => (
-                    <View
-                      key={`service-${
-                        service.propertyServiceId || index
-                      }-${index}`}
-                    >
-                      <ServiceItem
-                        key={`service-item-${
-                          service.propertyServiceId || index
-                        }-${index}`}
-                        service={service}
-                        index={index}
-                        onEdit={() =>
-                          openServiceForm(
-                            service as ContractServiceDetailResponse,
-                            false
-                          )
-                        }
-                        onChange={(service) => {
-                          onChange(
-                            value.map((s, i) => (i === index ? service : s))
-                          );
-                        }}
-                      />
-                    </View>
-                  ))}
-                </View>
-              );
-            }}
-          />
-
-          <View className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">
+          {/* <View className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-sm font-medium text-blue-700 mb-1">
@@ -371,7 +348,7 @@ const CreateContractScreen = ({
                 <Text className="text-xs text-blue-500">/tháng</Text>
               </View>
             </View>
-          </View>
+          </View> */}
         </CardComponent>
 
         <CardContent title="Điều khoảng bổ sung">
@@ -401,6 +378,12 @@ const CreateContractScreen = ({
             onPress: handleSave,
           },
         ]}
+      />
+      <ContractServiceComponent
+        ref={contractServiceRef}
+        onSuccess={(service, index) => {
+          update(index, service);
+        }}
       />
     </View>
   );

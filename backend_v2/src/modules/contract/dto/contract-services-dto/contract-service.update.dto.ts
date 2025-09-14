@@ -39,6 +39,10 @@ export class ContractServiceUpdateDto
   @IsEnum(ServiceCalculationMethod)
   calculationMethod?: ServiceCalculationMethod;
 
+  @IsOptional()
+  @IsNumber()
+  helperValue?: number;
+
   getEntity(
     entity: ContractServices,
   ): QueryDeepPartialEntity<ContractServices> {
@@ -51,6 +55,7 @@ export class ContractServiceUpdateDto
     if (this.notes !== undefined) updateData.notes = this.notes;
     if (this.calculationMethod !== undefined)
       updateData.calculationMethod = this.calculationMethod;
+    updateData.helperValue = this.helperValue;
     return updateData;
   }
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useCallback, useContext, useRef } from "react";
 import AppSheet, { AppSheetProps, AppSheetRef } from "./AppSheet/AppSheet";
 
 interface GlobalAppSheetContextType {
@@ -32,9 +32,9 @@ export const GlobalAppSheetProvider: React.FC<GlobalAppSheetProviderProps> = ({
     appSheetRef.current?.open(children, config);
   };
 
-  const closeAppSheet = () => {
+  const closeAppSheet = useCallback(() => {
     appSheetRef.current?.close();
-  };
+  }, []);
 
   return (
     <GlobalAppSheetContext.Provider value={{ openAppSheet, closeAppSheet }}>
