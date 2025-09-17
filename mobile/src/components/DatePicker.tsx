@@ -1,4 +1,5 @@
 import { createStyles } from "@/styles/component/StyleInput";
+import { useTheme } from "@/theme/ThemeProvider";
 import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -12,7 +13,6 @@ import {
   ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme as useTamaguiTheme } from "tamagui";
 import { useGlobalAppSheet } from "./GlobalAppSheet";
 
 export interface DatePickerIconProps {
@@ -55,7 +55,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   maxDate,
   minDate,
 }) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);

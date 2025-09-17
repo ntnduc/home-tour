@@ -15,12 +15,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BuildingSelector from "../../components/BuildingSelector";
 import PaymentSummary from "../../components/PaymentSummary";
 import { RootStackParamList } from "../../navigation/types";

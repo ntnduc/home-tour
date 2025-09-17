@@ -1,9 +1,9 @@
 import { createStyles } from "@/styles/component/StyleComboBox";
+import { useTheme } from "@/theme/ThemeProvider";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useCallback, useEffect, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { useTheme as useTamaguiTheme } from "tamagui";
 import { InputIconProps } from "./Input";
 
 interface ComboBoxProps<T> {
@@ -52,7 +52,7 @@ export const ComboBox = <T,>({
   iconProps,
   renderItem,
 }: ComboBoxProps<T>) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
   const [open, setOpen] = useState(false);
   const [searchText, setSearchText] = useState("");

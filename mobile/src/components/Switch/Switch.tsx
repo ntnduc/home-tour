@@ -1,7 +1,7 @@
 import { createStyles } from "@/styles/component/StyleInput";
+import { useTheme } from "@/theme/ThemeProvider";
 import React from "react";
 import { Switch as RNSwitch, Text, View } from "react-native";
-import { useTheme as useTamaguiTheme } from "tamagui";
 import { SwitchProps } from "./types";
 
 const Switch: React.FC<SwitchProps> = ({
@@ -29,7 +29,7 @@ const Switch: React.FC<SwitchProps> = ({
   accessibilityLabel,
   accessibilityHint,
 }) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
 
   // Tính toán size cho switch
@@ -48,7 +48,7 @@ const Switch: React.FC<SwitchProps> = ({
   const getActiveColor = () => {
     if (activeColor) return activeColor;
     if (error) return "#ff3b30";
-    return theme.blue9?.val || "#007AFF";
+    return "#007AFF";
   };
 
   const getInactiveColor = () => {

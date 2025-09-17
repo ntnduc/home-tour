@@ -2,12 +2,12 @@ import { getListService } from "@/api/service/service.api";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { createStyles } from "@/styles/component/StyleComboBox";
+import { useTheme } from "@/theme/ThemeProvider";
 import { ServiceCreateOrUpdateRequest } from "@/types/service";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
-import { Text, useTheme as useTamaguiTheme } from "tamagui";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const ServiceSelectedSearchComponent = ({
   value,
@@ -22,7 +22,7 @@ const ServiceSelectedSearchComponent = ({
 }) => {
   const ICON_DEFAULT = "apps-outline";
 
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
 
   const [search, setSearch] = useState("");

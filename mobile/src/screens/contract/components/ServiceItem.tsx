@@ -10,7 +10,7 @@ import { formatCurrency } from "@/utils/appUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
-import { useDebounce } from "tamagui";
+import { useDebounce } from "use-debounce";
 
 interface ServiceItemProps {
   service: ContractServiceCreateRequest;
@@ -83,7 +83,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
             }}
             defaultValue={service.helperValue?.toString()}
             label={`Số ${service.name?.toLocaleLowerCase()} hiện tại`}
-            onChangeText={(text) => _onChangeHelperValue(text)}
+            onChangeText={(text) => _onChangeHelperValue[0](text)}
           />
         )}
       {service.isEnabled &&
@@ -97,8 +97,8 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
               fontSize: 14,
             }}
             defaultValue={service.helperValue?.toString()}
+            onChangeText={(text) => _onChangeHelperValue[0](text)}
             label={`Số lượng`}
-            onChangeText={(text) => _onChangeHelperValue(text)}
           />
         )}
       <View className="mt-3 pt-3 border-t border-gray-100">

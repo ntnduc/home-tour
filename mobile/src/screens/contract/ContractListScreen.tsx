@@ -3,12 +3,12 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import {
   FlatList,
-  SafeAreaView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import ContractCard from "../../components/ContractCard";
 import { colors } from "../../theme/colors";
 import { Contract, ContractStatus } from "../../types/contract";

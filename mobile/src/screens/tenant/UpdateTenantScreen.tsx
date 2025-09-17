@@ -5,10 +5,9 @@ import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
-import { Alert, ScrollView } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
-import { YStack, useTheme as useTamaguiTheme } from "tamagui";
 import { RootStackParamList } from "../../navigation/types";
 
 // Placeholder tenant type - should be defined in types
@@ -26,7 +25,6 @@ type UpdateTenantScreenProps = {
 };
 
 const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
-  const theme = useTamaguiTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [initialData, setInitialData] = useState<TenantUpdateRequest>();
   const { tenantId } = route.params;
@@ -93,10 +91,9 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
-            backgroundColor: theme.background?.val,
           }}
         >
-          <YStack padding="$4" space="$4">
+          <View className="flex-row gap-4">
             <Controller
               control={control}
               name="name"
@@ -199,7 +196,7 @@ const UpdateTenantScreen = ({ navigation, route }: UpdateTenantScreenProps) => {
                 />
               )}
             />
-          </YStack>
+          </View>
         </ScrollView>
       </KeyboardAwareScrollView>
       <ActionButtonBottom

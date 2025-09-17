@@ -10,6 +10,7 @@ import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
 import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { createStyles } from "@/styles/StyleCreateTenantScreen";
+import { useTheme } from "@/theme/ThemeProvider";
 import { ComboOption } from "@/types/comboOption";
 import {
   mapPropertyDetailToUpdateRequest,
@@ -28,10 +29,9 @@ import {
   useFieldArray,
   useForm,
 } from "react-hook-form";
-import { Alert, Text, TouchableOpacity } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
-import { useTheme as useTamaguiTheme, XStack, YStack } from "tamagui";
 import { RootStackParamList } from "../../navigation/types";
 import CalculatorMethodComponent from "../tenant/components/CalculatorMethodComponent";
 import ServiceSelectedSearchComponent from "../tenant/components/ServiceSelectedSearchComponent";
@@ -45,7 +45,7 @@ const UpdatePropertyScreen = ({
   navigation,
   route,
 }: UpdatePropertyScreenProps) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -218,7 +218,7 @@ const UpdatePropertyScreen = ({
         showsVerticalScrollIndicator={false}
         className="bg-white"
       >
-        <YStack padding="$4" space="$4">
+        <View className="p-4 gap-4">
           <Controller
             control={control}
             name="name"
@@ -365,12 +365,8 @@ const UpdatePropertyScreen = ({
             )}
           />
 
-          <YStack space="$2">
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginBottom="$2"
-            >
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between mb-2">
               <Text style={styles.label}>Dịch vụ thu phí</Text>
               <TouchableOpacity
                 style={styles.addServiceButton}
@@ -379,24 +375,13 @@ const UpdatePropertyScreen = ({
                 <Ionicons name="add-circle-outline" size={20} color="#fff" />
                 <Text style={styles.addServiceButtonText}>Thêm dịch vụ</Text>
               </TouchableOpacity>
-            </XStack>
-            <YStack
-              space="$3"
-              backgroundColor="#f8f9fa"
-              padding="$3"
-              borderRadius="$4"
-            >
+            </View>
+            <View className="gap-3 bg-[#f8f9fa] p-3 rounded-lg">
               {services &&
                 services?.map((service, index) => (
-                  <YStack
+                  <View
                     key={service.fieldId || String(index)}
-                    space="$2"
-                    backgroundColor="#fff"
-                    padding="$3"
-                    borderRadius="$4"
-                    borderWidth={1}
-                    borderColor="#e9ecef"
-                    marginBottom="$2"
+                    className="gap-2 bg-white p-3 rounded-lg border border-[#e9ecef] mb-2"
                     style={{ position: "relative" }}
                   >
                     <TouchableOpacity
@@ -405,8 +390,8 @@ const UpdatePropertyScreen = ({
                     >
                       <Ionicons name="close" size={16} color="#fff" />
                     </TouchableOpacity>
-                    <XStack space="$2" alignItems="center">
-                      <YStack space="$2" flex={1}>
+                    <View className="flex-row gap-2 items-center">
+                      <View className="gap-2 flex-1">
                         <Controller
                           control={control}
                           name={`services.${index}.name`}
@@ -482,13 +467,13 @@ const UpdatePropertyScreen = ({
                             />
                           )}
                         />
-                      </YStack>
-                    </XStack>
-                  </YStack>
+                      </View>
+                    </View>
+                  </View>
                 ))}
-            </YStack>
-          </YStack>
-        </YStack>
+            </View>
+          </View>
+        </View>
       </KeyboardAwareScrollView>
       <ActionButtonBottom
         actions={[

@@ -1,13 +1,6 @@
 import React, { useState } from "react";
-import {
-  FlatList,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { FlatList, ScrollView, StatusBar, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { SceneMap, TabView } from "react-native-tab-view";
 import BuildingDetailCard from "../../components/BuildingDetailCard";
 import CustomTabBar from "../../components/CustomTabBar";
@@ -199,7 +192,9 @@ const OverviewTab = () => {
             <StatCard
               icon={<Text className="text-2xl">📈</Text>}
               label="Dự kiến tháng tới"
-              value={`${(mockRevenueData.expectedNextMonth / 1000000).toFixed(1)}M`}
+              value={`${(mockRevenueData.expectedNextMonth / 1000000).toFixed(
+                1
+              )}M`}
               bgColor={colors.status.success + "20"}
             />
             <StatCard
@@ -456,10 +451,18 @@ const TenantsTab = () => {
                 {item.name}
               </Text>
               <View
-                className={`px-2 py-1 rounded-full ${item.status === "active" ? "bg-status-success bg-opacity-20" : "bg-status-error bg-opacity-20"}`}
+                className={`px-2 py-1 rounded-full ${
+                  item.status === "active"
+                    ? "bg-status-success bg-opacity-20"
+                    : "bg-status-error bg-opacity-20"
+                }`}
               >
                 <Text
-                  className={`text-xs font-medium ${item.status === "active" ? "text-status-success" : "text-status-error"}`}
+                  className={`text-xs font-medium ${
+                    item.status === "active"
+                      ? "text-status-success"
+                      : "text-status-error"
+                  }`}
                 >
                   {item.status === "active"
                     ? "Đã thanh toán"
@@ -628,7 +631,7 @@ const renderScene = SceneMap({
 });
 
 const ReportScreen = () => {
-  const layout = useWindowDimensions();
+  // const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
 
   return (
@@ -646,7 +649,7 @@ const ReportScreen = () => {
         navigationState={{ index, routes }}
         renderScene={renderScene}
         onIndexChange={setIndex}
-        initialLayout={{ width: layout.width }}
+        // initialLayout={{ width: layout.width }}
         renderTabBar={(props) => (
           <CustomTabBar {...props} setIndex={setIndex} />
         )}

@@ -3,10 +3,10 @@ import {
   ServiceCalculateMethod,
 } from "@/constant/service.constant";
 import { createStyles } from "@/styles/StyleCreateTenantScreen";
+import { useTheme } from "@/theme/ThemeProvider";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Alert, Text, TouchableOpacity } from "react-native";
-import { XStack, YStack, useTheme as useTamaguiTheme } from "tamagui";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 const CalculatorMethodComponent = ({
   value,
@@ -15,13 +15,13 @@ const CalculatorMethodComponent = ({
   value: ServiceCalculateMethod;
   onChange: (value: ServiceCalculateMethod) => void;
 }) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <YStack space="$2">
+    <View className="gap-2">
       <Text
         style={[
           styles.label,
@@ -34,7 +34,7 @@ const CalculatorMethodComponent = ({
       >
         Cách tính tiền
       </Text>
-      <YStack space="$2">
+      <View className="gap-2">
         <TouchableOpacity
           style={[
             styles.calculationMethodButton,
@@ -42,7 +42,7 @@ const CalculatorMethodComponent = ({
           ]}
           onPress={() => onChange(value)}
         >
-          <XStack space="$3" alignItems="center" flex={1}>
+          <View className="flex-row gap-3 items-center flex-1">
             <Ionicons
               name={SERVICE_CALCULATE_METHOD_WITH_INFO[value].icon}
               size={20}
@@ -51,7 +51,7 @@ const CalculatorMethodComponent = ({
             <Text style={[styles.methodTitle, styles.methodTitleActive]}>
               {SERVICE_CALCULATE_METHOD_WITH_INFO[value].label}
             </Text>
-          </XStack>
+          </View>
           <TouchableOpacity
             style={styles.methodDetailButton}
             onPress={() => {
@@ -81,7 +81,7 @@ const CalculatorMethodComponent = ({
                     onChange(method);
                   }}
                 >
-                  <XStack space="$3" alignItems="center" flex={1}>
+                  <View className="flex-row gap-3 items-center flex-1">
                     <Ionicons
                       name={SERVICE_CALCULATE_METHOD_WITH_INFO[method].icon}
                       size={20}
@@ -90,7 +90,7 @@ const CalculatorMethodComponent = ({
                     <Text style={[styles.methodTitle]}>
                       {SERVICE_CALCULATE_METHOD_WITH_INFO[method].label}
                     </Text>
-                  </XStack>
+                  </View>
                   <TouchableOpacity
                     style={styles.methodDetailButton}
                     onPress={() => {
@@ -115,7 +115,7 @@ const CalculatorMethodComponent = ({
           style={styles.expandButton}
           onPress={() => setIsExpanded(!isExpanded)}
         >
-          <XStack space="$2" alignItems="center" justifyContent="center">
+          <View className="flex-row gap-2 items-center justify-center">
             <Text style={styles.expandButtonText}>
               {isExpanded ? "Thu gọn" : "Xem thêm"}
             </Text>
@@ -124,10 +124,10 @@ const CalculatorMethodComponent = ({
               size={16}
               color="#007AFF"
             />
-          </XStack>
+          </View>
         </TouchableOpacity>
-      </YStack>
-    </YStack>
+      </View>
+    </View>
   );
 };
 
