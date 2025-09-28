@@ -1,5 +1,4 @@
 import ActionButtonBottom from "@/components/ActionButtonBottom";
-import CardContent from "@/components/CardContent";
 import DatePicker from "@/components/DatePicker";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
@@ -144,7 +143,7 @@ const CreateContractScreen = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <CardContent>
+        <CardComponent>
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <Text className="text-xl font-bold text-gray-900 mb-1">
@@ -162,9 +161,9 @@ const CreateContractScreen = ({
               </Text>
             </View>
           </View>
-        </CardContent>
+        </CardComponent>
 
-        <CardContent title="Thời hạn thuê">
+        <CardComponent title="Thời hạn thuê">
           <View className="mb-3">
             <Controller
               control={control}
@@ -214,9 +213,9 @@ const CreateContractScreen = ({
               )}
             />
           </View>
-        </CardContent>
+        </CardComponent>
 
-        <CardContent title="Thông tin thanh toán">
+        <CardComponent title="Thông tin thanh toán">
           <View className="mb-3">
             <Controller
               control={control}
@@ -278,7 +277,7 @@ const CreateContractScreen = ({
               {formatCurrency("1000")}đ
             </Text>
           </View> */}
-        </CardContent>
+        </CardComponent>
 
         <CardComponent
           title="Dịch vụ"
@@ -351,7 +350,7 @@ const CreateContractScreen = ({
           </View> */}
         </CardComponent>
 
-        <CardContent title="Điều khoảng bổ sung">
+        <CardComponent title="Điều khoảng bổ sung">
           <Controller
             control={control}
             name="notes"
@@ -367,7 +366,7 @@ const CreateContractScreen = ({
               />
             )}
           />
-        </CardContent>
+        </CardComponent>
       </KeyboardAwareScrollView>
       <ActionButtonBottom
         actions={[

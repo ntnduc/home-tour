@@ -12,8 +12,7 @@ module.exports = function (api) {
           '@': './src',
         },
       }],
-      // Reanimated plugin must be listed last for Expo SDK 54
-      'react-native-reanimated/plugin'
+      'react-native-worklets/plugin'
     ]
   };
 };

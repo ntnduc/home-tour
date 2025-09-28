@@ -6,12 +6,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.default,
   },
-  fixedHeader: {
-    backgroundColor: colors.background.default,
-    paddingHorizontal: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
+  // fixedHeader: {
+  //   backgroundColor: colors.background.default,
+  //   paddingHorizontal: 0,
+  //   borderBottomWidth: 1,
+  //   borderBottomColor: colors.border.light,
+  // },
   headerTop: {
     // flexDirection: "row",
     // alignItems: "center",
@@ -42,10 +42,11 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   filterContainer: {
-    backgroundColor: colors.background.default,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-    paddingVertical: 8,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    alignContent: "center",
+    width: "100%",
   },
   filterScrollContent: {
     paddingHorizontal: 16,

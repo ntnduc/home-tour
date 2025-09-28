@@ -1,5 +1,6 @@
 import { colors } from "@/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
+import { GlassView } from "expo-glass-effect";
 import React from "react";
 import {
   StyleProp,
@@ -25,13 +26,15 @@ const FabButton = ({
   style,
 }: FabButtonProps) => {
   return (
-    <TouchableOpacity style={[styles.fab, style]} onPress={onPress}>
-      <Ionicons
-        name={icon}
-        size={iconSize}
-        color={colors.neutral.white}
-        style={[styles.fabIcon, iconStyle]}
-      />
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+      <GlassView style={[styles.fab]} glassEffectStyle="regular">
+        <Ionicons
+          name={icon}
+          size={iconSize}
+          color={colors.neutral.white}
+          style={[styles.fabIcon, iconStyle]}
+        />
+      </GlassView>
     </TouchableOpacity>
   );
 };
@@ -41,22 +44,21 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 24,
     bottom: 32,
-    backgroundColor: colors.primary.main + "95",
+    // Dùng nền bán trong suốt để lộ hiệu ứng mờ phía sau
+    // backgroundColor: "rgba(255,255,255,0.12)",
     // borderWidth: 1,
-    // borderColor: colors.primary.main,
-    boxShadow: "0px 4px 12px 0px rgba(0, 0, 0, 0.1)",
+    // borderColor: "rgba(255,255,255,0.25)",
+    overflow: "hidden",
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: colors.primary.main,
-    shadowOpacity: 0.18,
     shadowRadius: 8,
     elevation: 5,
   },
   fabIcon: {
-    color: colors.neutral.white,
+    color: "#000",
     fontSize: 32,
     fontWeight: "bold",
     marginTop: -2,

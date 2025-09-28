@@ -83,19 +83,17 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
   };
 
   return (
-    <SafeAreaView className="bg-white flex-1">
+    <SafeAreaView className="flex-1">
       <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
-      <View>
-        <HeaderComponents
-          title="Quản lý khách thuê"
-          isSearch
-          searchConfig={{
-            placeholder: "Tìm kiếm khách thuê...",
-            onSearch: handleSearch,
-            className: "mx-2",
-          }}
-        />
-      </View>
+      <HeaderComponents
+        title="Quản lý khách thuê"
+        isSearch
+        searchConfig={{
+          placeholder: "Tìm kiếm khách thuê...",
+          onSearch: handleSearch,
+          className: "mx-2",
+        }}
+      />
       {isLoading && (
         <View className="flex-1 justify-center items-center">
           <Loading />

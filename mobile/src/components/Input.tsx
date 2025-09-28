@@ -101,7 +101,7 @@ const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <View className="bg-white rounded-xl shadow-sm">
+    <View className="">
       {label && (
         <Text style={[styles.label, labelStyles]} className={labelClassName}>
           {label}

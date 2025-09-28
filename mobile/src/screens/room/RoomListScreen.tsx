@@ -208,17 +208,15 @@ const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
     [];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.fixedHeader}>
-        <HeaderComponents
-          className="px-2 mb-2"
-          title="Danh Sách Phòng"
-          isSearch
-          searchConfig={{
-            placeholder: "Tìm kiếm phòng hoặc tòa nhà...",
-            onSearch: (text) => setSearch(text),
-          }}
-        />
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <HeaderComponents
+        title="Danh Sách Phòng"
+        isSearch
+        searchConfig={{
+          placeholder: "Tìm kiếm phòng hoặc tòa nhà...",
+          onSearch: (text) => setSearch(text),
+        }}
+      >
         <BuildingSelector
           buildings={comboProperty ?? []}
           selectedBuilding={
@@ -244,7 +242,7 @@ const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
           }}
         />
         {renderFilterButtons()}
-      </View>
+      </HeaderComponents>
       {isLoading && (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

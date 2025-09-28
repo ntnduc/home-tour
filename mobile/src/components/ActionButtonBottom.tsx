@@ -36,7 +36,7 @@ const getButtonStyle = (
 
   const variantStyles = {
     primary: "bg-blue-600",
-    secondary: "bg-white border border-gray-300",
+    secondary: "bg-white shadow-[0_1px_5px_rgb(0,0,0,0.12)]",
     danger: "bg-red-600",
     success: "bg-green-600",
   };
@@ -49,7 +49,7 @@ const getTextStyle = (variant: ActionButton["variant"] = "primary") => {
 
   const variantStyles = {
     primary: "text-white",
-    secondary: "text-gray-600 font-medium text-sm",
+    secondary: "text-gray-600",
     danger: "text-white",
     success: "text-white",
   };

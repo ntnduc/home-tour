@@ -124,7 +124,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   return (
-    <View className="bg-white rounded-xl shadow-sm">
+    <View className="">
       {label && (
         <Text style={styles.label}>
           {label}
