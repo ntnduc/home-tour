@@ -7,12 +7,12 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, "Login">;

@@ -10,12 +10,12 @@ import React, { useCallback, useState } from "react";
 import {
   FlatList,
   RefreshControl,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../../navigation/types";
 import { colors } from "../../theme/colors";
 import HeaderComponents from "../common/HeaderComponents";
@@ -71,7 +71,7 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
   };
 
   const handleCreateTenant = () => {
-    navigation.navigate("CreateTenant");
+    // navigation.navigate("CreateTenant");
   };
 
   const handleTenantPress = (tenantId: string) => {
@@ -83,19 +83,17 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
   };
 
   return (
-    <SafeAreaView className="bg-white flex-1">
+    <SafeAreaView className="flex-1">
       <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
-      <View>
-        <HeaderComponents
-          title="Quản lý khách thuê"
-          isSearch
-          searchConfig={{
-            placeholder: "Tìm kiếm khách thuê...",
-            onSearch: handleSearch,
-            className: "mx-2",
-          }}
-        />
-      </View>
+      <HeaderComponents
+        title="Quản lý khách thuê"
+        isSearch
+        searchConfig={{
+          placeholder: "Tìm kiếm khách thuê...",
+          onSearch: handleSearch,
+          className: "mx-2",
+        }}
+      />
       {isLoading && (
         <View className="flex-1 justify-center items-center">
           <Loading />

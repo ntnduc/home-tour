@@ -1,19 +1,16 @@
 import { createStyles } from "@/styles/component/StyleInput";
+import { useTheme } from "@/theme/ThemeProvider";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  NativeSyntheticEvent,
   StyleProp,
   Text,
   TextInput,
-  TextInputFocusEventData,
   TextInputProps,
-  TextInputSubmitEditingEventData,
   TextStyle,
   View,
   ViewStyle,
 } from "react-native";
-import { useTheme as useTamaguiTheme } from "tamagui";
 
 export interface InputIconProps {
   name?: keyof typeof Ionicons.glyphMap;
@@ -40,10 +37,8 @@ interface InputProps extends TextInputProps {
   inputStyles?: StyleProp<ViewStyle>;
   labelStyles?: StyleProp<TextStyle>;
   labelClassName?: string;
-  onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
-  onSubmitEditing?: (
-    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>
-  ) => void;
+  onBlur?: (e: any) => void;
+  onSubmitEditing?: (e: any) => void;
   iconProps?: InputIconProps;
   onClear?: () => void;
   showClear?: boolean;
@@ -76,7 +71,7 @@ const Input: React.FC<InputProps> = ({
   labelClassName,
   ...props
 }) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
 
   const formatCurrency = (text: string) => {
@@ -106,7 +101,7 @@ const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <View className="bg-white rounded-xl shadow-sm">
+    <View>
       {label && (
         <Text style={[styles.label, labelStyles]} className={labelClassName}>
           {label}
@@ -128,7 +123,7 @@ const Input: React.FC<InputProps> = ({
           />
         )}
         <TextInput
-          className={`flex-1 ${type === "area" ? "h-20" : ""}`}
+          className={`flex-1 ${type === "area" ? "h-24" : ""}`}
           value={value}
           onSubmitEditing={onSubmitEditing}
           style={[
@@ -144,7 +139,7 @@ const Input: React.FC<InputProps> = ({
           multiline={type === "area"}
           numberOfLines={type === "area" ? numberOfLines : 1}
           editable={!disabled}
-          onBlur={(e) => onBlur?.(e)}
+          onBlur={(e: any) => onBlur?.(e)}
           {...props}
         />
         {value && showClear && !disabled && (

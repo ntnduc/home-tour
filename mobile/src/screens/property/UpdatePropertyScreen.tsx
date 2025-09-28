@@ -5,11 +5,13 @@ import {
 } from "@/api/location/location.api";
 import { getProperty, updateProperty } from "@/api/property/property.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
+import CardContent from "@/components/CardContent";
 import { ComboBox } from "@/components/ComboBox";
 import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
 import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { createStyles } from "@/styles/StyleCreateTenantScreen";
+import { useTheme } from "@/theme/ThemeProvider";
 import { ComboOption } from "@/types/comboOption";
 import {
   mapPropertyDetailToUpdateRequest,
@@ -28,11 +30,11 @@ import {
   useFieldArray,
   useForm,
 } from "react-hook-form";
-import { Alert, Text, TouchableOpacity } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
-import { useTheme as useTamaguiTheme, XStack, YStack } from "tamagui";
 import { RootStackParamList } from "../../navigation/types";
+import CardComponent from "../common/CardComponent";
 import CalculatorMethodComponent from "../tenant/components/CalculatorMethodComponent";
 import ServiceSelectedSearchComponent from "../tenant/components/ServiceSelectedSearchComponent";
 
@@ -45,7 +47,7 @@ const UpdatePropertyScreen = ({
   navigation,
   route,
 }: UpdatePropertyScreenProps) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -208,7 +210,7 @@ const UpdatePropertyScreen = ({
   return (
     <>
       <KeyboardAwareScrollView
-        style={{ flex: 1 }}
+        style={styles.container}
         enableOnAndroid={true}
         extraScrollHeight={30}
         keyboardOpeningTime={0}
@@ -216,279 +218,282 @@ const UpdatePropertyScreen = ({
         enableResetScrollToCoords={false}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        className="bg-white"
       >
-        <YStack padding="$4" space="$4">
-          <Controller
-            control={control}
-            name="name"
-            rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
-            render={({ field: { onChange, value } }) => (
-              <InputBase
-                placeholder="Nhập tên gợi nhớ (không bắt buộc)"
-                value={value}
-                onChangeText={onChange}
-                label="Tên gợi nhớ"
-                error={errors.name?.message}
-              />
-            )}
-          />
+        <CardContent>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="name"
+              rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  placeholder="Nhập tên gợi nhớ (không bắt buộc)"
+                  value={value}
+                  onChangeText={onChange}
+                  label="Tên gợi nhớ"
+                  error={errors.name?.message}
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="provinceCode"
+              rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
+              render={({ field: { onChange, value } }) => (
+                <ComboBox
+                  value={value}
+                  options={cities}
+                  onChange={(value) => {
+                    onChange(value?.value ?? "");
+                    getDistricts(value?.value ?? "");
+                  }}
+                  isLoading={isLoadingDistricts}
+                  placeholder="Chọn thành phố/tỉnh"
+                  error={errors.provinceCode?.message}
+                  onFocus={() => setActiveDropdown("provinceCode")}
+                  isActive={activeDropdown === "provinceCode"}
+                  label="Thành phố / Tỉnh"
+                />
+              )}
+            />
+          </View>
 
-          <Controller
-            control={control}
-            name="provinceCode"
-            rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
-            render={({ field: { onChange, value } }) => (
-              <ComboBox
-                value={value}
-                options={cities}
-                onChange={(value) => {
-                  onChange(value?.value ?? "");
-                  getDistricts(value?.value ?? "");
-                }}
-                isLoading={isLoadingDistricts}
-                placeholder="Chọn thành phố/tỉnh"
-                error={errors.provinceCode?.message}
-                onFocus={() => setActiveDropdown("provinceCode")}
-                isActive={activeDropdown === "provinceCode"}
-                label="Thành phố / Tỉnh"
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="districtCode"
-            rules={{ required: "Vui lòng chọn quận/huyện" }}
-            render={({ field: { onChange, value } }) => (
-              <ComboBox
-                value={value}
-                options={districts}
-                onChange={(value) => {
-                  onChange(value?.value ?? "");
-                  getWards(value?.value ?? "");
-                }}
-                isLoading={isLoadingWard}
-                placeholder="Chọn quận/huyện"
-                error={errors.districtCode?.message}
-                onFocus={() => setActiveDropdown("districtCode")}
-                isActive={activeDropdown === "districtCode"}
-                label="Quận / Huyện"
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="wardCode"
-            rules={{ required: "Vui lòng chọn phường/xã" }}
-            render={({ field: { onChange, value } }) => (
-              <ComboBox
-                value={value}
-                options={wards}
-                onChange={(value) => {
-                  onChange(value?.value ?? "");
-                }}
-                placeholder="Chọn phường/xã"
-                error={errors.wardCode?.message}
-                onFocus={() => setActiveDropdown("wardCode")}
-                isActive={activeDropdown === "wardCode"}
-                label="Phường / Xã"
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="address"
-            rules={{ required: "Vui lòng nhập địa chỉ chi tiết" }}
-            render={({ field: { onChange, value } }) => (
-              <InputBase
-                placeholder="Nhập địa chỉ chi tiết"
-                value={value}
-                onChangeText={onChange}
-                required={true}
-                type="area"
-                numberOfLines={3}
-                label="Địa chỉ chi tiết"
-                error={errors.address?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="defaultRoomRent"
-            rules={{ required: "Vui lòng nhập giá thuê mặc định" }}
-            render={({ field: { onChange, value } }) => (
-              <InputBase
-                label="Giá thuê mặc định"
-                required={true}
-                placeholder="Nhập giá thuê mặc định"
-                value={value ? formatCurrency(value.toString()) : ""}
-                onChangeText={onChange}
-                keyboardType="numeric"
-                error={errors.defaultRoomRent?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="paymentDate"
-            rules={{ required: "Vui lòng nhập ngày thanh toán" }}
-            render={({ field: { onChange, value } }) => (
-              <InputBase
-                label="Ngày thanh toán"
-                required={true}
-                placeholder="Nhập ngày thanh toán"
-                value={value?.toString()}
-                onChangeText={onChange}
-                keyboardType="numeric"
-                error={errors.paymentDate?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="numberFloor"
-            render={({ field: { onChange, value } }) => (
-              <InputBase
-                label="Số tầng"
-                placeholder="Nhập số tầng"
-                value={value?.toString()}
-                onChangeText={onChange}
-                keyboardType="numeric"
-                error={errors.numberFloor?.message}
-              />
-            )}
-          />
-
-          <YStack space="$2">
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginBottom="$2"
-            >
-              <Text style={styles.label}>Dịch vụ thu phí</Text>
-              <TouchableOpacity
-                style={styles.addServiceButton}
-                onPress={handleAddService}
-              >
-                <Ionicons name="add-circle-outline" size={20} color="#fff" />
-                <Text style={styles.addServiceButtonText}>Thêm dịch vụ</Text>
-              </TouchableOpacity>
-            </XStack>
-            <YStack
-              space="$3"
-              backgroundColor="#f8f9fa"
-              padding="$3"
-              borderRadius="$4"
-            >
-              {services &&
-                services?.map((service, index) => (
-                  <YStack
-                    key={service.fieldId || String(index)}
-                    space="$2"
-                    backgroundColor="#fff"
-                    padding="$3"
-                    borderRadius="$4"
-                    borderWidth={1}
-                    borderColor="#e9ecef"
-                    marginBottom="$2"
-                    style={{ position: "relative" }}
-                  >
-                    <TouchableOpacity
-                      style={styles.removeServiceItemButton}
-                      onPress={() => handleRemoveService(index, service)}
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="districtCode"
+              rules={{ required: "Vui lòng chọn quận/huyện" }}
+              render={({ field: { onChange, value } }) => (
+                <ComboBox
+                  value={value}
+                  options={districts}
+                  onChange={(value) => {
+                    onChange(value?.value ?? "");
+                    getWards(value?.value ?? "");
+                  }}
+                  isLoading={isLoadingWard}
+                  placeholder="Chọn quận/huyện"
+                  error={errors.districtCode?.message}
+                  onFocus={() => setActiveDropdown("districtCode")}
+                  isActive={activeDropdown === "districtCode"}
+                  label="Quận / Huyện"
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="wardCode"
+              rules={{ required: "Vui lòng chọn phường/xã" }}
+              render={({ field: { onChange, value } }) => (
+                <ComboBox
+                  value={value}
+                  options={wards}
+                  onChange={(value) => {
+                    onChange(value?.value ?? "");
+                  }}
+                  placeholder="Chọn phường/xã"
+                  error={errors.wardCode?.message}
+                  onFocus={() => setActiveDropdown("wardCode")}
+                  isActive={activeDropdown === "wardCode"}
+                  label="Phường / Xã"
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="address"
+              rules={{ required: "Vui lòng nhập địa chỉ chi tiết" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  placeholder="Nhập địa chỉ chi tiết"
+                  value={value}
+                  onChangeText={onChange}
+                  required={true}
+                  type="area"
+                  numberOfLines={3}
+                  label="Địa chỉ chi tiết"
+                  error={errors.address?.message}
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="defaultRoomRent"
+              rules={{ required: "Vui lòng nhập giá thuê mặc định" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  label="Giá thuê mặc định"
+                  required={true}
+                  placeholder="Nhập giá thuê mặc định"
+                  value={value ? formatCurrency(value.toString()) : ""}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  error={errors.defaultRoomRent?.message}
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="paymentDate"
+              rules={{ required: "Vui lòng nhập ngày thanh toán" }}
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  label="Ngày thanh toán"
+                  required={true}
+                  placeholder="Nhập ngày thanh toán"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  error={errors.paymentDate?.message}
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="numberFloor"
+              render={({ field: { onChange, value } }) => (
+                <InputBase
+                  label="Số tầng"
+                  placeholder="Nhập số tầng"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  error={errors.numberFloor?.message}
+                />
+              )}
+            />
+          </View>
+          <CardComponent>
+            <View className="gap-2">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text style={styles.label}>Dịch vụ thu phí</Text>
+                <TouchableOpacity
+                  style={styles.addServiceButton}
+                  onPress={handleAddService}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color="#fff" />
+                  <Text style={styles.addServiceButtonText}>Thêm dịch vụ</Text>
+                </TouchableOpacity>
+              </View>
+              <View className="gap-3 rounded-lg">
+                {services &&
+                  services?.map((service, index) => (
+                    <View
+                      key={service.fieldId || String(index)}
+                      className="gap-2 bg-white p-3 rounded-lg border border-[#e9ecef] mb-2"
+                      style={{ position: "relative" }}
                     >
-                      <Ionicons name="close" size={16} color="#fff" />
-                    </TouchableOpacity>
-                    <XStack space="$2" alignItems="center">
-                      <YStack space="$2" flex={1}>
-                        <Controller
-                          control={control}
-                          name={`services.${index}.name`}
-                          render={({ field: { onChange, value } }) => {
-                            return (
-                              <ServiceSelectedSearchComponent
+                      <TouchableOpacity
+                        style={styles.removeServiceItemButton}
+                        onPress={() => handleRemoveService(index, service)}
+                      >
+                        <Ionicons name="close" size={16} color="#fff" />
+                      </TouchableOpacity>
+                      <View className="flex-row gap-2 items-center">
+                        <View className="gap-2 flex-1">
+                          <Controller
+                            control={control}
+                            name={`services.${index}.name`}
+                            render={({ field: { onChange, value } }) => {
+                              return (
+                                <ServiceSelectedSearchComponent
+                                  value={value}
+                                  service={service}
+                                  onChange={(newService) => {
+                                    setValue(
+                                      `services.${index}`,
+                                      newService as any
+                                    );
+                                  }}
+                                  error={
+                                    errors.services?.[index]?.name?.message
+                                  }
+                                />
+                              );
+                            }}
+                          />
+                          <Controller
+                            control={control}
+                            name={`services.${index}.price`}
+                            rules={{ required: "Vui lòng nhập giá dịch vụ" }}
+                            render={({ field: { value } }) => {
+                              const currentService = watch(`services.${index}`);
+                              const currentMethod =
+                                currentService?.calculationMethod;
+                              return (
+                                <InputBase
+                                  placeholder="Giá"
+                                  disabled={
+                                    currentMethod ===
+                                    ServiceCalculateMethod.FREE
+                                  }
+                                  icon="cash-outline"
+                                  iconProps={{
+                                    color: "#007AFF",
+                                  }}
+                                  value={
+                                    currentMethod ===
+                                    ServiceCalculateMethod.FREE
+                                      ? "0"
+                                      : value
+                                        ? formatCurrency(value.toString())
+                                        : ""
+                                  }
+                                  onChangeText={(text) => {
+                                    const numericValue = text.replace(
+                                      /[^0-9]/g,
+                                      ""
+                                    );
+                                    setValue(
+                                      `services.${index}.price`,
+                                      Number(numericValue)
+                                    );
+                                  }}
+                                  keyboardType="numeric"
+                                  error={
+                                    errors.services?.[index]?.price?.message
+                                  }
+                                />
+                              );
+                            }}
+                          />
+                          <Controller
+                            control={control}
+                            name={`services.${index}.calculationMethod`}
+                            render={({ field: { value, onChange } }) => (
+                              <CalculatorMethodComponent
                                 value={value}
-                                service={service}
-                                onChange={(newService) => {
-                                  setValue(
-                                    `services.${index}`,
-                                    newService as any
-                                  );
+                                onChange={(newMethod) => {
+                                  onChange(newMethod);
+                                  if (
+                                    newMethod === ServiceCalculateMethod.FREE
+                                  ) {
+                                    setValue(`services.${index}.price`, 0);
+                                  }
                                 }}
-                                error={errors.services?.[index]?.name?.message}
                               />
-                            );
-                          }}
-                        />
-                        <Controller
-                          control={control}
-                          name={`services.${index}.price`}
-                          rules={{ required: "Vui lòng nhập giá dịch vụ" }}
-                          render={({ field: { value } }) => {
-                            const currentService = watch(`services.${index}`);
-                            const currentMethod =
-                              currentService?.calculationMethod;
-                            return (
-                              <InputBase
-                                placeholder="Giá"
-                                disabled={
-                                  currentMethod === ServiceCalculateMethod.FREE
-                                }
-                                icon="cash-outline"
-                                iconProps={{
-                                  color: "#007AFF",
-                                }}
-                                value={
-                                  currentMethod === ServiceCalculateMethod.FREE
-                                    ? "0"
-                                    : value
-                                    ? formatCurrency(value.toString())
-                                    : ""
-                                }
-                                onChangeText={(text) => {
-                                  const numericValue = text.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                  );
-                                  setValue(
-                                    `services.${index}.price`,
-                                    Number(numericValue)
-                                  );
-                                }}
-                                keyboardType="numeric"
-                                error={errors.services?.[index]?.price?.message}
-                              />
-                            );
-                          }}
-                        />
-                        <Controller
-                          control={control}
-                          name={`services.${index}.calculationMethod`}
-                          render={({ field: { value, onChange } }) => (
-                            <CalculatorMethodComponent
-                              value={value}
-                              onChange={(newMethod) => {
-                                onChange(newMethod);
-                                if (newMethod === ServiceCalculateMethod.FREE) {
-                                  setValue(`services.${index}.price`, 0);
-                                }
-                              }}
-                            />
-                          )}
-                        />
-                      </YStack>
-                    </XStack>
-                  </YStack>
-                ))}
-            </YStack>
-          </YStack>
-        </YStack>
+                            )}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+              </View>
+            </View>
+          </CardComponent>
+        </CardContent>
       </KeyboardAwareScrollView>
       <ActionButtonBottom
         actions={[

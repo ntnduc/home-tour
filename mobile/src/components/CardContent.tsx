@@ -28,7 +28,7 @@ const CardContent = (props: Props) => {
     );
 
   return (
-    <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+    <View className="rounded-xl p-4 mb-3 bg-white">
       {titleElement}
       {props.children}
     </View>

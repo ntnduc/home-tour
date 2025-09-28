@@ -23,6 +23,7 @@ import {
   ServiceCalculateMethod,
 } from "@/constant/service.constant";
 import { createStyles } from "@/styles/component/StyleComboBox";
+import { useTheme } from "@/theme/ThemeProvider";
 import { ContractServiceDetailResponse } from "@/types/contract-service";
 import { formatCurrency } from "@/utils/appUtil";
 import BottomSheet, {
@@ -32,7 +33,6 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { Controller, useForm } from "react-hook-form";
 import Toast from "react-native-toast-message";
-import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface ContractServiceComponentProps {
   onSuccess?: (service: ContractServiceDetailResponse, index: number) => void;
@@ -59,7 +59,7 @@ const ContractServiceComponent = forwardRef<
   ContractServiceComponentRef,
   ContractServiceComponentProps
 >(({ onSuccess }, ref) => {
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const styles = createStyles(theme);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [index, setIndex] = useState<number>(0);

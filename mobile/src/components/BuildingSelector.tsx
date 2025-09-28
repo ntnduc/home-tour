@@ -29,7 +29,7 @@ const BuildingSelector = ({
   const buildingDto = selectedBuildingData?.extra;
 
   return (
-    <View className="mx-2">
+    <View className="w-full mt-2">
       <TouchableOpacity
         className="mb-2"
         style={styles.selector}

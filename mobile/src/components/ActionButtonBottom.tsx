@@ -1,3 +1,4 @@
+import { useTheme } from "@/theme/ThemeProvider";
 import { Ionicons } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
 import {
@@ -8,7 +9,6 @@ import {
   ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme as useTamaguiTheme } from "tamagui";
 
 interface ActionButton {
   label: string;
@@ -36,7 +36,7 @@ const getButtonStyle = (
 
   const variantStyles = {
     primary: "bg-blue-600",
-    secondary: "bg-white border border-gray-300",
+    secondary: "bg-white shadow-[0_1px_5px_rgb(0,0,0,0.12)]",
     danger: "bg-red-600",
     success: "bg-green-600",
   };
@@ -49,7 +49,7 @@ const getTextStyle = (variant: ActionButton["variant"] = "primary") => {
 
   const variantStyles = {
     primary: "text-white",
-    secondary: "text-gray-600 font-medium text-sm",
+    secondary: "text-gray-600",
     danger: "text-white",
     success: "text-white",
   };
@@ -73,12 +73,12 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
   className,
 }) => {
   const { bottom } = useSafeAreaInsets();
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   return (
     <View
       className={`bg-white border-t border-gray-200 px-6 pt-3 ${className}`}
       style={[
-        { backgroundColor: theme.background?.val ?? "#fff" },
+        { backgroundColor: "#fff" },
         containerStyle,
         { paddingBottom: bottom },
       ]}

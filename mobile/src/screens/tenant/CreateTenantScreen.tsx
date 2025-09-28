@@ -5,10 +5,10 @@ import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
-import { Alert, SafeAreaView } from "react-native";
+import { Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import { YStack, useTheme as useTamaguiTheme } from "tamagui";
 import { RootStackParamList } from "../../navigation/types";
 
 // Placeholder tenant type - should be defined in types
@@ -27,7 +27,6 @@ type CreateTenantScreenProps = {
 };
 
 const CreateTenantScreen = ({ navigation, route }: CreateTenantScreenProps) => {
-  const theme = useTamaguiTheme();
   const [isLoading, setIsLoading] = useState(false);
   const { roomId } = route.params || {};
 
@@ -78,113 +77,109 @@ const CreateTenantScreen = ({ navigation, route }: CreateTenantScreenProps) => {
         showsVerticalScrollIndicator={false}
         enableAutomaticScroll={true}
       >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: theme.background?.val }}
-        >
-          <YStack padding="$4" space="$4">
-            <Controller
-              control={control}
-              name="name"
-              rules={{ required: "Vui lòng nhập họ tên" }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập họ tên đầy đủ"
-                  value={value}
-                  onChangeText={onChange}
-                  label="Họ và tên"
-                  required={true}
-                  error={errors.name?.message}
-                />
-              )}
-            />
+        <SafeAreaView style={{ flex: 1 }}>
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: "Vui lòng nhập họ tên" }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập họ tên đầy đủ"
+                value={value}
+                onChangeText={onChange}
+                label="Họ và tên"
+                required={true}
+                error={errors.name?.message}
+              />
+            )}
+          />
 
-            <Controller
-              control={control}
-              name="email"
-              rules={{
-                required: "Vui lòng nhập email",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Email không hợp lệ",
-                },
-              }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập địa chỉ email"
-                  value={value}
-                  onChangeText={onChange}
-                  label="Email"
-                  required={true}
-                  keyboardType="email-address"
-                  error={errors.email?.message}
-                />
-              )}
-            />
+          <Controller
+            control={control}
+            name="email"
+            rules={{
+              required: "Vui lòng nhập email",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Email không hợp lệ",
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập địa chỉ email"
+                value={value}
+                onChangeText={onChange}
+                label="Email"
+                required={true}
+                keyboardType="email-address"
+                error={errors.email?.message}
+              />
+            )}
+          />
 
-            <Controller
-              control={control}
-              name="phone"
-              rules={{
-                required: "Vui lòng nhập số điện thoại",
-                pattern: {
-                  value: /^[0-9]{10,11}$/,
-                  message: "Số điện thoại không hợp lệ",
-                },
-              }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập số điện thoại"
-                  value={value}
-                  onChangeText={onChange}
-                  label="Số điện thoại"
-                  required={true}
-                  keyboardType="phone-pad"
-                  error={errors.phone?.message}
-                />
-              )}
-            />
+          <Controller
+            control={control}
+            name="phone"
+            rules={{
+              required: "Vui lòng nhập số điện thoại",
+              pattern: {
+                value: /^[0-9]{10,11}$/,
+                message: "Số điện thoại không hợp lệ",
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập số điện thoại"
+                value={value}
+                onChangeText={onChange}
+                label="Số điện thoại"
+                required={true}
+                keyboardType="phone-pad"
+                error={errors.phone?.message}
+              />
+            )}
+          />
 
-            <Controller
-              control={control}
-              name="identityNumber"
-              rules={{
-                required: "Vui lòng nhập CCCD/CMND",
-                pattern: {
-                  value: /^[0-9]{9,12}$/,
-                  message: "CCCD/CMND không hợp lệ",
-                },
-              }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập số CCCD/CMND"
-                  value={value}
-                  onChangeText={onChange}
-                  label="CCCD/CMND"
-                  required={true}
-                  keyboardType="numeric"
-                  error={errors.identityNumber?.message}
-                />
-              )}
-            />
+          <Controller
+            control={control}
+            name="identityNumber"
+            rules={{
+              required: "Vui lòng nhập CCCD/CMND",
+              pattern: {
+                value: /^[0-9]{9,12}$/,
+                message: "CCCD/CMND không hợp lệ",
+              },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập số CCCD/CMND"
+                value={value}
+                onChangeText={onChange}
+                label="CCCD/CMND"
+                required={true}
+                keyboardType="numeric"
+                error={errors.identityNumber?.message}
+              />
+            )}
+          />
 
-            <Controller
-              control={control}
-              name="address"
-              rules={{ required: "Vui lòng nhập địa chỉ" }}
-              render={({ field: { onChange, value } }) => (
-                <InputBase
-                  placeholder="Nhập địa chỉ thường trú"
-                  value={value}
-                  onChangeText={onChange}
-                  required={true}
-                  type="area"
-                  numberOfLines={3}
-                  label="Địa chỉ thường trú"
-                  error={errors.address?.message}
-                />
-              )}
-            />
-          </YStack>
+          <Controller
+            control={control}
+            name="address"
+            rules={{ required: "Vui lòng nhập địa chỉ" }}
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                placeholder="Nhập địa chỉ thường trú"
+                value={value}
+                onChangeText={onChange}
+                required={true}
+                type="area"
+                numberOfLines={3}
+                label="Địa chỉ thường trú"
+                error={errors.address?.message}
+              />
+            )}
+          />
         </SafeAreaView>
       </KeyboardAwareScrollView>
       <ActionButtonBottom

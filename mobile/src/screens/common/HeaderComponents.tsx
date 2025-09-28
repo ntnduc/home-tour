@@ -1,3 +1,4 @@
+import { colors } from "@/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -49,9 +50,10 @@ const HeaderComponents = (props: HeaderComponentsProps) => {
 
   return (
     <View
-      className={`flex flex-col justify-between items-center content-center bg-white w-full ${className}`}
+      className={`flex flex-col justify-between items-center content-center w-full ${className}`}
+      style={styles.fixedHeader}
     >
-      <View className="flex flex-col justify-between items-center content-center bg-white w-full">
+      <View className="flex flex-col justify-between items-center content-center w-full">
         <View
           className="flex flex-row items-center content-start align-start"
           style={{ alignSelf: "flex-start", marginLeft: 6 }}
@@ -126,9 +128,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#222",
-    // alignSelf: "flex-start",
     margin: 10,
     letterSpacing: 0.2,
+  },
+  fixedHeader: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    alignContent: "center",
+    width: "100%",
+    backgroundColor: colors.background.default,
+    paddingBottom: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   statsBox: {
     flex: 1,

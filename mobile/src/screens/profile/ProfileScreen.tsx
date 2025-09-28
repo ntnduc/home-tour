@@ -1,20 +1,13 @@
 import { logout } from "@/api/auth/api";
+import { useTheme } from "@/theme/ThemeProvider";
 import { User } from "@/types/user";
 import { getStoreUser } from "@/utils/appUtil";
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
-import { Alert, SafeAreaView, ScrollView } from "react-native";
-import {
-  Avatar,
-  Button,
-  H3,
-  Paragraph,
-  XStack,
-  YStack,
-  useTheme as useTamaguiTheme,
-} from "tamagui";
+import { Alert, ScrollView, View } from "react-native";
+import { Avatar } from "react-native-elements";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type RootStackParamList = {
   Login: undefined;
@@ -25,7 +18,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const theme = useTamaguiTheme();
+  const theme = useTheme();
   const [user, setUser] = React.useState<User | undefined>(undefined);
 
   React.useEffect(() => {
@@ -62,35 +55,32 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.theme.colors.primary.main }}
+    >
       <ScrollView>
-        <YStack padding="$4" space="$4">
+        <View className="p-4 gap-4">
           {/* Header */}
-          <YStack
-            backgroundColor="$backgroundHover"
-            padding="$4"
-            borderRadius="$4"
-            space="$4"
-          >
-            <XStack justifyContent="center">
-              <Avatar circular size="$8" backgroundColor="$colorFocus">
-                <Ionicons
+          <View className="bg-[rgba(0,0,0,0.03)] p-4 rounded-lg gap-4">
+            <View className="flex-row justify-center">
+              <Avatar>
+                {/* <Ionicons
                   name="person-circle"
                   size={40}
                   color={theme.color.val}
-                />
+                /> */}
               </Avatar>
-            </XStack>
-            <YStack space="$2" alignItems="center">
-              <H3 color="$color">{user?.fullName || "Chưa cập nhật"}</H3>
-              <Paragraph color="$colorHover">
+            </View>
+            <View className="gap-2 items-center">
+              {/* <Text color={theme.theme.colors.primary.main}>{user?.fullName || "Chưa cập nhật"}</H3> */}
+              {/* <Paragraph color={theme.theme.colors.primary.main}>
                 {user?.phoneNumber || "Chưa cập nhật"}
-              </Paragraph>
-            </YStack>
-          </YStack>
+              </Paragraph> */}
+            </View>
+          </View>
 
           {/* Menu Items */}
-          <YStack space="$2">
+          {/* <View className="gap-2">
             <Button
               icon={
                 <Ionicons
@@ -138,13 +128,13 @@ const ProfileScreen = () => {
             >
               Đăng xuất
             </Button>
-          </YStack>
+          </View> */}
 
           {/* App Info */}
-          <YStack alignItems="center" padding="$4">
+          {/* <View className="items-center p-4">
             <Paragraph color="$colorPress">Phiên bản 1.0.0</Paragraph>
-          </YStack>
-        </YStack>
+          </View> */}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
