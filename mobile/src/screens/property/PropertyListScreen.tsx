@@ -91,7 +91,7 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
   };
 
   return (
-    <SafeAreaView className="bg-white flex-1">
+    <SafeAreaView className="bg-white flex-1" edges={["top"]}>
       <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
       <View>
         <HeaderComponents
