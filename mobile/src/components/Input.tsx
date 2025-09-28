@@ -101,7 +101,7 @@ const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <View className="">
+    <View>
       {label && (
         <Text style={[styles.label, labelStyles]} className={labelClassName}>
           {label}
@@ -123,7 +123,7 @@ const Input: React.FC<InputProps> = ({
           />
         )}
         <TextInput
-          className={`flex-1 ${type === "area" ? "h-20" : ""}`}
+          className={`flex-1 ${type === "area" ? "h-24" : ""}`}
           value={value}
           onSubmitEditing={onSubmitEditing}
           style={[

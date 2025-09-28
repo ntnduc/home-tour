@@ -2,6 +2,10 @@ import { StyleSheet } from "react-native";
 
 export const createStyles = (theme: any) =>
   StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background?.val,
+    },
     label: {
       fontSize: 16,
       fontWeight: "600",
@@ -55,13 +59,13 @@ export const createStyles = (theme: any) =>
     addServiceButton: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.blue10?.val ?? "#3b82f6",
+      backgroundColor: "#3b82f6",
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 20,
     },
     addServiceButtonText: {
-      color: theme.background?.val,
+      color: "#fff",
       fontSize: 14,
       fontWeight: "600",
       marginLeft: 4,

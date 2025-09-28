@@ -9,6 +9,7 @@ export const createStyles = (theme: any) =>
       lineHeight: theme?.input?.lineHeight ?? 20,
       fontSize: theme?.input?.fontSize ?? 16,
       paddingVertical: theme?.input?.paddingVertical ?? 4,
+      minHeight: 32,
     },
     inputError: {
       borderColor: "#ff3b30",
