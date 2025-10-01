@@ -99,16 +99,28 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
   const _renderChildren = () => {
     if (state.dynamicChildren) {
       if (state.config?.header) {
+        const headerConfig = state.config.header;
+        const headerHeight = headerConfig?.height ?? 56;
         return (
-          <>
-            {header(state.config.header)}
-            {state.dynamicChildren}
-            {!state.config?.ignoreBottomInset && (
-              <BottomSheetView>
-                <View style={{ height: insets.bottom }} />
-              </BottomSheetView>
-            )}
-          </>
+          <View>
+            <View
+              style={[
+                stylesHeader.fixedHeaderContainer,
+                headerConfig?.style,
+                { height: headerHeight },
+              ]}
+            >
+              {header(headerConfig)}
+            </View>
+            <View style={{ marginTop: headerHeight }}>
+              {state.dynamicChildren}
+              {!state.config?.ignoreBottomInset && (
+                <BottomSheetView>
+                  <View style={{ height: insets.bottom }} />
+                </BottomSheetView>
+              )}
+            </View>
+          </View>
         );
       }
       return state.dynamicChildren;
@@ -153,7 +165,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
   );
 });
 
-const styles = StyleSheet.create({
+export const stylesHeader = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 600,
@@ -167,6 +179,16 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  fixedHeaderContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
 });
 

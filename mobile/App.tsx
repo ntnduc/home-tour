@@ -50,6 +50,7 @@ import InvoiceDetailScreen from "./src/screens/invoice/InvoiceDetailScreen";
 import InvoiceHistoryScreen from "./src/screens/invoice/InvoiceHistoryScreen";
 
 // Config
+import TestScreen from "@/screens/test/TestScreen";
 import { TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -249,6 +250,13 @@ export default function App() {
                   name="CreateInvoice"
                   component={CreateInvoiceScreen}
                   options={{ title: "Tạo Hóa Đơn Mới" }}
+                />
+
+                {/* Test */}
+                <Stack.Screen
+                  name="TestScreen"
+                  component={TestScreen}
+                  options={{ title: "Test Screen" }}
                 />
               </Stack.Navigator>
               <StatusBar style="dark" />

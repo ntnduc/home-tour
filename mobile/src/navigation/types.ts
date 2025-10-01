@@ -45,6 +45,9 @@ export type RootStackParamList = {
 
   // Profile
   Profile: undefined;
+
+  // Test
+  TestScreen: undefined;
 };
 
 export type TabParamList = {
@@ -54,4 +57,5 @@ export type TabParamList = {
   Contracts: undefined;
   Reports: undefined;
   Profile: undefined;
+  TestScreen: undefined;
 };

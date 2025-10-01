@@ -93,10 +93,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
       </BottomSheetView>,
       {
         snapPoints: [300],
-        ignoreBottomInset: true,
         header: {
           element: (
-            <View className="flex-row justify-between items-center border-b border-gray-200 w-full p-4 rounded-t-2xl">
+            <View className="flex-row justify-between items-center border-b border-gray-200 w-full p-4 rounded-t-2xl h-[60px]">
               <TouchableOpacity onPress={closeAppSheet} className="py-2">
                 <Text className="text-gray-600 font-medium">Hủy</Text>
               </TouchableOpacity>

@@ -1,3 +1,4 @@
+import TestScreen from "@/screens/test/TestScreen";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
@@ -57,6 +58,8 @@ const TabNavigator = () => {
                   color={color}
                 />
               );
+            case "TestScreen":
+              return <Ionicons name="telescope" size={size} color={color} />;
             default:
               return null;
           }
@@ -92,6 +95,11 @@ const TabNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{ title: "Cá nhân" }}
+      />
+      <Tab.Screen
+        name="TestScreen"
+        component={TestScreen}
+        options={{ title: "Test Screen" }}
       />
     </Tab.Navigator>
   );

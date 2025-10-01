@@ -122,7 +122,7 @@ const CardComponent = (props: CardComponentProps) => {
   return (
     <View
       style={[styles.card, style]}
-      className={`rounded-xl p-4 mb-4 ${className || ""}`}
+      className={`rounded-xl ${className || ""}`}
     >
       {header !== undefined ? (
         header

@@ -133,8 +133,12 @@ const CreateContractScreen = ({
   return (
     <View className="flex-1 bg-gray-50">
       <KeyboardAwareScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+        contentContainerStyle={{
+          padding: 16,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+        }}
         enableOnAndroid={true}
         extraScrollHeight={30}
         keyboardOpeningTime={0}
@@ -296,29 +300,31 @@ const CreateContractScreen = ({
               </Text>
             </View>
           ) : (
-            contractServices.map((service, index) => (
-              <Controller
-                key={service.fieldId || index}
-                control={control}
-                name={`contractServices.${index}`}
-                render={({ field: { value } }) => (
-                  <ServiceItem
-                    key={`service-item-${
-                      service.propertyServiceId || index
-                    }-${index}`}
-                    service={service}
-                    index={index}
-                    onEdit={() =>
-                      openContractServiceForm(
-                        value as ContractServiceDetailResponse,
-                        index
-                      )
-                    }
-                    onChange={(service) => update(index, service)}
-                  />
-                )}
-              />
-            ))
+            <View className="flex flex-col gap-3">
+              {contractServices.map((service, index) => (
+                <Controller
+                  key={service.fieldId || index}
+                  control={control}
+                  name={`contractServices.${index}`}
+                  render={({ field: { value } }) => (
+                    <ServiceItem
+                      key={`service-item-${
+                        service.propertyServiceId || index
+                      }-${index}`}
+                      service={service}
+                      index={index}
+                      onEdit={() =>
+                        openContractServiceForm(
+                          value as ContractServiceDetailResponse,
+                          index
+                        )
+                      }
+                      onChange={(service) => update(index, service)}
+                    />
+                  )}
+                />
+              ))}
+            </View>
           )}
 
           {/* <View className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">

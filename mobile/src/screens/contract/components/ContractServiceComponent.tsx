@@ -13,6 +13,7 @@ import Input from "@/components/Input";
 
 // Types & Constants
 import ActionButtonBottom from "@/components/ActionButtonBottom";
+import { stylesHeader } from "@/components/AppSheet/AppSheet";
 import AppSheetBackdropComponent from "@/components/AppSheet/AppSheetBackdropComponent";
 import AppSheetHandleComponent from "@/components/AppSheet/AppSheetHandleComponent";
 import AppSheetHeader from "@/components/AppSheet/AppSheetHeader";
@@ -61,6 +62,7 @@ const ContractServiceComponent = forwardRef<
 >(({ onSuccess }, ref) => {
   const theme = useTheme();
   const styles = createStyles(theme);
+  const styleHeader = stylesHeader;
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [index, setIndex] = useState<number>(0);
 
@@ -80,7 +82,6 @@ const ContractServiceComponent = forwardRef<
     },
   });
 
-  // Expose BottomSheet methods through ref
   useImperativeHandle(ref, () => ({
     snapToIndex: (index: number) => {
       bottomSheetRef.current?.snapToIndex(index);
@@ -263,7 +264,7 @@ const ContractServiceComponent = forwardRef<
         />
       </BottomSheetFooter>
     ),
-    []
+    [index]
   );
 
   const renderBackdrop = useCallback(
@@ -291,18 +292,18 @@ const ContractServiceComponent = forwardRef<
       detached={true}
       footerComponent={_renderFooter}
     >
-      {
+      <View style={[styleHeader.fixedHeaderContainer, { height: 60 }]}>
         <AppSheetHeader
           title="Cập nhật dịch vụ"
           onClose={() => {
             bottomSheetRef.current?.close();
           }}
         />
-      }
+      </View>
       <BottomSheetScrollView
-        className="p-4"
-        contentContainerStyle={{ paddingBottom: 80 }}
+        className="p-4 mt-[60px] mb-[90px]"
         nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={true}
       >
         <View className="mb-3">
           <Controller
@@ -406,7 +407,7 @@ const ContractServiceComponent = forwardRef<
                   value={value}
                   alignLabel="horizontal"
                   onValueChange={onChange}
-                  label="Trạng thái"
+                  label="Sử dụng"
                 />
               );
             }}
@@ -453,14 +454,14 @@ const ContractServiceComponent = forwardRef<
 
             <View className="flex-row justify-between items-center py-2">
               <Text className="text-base text-gray-600 font-medium">
-                Trạng thái:
+                Sử dụng:
               </Text>
               <Text
                 className={`text-base ${
                   isEnabled ? "text-green-600" : "text-red-600"
                 } font-semibold text-right flex-1`}
               >
-                {isEnabled ? "Đang hoạt động" : "Tạm dừng"}
+                {isEnabled ? "Đang sử dụng" : "Không sử dụng"}
               </Text>
             </View>
           </View>

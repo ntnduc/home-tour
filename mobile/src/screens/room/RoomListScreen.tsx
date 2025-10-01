@@ -8,7 +8,7 @@ import { ComboOptionWithExtra } from "@/types/comboOption";
 import { PropertyDetail } from "@/types/property";
 import { RoomListResponse } from "@/types/room";
 import { Ionicons } from "@expo/vector-icons";
-import { RouteProp, useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useState } from "react";
@@ -33,12 +33,9 @@ import styles from "./styles/StyleRoomList";
 
 type RoomListScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, "RoomList">;
-  route: RouteProp<RootStackParamList, "RoomList">;
 };
 
-const RoomListScreen = ({ navigation, route }: RoomListScreenProps) => {
-  const { propertyId } = route.params || {};
-
+const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
   const [search, setSearch] = useState("");
   const [filterPayment, setFilterPayment] = useState<PaymentStatus | null>(
