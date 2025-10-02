@@ -219,6 +219,39 @@ const CreateContractScreen = ({
           </View>
         </CardComponent>
 
+        {/* <CardComponent title="Thông tin người thuê">
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="tenantName"
+              rules={{ required: "Vui lòng nhập tên người thuê" }}
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Tên người thuê"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Nhập tên người thuê"
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="tenantPhone"
+              rules={{ required: "Vui lòng nhập số điện thoại người thuê" }}
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Số điện thoại người thuê"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Nhập số điện thoại người thuê"
+                />
+              )}
+            />
+          </View>
+        </CardComponent> */}
+
         <CardComponent title="Thông tin thanh toán">
           <View className="mb-3">
             <Controller
