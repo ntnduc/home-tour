@@ -1,11 +1,11 @@
 import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { Client } from 'src/modules/client/entities/client.entity';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
-import { User } from '../../users/entities/user.entity';
 import { Contracts } from './contracts.entity';
 
 @Entity('contract_properties')
-@Unique(['contractId', 'propertyUserId'])
+@Unique(['contractId', 'clientId'])
 export class ContractProperties extends BaseEntity {
   @ManyToOne(() => Contracts, (contract) => contract.contractProperties, {
     onDelete: 'CASCADE',
@@ -16,9 +16,9 @@ export class ContractProperties extends BaseEntity {
   @Column()
   contractId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'propertyUserId' })
-  property: User;
+  @ManyToOne(() => Client)
+  @JoinColumn({ name: 'clientId' })
+  client: Client;
 
   @Column({ default: '' })
   @IsString()
@@ -31,7 +31,7 @@ export class ContractProperties extends BaseEntity {
   isPrimaryPropertyUser: boolean;
 
   @Column()
-  propertyUserId: string;
+  clientId: string;
 
   @Column({ type: 'date', nullable: true })
   moveInDate?: Date;

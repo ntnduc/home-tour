@@ -11,7 +11,7 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Alert, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
-import { getRoomService } from "../../api/room/room.api";
+import { getRoomWitcService } from "../../api/room/room.api";
 import { ContractCreateRequest } from "../../types/contract";
 import { RoomServiceDetailResponse, RoomStatus } from "../../types/room";
 import CardComponent from "../common/CardComponent";
@@ -56,7 +56,7 @@ const CreateContractScreen = ({
       try {
         setIsLoading(true);
 
-        const roomServiceResponse = await getRoomService(roomId);
+        const roomServiceResponse = await getRoomWitcService(roomId);
 
         if (roomServiceResponse.success && roomServiceResponse.data) {
           const room = roomServiceResponse.data;
@@ -273,6 +273,34 @@ const CreateContractScreen = ({
             />
           </View>
 
+          <View>
+            <Controller
+              control={control}
+              name="paymentDueDay"
+              rules={{ required: "Vui lòng nhập ngày thanh toán" }}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <Input
+                  label="Ngày thanh toán"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  required
+                  placeholder="Nhập ngày thanh toán"
+                  min={1}
+                  max={30}
+                  error={error?.message}
+                  type="number"
+                  icon="calendar-clear"
+                  keyboardType="numeric"
+                  returnKeyType="done"
+                  returnKeyLabel="Xong"
+                />
+              )}
+            />
+          </View>
+
           {/* <View className="bg-blue-50 rounded-lg p-3 border border-blue-200">
             <Text className="text-sm font-semibold text-blue-800 mb-1">
               Tổng tiền cọc (bao gồm dịch vụ):
@@ -365,7 +393,7 @@ const CreateContractScreen = ({
                 type="area"
                 value={value}
                 onChangeText={onChange}
-                placeholder="Nhập điều khoảng bổ sung (tùy chọn)"
+                placeholder="Nhập điều khoảng bổ sung (không bắc buộc)"
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"

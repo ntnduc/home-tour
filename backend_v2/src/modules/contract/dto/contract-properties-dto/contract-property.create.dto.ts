@@ -16,7 +16,8 @@ export class ContractPropertyCreateDto extends BaseCreateDto<ContractProperties>
   contractId?: string;
 
   @IsUUID()
-  propertyUserId: string;
+  @IsOptional()
+  clientId?: string;
 
   @IsBoolean()
   @IsOptional()
@@ -45,7 +46,7 @@ export class ContractPropertyCreateDto extends BaseCreateDto<ContractProperties>
   getEntity(): ContractProperties {
     const entity = new ContractProperties();
     if (this.contractId) entity.contractId = this.contractId;
-    entity.propertyUserId = this.propertyUserId;
+    if (this.clientId) entity.clientId = this.clientId;
     entity.isPrimaryPropertyUser = this.isPrimaryPropertyUser ?? false;
     entity.moveInDate = this.moveInDate ? new Date(this.moveInDate) : undefined;
     entity.moveOutDate = this.moveOutDate

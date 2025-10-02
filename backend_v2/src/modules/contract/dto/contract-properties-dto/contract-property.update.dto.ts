@@ -9,7 +9,9 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { BaseUpdateDto } from '../../../../common/base/dto/update.dto';
 import { ContractProperties } from '../../entities/contract-properties.entity';
 
-export class ContractPropertyUpdateDto implements BaseUpdateDto<ContractProperties> {
+export class ContractPropertyUpdateDto
+  implements BaseUpdateDto<ContractProperties>
+{
   @IsString()
   id: string;
 
@@ -29,7 +31,9 @@ export class ContractPropertyUpdateDto implements BaseUpdateDto<ContractProperti
   @IsBoolean()
   isActiveInContract?: boolean;
 
-  getEntity(entity: ContractProperties): QueryDeepPartialEntity<ContractProperties> {
+  getEntity(
+    entity: ContractProperties,
+  ): QueryDeepPartialEntity<ContractProperties> {
     const updateData: QueryDeepPartialEntity<ContractProperties> = {};
 
     if (this.propertyUserId) updateData.propertyUserId = this.propertyUserId;

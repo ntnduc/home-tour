@@ -33,6 +33,7 @@ export const getRoom = async (id: string) => {
   const response = await privateApi.get<ApiResponse<RoomDetailResponse>>(
     `/rooms/${id}`
   );
+
   return response.data;
 };
 
@@ -44,7 +45,7 @@ export const updateRoom = async (data: RoomUpdateRequest) => {
   return response.data;
 };
 
-export const getRoomService = async (id: string) => {
+export const getRoomWitcService = async (id: string) => {
   const response = await privateApi.get<ApiResponse<RoomServiceDetailResponse>>(
     `/rooms/${id}/services`
   );

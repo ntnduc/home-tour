@@ -128,7 +128,10 @@ const CardComponent = (props: CardComponentProps) => {
         header
       ) : title || actions || renderActions ? (
         <View style={styles.header}>
-          <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
+            className="mb-3"
+          >
             <View style={{ flex: 1 }}>
               {title ? (
                 typeof title === "string" ? (

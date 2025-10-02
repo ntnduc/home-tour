@@ -30,7 +30,9 @@ export class ContractPropertiesRepository extends BaseRepository<ContractPropert
     return this.createQueryBuilder('contractProperty')
       .leftJoinAndSelect('contractProperty.property', 'property')
       .where('contractProperty.contractId = :contractId', { contractId })
-      .andWhere('contractProperty.isActiveInContract = :isActive', { isActive: true })
+      .andWhere('contractProperty.isActiveInContract = :isActive', {
+        isActive: true,
+      })
       .orderBy('contractProperty.createdAt', 'ASC')
       .getMany();
   }

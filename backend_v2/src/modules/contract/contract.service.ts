@@ -9,13 +9,14 @@ import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
 import { RoomStatus } from '../../common/enums/room.enum';
 import { AuthService } from '../auth/auth.service';
+import { Client } from '../client/entities/client.entity';
+import { ClientRepository } from '../client/repositories/client.repository';
 import { PropertiesService } from '../property/entities/properties-service.entity';
 import { PropertiesServiceRepository } from '../property/repositories/properties-service.repository';
 import { RoomsRepository } from '../property/repositories/rooms.repository';
 import { ServiceDetailDto } from '../services/dto/services.detail.dto';
 import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
-import { User } from '../users/entities/user.entity';
 import { UserRepository } from '../users/repositories/user.repository';
 import { ContractCreateDto } from './dto/contract-dto/contract.create.dto';
 import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
@@ -50,6 +51,7 @@ export class ContractService
     private readonly propertiesServiceRepository: PropertiesServiceRepository,
     private readonly servicesRepository: ServicesRepository,
     private readonly userRepository: UserRepository,
+    private readonly clientRepository: ClientRepository,
     private readonly dataSource: DataSource,
   ) {
     super(
@@ -329,23 +331,24 @@ export class ContractService
 
     const phones = contractPropertiesDto.map((x) => x.phone);
 
-    const findUserExist = await this.userRepository.find({
-      where: { phone: In(phones) },
+    const existedClients = await this.clientRepository.find({
+      where: { phoneNumber: In(phones) },
     });
 
     for (const propertyDto of contractPropertiesDto) {
-      const findUser = findUserExist.find((x) => x.phone === propertyDto.phone);
+      const existed = existedClients.find(
+        (x) => x.phoneNumber === propertyDto.phone,
+      );
 
-      if (findUser) {
-        propertyDto.propertyUserId = findUser.id;
+      if (existed) {
+        propertyDto.clientId = existed.id;
       } else {
-        const user = new User();
-        user.phone = propertyDto.phone;
-        user.fullName = propertyDto.name;
-        user.isPhoneVerified = false;
-        user.isActive = true;
-        await manager.save(user);
-        propertyDto.propertyUserId = user.id;
+        const client = new Client();
+        client.phoneNumber = propertyDto.phone;
+        client.fullName = propertyDto.name;
+        client.isActive = true;
+        await manager.save(client);
+        propertyDto.clientId = client.id;
       }
       propertyDto.contractId = contractId;
       const propertyEntity = propertyDto.getEntity();

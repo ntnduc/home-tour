@@ -1,9 +1,9 @@
+import { Client } from 'src/modules/client/entities/client.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { ContractStatus } from '../../../common/enums/contract.enum';
 import { Properties } from '../../property/entities/properties.entity';
 import { Rooms } from '../../property/entities/rooms.entity';
-import { User } from '../../users/entities/user.entity';
 import { ContractProperties } from './contract-properties.entity';
 import { ContractServices } from './contract-services.entity';
 
@@ -23,12 +23,12 @@ export class Contracts extends BaseEntity {
   @Column()
   roomId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'landlordUserId' })
-  landlord: User;
+  @ManyToOne(() => Client, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'landlordClientId' })
+  landlord: Client;
 
   @Column()
-  landlordUserId: string;
+  landlordClientId: string;
 
   @Column({ type: 'date' })
   startDate: Date;

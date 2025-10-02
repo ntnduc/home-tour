@@ -23,7 +23,7 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   roomId: string;
 
   @IsUUID()
-  landlordUserId: string;
+  landlordClientId: string;
 
   @IsDateString()
   startDate: string;
@@ -70,7 +70,7 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     const entity = new Contracts();
     entity.propertyId = this.propertyId;
     entity.roomId = this.roomId;
-    entity.landlordUserId = this.landlordUserId;
+    entity.landlordClientId = this.landlordClientId;
     entity.startDate = new Date(this.startDate);
     entity.endDate = this.endDate ? new Date(this.endDate) : undefined;
     entity.rentAmountAgreed = this.rentAmountAgreed;

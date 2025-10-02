@@ -24,11 +24,11 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     phone: string;
     email?: string;
   };
-  landlordUserId: string;
+  landlordClientId: string;
   landlord: {
     id: string;
     fullName: string;
-    phone: string;
+    phoneNumber: string;
     email?: string;
   };
   startDate: Date;
@@ -41,11 +41,11 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   notes?: string;
   contractProperties: Array<{
     id: string;
-    propertyUserId: string;
+    clientId: string;
     property: {
       id: string;
       fullName: string;
-      phone: string;
+      phoneNumber: string;
       email?: string;
     };
     moveInDate?: Date;
@@ -91,13 +91,13 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
           ?.property?.fullName || '',
       phone:
         entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.phone || '',
+          ?.property?.phoneNumber || '',
     };
-    this.landlordUserId = entity.landlordUserId;
+    this.landlordClientId = entity.landlordClientId;
     this.landlord = {
       id: entity.landlord?.id || '',
       fullName: entity.landlord?.fullName || '',
-      phone: entity.landlord?.phone || '',
+      phoneNumber: entity.landlord?.phoneNumber || '',
       email: entity.landlord?.email,
     };
     this.startDate = entity.startDate;
@@ -111,11 +111,11 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractProperties =
       entity.contractProperties?.map((lp) => ({
         id: lp.id,
-        propertyUserId: lp.propertyUserId,
+        clientId: lp.clientId,
         property: {
           id: lp.property?.id || '',
           fullName: lp.property?.fullName || '',
-          phone: lp.property?.phone || '',
+          phoneNumber: lp.property?.phoneNumber || '',
           email: lp.property?.email,
         },
         moveInDate: lp.moveInDate,

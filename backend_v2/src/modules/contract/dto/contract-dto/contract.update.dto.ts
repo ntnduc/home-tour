@@ -23,7 +23,7 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
 
   @IsOptional()
   @IsUUID()
-  landlordUserId?: string;
+  landlordClientId?: string;
 
   @IsOptional()
   @IsDateString()
@@ -65,7 +65,6 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
     const updateData: QueryDeepPartialEntity<Contracts> = {};
 
     if (this.roomId) updateData.roomId = this.roomId;
-    if (this.landlordUserId) updateData.landlordUserId = this.landlordUserId;
     if (this.startDate) updateData.startDate = new Date(this.startDate);
     if (this.endDate) updateData.endDate = new Date(this.endDate);
     if (this.rentAmountAgreed !== undefined)

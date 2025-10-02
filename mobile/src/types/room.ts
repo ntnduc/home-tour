@@ -28,6 +28,7 @@ export interface RoomListResponse extends Room {}
 
 export interface RoomDetailResponse extends Room {
   propertyName?: string;
+  contractServices: ContractServiceDetailResponse[];
 }
 
 export interface RoomUpdateRequest extends Room {
