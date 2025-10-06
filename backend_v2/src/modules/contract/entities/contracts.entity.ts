@@ -16,19 +16,25 @@ export class Contracts extends BaseEntity {
   @Column()
   propertyId: string;
 
-  @ManyToOne(() => Rooms, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Rooms)
   @JoinColumn({ name: 'roomId' })
   room: Rooms;
 
   @Column()
   roomId: string;
 
-  @ManyToOne(() => Client, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Client)
   @JoinColumn({ name: 'landlordClientId' })
-  landlord: Client;
+  landlordClient: Client;
 
   @Column()
   landlordClientId: string;
+
+  @OneToMany(() => Client, (client) => client.contract)
+  partnerClient?: Client[];
+
+  @Column({ type: 'int', default: 0 })
+  partnerClientCount: number;
 
   @Column({ type: 'date' })
   startDate: Date;

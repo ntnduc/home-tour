@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientRepository } from '../client/repositories/client.repository';
 import { CurrentUserModule } from '../current.user';
 import { PropertiesService } from '../property/entities/properties-service.entity';
 import { Properties } from '../property/entities/properties.entity';
@@ -55,6 +56,7 @@ import { ContractsRepository } from './repositories/contracts.repository';
     ContractServicesRepository,
     ContractsRepository,
     UserRepository,
+    ClientRepository,
   ],
   exports: [
     ContractService,

@@ -85,20 +85,20 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.primaryPropertyUser = {
       id:
         entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.id || '',
+          ?.client?.id || '',
       fullName:
         entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.fullName || '',
+          ?.client?.fullName || '',
       phone:
         entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.phoneNumber || '',
+          ?.client?.phoneNumber || '',
     };
     this.landlordClientId = entity.landlordClientId;
     this.landlord = {
-      id: entity.landlord?.id || '',
-      fullName: entity.landlord?.fullName || '',
-      phoneNumber: entity.landlord?.phoneNumber || '',
-      email: entity.landlord?.email,
+      id: entity.landlordClient?.id || '',
+      fullName: entity.landlordClient?.fullName || '',
+      phoneNumber: entity.landlordClient?.phoneNumber || '',
+      email: entity.landlordClient?.email,
     };
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
@@ -113,10 +113,10 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
         id: lp.id,
         clientId: lp.clientId,
         property: {
-          id: lp.property?.id || '',
-          fullName: lp.property?.fullName || '',
-          phoneNumber: lp.property?.phoneNumber || '',
-          email: lp.property?.email,
+          id: lp.client?.id || '',
+          fullName: lp.client?.fullName || '',
+          phoneNumber: lp.client?.phoneNumber || '',
+          email: lp.client?.email,
         },
         moveInDate: lp.moveInDate,
         moveOutDate: lp.moveOutDate,

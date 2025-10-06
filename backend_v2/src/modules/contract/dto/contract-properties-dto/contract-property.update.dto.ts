@@ -17,7 +17,7 @@ export class ContractPropertyUpdateDto
 
   @IsOptional()
   @IsUUID()
-  propertyUserId?: string;
+  clientId?: string;
 
   @IsOptional()
   @IsDateString()
@@ -36,7 +36,7 @@ export class ContractPropertyUpdateDto
   ): QueryDeepPartialEntity<ContractProperties> {
     const updateData: QueryDeepPartialEntity<ContractProperties> = {};
 
-    if (this.propertyUserId) updateData.propertyUserId = this.propertyUserId;
+    if (this.clientId) updateData.clientId = this.clientId;
     if (this.moveInDate) updateData.moveInDate = new Date(this.moveInDate);
     if (this.moveOutDate) updateData.moveOutDate = new Date(this.moveOutDate);
     if (this.isActiveInContract !== undefined)

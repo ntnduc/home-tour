@@ -34,7 +34,7 @@ export class ContractPropertiesService {
     const existingProperty = await this.contractPropertiesRepository.findOne({
       where: {
         contractId: createDto.contractId,
-        propertyUserId: createDto.propertyUserId,
+        clientId: createDto.clientId,
       },
     });
 

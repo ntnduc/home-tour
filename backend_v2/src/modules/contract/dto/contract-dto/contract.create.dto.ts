@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
@@ -8,7 +9,9 @@ import {
   IsUUID,
   Max,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { ClientCreateDto } from 'src/modules/client/dto/client.create.dto';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
 import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
@@ -21,9 +24,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
 
   @IsUUID()
   roomId: string;
-
-  @IsUUID()
-  landlordClientId: string;
 
   @IsDateString()
   startDate: string;
@@ -66,11 +66,14 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   contractServices?: ContractServiceCreateDto[];
 
+  @ValidateNested({ each: true })
+  @Type(() => ClientCreateDto)
+  landlordClient?: ClientCreateDto;
+
   getEntity(): Contracts {
     const entity = new Contracts();
     entity.propertyId = this.propertyId;
     entity.roomId = this.roomId;
-    entity.landlordClientId = this.landlordClientId;
     entity.startDate = new Date(this.startDate);
     entity.endDate = this.endDate ? new Date(this.endDate) : undefined;
     entity.rentAmountAgreed = this.rentAmountAgreed;
@@ -88,6 +91,9 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
       this.contractServices.forEach((service) => {
         entity.contractServices.push(service.getEntity());
       });
+    }
+    if (this.landlordClient) {
+      entity.landlordClient = this.landlordClient.getEntity();
     }
     return entity;
   }
