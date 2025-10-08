@@ -32,14 +32,14 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.propertyName = entity.room?.property?.name || '';
     this.primaryPropertyUser = {
       id:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.client?.id || '',
+        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
+          ?.id || '',
       fullName:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.client?.fullName || '',
+        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
+          ?.fullName || '',
       phone:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.client?.phoneNumber || '',
+        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
+          ?.phoneNumber || '',
     };
     this.landlordName = entity.landlordClient?.fullName || '';
     this.startDate = entity.startDate;
@@ -49,8 +49,7 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.paymentDueDay = entity.paymentDueDay;
     this.status = entity.status;
     this.totalProperties =
-      entity.contractProperties?.filter((p) => p.isActiveInContract).length ||
-      0;
+      entity.contractClient?.filter((p) => p.isActiveInContract).length || 0;
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
   }

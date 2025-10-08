@@ -4,10 +4,10 @@ import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { Contracts } from './contracts.entity';
 
-@Entity('contract_properties')
+@Entity('contract_client')
 @Unique(['contractId', 'clientId'])
-export class ContractProperties extends BaseEntity {
-  @ManyToOne(() => Contracts, (contract) => contract.contractProperties, {
+export class ContractClient extends BaseEntity {
+  @ManyToOne(() => Contracts, (contract) => contract.contractClient, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'contractId' })

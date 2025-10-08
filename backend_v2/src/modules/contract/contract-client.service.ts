@@ -4,23 +4,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { ContractPropertyCreateDto } from './dto/contract-properties-dto/contract-property.create.dto';
-import { ContractPropertyUpdateDto } from './dto/contract-properties-dto/contract-property.update.dto';
-import { ContractProperties } from './entities/contract-properties.entity';
-import { ContractPropertiesRepository } from './repositories/contract-properties.repository';
+import { ContractClientCreateDto } from './dto/contract-client-dto/contract-client.create.dto';
+import { ContractClientUpdateDto } from './dto/contract-client-dto/contract-client.update.dto';
+import { ContractClient } from './entities/contract-client.entity';
+import { ContractClientRepository } from './repositories/contract-client.repository';
 import { ContractsRepository } from './repositories/contracts.repository';
 
 @Injectable()
-export class ContractPropertiesService {
+export class ContractClientService {
   constructor(
-    private readonly contractPropertiesRepository: ContractPropertiesRepository,
+    private readonly contractPropertiesRepository: ContractClientRepository,
     private readonly contractsRepository: ContractsRepository,
     private readonly dataSource: DataSource,
   ) {}
-
-  async create(
-    createDto: ContractPropertyCreateDto,
-  ): Promise<ContractProperties> {
+  async create(createDto: ContractClientCreateDto): Promise<ContractClient> {
     // Kiểm tra hợp đồng tồn tại
     const contract = await this.contractsRepository.findOne({
       where: { id: createDto.contractId },
@@ -48,8 +45,8 @@ export class ContractPropertiesService {
 
   async update(
     id: string,
-    updateDto: ContractPropertyUpdateDto,
-  ): Promise<ContractProperties> {
+    updateDto: ContractClientUpdateDto,
+  ): Promise<ContractClient> {
     const existingProperty = await this.contractPropertiesRepository.findOne({
       where: { id },
     });
@@ -75,13 +72,13 @@ export class ContractPropertiesService {
     return result;
   }
 
-  async findByContractId(contractId: string): Promise<ContractProperties[]> {
+  async findByContractId(contractId: string): Promise<ContractClient[]> {
     return await this.contractPropertiesRepository.findByContractId(contractId);
   }
 
   async findActivePropertiesByContractId(
     contractId: string,
-  ): Promise<ContractProperties[]> {
+  ): Promise<ContractClient[]> {
     return await this.contractPropertiesRepository.findActivePropertiesByContractId(
       contractId,
     );
@@ -89,7 +86,7 @@ export class ContractPropertiesService {
 
   async findByPropertyUserId(
     propertyUserId: string,
-  ): Promise<ContractProperties[]> {
+  ): Promise<ContractClient[]> {
     return await this.contractPropertiesRepository.findByPropertyUserId(
       propertyUserId,
     );
@@ -107,7 +104,7 @@ export class ContractPropertiesService {
     await this.contractPropertiesRepository.delete({ id });
   }
 
-  async moveOut(id: string, moveOutDate: Date): Promise<ContractProperties> {
+  async moveOut(id: string, moveOutDate: Date): Promise<ContractClient> {
     const property = await this.contractPropertiesRepository.findOne({
       where: { id },
     });
@@ -138,7 +135,7 @@ export class ContractPropertiesService {
     return result;
   }
 
-  async moveIn(id: string, moveInDate: Date): Promise<ContractProperties> {
+  async moveIn(id: string, moveInDate: Date): Promise<ContractClient> {
     const property = await this.contractPropertiesRepository.findOne({
       where: { id },
     });

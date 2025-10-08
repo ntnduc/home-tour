@@ -18,11 +18,11 @@ import { ServiceDetailDto } from '../services/dto/services.detail.dto';
 import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { UserRepository } from '../users/repositories/user.repository';
+import { ContractClientCreateDto } from './dto/contract-client-dto/contract-client.create.dto';
 import { ContractCreateDto } from './dto/contract-dto/contract.create.dto';
 import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
 import { ContractListDto } from './dto/contract-dto/contract.list.dto';
 import { ContractUpdateDto } from './dto/contract-dto/contract.update.dto';
-import { ContractPropertyCreateDto } from './dto/contract-properties-dto/contract-property.create.dto';
 import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
 import { Contracts } from './entities/contracts.entity';
 import { ContractsRepository } from './repositories/contracts.repository';
@@ -116,13 +116,10 @@ export class ContractService
         contractEntity,
       );
 
-      if (
-        createDto.contractProperties &&
-        createDto.contractProperties.length > 0
-      ) {
+      if (createDto.contractClient && createDto.contractClient.length > 0) {
         await this.createContractProperties(
           savedContract.id,
-          createDto.contractProperties,
+          createDto.contractClient,
           savedContract,
           queryRunner.manager,
         );
@@ -311,7 +308,7 @@ export class ContractService
 
   private async createContractProperties(
     contractId: string,
-    contractPropertiesDto: ContractPropertyCreateDto[],
+    contractPropertiesDto: ContractClientCreateDto[],
     contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {

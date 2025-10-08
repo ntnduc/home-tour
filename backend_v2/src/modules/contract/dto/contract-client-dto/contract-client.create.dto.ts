@@ -8,9 +8,9 @@ import {
   IsUUID,
 } from 'class-validator';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
-import { ContractProperties } from '../../entities/contract-properties.entity';
+import { ContractClient } from '../../entities/contract-client.entity';
 
-export class ContractPropertyCreateDto extends BaseCreateDto<ContractProperties> {
+export class ContractClientCreateDto extends BaseCreateDto<ContractClient> {
   @IsUUID()
   @IsOptional()
   contractId?: string;
@@ -43,8 +43,8 @@ export class ContractPropertyCreateDto extends BaseCreateDto<ContractProperties>
   @IsOptional()
   isActiveInContract?: boolean;
 
-  getEntity(): ContractProperties {
-    const entity = new ContractProperties();
+  getEntity(): ContractClient {
+    const entity = new ContractClient();
     if (this.contractId) entity.contractId = this.contractId;
     if (this.clientId) entity.clientId = this.clientId;
     entity.isPrimaryPropertyUser = this.isPrimaryPropertyUser ?? false;

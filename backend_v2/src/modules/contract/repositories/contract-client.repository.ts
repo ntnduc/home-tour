@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { BaseRepository } from '../../../common/base/repositories/base.repository';
-import { ContractProperties } from '../entities/contract-properties.entity';
+import { ContractClient } from '../entities/contract-client.entity';
 
 @Injectable()
-export class ContractPropertiesRepository extends BaseRepository<ContractProperties> {
+export class ContractClientRepository extends BaseRepository<ContractClient> {
   constructor(dataSource: DataSource) {
-    super(ContractProperties, dataSource);
+    super(ContractClient, dataSource);
   }
 
   override globalQuery(
-    query: SelectQueryBuilder<ContractProperties>,
-  ): SelectQueryBuilder<ContractProperties> {
+    query: SelectQueryBuilder<ContractClient>,
+  ): SelectQueryBuilder<ContractClient> {
     // Không cần filter đặc biệt cho contract properties
     return query;
   }
 
-  async findByContractId(contractId: string): Promise<ContractProperties[]> {
+  async findByContractId(contractId: string): Promise<ContractClient[]> {
     return this.createQueryBuilder('contractProperty')
       .leftJoinAndSelect('contractProperty.property', 'property')
       .where('contractProperty.contractId = :contractId', { contractId })
@@ -26,7 +26,7 @@ export class ContractPropertiesRepository extends BaseRepository<ContractPropert
 
   async findActivePropertiesByContractId(
     contractId: string,
-  ): Promise<ContractProperties[]> {
+  ): Promise<ContractClient[]> {
     return this.createQueryBuilder('contractProperty')
       .leftJoinAndSelect('contractProperty.property', 'property')
       .where('contractProperty.contractId = :contractId', { contractId })
@@ -39,7 +39,7 @@ export class ContractPropertiesRepository extends BaseRepository<ContractPropert
 
   async findByPropertyUserId(
     propertyUserId: string,
-  ): Promise<ContractProperties[]> {
+  ): Promise<ContractClient[]> {
     return this.createQueryBuilder('contractProperty')
       .leftJoinAndSelect('contractProperty.contract', 'contract')
       .leftJoinAndSelect('contract.room', 'room')

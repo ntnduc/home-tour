@@ -15,7 +15,7 @@ import { ClientCreateDto } from 'src/modules/client/dto/client.create.dto';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
 import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
-import { ContractPropertyCreateDto } from '../contract-properties-dto/contract-property.create.dto';
+import { ContractClientCreateDto } from '../contract-client-dto/contract-client.create.dto';
 import { ContractServiceCreateDto } from '../contract-services-dto/contract-service.create.dto';
 
 export class ContractCreateDto extends BaseCreateDto<Contracts> {
@@ -60,7 +60,7 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
 
   @IsArray()
   @IsOptional()
-  contractProperties?: ContractPropertyCreateDto[];
+  contractClient?: ContractClientCreateDto[];
 
   @IsArray()
   @IsOptional()
@@ -80,11 +80,11 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     entity.depositAmountPaid = this.depositAmountPaid ?? 0;
     entity.paymentDueDay = this.paymentDueDay;
     entity.contractScanURL = this.contractScanURL;
-    entity.status = this.status ?? ContractStatus.PENDING_START;
+    entity.status = this.status ?? ContractStatus.ACTIVE;
     entity.notes = this.notes;
-    if (this.contractProperties) {
-      this.contractProperties.forEach((property) => {
-        entity.contractProperties.push(property.getEntity());
+    if (this.contractClient) {
+      this.contractClient.forEach((property) => {
+        entity.contractClient.push(property.getEntity());
       });
     }
     if (this.contractServices) {

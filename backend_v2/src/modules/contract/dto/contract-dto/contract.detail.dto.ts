@@ -39,7 +39,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   contractScanURL?: string;
   status: ContractStatus;
   notes?: string;
-  contractProperties: Array<{
+  contractClient: Array<{
     id: string;
     clientId: string;
     property: {
@@ -84,14 +84,14 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     };
     this.primaryPropertyUser = {
       id:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.client?.id || '',
+        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
+          ?.id || '',
       fullName:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.client?.fullName || '',
+        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
+          ?.fullName || '',
       phone:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.client?.phoneNumber || '',
+        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
+          ?.phoneNumber || '',
     };
     this.landlordClientId = entity.landlordClientId;
     this.landlord = {
@@ -108,8 +108,8 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractScanURL = entity.contractScanURL;
     this.status = entity.status;
     this.notes = entity.notes;
-    this.contractProperties =
-      entity.contractProperties?.map((lp) => ({
+    this.contractClient =
+      entity.contractClient?.map((lp) => ({
         id: lp.id,
         clientId: lp.clientId,
         property: {
