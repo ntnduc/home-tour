@@ -12,7 +12,6 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGlobalAppSheet } from "./GlobalAppSheet";
 
 export interface DatePickerIconProps {
@@ -57,7 +56,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const theme = useTheme();
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
-  const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
   const handleOpen = () => {
@@ -76,7 +74,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
           style={{
             width: "100%",
             height: "100%",
-            marginBottom: insets.bottom,
           }}
           value={value ? new Date(value) : new Date()}
           mode="date"
@@ -104,6 +101,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               </Text>
               <TouchableOpacity
                 onPress={() => {
+                  onChange?.(new Date());
                   closeAppSheet();
                 }}
                 className="px-4 py-2 bg-blue-500 rounded-lg"

@@ -130,13 +130,14 @@ const ContractServiceComponent = forwardRef<
       return (
         <View
           style={{
-            padding: 17,
             justifyContent: "space-between",
             flexDirection: "row",
             alignItems: "center",
+            height: 50,
+            paddingHorizontal: 10,
           }}
         >
-          <View className="flex-row items-center">
+          <View className="flex-row items-center flex-1">
             <Ionicons
               className="mr-4"
               name={item.icon as any}
