@@ -28,7 +28,7 @@ export class ContractClient extends BaseEntity {
   @Column({ default: false })
   @IsBoolean()
   @IsNotEmpty()
-  isPrimaryPropertyUser: boolean;
+  isLandlordClient: boolean;
 
   @Column()
   clientId: string;

@@ -18,6 +18,10 @@ export class ContractClientUpdateDto implements BaseUpdateDto<ContractClient> {
   clientId?: string;
 
   @IsOptional()
+  @IsBoolean()
+  isLandlordClient?: boolean;
+
+  @IsOptional()
   @IsDateString()
   moveInDate?: string;
 
@@ -33,6 +37,8 @@ export class ContractClientUpdateDto implements BaseUpdateDto<ContractClient> {
     const updateData: QueryDeepPartialEntity<ContractClient> = {};
 
     if (this.clientId) updateData.clientId = this.clientId;
+    if (this.isLandlordClient)
+      updateData.isLandlordClient = this.isLandlordClient;
     if (this.moveInDate) updateData.moveInDate = new Date(this.moveInDate);
     if (this.moveOutDate) updateData.moveOutDate = new Date(this.moveOutDate);
     if (this.isActiveInContract !== undefined)

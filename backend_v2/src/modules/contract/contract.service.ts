@@ -69,8 +69,8 @@ export class ContractService
       .leftJoinAndSelect('contract.property', 'property')
       .leftJoinAndSelect('contract.room', 'room')
       .leftJoinAndSelect('room.property', 'roomProperty')
-      .leftJoinAndSelect('contract.primaryPropertyUser', 'primaryPropertyUser')
-      .leftJoinAndSelect('contract.landlord', 'landlord')
+      .leftJoinAndSelect('contract.contractClient', 'contractClient')
+      .leftJoinAndSelect('contractClient.client', 'client')
       .leftJoinAndSelect('contract.contractProperties', 'contractProperties')
       .leftJoinAndSelect('contractProperties.property', 'contractProperty')
       .leftJoinAndSelect('contract.contractServices', 'contractServices')
@@ -96,7 +96,7 @@ export class ContractService
       }
 
       if (room.status !== RoomStatus.AVAILABLE) {
-        throw new BadRequestException('Phòng không ở trạng thái trống');
+        throw new BadRequestException('Phòng đang không sẵn sàng để cho thuê!');
       }
 
       const activeContractExists = await this.contractsRepository.findOne({
@@ -117,7 +117,7 @@ export class ContractService
       );
 
       if (createDto.contractClient && createDto.contractClient.length > 0) {
-        await this.createContractProperties(
+        await this.createContractClient(
           savedContract.id,
           createDto.contractClient,
           savedContract,
@@ -152,6 +152,8 @@ export class ContractService
           'contractServices',
           'contractServices.propertyService',
           'contractServices.propertyService.service',
+          'contractClient',
+          'contractClient.client',
         ],
       });
       const detailDto = new ContractDetailDto();
@@ -306,14 +308,14 @@ export class ContractService
     }
   }
 
-  private async createContractProperties(
+  private async createContractClient(
     contractId: string,
     contractPropertiesDto: ContractClientCreateDto[],
     contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {
     const findPrimaryPropertyUser = contractPropertiesDto.find(
-      (property) => property.isPrimaryPropertyUser,
+      (property) => property.isLandlordClient,
     );
 
     if (!findPrimaryPropertyUser) {
@@ -321,7 +323,7 @@ export class ContractService
     }
 
     contractPropertiesDto.forEach((property) => {
-      if (property.isPrimaryPropertyUser) {
+      if (property.isLandlordClient) {
         property.phone = AuthService.formatPhoneNumber(property.phone);
       }
     });

@@ -24,7 +24,6 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     phone: string;
     email?: string;
   };
-  landlordClientId: string;
   landlord: {
     id: string;
     fullName: string;
@@ -82,24 +81,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
         address: entity.room?.property?.address || '',
       },
     };
-    this.primaryPropertyUser = {
-      id:
-        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
-          ?.id || '',
-      fullName:
-        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
-          ?.fullName || '',
-      phone:
-        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
-          ?.phoneNumber || '',
-    };
-    this.landlordClientId = entity.landlordClientId;
-    this.landlord = {
-      id: entity.landlordClient?.id || '',
-      fullName: entity.landlordClient?.fullName || '',
-      phoneNumber: entity.landlordClient?.phoneNumber || '',
-      email: entity.landlordClient?.email,
-    };
+
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
     this.rentAmountAgreed = entity.rentAmountAgreed;

@@ -30,18 +30,6 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.roomId = entity.roomId;
     this.roomName = entity.room?.name || '';
     this.propertyName = entity.room?.property?.name || '';
-    this.primaryPropertyUser = {
-      id:
-        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
-          ?.id || '',
-      fullName:
-        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
-          ?.fullName || '',
-      phone:
-        entity.contractClient?.find((cp) => cp.isPrimaryPropertyUser)?.client
-          ?.phoneNumber || '',
-    };
-    this.landlordName = entity.landlordClient?.fullName || '';
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
     this.rentAmountAgreed = entity.rentAmountAgreed;

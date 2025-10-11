@@ -1,4 +1,3 @@
-import { Client } from 'src/modules/client/entities/client.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { ContractStatus } from '../../../common/enums/contract.enum';
@@ -22,16 +21,6 @@ export class Contracts extends BaseEntity {
 
   @Column()
   roomId: string;
-
-  @ManyToOne(() => Client)
-  @JoinColumn({ name: 'landlordClientId' })
-  landlordClient: Client;
-
-  @Column()
-  landlordClientId: string;
-
-  @OneToMany(() => Client, (client) => client.contract)
-  partnerClient?: Client[];
 
   @Column({ type: 'int', default: 0 })
   partnerClientCount: number;

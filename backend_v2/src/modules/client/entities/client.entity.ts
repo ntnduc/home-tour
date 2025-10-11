@@ -1,5 +1,5 @@
-import { Contracts } from 'src/modules/contract/entities/contracts.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { ContractClient } from 'src/modules/contract/entities/contract-client.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 
 @Entity('clients')
@@ -31,10 +31,6 @@ export class Client extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
-  @Column({ type: 'uuid', nullable: true })
-  contractId?: string;
-
-  @ManyToOne(() => Contracts, (contract) => contract.partnerClient)
-  @JoinColumn({ name: 'contractId' })
-  contract?: Contracts;
+  @OneToMany(() => ContractClient, (contractClient) => contractClient.client)
+  contractClient: ContractClient[];
 }

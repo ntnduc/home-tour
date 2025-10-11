@@ -22,10 +22,6 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
   roomId?: string;
 
   @IsOptional()
-  @IsUUID()
-  landlordClientId?: string;
-
-  @IsOptional()
   @IsDateString()
   startDate?: string;
 

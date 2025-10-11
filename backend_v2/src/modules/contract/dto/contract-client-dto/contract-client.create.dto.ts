@@ -21,7 +21,7 @@ export class ContractClientCreateDto extends BaseCreateDto<ContractClient> {
 
   @IsBoolean()
   @IsOptional()
-  isPrimaryPropertyUser?: boolean;
+  isLandlordClient?: boolean;
 
   @IsString()
   @IsNotEmpty()
@@ -47,7 +47,7 @@ export class ContractClientCreateDto extends BaseCreateDto<ContractClient> {
     const entity = new ContractClient();
     if (this.contractId) entity.contractId = this.contractId;
     if (this.clientId) entity.clientId = this.clientId;
-    entity.isPrimaryPropertyUser = this.isPrimaryPropertyUser ?? false;
+    entity.isLandlordClient = this.isLandlordClient ?? false;
     entity.moveInDate = this.moveInDate ? new Date(this.moveInDate) : undefined;
     entity.moveOutDate = this.moveOutDate
       ? new Date(this.moveOutDate)

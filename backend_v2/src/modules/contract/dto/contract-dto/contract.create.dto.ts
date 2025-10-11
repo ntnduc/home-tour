@@ -1,19 +1,14 @@
-import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
-  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Max,
   Min,
-  ValidateNested,
 } from 'class-validator';
-import { ClientCreateDto } from 'src/modules/client/dto/client.create.dto';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
-import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
 import { ContractClientCreateDto } from '../contract-client-dto/contract-client.create.dto';
 import { ContractServiceCreateDto } from '../contract-services-dto/contract-service.create.dto';
@@ -50,10 +45,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   contractScanURL?: string;
 
-  @IsEnum(ContractStatus)
-  @IsOptional()
-  status?: ContractStatus;
-
   @IsString()
   @IsOptional()
   notes?: string;
@@ -66,10 +57,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   contractServices?: ContractServiceCreateDto[];
 
-  @ValidateNested({ each: true })
-  @Type(() => ClientCreateDto)
-  landlordClient?: ClientCreateDto;
-
   getEntity(): Contracts {
     const entity = new Contracts();
     entity.propertyId = this.propertyId;
@@ -80,8 +67,8 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     entity.depositAmountPaid = this.depositAmountPaid ?? 0;
     entity.paymentDueDay = this.paymentDueDay;
     entity.contractScanURL = this.contractScanURL;
-    entity.status = this.status ?? ContractStatus.ACTIVE;
     entity.notes = this.notes;
+
     if (this.contractClient) {
       this.contractClient.forEach((property) => {
         entity.contractClient.push(property.getEntity());
@@ -91,9 +78,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
       this.contractServices.forEach((service) => {
         entity.contractServices.push(service.getEntity());
       });
-    }
-    if (this.landlordClient) {
-      entity.landlordClient = this.landlordClient.getEntity();
     }
     return entity;
   }
