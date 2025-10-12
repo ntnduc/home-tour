@@ -260,10 +260,6 @@ export class ContractService
     manager: EntityManager,
   ): Promise<void> {
     for (const serviceDto of contractServicesDto) {
-      console.log(
-        '💞💓💗💞💓💗 ~ ContractService ~ createContractServices ~ serviceDto:',
-        serviceDto,
-      );
       if (serviceDto.propertyServiceId && !serviceDto.isNew) {
         const propertyService = await this.propertiesServiceRepository.findOne({
           where: { id: serviceDto.propertyServiceId },
