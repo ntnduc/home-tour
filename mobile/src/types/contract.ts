@@ -16,7 +16,6 @@ export interface Contract {
   id: string;
   propertyId: string;
   roomId: string;
-  landlordUserId: string;
   startDate: string;
   endDate?: string;
   rentAmountAgreed: number;
@@ -26,15 +25,11 @@ export interface Contract {
   status: ContractStatus;
   notes?: string;
   partnerClientCount?: number;
-
-  // contractProperties: ContractProperty[];
-  // contractServices: ContractService[];
 }
 
-export interface ContractCreateRequest extends Omit<Contract, "id"> {
+export interface ContractCreateRequest extends Omit<Contract, "id" | "status"> {
   contractServices: ContractServiceCreateRequest[];
-  landlordClient: ClientCreateRequest;
-  partnerClient?: ClientCreateRequest[];
+  contractClient: ClientCreateRequest[];
 }
 
 export interface ContractUpdateRequest {

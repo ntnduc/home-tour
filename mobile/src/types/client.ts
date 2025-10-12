@@ -1,10 +1,11 @@
 export interface Client {
   id: string;
-  fullName: string;
-  phoneNumber: string;
+  name: string;
+  phone: string;
   email?: string;
   idCardNumber?: string;
   permanentAddress?: string;
+  isLandlordClient: boolean;
   dateOfBirth?: Date;
   profilePictureURL?: string;
   isActive: boolean;

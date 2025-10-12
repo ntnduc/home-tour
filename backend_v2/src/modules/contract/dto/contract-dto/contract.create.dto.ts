@@ -69,16 +69,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     entity.contractScanURL = this.contractScanURL;
     entity.notes = this.notes;
 
-    if (this.contractClient) {
-      this.contractClient.forEach((property) => {
-        entity.contractClient.push(property.getEntity());
-      });
-    }
-    if (this.contractServices) {
-      this.contractServices.forEach((service) => {
-        entity.contractServices.push(service.getEntity());
-      });
-    }
     return entity;
   }
 }

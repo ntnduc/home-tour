@@ -37,7 +37,7 @@ const CreateContractScreen = ({
     null
   );
 
-  const { control, watch, getValues, setValue, reset, setFocus, handleSubmit } =
+  const { control, watch, reset, handleSubmit } =
     useForm<ContractCreateRequest>({
       defaultValues: {
         partnerClientCount: 0,
@@ -55,9 +55,7 @@ const CreateContractScreen = ({
     const fetchRoomData = async () => {
       try {
         setIsLoading(true);
-
         const roomServiceResponse = await getRoomWitcService(roomId);
-
         if (roomServiceResponse.success && roomServiceResponse.data) {
           const room = roomServiceResponse.data;
           setRoomData(room);
@@ -94,6 +92,11 @@ const CreateContractScreen = ({
   };
 
   const handleSave = async (formData: ContractCreateRequest) => {
+    /*
+      TODO: Update thêm tính năng nhập thông tin người ở cùng sau
+    */
+    formData.contractClient[0].isLandlordClient = true;
+
     navigation.navigate("ConfirmCreateContract", {
       contract: formData,
       room: roomData?.name ?? "",
@@ -160,7 +163,7 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="landlordClient.fullName"
+              name="contractClient.0.name"
               rules={{ required: "Vui lòng nhập tên người thuê" }}
               render={({
                 field: { onChange, value },
@@ -181,7 +184,7 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="landlordClient.phoneNumber"
+              name="contractClient.0.phone"
               rules={{ required: "Vui lòng nhập số điện thoại người thuê" }}
               render={({
                 field: { onChange, value },
@@ -205,7 +208,7 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="landlordClient.idCardNumber"
+              name="contractClient.0.idCardNumber"
               rules={{ required: "Vui lòng nhập CCCD/CMND người thuê" }}
               render={({
                 field: { onChange, value },

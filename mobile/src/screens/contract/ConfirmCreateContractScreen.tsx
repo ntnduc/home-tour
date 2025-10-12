@@ -1,3 +1,4 @@
+import { createContract } from "@/api/contract/contract.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
@@ -12,6 +13,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Toast from "react-native-toast-message";
 
 type ConfirmCreateContractScreenProps = {
   navigation: NativeStackNavigationProp<
@@ -28,30 +30,41 @@ const ConfirmCreateContractScreen = ({
   const { contract, room, property } = route.params;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const monthlyServicesTotal = useMemo(() => {
-    const total = (contract.contractServices || [])
-      .filter((s) => s.isEnabled)
-      .reduce((sum, s) => sum + (s.price || 0), 0);
-    return total;
-  }, [contract.contractServices]);
-
   const depositTotal = useMemo(() => {
     return contract.depositAmountPaid || 0;
   }, [contract.depositAmountPaid]);
 
-  const monthlyTotal = useMemo(() => {
-    return (contract.rentAmountAgreed || 0) + (monthlyServicesTotal || 0);
-  }, [contract.rentAmountAgreed, monthlyServicesTotal]);
+  const landlordClient = useMemo(() => {
+    return contract.contractClient.find((client) => client.isLandlordClient);
+  }, [contract.contractClient]);
 
   const onEdit = () => {
     navigation.goBack();
   };
 
   const onConfirm = async () => {
-    // TODO: Gọi API tạo hợp đồng khi có endpoint. Tạm thời điều hướng về danh sách hợp đồng.
     try {
-      setIsSubmitting(true);
-      navigation.replace("ContractList");
+      const response = await createContract(contract);
+      if (response.success && response.data) {
+        Toast.show({
+          type: "success",
+          text1: "Thành công",
+          text2: "Tạo hợp đồng thành công",
+        });
+        navigation.popToTop();
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: response.message ?? "Tạo hợp đồng thất bại!",
+        });
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: error.response.data.message ?? "Tạo hợp đồng thất bại!",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -131,23 +144,6 @@ const ConfirmCreateContractScreen = ({
           </View>
         </CardComponent>
 
-        {/* Tổng quan thanh toán hàng tháng */}
-        {/* <CardComponent>
-          <View className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <Text className="text-xs text-blue-700 mb-1">
-              Thanh toán hàng tháng
-            </Text>
-            <Text className="text-2xl font-extrabold text-blue-700">
-              {formatCurrency((monthlyTotal || 0).toString())}đ
-            </Text>
-            <Text className="text-xs text-blue-600 mt-1">
-              {contract.paymentDueDay
-                ? `Thu ngày ${contract.paymentDueDay} hàng tháng`
-                : "Chưa thiết lập ngày thu"}
-            </Text>
-          </View>
-        </CardComponent> */}
-
         {/* Tiền cọc - nhấn mạnh thanh toán ngay khi xác nhận */}
         <CardComponent>
           <View className="bg-amber-50 border border-amber-200 rounded-xl p-4">
@@ -197,15 +193,9 @@ const ConfirmCreateContractScreen = ({
         {/* Người thuê chính */}
         <CardComponent title="Người thuê">
           <View>
-            {renderRow("Họ và tên", contract.landlordClient?.fullName || "-")}
-            {renderRow(
-              "Số điện thoại",
-              contract.landlordClient?.phoneNumber || "-"
-            )}
-            {renderRow(
-              "CCCD/CMND",
-              contract.landlordClient?.idCardNumber || "-"
-            )}
+            {renderRow("Họ và tên", landlordClient?.name || "-")}
+            {renderRow("Số điện thoại", landlordClient?.phone || "-")}
+            {renderRow("CCCD/CMND", landlordClient?.idCardNumber || "-")}
             {renderRow("Số người ở cùng", contract.partnerClientCount ?? 0)}
           </View>
         </CardComponent>

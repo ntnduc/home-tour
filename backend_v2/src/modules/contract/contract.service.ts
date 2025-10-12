@@ -111,6 +111,9 @@ export class ContractService
       }
 
       const contractEntity = createDto.getEntity();
+      if (contractEntity.startDate <= new Date()) {
+        contractEntity.status = ContractStatus.ACTIVE;
+      }
       const savedContract = await queryRunner.manager.save(
         Contracts,
         contractEntity,
@@ -161,6 +164,7 @@ export class ContractService
       return detailDto;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      console.error(error);
       throw error;
     } finally {
       await queryRunner.release();
@@ -256,6 +260,10 @@ export class ContractService
     manager: EntityManager,
   ): Promise<void> {
     for (const serviceDto of contractServicesDto) {
+      console.log(
+        '💞💓💗💞💓💗 ~ ContractService ~ createContractServices ~ serviceDto:',
+        serviceDto,
+      );
       if (serviceDto.propertyServiceId && !serviceDto.isNew) {
         const propertyService = await this.propertiesServiceRepository.findOne({
           where: { id: serviceDto.propertyServiceId },
@@ -268,7 +276,6 @@ export class ContractService
             propertyServiceId: propertyService.id,
             price: serviceDto.price ?? propertyService.price,
             isEnabled: serviceDto.isEnabled ?? true,
-            notes: serviceDto.notes,
           };
           await manager.save('contract_services', contractService);
         }
@@ -310,31 +317,31 @@ export class ContractService
 
   private async createContractClient(
     contractId: string,
-    contractPropertiesDto: ContractClientCreateDto[],
+    contractClientsDto: ContractClientCreateDto[],
     contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {
-    const findPrimaryPropertyUser = contractPropertiesDto.find(
-      (property) => property.isLandlordClient,
+    const findPrimaryClient = contractClientsDto.find(
+      (client) => client.isLandlordClient,
     );
 
-    if (!findPrimaryPropertyUser) {
+    if (!findPrimaryClient) {
       throw new BadRequestException('Phải có ít nhất 1 người thuê chính');
     }
 
-    contractPropertiesDto.forEach((property) => {
+    contractClientsDto.forEach((property) => {
       if (property.isLandlordClient) {
         property.phone = AuthService.formatPhoneNumber(property.phone);
       }
     });
 
-    const phones = contractPropertiesDto.map((x) => x.phone);
+    const phones = contractClientsDto.map((x) => x.phone);
 
     const existedClients = await this.clientRepository.find({
       where: { phoneNumber: In(phones) },
     });
 
-    for (const propertyDto of contractPropertiesDto) {
+    for (const propertyDto of contractClientsDto) {
       const existed = existedClients.find(
         (x) => x.phoneNumber === propertyDto.phone,
       );
@@ -350,8 +357,17 @@ export class ContractService
         propertyDto.clientId = client.id;
       }
       propertyDto.contractId = contractId;
-      const propertyEntity = propertyDto.getEntity();
-      await manager.save(propertyEntity);
+      const clientCreateDto = new ContractClientCreateDto();
+      clientCreateDto.name = propertyDto.name;
+      clientCreateDto.isLandlordClient = propertyDto.isLandlordClient;
+      clientCreateDto.moveInDate = propertyDto.moveInDate;
+      clientCreateDto.moveOutDate = propertyDto.moveOutDate;
+      clientCreateDto.isActiveInContract = propertyDto.isActiveInContract;
+      clientCreateDto.contractId = contractId;
+      clientCreateDto.clientId = propertyDto.clientId;
+
+      const clientEntity = clientCreateDto.getEntity();
+      await manager.save(clientEntity);
     }
   }
 

@@ -99,6 +99,7 @@ const ContractServiceComponent = forwardRef<
       setValueForm("price", service.price);
       setValueForm("isEnabled", service.isEnabled);
       setValueForm("helperValue", service.helperValue);
+      setValueForm("propertyServiceId", service.propertyServiceId);
 
       setTimeout(() => {
         bottomSheetRef.current?.expand();

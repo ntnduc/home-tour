@@ -47,6 +47,7 @@ export class ContractClientCreateDto extends BaseCreateDto<ContractClient> {
     const entity = new ContractClient();
     if (this.contractId) entity.contractId = this.contractId;
     if (this.clientId) entity.clientId = this.clientId;
+    entity.name = this.name;
     entity.isLandlordClient = this.isLandlordClient ?? false;
     entity.moveInDate = this.moveInDate ? new Date(this.moveInDate) : undefined;
     entity.moveOutDate = this.moveOutDate
