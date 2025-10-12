@@ -1,7 +1,6 @@
 import {
   IsArray,
   IsDateString,
-  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
@@ -10,9 +9,8 @@ import {
   Min,
 } from 'class-validator';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
-import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
-import { ContractPropertyCreateDto } from '../contract-properties-dto/contract-property.create.dto';
+import { ContractClientCreateDto } from '../contract-client-dto/contract-client.create.dto';
 import { ContractServiceCreateDto } from '../contract-services-dto/contract-service.create.dto';
 
 export class ContractCreateDto extends BaseCreateDto<Contracts> {
@@ -21,9 +19,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
 
   @IsUUID()
   roomId: string;
-
-  @IsUUID()
-  landlordUserId: string;
 
   @IsDateString()
   startDate: string;
@@ -50,17 +45,13 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   contractScanURL?: string;
 
-  @IsEnum(ContractStatus)
-  @IsOptional()
-  status?: ContractStatus;
-
   @IsString()
   @IsOptional()
   notes?: string;
 
   @IsArray()
   @IsOptional()
-  contractProperties?: ContractPropertyCreateDto[];
+  contractClient?: ContractClientCreateDto[];
 
   @IsArray()
   @IsOptional()
@@ -70,25 +61,14 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     const entity = new Contracts();
     entity.propertyId = this.propertyId;
     entity.roomId = this.roomId;
-    entity.landlordUserId = this.landlordUserId;
     entity.startDate = new Date(this.startDate);
     entity.endDate = this.endDate ? new Date(this.endDate) : undefined;
     entity.rentAmountAgreed = this.rentAmountAgreed;
     entity.depositAmountPaid = this.depositAmountPaid ?? 0;
     entity.paymentDueDay = this.paymentDueDay;
     entity.contractScanURL = this.contractScanURL;
-    entity.status = this.status ?? ContractStatus.PENDING_START;
     entity.notes = this.notes;
-    if (this.contractProperties) {
-      this.contractProperties.forEach((property) => {
-        entity.contractProperties.push(property.getEntity());
-      });
-    }
-    if (this.contractServices) {
-      this.contractServices.forEach((service) => {
-        entity.contractServices.push(service.getEntity());
-      });
-    }
+
     return entity;
   }
 }

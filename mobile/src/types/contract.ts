@@ -1,6 +1,5 @@
-import { ContractProperty } from "./contract-property";
+import { ClientCreateRequest } from "./client";
 import {
-  ContractService,
   ContractServiceCreateRequest,
   ContractServiceDetailResponse,
 } from "./contract-service";
@@ -17,7 +16,6 @@ export interface Contract {
   id: string;
   propertyId: string;
   roomId: string;
-  landlordUserId: string;
   startDate: string;
   endDate?: string;
   rentAmountAgreed: number;
@@ -26,49 +24,12 @@ export interface Contract {
   contractScanURL?: string;
   status: ContractStatus;
   notes?: string;
-  contractProperties: ContractProperty[];
-  contractServices: ContractService[];
-  room?: {
-    id: string;
-    name: string;
-    area?: number;
-    rentAmount: number;
-    maxOccupancy?: number;
-    floor?: string;
-    property: {
-      id: string;
-      name: string;
-      address: string;
-    };
-  };
-  primaryPropertyUser?: {
-    id: string;
-    fullName: string;
-    phone: string;
-    email?: string;
-  };
-  landlord?: {
-    id: string;
-    fullName: string;
-    phone: string;
-    email?: string;
-  };
+  partnerClientCount?: number;
 }
 
-export interface ContractCreateRequest {
-  propertyId: string;
-  roomId: string;
-  landlordUserId: string;
-  startDate: string;
-  endDate?: string;
-  rentAmountAgreed: number;
-  depositAmountPaid?: number;
-  paymentDueDay: number;
-  contractScanURL?: string;
-  status?: ContractStatus;
-  notes?: string;
-  contractProperties?: ContractProperty[];
-  contractServices?: ContractServiceCreateRequest[];
+export interface ContractCreateRequest extends Omit<Contract, "id" | "status"> {
+  contractServices: ContractServiceCreateRequest[];
+  contractClient: ClientCreateRequest[];
 }
 
 export interface ContractUpdateRequest {

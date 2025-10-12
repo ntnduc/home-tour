@@ -24,11 +24,10 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     phone: string;
     email?: string;
   };
-  landlordUserId: string;
   landlord: {
     id: string;
     fullName: string;
-    phone: string;
+    phoneNumber: string;
     email?: string;
   };
   startDate: Date;
@@ -39,13 +38,13 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   contractScanURL?: string;
   status: ContractStatus;
   notes?: string;
-  contractProperties: Array<{
+  contractClient: Array<{
     id: string;
-    propertyUserId: string;
+    clientId: string;
     property: {
       id: string;
       fullName: string;
-      phone: string;
+      phoneNumber: string;
       email?: string;
     };
     moveInDate?: Date;
@@ -82,24 +81,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
         address: entity.room?.property?.address || '',
       },
     };
-    this.primaryPropertyUser = {
-      id:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.id || '',
-      fullName:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.fullName || '',
-      phone:
-        entity.contractProperties?.find((cp) => cp.isPrimaryPropertyUser)
-          ?.property?.phone || '',
-    };
-    this.landlordUserId = entity.landlordUserId;
-    this.landlord = {
-      id: entity.landlord?.id || '',
-      fullName: entity.landlord?.fullName || '',
-      phone: entity.landlord?.phone || '',
-      email: entity.landlord?.email,
-    };
+
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
     this.rentAmountAgreed = entity.rentAmountAgreed;
@@ -108,15 +90,15 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractScanURL = entity.contractScanURL;
     this.status = entity.status;
     this.notes = entity.notes;
-    this.contractProperties =
-      entity.contractProperties?.map((lp) => ({
+    this.contractClient =
+      entity.contractClient?.map((lp) => ({
         id: lp.id,
-        propertyUserId: lp.propertyUserId,
+        clientId: lp.clientId,
         property: {
-          id: lp.property?.id || '',
-          fullName: lp.property?.fullName || '',
-          phone: lp.property?.phone || '',
-          email: lp.property?.email,
+          id: lp.client?.id || '',
+          fullName: lp.client?.fullName || '',
+          phoneNumber: lp.client?.phoneNumber || '',
+          email: lp.client?.email,
         },
         moveInDate: lp.moveInDate,
         moveOutDate: lp.moveOutDate,

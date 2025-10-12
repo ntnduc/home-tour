@@ -33,6 +33,8 @@ interface ComboBoxProps<T> {
       ) => React.ReactElement | null)
     | keyof typeof Ionicons.glyphMap;
   iconProps?: InputIconProps;
+  labelKey?: string;
+  valueKey?: string;
 }
 
 export const ComboBox = <T,>({
@@ -51,6 +53,8 @@ export const ComboBox = <T,>({
   icon,
   iconProps,
   renderItem,
+  labelKey,
+  valueKey,
 }: ComboBoxProps<T>) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -239,8 +243,8 @@ export const ComboBox = <T,>({
             }}
             disable={isLoading || disabled}
             placeholderStyle={{ color: "#999" }}
-            labelField="label"
-            valueField="key"
+            labelField={labelKey ?? "label"}
+            valueField={valueKey ?? "key"}
           />
 
           {error && (

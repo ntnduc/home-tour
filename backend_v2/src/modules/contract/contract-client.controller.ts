@@ -15,26 +15,24 @@ import {
 } from '@nestjs/swagger';
 import { Role } from '../../common/enums/role.enum';
 import { Roles } from '../rbac/decorators/roles.decorator';
-import { ContractPropertiesService } from './contract-properties.service';
-import { ContractPropertyCreateDto } from './dto/contract-properties-dto/contract-property.create.dto';
-import { ContractPropertyUpdateDto } from './dto/contract-properties-dto/contract-property.update.dto';
+import { ContractClientService } from './contract-client.service';
+import { ContractClientCreateDto } from './dto/contract-client-dto/contract-client.create.dto';
+import { ContractClientUpdateDto } from './dto/contract-client-dto/contract-client.update.dto';
 
 @ApiTags('Contract Properties')
 @ApiBearerAuth()
 @Controller('api/contract-properties')
 @Roles(Role.ADMIN, Role.OWNER, Role.PROPERTY_MANAGER, Role.ACCOUNTANT)
-export class ContractPropertiesController {
-  constructor(
-    private readonly contractPropertiesService: ContractPropertiesService,
-  ) {}
+export class ContractClientController {
+  constructor(private readonly contractClientService: ContractClientService) {}
 
   @Post()
   @ApiOperation({ summary: 'Add property to contract' })
   @ApiResponse({ status: 201, description: 'Property added successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 404, description: 'Contract not found.' })
-  async create(@Body() createDto: ContractPropertyCreateDto) {
-    return await this.contractPropertiesService.create(createDto);
+  async create(@Body() createDto: ContractClientCreateDto) {
+    return await this.contractClientService.create(createDto);
   }
 
   @Get('contract/:contractId')
@@ -44,7 +42,7 @@ export class ContractPropertiesController {
     description: 'List of properties for the contract.',
   })
   async getPropertiesByContractId(@Param('contractId') contractId: string) {
-    return await this.contractPropertiesService.findByContractId(contractId);
+    return await this.contractClientService.findByContractId(contractId);
   }
 
   @Get('contract/:contractId/active')
@@ -56,7 +54,7 @@ export class ContractPropertiesController {
   async getActivePropertiesByContractId(
     @Param('contractId') contractId: string,
   ) {
-    return await this.contractPropertiesService.findActivePropertiesByContractId(
+    return await this.contractClientService.findActivePropertiesByContractId(
       contractId,
     );
   }
@@ -70,7 +68,7 @@ export class ContractPropertiesController {
   async getContractsByPropertyUserId(
     @Param('propertyUserId') propertyUserId: string,
   ) {
-    return await this.contractPropertiesService.findByPropertyUserId(
+    return await this.contractClientService.findByPropertyUserId(
       propertyUserId,
     );
   }
@@ -84,9 +82,9 @@ export class ContractPropertiesController {
   @ApiResponse({ status: 404, description: 'Contract property not found.' })
   async update(
     @Param('id') id: string,
-    @Body() updateDto: ContractPropertyUpdateDto,
+    @Body() updateDto: ContractClientUpdateDto,
   ) {
-    return await this.contractPropertiesService.update(id, updateDto);
+    return await this.contractClientService.update(id, updateDto);
   }
 
   @Delete(':id')
@@ -94,7 +92,7 @@ export class ContractPropertiesController {
   @ApiResponse({ status: 200, description: 'Property removed successfully.' })
   @ApiResponse({ status: 404, description: 'Contract property not found.' })
   async remove(@Param('id') id: string) {
-    await this.contractPropertiesService.remove(id);
+    await this.contractClientService.remove(id);
     return { message: 'Property removed successfully' };
   }
 
@@ -107,7 +105,7 @@ export class ContractPropertiesController {
     @Body() body: { moveOutDate: string },
   ) {
     const moveOutDate = new Date(body.moveOutDate);
-    return await this.contractPropertiesService.moveOut(id, moveOutDate);
+    return await this.contractClientService.moveOut(id, moveOutDate);
   }
 
   @Patch(':id/move-in')
@@ -116,6 +114,6 @@ export class ContractPropertiesController {
   @ApiResponse({ status: 404, description: 'Contract property not found.' })
   async moveIn(@Param('id') id: string, @Body() body: { moveInDate: string }) {
     const moveInDate = new Date(body.moveInDate);
-    return await this.contractPropertiesService.moveIn(id, moveInDate);
+    return await this.contractClientService.moveIn(id, moveInDate);
   }
 }

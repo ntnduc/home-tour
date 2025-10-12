@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientRepository } from '../client/repositories/client.repository';
 import { CurrentUserModule } from '../current.user';
 import { PropertiesService } from '../property/entities/properties-service.entity';
 import { Properties } from '../property/entities/properties.entity';
@@ -12,16 +13,16 @@ import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { User } from '../users/entities/user.entity';
 import { UserRepository } from '../users/repositories/user.repository';
-import { ContractPropertiesController } from './contract-properties.controller';
-import { ContractPropertiesService } from './contract-properties.service';
+import { ContractClientController } from './contract-client.controller';
+import { ContractClientService } from './contract-client.service';
 import { ContractServicesController } from './contract-services.controller';
 import { ContractServicesService } from './contract-services.service';
 import { ContractController } from './contract.controller';
 import { ContractService } from './contract.service';
-import { ContractProperties } from './entities/contract-properties.entity';
+import { ContractClient } from './entities/contract-client.entity';
 import { ContractServices } from './entities/contract-services.entity';
 import { Contracts } from './entities/contracts.entity';
-import { ContractPropertiesRepository } from './repositories/contract-properties.repository';
+import { ContractClientRepository } from './repositories/contract-client.repository';
 import { ContractServicesRepository } from './repositories/contract-services.repository';
 import { ContractsRepository } from './repositories/contracts.repository';
 
@@ -34,7 +35,7 @@ import { ContractsRepository } from './repositories/contracts.repository';
       PropertiesService,
       Services,
       User,
-      ContractProperties,
+      ContractClient,
       ContractServices,
     ]),
     CurrentUserModule,
@@ -42,28 +43,25 @@ import { ContractsRepository } from './repositories/contracts.repository';
   ],
   providers: [
     ContractService,
-    ContractPropertiesService,
+    ContractClientService,
     ContractServicesService,
     RoomsRepository,
     PropertiesRepository,
     PropertiesServiceRepository,
     ServicesRepository,
-    ContractPropertiesRepository,
+    ContractClientRepository,
     ContractServicesRepository,
     ContractsRepository,
-    ContractPropertiesRepository,
+    ContractClientRepository,
     ContractServicesRepository,
     ContractsRepository,
     UserRepository,
+    ClientRepository,
   ],
-  exports: [
-    ContractService,
-    ContractPropertiesService,
-    ContractServicesService,
-  ],
+  exports: [ContractService, ContractClientService, ContractServicesService],
   controllers: [
     ContractController,
-    ContractPropertiesController,
+    ContractClientController,
     ContractServicesController,
   ],
 })

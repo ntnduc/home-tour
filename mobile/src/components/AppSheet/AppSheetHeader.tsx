@@ -10,8 +10,9 @@ const AppSheetHeader = (props: HeaderConfig & { onClose: () => void }) => {
     <BottomSheetView>
       <View className={props?.className} style={[styles.header, props?.style]}>
         <Text style={styles.headerTitle}>{props?.title}</Text>
-        <TouchableOpacity onPress={onClose}></TouchableOpacity>
-        <Ionicons name="close" size={24} color="#666" />
+        <TouchableOpacity onPress={onClose}>
+          <Ionicons name="close" size={24} color="#666" />
+        </TouchableOpacity>
       </View>
     </BottomSheetView>
   );

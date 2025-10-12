@@ -2,6 +2,7 @@ import ActionButtonBottom from "@/components/ActionButtonBottom";
 import DatePicker from "@/components/DatePicker";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
+import { RootStackParamList } from "@/navigation/types";
 import { ContractServiceDetailResponse } from "@/types/contract-service";
 import { formatCurrency } from "@/utils/appUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -11,7 +12,7 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Alert, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
-import { getRoomService } from "../../api/room/room.api";
+import { getRoomWitcService } from "../../api/room/room.api";
 import { ContractCreateRequest } from "../../types/contract";
 import { RoomServiceDetailResponse, RoomStatus } from "../../types/room";
 import CardComponent from "../common/CardComponent";
@@ -20,14 +21,9 @@ import ContractServiceComponent, {
 } from "./components/ContractServiceComponent";
 import ServiceItem from "./components/ServiceItem";
 
-type RootStackParamList = {
-  CreateContract: { roomId: string };
-  RoomList: undefined;
-};
-
 type CreateContractScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList>;
-  route: { params: { roomId: string } };
+  navigation: NativeStackNavigationProp<RootStackParamList, "CreateContract">;
+  route: { params: RootStackParamList["CreateContract"] };
 };
 
 const CreateContractScreen = ({
@@ -41,8 +37,12 @@ const CreateContractScreen = ({
     null
   );
 
-  const { control, watch, getValues, setValue, reset, setFocus } =
-    useForm<ContractCreateRequest>();
+  const { control, watch, reset, handleSubmit } =
+    useForm<ContractCreateRequest>({
+      defaultValues: {
+        partnerClientCount: 0,
+      },
+    });
   const { fields: contractServices, update } = useFieldArray({
     control,
     name: "contractServices",
@@ -55,9 +55,7 @@ const CreateContractScreen = ({
     const fetchRoomData = async () => {
       try {
         setIsLoading(true);
-
-        const roomServiceResponse = await getRoomService(roomId);
-
+        const roomServiceResponse = await getRoomWitcService(roomId);
         if (roomServiceResponse.success && roomServiceResponse.data) {
           const room = roomServiceResponse.data;
           setRoomData(room);
@@ -93,23 +91,17 @@ const CreateContractScreen = ({
     contractServiceRef.current?.expand(service, index);
   };
 
-  const handleSave = async () => {
-    setIsLoading(true);
+  const handleSave = async (formData: ContractCreateRequest) => {
+    /*
+      TODO: Update thêm tính năng nhập thông tin người ở cùng sau
+    */
+    formData.contractClient[0].isLandlordClient = true;
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      Alert.alert("Thành công", "Đã tạo hợp đồng thành công!", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("RoomList"),
-        },
-      ]);
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể tạo hợp đồng");
-    } finally {
-      setIsLoading(false);
-    }
+    navigation.navigate("ConfirmCreateContract", {
+      contract: formData,
+      room: roomData?.name ?? "",
+      property: roomData?.property?.name ?? "",
+    });
   };
 
   if (isLoading) {
@@ -131,7 +123,7 @@ const CreateContractScreen = ({
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <>
       <KeyboardAwareScrollView
         contentContainerStyle={{
           padding: 16,
@@ -167,6 +159,95 @@ const CreateContractScreen = ({
           </View>
         </CardComponent>
 
+        <CardComponent title="Thông tin người thuê">
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="contractClient.0.name"
+              rules={{ required: "Vui lòng nhập tên người thuê" }}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <Input
+                  label="Tên người thuê"
+                  value={value}
+                  onChangeText={onChange}
+                  required
+                  icon="person"
+                  error={error?.message}
+                  placeholder="Nhập tên người thuê"
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="contractClient.0.phone"
+              rules={{ required: "Vui lòng nhập số điện thoại người thuê" }}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <Input
+                  label="Số điện thoại người thuê"
+                  value={value}
+                  type="number"
+                  maxLength={10}
+                  keyboardType="phone-pad"
+                  required
+                  icon="phone-portrait-outline"
+                  onChangeText={onChange}
+                  placeholder="Nhập số điện thoại người thuê"
+                  error={error?.message}
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="contractClient.0.idCardNumber"
+              rules={{ required: "Vui lòng nhập CCCD/CMND người thuê" }}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <Input
+                  label="CCCD/CMND người thuê"
+                  value={value}
+                  maxLength={12}
+                  keyboardType="numeric"
+                  onChangeText={onChange}
+                  placeholder="Nhập CCCD/CMND người thuê"
+                  icon="card-outline"
+                  required
+                  error={error?.message}
+                />
+              )}
+            />
+          </View>
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="partnerClientCount"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Số lượng người ở cùng"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  placeholder="Nhập số lượng người ở cùng"
+                  type="number"
+                  icon="people-outline"
+                  defaultValue="0"
+                  keyboardType="numeric"
+                />
+              )}
+            />
+          </View>
+        </CardComponent>
+
         <CardComponent title="Thời hạn thuê">
           <View className="mb-3">
             <Controller
@@ -196,7 +277,6 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="endDate"
-              rules={{ required: "Vui lòng chọn ngày kết thúc" }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -250,6 +330,34 @@ const CreateContractScreen = ({
           </View>
 
           <View className="mb-3">
+            <Controller
+              control={control}
+              name="paymentDueDay"
+              rules={{ required: "Vui lòng nhập ngày thu tiền hàng tháng" }}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <Input
+                  label="Ngày thu tiền hàng tháng"
+                  value={value?.toString()}
+                  onChangeText={onChange}
+                  required
+                  placeholder="Nhập ngày thu tiền hàng tháng"
+                  min={1}
+                  max={30}
+                  error={error?.message}
+                  type="number"
+                  icon="calendar-clear"
+                  keyboardType="numeric"
+                  returnKeyType="done"
+                  returnKeyLabel="Xong"
+                />
+              )}
+            />
+          </View>
+
+          <View>
             <Controller
               control={control}
               name="depositAmountPaid"
@@ -326,37 +434,9 @@ const CreateContractScreen = ({
               ))}
             </View>
           )}
-
-          {/* <View className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">
-            <View className="flex-row items-center justify-between">
-              <View>
-                <Text className="text-sm font-medium text-blue-700 mb-1">
-                  Tổng tiền dịch vụ hàng tháng
-                </Text>
-                <Text className="text-xs text-blue-600">
-                  Bao gồm tất cả dịch vụ đã chọn
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text className="text-2xl font-bold text-blue-600">
-                  {formatCurrency(
-                    getValues("contractServices")
-                      ?.filter((service) => service.isEnabled)
-                      .reduce(
-                        (total, service) => total + (service.price || 0),
-                        0
-                      )
-                      .toString() || "0"
-                  )}
-                  đ
-                </Text>
-                <Text className="text-xs text-blue-500">/tháng</Text>
-              </View>
-            </View>
-          </View> */}
         </CardComponent>
 
-        <CardComponent title="Điều khoảng bổ sung">
+        <CardComponent title="Điều khoản bổ sung">
           <Controller
             control={control}
             name="notes"
@@ -365,7 +445,7 @@ const CreateContractScreen = ({
                 type="area"
                 value={value}
                 onChangeText={onChange}
-                placeholder="Nhập điều khoảng bổ sung (tùy chọn)"
+                placeholder="Nhập điều khoản bổ sung (không bắc buộc)"
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
@@ -377,10 +457,16 @@ const CreateContractScreen = ({
       <ActionButtonBottom
         actions={[
           {
-            label: "Tạo hợp đồng",
+            label: "Xác nhận hợp đồng",
             icon: "checkmark-circle",
             isLoading,
-            onPress: handleSave,
+            onPress: handleSubmit(handleSave, (error) => {
+              Toast.show({
+                type: "error",
+                text1: "Lỗi",
+                text2: "Vui lòng nhập đầy đủ thông tin!",
+              });
+            }),
           },
         ]}
       />
@@ -390,7 +476,7 @@ const CreateContractScreen = ({
           update(index, service);
         }}
       />
-    </View>
+    </>
   );
 };
 

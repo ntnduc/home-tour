@@ -9,19 +9,20 @@ import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
 import { RoomStatus } from '../../common/enums/room.enum';
 import { AuthService } from '../auth/auth.service';
+import { Client } from '../client/entities/client.entity';
+import { ClientRepository } from '../client/repositories/client.repository';
 import { PropertiesService } from '../property/entities/properties-service.entity';
 import { PropertiesServiceRepository } from '../property/repositories/properties-service.repository';
 import { RoomsRepository } from '../property/repositories/rooms.repository';
 import { ServiceDetailDto } from '../services/dto/services.detail.dto';
 import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
-import { User } from '../users/entities/user.entity';
 import { UserRepository } from '../users/repositories/user.repository';
+import { ContractClientCreateDto } from './dto/contract-client-dto/contract-client.create.dto';
 import { ContractCreateDto } from './dto/contract-dto/contract.create.dto';
 import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
 import { ContractListDto } from './dto/contract-dto/contract.list.dto';
 import { ContractUpdateDto } from './dto/contract-dto/contract.update.dto';
-import { ContractPropertyCreateDto } from './dto/contract-properties-dto/contract-property.create.dto';
 import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
 import { Contracts } from './entities/contracts.entity';
 import { ContractsRepository } from './repositories/contracts.repository';
@@ -50,6 +51,7 @@ export class ContractService
     private readonly propertiesServiceRepository: PropertiesServiceRepository,
     private readonly servicesRepository: ServicesRepository,
     private readonly userRepository: UserRepository,
+    private readonly clientRepository: ClientRepository,
     private readonly dataSource: DataSource,
   ) {
     super(
@@ -67,8 +69,8 @@ export class ContractService
       .leftJoinAndSelect('contract.property', 'property')
       .leftJoinAndSelect('contract.room', 'room')
       .leftJoinAndSelect('room.property', 'roomProperty')
-      .leftJoinAndSelect('contract.primaryPropertyUser', 'primaryPropertyUser')
-      .leftJoinAndSelect('contract.landlord', 'landlord')
+      .leftJoinAndSelect('contract.contractClient', 'contractClient')
+      .leftJoinAndSelect('contractClient.client', 'client')
       .leftJoinAndSelect('contract.contractProperties', 'contractProperties')
       .leftJoinAndSelect('contractProperties.property', 'contractProperty')
       .leftJoinAndSelect('contract.contractServices', 'contractServices')
@@ -94,7 +96,7 @@ export class ContractService
       }
 
       if (room.status !== RoomStatus.AVAILABLE) {
-        throw new BadRequestException('Phòng không ở trạng thái trống');
+        throw new BadRequestException('Phòng đang không sẵn sàng để cho thuê!');
       }
 
       const activeContractExists = await this.contractsRepository.findOne({
@@ -109,18 +111,18 @@ export class ContractService
       }
 
       const contractEntity = createDto.getEntity();
+      if (contractEntity.startDate <= new Date()) {
+        contractEntity.status = ContractStatus.ACTIVE;
+      }
       const savedContract = await queryRunner.manager.save(
         Contracts,
         contractEntity,
       );
 
-      if (
-        createDto.contractProperties &&
-        createDto.contractProperties.length > 0
-      ) {
-        await this.createContractProperties(
+      if (createDto.contractClient && createDto.contractClient.length > 0) {
+        await this.createContractClient(
           savedContract.id,
-          createDto.contractProperties,
+          createDto.contractClient,
           savedContract,
           queryRunner.manager,
         );
@@ -153,6 +155,8 @@ export class ContractService
           'contractServices',
           'contractServices.propertyService',
           'contractServices.propertyService.service',
+          'contractClient',
+          'contractClient.client',
         ],
       });
       const detailDto = new ContractDetailDto();
@@ -160,6 +164,7 @@ export class ContractService
       return detailDto;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      console.error(error);
       throw error;
     } finally {
       await queryRunner.release();
@@ -255,6 +260,10 @@ export class ContractService
     manager: EntityManager,
   ): Promise<void> {
     for (const serviceDto of contractServicesDto) {
+      console.log(
+        '💞💓💗💞💓💗 ~ ContractService ~ createContractServices ~ serviceDto:',
+        serviceDto,
+      );
       if (serviceDto.propertyServiceId && !serviceDto.isNew) {
         const propertyService = await this.propertiesServiceRepository.findOne({
           where: { id: serviceDto.propertyServiceId },
@@ -267,7 +276,6 @@ export class ContractService
             propertyServiceId: propertyService.id,
             price: serviceDto.price ?? propertyService.price,
             isEnabled: serviceDto.isEnabled ?? true,
-            notes: serviceDto.notes,
           };
           await manager.save('contract_services', contractService);
         }
@@ -307,49 +315,59 @@ export class ContractService
     }
   }
 
-  private async createContractProperties(
+  private async createContractClient(
     contractId: string,
-    contractPropertiesDto: ContractPropertyCreateDto[],
+    contractClientsDto: ContractClientCreateDto[],
     contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {
-    const findPrimaryPropertyUser = contractPropertiesDto.find(
-      (property) => property.isPrimaryPropertyUser,
+    const findPrimaryClient = contractClientsDto.find(
+      (client) => client.isLandlordClient,
     );
 
-    if (!findPrimaryPropertyUser) {
+    if (!findPrimaryClient) {
       throw new BadRequestException('Phải có ít nhất 1 người thuê chính');
     }
 
-    contractPropertiesDto.forEach((property) => {
-      if (property.isPrimaryPropertyUser) {
+    contractClientsDto.forEach((property) => {
+      if (property.isLandlordClient) {
         property.phone = AuthService.formatPhoneNumber(property.phone);
       }
     });
 
-    const phones = contractPropertiesDto.map((x) => x.phone);
+    const phones = contractClientsDto.map((x) => x.phone);
 
-    const findUserExist = await this.userRepository.find({
-      where: { phone: In(phones) },
+    const existedClients = await this.clientRepository.find({
+      where: { phoneNumber: In(phones) },
     });
 
-    for (const propertyDto of contractPropertiesDto) {
-      const findUser = findUserExist.find((x) => x.phone === propertyDto.phone);
+    for (const propertyDto of contractClientsDto) {
+      const existed = existedClients.find(
+        (x) => x.phoneNumber === propertyDto.phone,
+      );
 
-      if (findUser) {
-        propertyDto.propertyUserId = findUser.id;
+      if (existed) {
+        propertyDto.clientId = existed.id;
       } else {
-        const user = new User();
-        user.phone = propertyDto.phone;
-        user.fullName = propertyDto.name;
-        user.isPhoneVerified = false;
-        user.isActive = true;
-        await manager.save(user);
-        propertyDto.propertyUserId = user.id;
+        const client = new Client();
+        client.phoneNumber = propertyDto.phone;
+        client.fullName = propertyDto.name;
+        client.isActive = true;
+        await manager.save(client);
+        propertyDto.clientId = client.id;
       }
       propertyDto.contractId = contractId;
-      const propertyEntity = propertyDto.getEntity();
-      await manager.save(propertyEntity);
+      const clientCreateDto = new ContractClientCreateDto();
+      clientCreateDto.name = propertyDto.name;
+      clientCreateDto.isLandlordClient = propertyDto.isLandlordClient;
+      clientCreateDto.moveInDate = propertyDto.moveInDate;
+      clientCreateDto.moveOutDate = propertyDto.moveOutDate;
+      clientCreateDto.isActiveInContract = propertyDto.isActiveInContract;
+      clientCreateDto.contractId = contractId;
+      clientCreateDto.clientId = propertyDto.clientId;
+
+      const clientEntity = clientCreateDto.getEntity();
+      await manager.save(clientEntity);
     }
   }
 

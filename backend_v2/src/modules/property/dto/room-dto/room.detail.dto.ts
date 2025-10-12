@@ -74,5 +74,16 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
     if (entity.property) {
       this.propertyName = entity.property.name;
     }
+    if (
+      entity.property &&
+      entity.property.services &&
+      entity.property.services.length > 0
+    ) {
+      this.contractServices = entity.property.services.map((service) => {
+        const serviceDetailDto = new ContractServiceDetailDto();
+        serviceDetailDto.fromPropertyService(service);
+        return serviceDetailDto;
+      });
+    }
   }
 }

@@ -8,19 +8,20 @@ import {
   IsUUID,
 } from 'class-validator';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
-import { ContractProperties } from '../../entities/contract-properties.entity';
+import { ContractClient } from '../../entities/contract-client.entity';
 
-export class ContractPropertyCreateDto extends BaseCreateDto<ContractProperties> {
+export class ContractClientCreateDto extends BaseCreateDto<ContractClient> {
   @IsUUID()
   @IsOptional()
   contractId?: string;
 
   @IsUUID()
-  propertyUserId: string;
+  @IsOptional()
+  clientId?: string;
 
   @IsBoolean()
   @IsOptional()
-  isPrimaryPropertyUser?: boolean;
+  isLandlordClient?: boolean;
 
   @IsString()
   @IsNotEmpty()
@@ -42,11 +43,12 @@ export class ContractPropertyCreateDto extends BaseCreateDto<ContractProperties>
   @IsOptional()
   isActiveInContract?: boolean;
 
-  getEntity(): ContractProperties {
-    const entity = new ContractProperties();
+  getEntity(): ContractClient {
+    const entity = new ContractClient();
     if (this.contractId) entity.contractId = this.contractId;
-    entity.propertyUserId = this.propertyUserId;
-    entity.isPrimaryPropertyUser = this.isPrimaryPropertyUser ?? false;
+    if (this.clientId) entity.clientId = this.clientId;
+    entity.name = this.name;
+    entity.isLandlordClient = this.isLandlordClient ?? false;
     entity.moveInDate = this.moveInDate ? new Date(this.moveInDate) : undefined;
     entity.moveOutDate = this.moveOutDate
       ? new Date(this.moveOutDate)

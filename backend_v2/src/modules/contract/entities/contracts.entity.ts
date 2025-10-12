@@ -3,8 +3,7 @@ import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { ContractStatus } from '../../../common/enums/contract.enum';
 import { Properties } from '../../property/entities/properties.entity';
 import { Rooms } from '../../property/entities/rooms.entity';
-import { User } from '../../users/entities/user.entity';
-import { ContractProperties } from './contract-properties.entity';
+import { ContractClient } from './contract-client.entity';
 import { ContractServices } from './contract-services.entity';
 
 @Entity('contracts')
@@ -16,19 +15,15 @@ export class Contracts extends BaseEntity {
   @Column()
   propertyId: string;
 
-  @ManyToOne(() => Rooms, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Rooms)
   @JoinColumn({ name: 'roomId' })
   room: Rooms;
 
   @Column()
   roomId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'landlordUserId' })
-  landlord: User;
-
-  @Column()
-  landlordUserId: string;
+  @Column({ type: 'int', default: 0 })
+  partnerClientCount: number;
 
   @Column({ type: 'date' })
   startDate: Date;
@@ -58,11 +53,8 @@ export class Contracts extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
-  @OneToMany(
-    () => ContractProperties,
-    (contractProperties) => contractProperties.contract,
-  )
-  contractProperties: ContractProperties[];
+  @OneToMany(() => ContractClient, (contractClient) => contractClient.contract)
+  contractClient: ContractClient[];
 
   @OneToMany(
     () => ContractServices,

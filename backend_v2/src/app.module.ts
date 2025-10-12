@@ -7,6 +7,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import databaseConfig from './config/database.config';
 import { DatabaseConfig } from './config/database.interface';
 import { AuthModule } from './modules/auth/auth.module';
+import { ClientModule } from './modules/client/client.module';
 import { ContractModule } from './modules/contract/contract.module';
 import { CurrentUserModule } from './modules/current.user';
 import { LocationModule } from './modules/location/location.module';
@@ -45,6 +46,7 @@ import { UsersModule } from './modules/users/users.module';
       inject: [ConfigService],
     }),
     UsersModule,
+    ClientModule,
     AuthModule,
     CurrentUserModule,
     LocationModule,
