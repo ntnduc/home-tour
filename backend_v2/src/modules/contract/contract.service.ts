@@ -223,6 +223,25 @@ export class ContractService
     }
   }
 
+  async get(id: string): Promise<ContractDetailDto> {
+    const contract = await this.contractsRepository.findOne({
+      where: { id },
+      relations: [
+        'contractServices',
+        'contractServices.propertyService',
+        'contractServices.propertyService.service',
+        'contractClient',
+        'contractClient.client',
+      ],
+    });
+    if (!contract) {
+      throw new NotFoundException('Hợp đồng không tồn tại');
+    }
+    const detailDto = new ContractDetailDto();
+    detailDto.fromEntity(contract);
+    return detailDto;
+  }
+
   // async findById(id: string): Promise<ContractDetailDto> {
   //   const contract = await this.contractsRepository.findWithRelations(id);
   //   if (!contract) {

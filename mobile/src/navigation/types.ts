@@ -31,7 +31,7 @@ export type RootStackParamList = {
 
   // Contract Management
   ContractList: undefined;
-  ContractDetail: { contract: Contract };
+  ContractDetail: { contractId: string };
   CreateContract: { roomId: string; tenantId?: string };
   ConfirmCreateContract: {
     contract: ContractCreateRequest;

@@ -1,5 +1,6 @@
 import CardComponent from "@/screens/common/CardComponent";
 import { colors } from "@/theme/colors";
+import { ContractStatus } from "@/types/contract";
 import { RoomListResponse, RoomStatus } from "@/types/room";
 import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,69 +8,15 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import styles from "../styles/StyleRoomCardItemComponent";
 
-const statusColor = {
-  "Đang thuê": {
-    bg: "#22C55E20",
-    color: "#22C55E",
-  },
-  Trống: { bg: "#F59E4220", color: "#F59E42" },
-  "Đang sửa": { bg: "#EF444420", color: "#EF4444" },
-};
-
 type Props = {
   item: RoomListResponse;
   navigation: any;
 };
 
 const RoomCardItemComponent = ({ item, navigation }: Props) => {
-  const contract = {
-    id: 1,
-    roomId: 1,
-    roomName: "Phòng 101",
-    buildingName: "Tòa Sunrise",
-    tenantName: "Nguyễn Văn A",
-    tenantPhone: "0123456789",
-    tenantEmail: "nguyenvana@email.com",
-    tenantIdCard: "123456789",
-    tenantAddress: "123 Đường ABC, Quận 1, TP.HCM",
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    monthlyRent: 3500000,
-    deposit: 3500000,
-    status: "ACTIVE",
-    createdAt: "2024-01-01",
-    signedAt: "2024-01-01",
-    services: [
-      {
-        id: 1,
-        name: "Điện",
-        price: 3500,
-        calculationMethod: "PER_UNIT_SIMPLE",
-        isIncluded: true,
-      },
-      {
-        id: 2,
-        name: "Nước",
-        price: 15000,
-        calculationMethod: "PER_UNIT_SIMPLE",
-        isIncluded: true,
-      },
-      {
-        id: 3,
-        name: "Wifi",
-        price: 100000,
-        calculationMethod: "FIXED_PER_ROOM",
-        isIncluded: true,
-      },
-      {
-        id: 4,
-        name: "Gửi xe",
-        price: 25000,
-        calculationMethod: "FIXED_PER_ROOM",
-        isIncluded: true,
-      },
-    ],
-  };
+  const contractActive = item.contracts?.findLast(
+    (contract) => contract.status === ContractStatus.ACTIVE
+  );
 
   return (
     <CardComponent
@@ -112,17 +59,21 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
           )}
 
           {/* Thông tin hợp đồng cho phòng đang thuê */}
-          {contract && item.status === RoomStatus.OCCUPIED && (
+          {contractActive && item.status === RoomStatus.OCCUPIED && (
             <View style={styles.contractInfo}>
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Người thuê:</Text>
-                <Text style={styles.contractText}>{contract.tenantName}</Text>
+                <Text style={styles.contractText}>
+                  {contractActive.primaryPropertyUser?.fullName || "N/A"}
+                </Text>
               </View>
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Hợp đồng:</Text>
                 <Text style={styles.contractText}>
-                  #{contract.id} - {formatDate(contract.startDate)} đến{" "}
-                  {formatDate(contract.endDate)}
+                  #{contractActive.id} - {formatDate(contractActive.startDate)}{" "}
+                  {contractActive.endDate
+                    ? `đến ${formatDate(contractActive.endDate)}`
+                    : ""}
                 </Text>
               </View>
             </View>
@@ -207,12 +158,15 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
             <Text style={styles.createContractBtnText}>Tạo hợp đồng</Text>
           </TouchableOpacity>
         </View>
-      ) : item.status === RoomStatus.OCCUPIED && contract ? (
+      ) : item.status === RoomStatus.OCCUPIED && contractActive ? (
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.viewContractBtn}
             onPress={() => {
-              navigation.navigate("ContractDetail", { contract });
+              contractActive?.id &&
+                navigation.navigate("ContractDetail", {
+                  contractId: contractActive?.id,
+                });
             }}
           >
             <Ionicons
@@ -225,7 +179,9 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
           <TouchableOpacity
             style={styles.terminateContractBtn}
             onPress={() => {
-              navigation.navigate("TerminateContract", { contract });
+              navigation.navigate("TerminateContract", {
+                contractId: contractActive.id,
+              });
             }}
           >
             <Ionicons

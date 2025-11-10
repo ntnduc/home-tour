@@ -1,3 +1,4 @@
+import { ContractListResponse } from "./contract";
 import { ContractServiceDetailResponse } from "./contract-service";
 import { PropertyDetail } from "./property";
 
@@ -22,6 +23,7 @@ export interface Room {
   description?: string;
   area?: number;
   property?: PropertyDetail;
+  contracts: ContractListResponse[];
 }
 
 export interface RoomListResponse extends Room {}

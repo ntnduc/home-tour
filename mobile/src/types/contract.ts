@@ -1,8 +1,5 @@
 import { ClientCreateRequest } from "./client";
-import {
-  ContractServiceCreateRequest,
-  ContractServiceDetailResponse,
-} from "./contract-service";
+import { ContractServiceCreateRequest } from "./contract-service";
 
 export enum ContractStatus {
   PENDING_START = "PENDING_START",
@@ -49,56 +46,55 @@ export interface ContractUpdateRequest {
 
 export interface ContractDetailResponse {
   id: string;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
   propertyId: string;
   roomId: string;
-  landlordUserId: string;
   startDate: string;
-  endDate?: string;
-  rentAmountAgreed: number;
-  depositAmountPaid: number;
+  endDate?: string | null;
+  rentAmountAgreed: string;
+  depositAmountPaid: string;
   paymentDueDay: number;
-  contractScanURL?: string;
+  contractScanURL?: string | null;
   status: ContractStatus;
-  notes?: string;
+  notes?: string | null;
   room: {
     id: string;
     name: string;
-    area?: number;
     rentAmount: number;
-    maxOccupancy?: number;
-    floor?: string;
     property: {
       id: string;
       name: string;
       address: string;
     };
   };
-  primaryPropertyUser: {
+  contractClient: Array<{
     id: string;
-    fullName: string;
-    phone: string;
-    email?: string;
-  };
-  landlord: {
-    id: string;
-    fullName: string;
-    phone: string;
-    email?: string;
-  };
-  contractProperties: Array<{
-    id: string;
-    propertyUserId: string;
+    clientId: string;
     property: {
       id: string;
       fullName: string;
-      phone: string;
-      email?: string;
+      phoneNumber: string;
+      email?: string | null;
     };
-    moveInDate?: string;
-    moveOutDate?: string;
+    moveInDate?: string | null;
+    moveOutDate?: string | null;
     isActiveInContract: boolean;
   }>;
-  contractServices: ContractServiceDetailResponse[];
+  contractServices: Array<{
+    id: string;
+    serviceId: string;
+    service: {
+      id: string;
+      name: string;
+      icon: string;
+    };
+    price: string;
+    isEnabled: boolean;
+    notes?: string | null;
+  }>;
 }
 
 export interface ContractListResponse {

@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Contracts } from 'src/modules/contract/entities/contracts.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { RoomStatus } from './../../../common/enums/room.enum';
 import { Properties } from './properties.entity';
@@ -43,4 +44,7 @@ export class Rooms extends BaseEntity {
 
   @Column({ nullable: true })
   description?: string;
+
+  @OneToMany(() => Contracts, (contract) => contract.room)
+  contracts: Contracts[];
 }

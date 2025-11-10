@@ -1,4 +1,5 @@
 import { BaseListDto } from 'src/common/base/dto/list.dto';
+import { ContractListDto } from 'src/modules/contract/dto/contract-dto/contract.list.dto';
 import { Rooms } from '../../entities/rooms.entity';
 import { PropertyDetailDto } from '../properties-dto/property.detail.dto';
 
@@ -14,6 +15,7 @@ export class RoomListDto extends BaseListDto<Rooms> {
   defaultPaymentDueDay: number;
   description?: string;
   property?: PropertyDetailDto;
+  contracts?: ContractListDto[];
 
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
@@ -27,6 +29,15 @@ export class RoomListDto extends BaseListDto<Rooms> {
     this.defaultDepositAmount = entity.defaultDepositAmount;
     this.defaultPaymentDueDay = entity.defaultPaymentDueDay;
     this.description = entity.description;
+
+    if (entity.contracts && entity.contracts.length > 0) {
+      this.contracts = entity.contracts.map((contract) => {
+        const contractDto = new ContractListDto();
+        contractDto.fromEntity(contract);
+        return contractDto;
+      });
+    }
+
     if (entity.property) {
       const propertyDto = new PropertyDetailDto();
       propertyDto.fromEntity(entity.property);

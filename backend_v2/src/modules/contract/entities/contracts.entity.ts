@@ -15,6 +15,9 @@ export class Contracts extends BaseEntity {
   @Column()
   propertyId: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  code: string;
+
   @ManyToOne(() => Rooms)
   @JoinColumn({ name: 'roomId' })
   room: Rooms;
