@@ -3,6 +3,7 @@ import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
 
 export class ContractListDto extends BaseListDto<Contracts> {
+  code: string;
   propertyId: string;
   roomId: string;
   roomName: string;
@@ -40,5 +41,6 @@ export class ContractListDto extends BaseListDto<Contracts> {
       entity.contractClient?.filter((p) => p.isActiveInContract).length || 0;
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
+    this.code = entity.code;
   }
 }

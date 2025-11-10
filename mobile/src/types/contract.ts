@@ -99,6 +99,7 @@ export interface ContractDetailResponse {
 
 export interface ContractListResponse {
   id: string;
+  code: string;
   propertyId: string;
   roomId: string;
   landlordUserId: string;

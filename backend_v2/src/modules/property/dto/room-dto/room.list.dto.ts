@@ -1,4 +1,5 @@
 import { BaseListDto } from 'src/common/base/dto/list.dto';
+import { ContractStatus } from 'src/common/enums/contract.enum';
 import { ContractListDto } from 'src/modules/contract/dto/contract-dto/contract.list.dto';
 import { Rooms } from '../../entities/rooms.entity';
 import { PropertyDetailDto } from '../properties-dto/property.detail.dto';
@@ -16,6 +17,7 @@ export class RoomListDto extends BaseListDto<Rooms> {
   description?: string;
   property?: PropertyDetailDto;
   contracts?: ContractListDto[];
+  landlordClient: string;
 
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
@@ -36,6 +38,17 @@ export class RoomListDto extends BaseListDto<Rooms> {
         contractDto.fromEntity(contract);
         return contractDto;
       });
+      const contractActive = entity.contracts.find(
+        (contract) =>
+          contract.status === ContractStatus.ACTIVE &&
+          contract.contractClient.length > 0,
+      );
+      if (contractActive) {
+        this.landlordClient =
+          contractActive.contractClient.find(
+            (contractClient) => contractClient.isLandlordClient,
+          )?.name || '';
+      }
     }
 
     if (entity.property) {

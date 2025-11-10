@@ -64,13 +64,13 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Người thuê:</Text>
                 <Text style={styles.contractText}>
-                  {contractActive.primaryPropertyUser?.fullName || "N/A"}
+                  {item.landlordClient || "N/A"}
                 </Text>
               </View>
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Hợp đồng:</Text>
                 <Text style={styles.contractText}>
-                  #{contractActive.id} - {formatDate(contractActive.startDate)}{" "}
+                  #{contractActive.code}
                   {contractActive.endDate
                     ? `đến ${formatDate(contractActive.endDate)}`
                     : ""}

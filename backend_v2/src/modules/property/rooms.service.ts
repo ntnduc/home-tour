@@ -39,8 +39,9 @@ export class RoomsService extends BaseService<
 
   override async specQuery(): Promise<SelectQueryBuilder<Rooms>> {
     const query = this.roomsRepository
-      .createQueryBuilder('room')
-      .leftJoinAndSelect('room.contracts', 'contracts');
+      .createQueryBuilder('entity')
+      .leftJoinAndSelect('entity.contracts', 'contracts')
+      .leftJoinAndSelect('contracts.contractClient', 'contractClient');
     query.orderBy('property.name', 'ASC');
     return query;
   }

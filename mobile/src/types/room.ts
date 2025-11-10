@@ -26,7 +26,9 @@ export interface Room {
   contracts: ContractListResponse[];
 }
 
-export interface RoomListResponse extends Room {}
+export interface RoomListResponse extends Room {
+  landlordClient: string;
+}
 
 export interface RoomDetailResponse extends Room {
   propertyName?: string;
