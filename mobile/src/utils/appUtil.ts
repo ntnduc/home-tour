@@ -20,11 +20,23 @@ export const checkLogin = async (): Promise<boolean> => {
   return false;
 };
 
-export const formatCurrency = (value: string) => {
+export const formatCurrency = (value: string | number) => {
+  if (typeof value === "number") {
+    value = value.toString();
+  }
   const numericValue = value.replace(/[.,]/g, "");
   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 export const generateId = () => {
   return uuid.v4();
+};
+
+export const formatPhoneNumber = (phoneNumber: string) => {
+  let digits = phoneNumber.replace(/\D/g, "");
+
+  if (digits.startsWith("84")) {
+    digits = "0" + digits.substring(2);
+  }
+  return digits.replace(/^(\d{4})(\d{3})(\d{3})$/, "$1 $2 $3");
 };

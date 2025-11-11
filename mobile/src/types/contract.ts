@@ -46,6 +46,7 @@ export interface ContractUpdateRequest {
 
 export interface ContractDetailResponse {
   id: string;
+  code: string;
   createdBy: string;
   updatedBy: string;
   createdAt: string;
@@ -54,8 +55,8 @@ export interface ContractDetailResponse {
   roomId: string;
   startDate: string;
   endDate?: string | null;
-  rentAmountAgreed: string;
-  depositAmountPaid: string;
+  rentAmountAgreed: number;
+  depositAmountPaid: number;
   paymentDueDay: number;
   contractScanURL?: string | null;
   status: ContractStatus;

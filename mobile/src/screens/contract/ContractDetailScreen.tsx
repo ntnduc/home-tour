@@ -1,5 +1,6 @@
 import { getContract } from "@/api/contract/contract.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
+import DisplayPhoneNumber from "@/components/DisplayPhoneNumber";
 import Loading from "@/components/Loading";
 import { RootStackParamList } from "@/navigation/types";
 import CardComponent from "@/screens/common/CardComponent";
@@ -29,6 +30,7 @@ const ContractDetailScreen = ({
   route,
 }: ContractDetailScreenProps) => {
   const { contractId } = route.params;
+
   const [isLoading, setIsLoading] = useState(true);
   const [contract, setContract] = useState<ContractDetailResponse | null>(null);
 
@@ -103,8 +105,8 @@ const ContractDetailScreen = ({
               roomId: contract.roomId,
               startDate: contract.startDate,
               endDate: contract.endDate || undefined,
-              rentAmountAgreed: parseFloat(contract.rentAmountAgreed),
-              depositAmountPaid: parseFloat(contract.depositAmountPaid),
+              rentAmountAgreed: contract.rentAmountAgreed,
+              depositAmountPaid: contract.depositAmountPaid,
               paymentDueDay: contract.paymentDueDay,
               contractScanURL: contract.contractScanURL || undefined,
               status: contract.status,
@@ -129,7 +131,7 @@ const ContractDetailScreen = ({
 
   const renderRow = (
     label: string,
-    value?: string | number,
+    value?: string | number | React.ReactNode,
     strong?: boolean
   ) => (
     <View className="flex-row justify-between items-center mb-2">
@@ -195,7 +197,7 @@ const ContractDetailScreen = ({
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <Text className="text-xl font-bold text-gray-900 mb-1">
-                Hợp đồng #{contract.id.slice(0, 8)}
+                Hợp đồng #{contract.code}
               </Text>
               <Text className="text-sm text-gray-600">
                 {contract.room.name} - {contract.room.property.name}
@@ -240,7 +242,9 @@ const ContractDetailScreen = ({
                 {renderRow("Họ và tên", landlordClient.property.fullName)}
                 {renderRow(
                   "Số điện thoại",
-                  landlordClient.property.phoneNumber
+                  <DisplayPhoneNumber>
+                    {landlordClient.property.phoneNumber}
+                  </DisplayPhoneNumber>
                 )}
                 {landlordClient.property.email &&
                   renderRow("Email", landlordClient.property.email)}
@@ -465,12 +469,12 @@ const ContractDetailScreen = ({
       )}
 
       {/* Back Button */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         className="absolute top-16 left-4 w-10 h-10 rounded-full bg-white/90 items-center justify-center shadow-md"
         onPress={() => navigation.goBack()}
       >
         <Ionicons name="arrow-back" size={20} color="#374151" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </>
   );
 };

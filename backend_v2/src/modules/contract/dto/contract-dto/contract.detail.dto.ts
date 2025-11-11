@@ -5,6 +5,7 @@ import { Contracts } from '../../entities/contracts.entity';
 export class ContractDetailDto extends BaseDetailDto<Contracts> {
   propertyId: string;
   roomId: string;
+  code: string;
   room: {
     id: string;
     name: string;
@@ -84,8 +85,12 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
 
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
-    this.rentAmountAgreed = entity.rentAmountAgreed;
-    this.depositAmountPaid = entity.depositAmountPaid;
+    this.rentAmountAgreed = entity.rentAmountAgreed
+      ? Number(entity.rentAmountAgreed)
+      : 0;
+    this.depositAmountPaid = entity.depositAmountPaid
+      ? Number(entity.depositAmountPaid)
+      : 0;
     this.paymentDueDay = entity.paymentDueDay;
     this.contractScanURL = entity.contractScanURL;
     this.status = entity.status;
@@ -121,5 +126,6 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.updatedAt = entity.updatedAt;
     this.createdBy = entity.createdBy;
     this.updatedBy = entity.updatedBy;
+    this.code = entity.code;
   }
 }
