@@ -55,6 +55,7 @@ export interface ContractDetailResponse {
   roomId: string;
   startDate: string;
   endDate?: string | null;
+  partnerClientCount?: number;
   rentAmountAgreed: number;
   depositAmountPaid: number;
   paymentDueDay: number;
@@ -65,11 +66,11 @@ export interface ContractDetailResponse {
     id: string;
     name: string;
     rentAmount: number;
-    property: {
-      id: string;
-      name: string;
-      address: string;
-    };
+  };
+  property: {
+    id: string;
+    name: string;
+    address: string;
   };
   contractClient: Array<{
     id: string;

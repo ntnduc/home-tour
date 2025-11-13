@@ -1,16 +1,28 @@
 import { colors } from "@/theme/colors";
-import React from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import React, { useCallback } from "react";
+import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
 
 export type StatusType = "success" | "warning" | "error" | "info" | "default";
 
+export type StatusOption = {
+  value: any;
+  label: string;
+  type?: StatusType;
+  className?: string;
+  textClassName?: string;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+};
+
 type Props = {
-  type: StatusType;
+  type?: StatusType;
   label?: string;
   style?: ViewStyle;
   containerStyle?: ViewStyle;
   className?: string;
   textClassName?: string;
+  options?: StatusOption[];
+  value?: any;
 };
 
 const Status = ({
@@ -20,14 +32,56 @@ const Status = ({
   containerStyle,
   className,
   textClassName,
+  options,
+  value,
 }: Props) => {
+  const _renderOption = useCallback(
+    (option: Props[], value: any) => {
+      if (!value) return <View></View>;
+      const selectedOption = options?.find((option) => option.value === value);
+      if (!selectedOption) return <View></View>;
+
+      return (
+        <View
+          style={[
+            styles.container,
+            styles[selectedOption.type ?? "default"],
+            containerStyle,
+            style,
+          ]}
+          className={selectedOption.className}
+        >
+          <Text
+            style={[
+              styles.text,
+              styles[`text_${selectedOption.type ?? "default"}`],
+            ]}
+            className={selectedOption.textClassName}
+          >
+            {selectedOption.label}
+          </Text>
+        </View>
+      );
+    },
+    [options, value]
+  );
+
+  if (options && options.length > 0 && value) {
+    return _renderOption(options, value);
+  }
+
   return (
     <View
-      style={[styles.container, styles[type], containerStyle, style]}
+      style={[
+        styles.container,
+        styles[type ?? "default"],
+        containerStyle,
+        style,
+      ]}
       className={className}
     >
       <Text
-        style={[styles.text, styles[`text_${type}`]]}
+        style={[styles.text, styles[`text_${type ?? "default"}`]]}
         className={textClassName}
       >
         {label}
@@ -76,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.status.info + "20",
   },
   default: {
-    backgroundColor: colors.status.success + "20",
+    backgroundColor: "20",
   },
 });
 

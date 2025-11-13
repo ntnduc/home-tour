@@ -6,6 +6,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   propertyId: string;
   roomId: string;
   code: string;
+  partnerClientCount?: number;
   room: {
     id: string;
     name: string;
@@ -30,6 +31,11 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     fullName: string;
     phoneNumber: string;
     email?: string;
+  };
+  property: {
+    id: string;
+    name: string;
+    address: string;
   };
   startDate: Date;
   endDate?: Date;
@@ -69,6 +75,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.id = entity.id;
     this.propertyId = entity.propertyId;
     this.roomId = entity.roomId;
+    this.partnerClientCount = entity.partnerClientCount;
     this.room = {
       id: entity.room?.id || '',
       name: entity.room?.name || '',
@@ -82,6 +89,13 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
         address: entity.room?.property?.address || '',
       },
     };
+    if (entity.property) {
+      this.property = {
+        id: entity.property?.id || '',
+        name: entity.property?.name || '',
+        address: entity.property?.address || '',
+      };
+    }
 
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;

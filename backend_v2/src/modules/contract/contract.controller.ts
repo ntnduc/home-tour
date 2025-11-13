@@ -111,13 +111,27 @@ export class ContractController extends BaseController<
 
   @Post(':id/activate')
   @ApiOperation({ summary: 'Activate contract' })
-  @ApiResponse({ status: 200, description: 'Contract activated successfully.' })
-  @ApiResponse({ status: 404, description: 'Contract not found.' })
+  @ApiResponse({ status: 200, description: 'Hợp đồng đã có hiệu lực.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hợp đồng.' })
   async activateContract(@Param('id') id: string) {
     const updateDto = new ContractUpdateDto();
     updateDto.id = id;
     updateDto.status = ContractStatus.ACTIVE;
-    return await this.contractService.update(updateDto);
+    return await this.contractService.changeStatus(updateDto);
+  }
+
+  @Post(':id/terminate')
+  @ApiOperation({ summary: 'Terminate contract' })
+  @ApiResponse({
+    status: 200,
+    description: 'Hợp đồng đã bị hủy hiệu lực.',
+  })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hợp đồng.' })
+  async deactivateContract(@Param('id') id: string) {
+    const updateDto = new ContractUpdateDto();
+    updateDto.id = id;
+    updateDto.status = ContractStatus.TERMINATED_EARLY;
+    return await this.contractService.changeStatus(updateDto);
   }
 
   @Get('status/:status')

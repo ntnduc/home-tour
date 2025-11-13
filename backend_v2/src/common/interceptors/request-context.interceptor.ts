@@ -16,7 +16,7 @@ export class RequestContextInterceptor implements NestInterceptor {
 
     const userId = user?.userId || user?.id;
 
-    return RequestContextService.run(userId, () => {
+    return RequestContextService.run(userId, user, () => {
       return next.handle();
     });
   }

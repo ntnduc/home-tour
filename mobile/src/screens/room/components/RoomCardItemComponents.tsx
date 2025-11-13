@@ -38,22 +38,9 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
         }}
       >
         <View style={{ flex: 1 }}>
-          {/* <View style={styles.titleRow}>
-            <Text style={styles.roomName}>{item.name}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-              <Text style={[styles.statusText, { color: status.color }]}>
-                {item.status}
-              </Text>
-            </View>
-          </View> */}
-          {/* <Text style={styles.buildingName}>{item.building}</Text> */}
           <Text style={styles.price}>
             {item.rentAmount?.toLocaleString() ?? ""}đ/tháng
           </Text>
-          <View style={styles.roomInfoRow}>
-            <Text style={styles.roomInfoText}>Diện tích: {item.area}m²</Text>
-            <Text style={styles.roomInfoText}>👤 {item.maxOccupancy}</Text>
-          </View>
           {item.description && (
             <Text style={styles.roomDesc}>{item.description}</Text>
           )}

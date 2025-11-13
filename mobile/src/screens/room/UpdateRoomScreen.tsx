@@ -4,6 +4,8 @@ import CardContent from "@/components/CardContent";
 import { ComboBox } from "@/components/ComboBox";
 import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
+import Status from "@/components/Status";
+import { ROOM_STATUS_OPTIONS } from "@/constant/room.constant";
 import {
   RoomDetailResponse,
   RoomStatus,
@@ -11,7 +13,7 @@ import {
 } from "@/types/room";
 import { formatCurrency } from "@/utils/appUtil";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useCallback } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -53,62 +55,6 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
       }
     },
   });
-
-  const statusOptions = [
-    {
-      value: RoomStatus.AVAILABLE,
-      label: "Trống",
-      color: "#34C759",
-      icon: "ellipse-outline",
-    },
-    {
-      value: RoomStatus.MAINTENANCE,
-      label: "Đang sửa",
-      color: "#FF9500",
-      icon: "construct",
-    },
-    {
-      value: RoomStatus.UNAVAILABLE,
-      label: "Không hoạt động",
-      color: "#FF3B30",
-      icon: "checkmark-circle",
-    },
-  ];
-
-  const _getInformationStatus = useCallback(() => {
-    switch (defaultValues?.status) {
-      case RoomStatus.OCCUPIED:
-        return {
-          bgClass: "bg-green-100",
-          textClass: "text-green-700",
-          label: "Đang thuê",
-        };
-      case RoomStatus.AVAILABLE:
-        return {
-          bgClass: "bg-orange-100",
-          textClass: "text-orange-700",
-          label: "Trống",
-        };
-      case RoomStatus.MAINTENANCE:
-        return {
-          bgClass: "bg-red-100",
-          textClass: "text-red-700",
-          label: "Đang sửa",
-        };
-      case RoomStatus.UNAVAILABLE:
-        return {
-          bgClass: "bg-red-100",
-          textClass: "text-red-700",
-          label: "Không hoạt động",
-        };
-      default:
-        return {
-          bgClass: "bg-blue-100",
-          textClass: "text-blue-700",
-          label: "Đang thuê",
-        };
-    }
-  }, [defaultValues?.status]);
 
   const handleSave = async (data: RoomUpdateRequest) => {
     try {
@@ -172,29 +118,18 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
         <CardContent>
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
-              <Text className="text-xl font-bold text-gray-900 mb-1">
+              <Text className="text-xl font-bold text-gray-900">
                 {defaultValues?.name}
               </Text>
-              <Text className="text-sm text-gray-600">
-                {defaultValues?.property?.name}
-              </Text>
-              <View className="flex-row items-center">
-                <View
-                  className={`px-3 py-1 rounded-full h-7 flex items-center justify-center ${_getInformationStatus().bgClass}`}
-                >
-                  <Text
-                    className={`text-xs font-semibold min-w-16 text-center ${_getInformationStatus().textClass}`}
-                  >
-                    {_getInformationStatus().label || ""}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View className="items-end">
-              <Text className="text-xs text-gray-500 mb-1">Giá hiện tại</Text>
               <Text className="text-lg font-bold text-blue-600">
                 {defaultValues?.rentAmount?.toLocaleString()}đ
               </Text>
+            </View>
+            <View className="items-end">
+              <Status
+                value={defaultValues?.status}
+                options={ROOM_STATUS_OPTIONS}
+              />
             </View>
           </View>
         </CardContent>
@@ -247,21 +182,23 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
               render={({ field: { onChange, value } }) => {
                 return (
                   <ComboBox
-                    options={statusOptions}
+                    options={
+                      value !== RoomStatus.OCCUPIED
+                        ? ROOM_STATUS_OPTIONS.filter(
+                            (option) => option.value !== RoomStatus.OCCUPIED
+                          )
+                        : ROOM_STATUS_OPTIONS
+                    }
                     valueKey={"value"}
                     value={value}
                     onChange={(value) => {
                       onChange(value.value);
                     }}
+                    disabled={value === RoomStatus.OCCUPIED}
                     label="Trạng thái"
                     icon="checkmark-circle"
                     placeholder="Chọn trạng thái"
                     error={erroForms.status?.message}
-                    renderItem={(item) => {
-                      return (
-                        <Text style={{ color: item.color }}>{item.label}</Text>
-                      );
-                    }}
                     isSearch={false}
                   />
                 );
@@ -425,9 +362,10 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           {
             label: "Xoá phòng",
             onPress: handleSubmit(handleSave, handleError),
-            variant: "secondary",
+            variant: "danger",
             isLoading: isLoading,
             icon: "trash-outline",
+            hidden: () => defaultValues?.status === RoomStatus.OCCUPIED,
           },
         ]}
       />

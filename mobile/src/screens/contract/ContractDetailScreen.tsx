@@ -1,12 +1,13 @@
 import { getContract } from "@/api/contract/contract.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
-import DisplayPhoneNumber from "@/components/DisplayPhoneNumber";
+import DisplayField from "@/components/DisplayField";
 import Loading from "@/components/Loading";
+import Status from "@/components/Status";
+import { CONTRACT_STATUS_OPTIONS } from "@/constant/contract.constant";
 import { RootStackParamList } from "@/navigation/types";
 import CardComponent from "@/screens/common/CardComponent";
 import {
   CONTRACT_STATUS_COLOR,
-  CONTRACT_STATUS_LABEL,
   Contract,
   ContractDetailResponse,
   ContractStatus,
@@ -15,7 +16,8 @@ import { formatCurrency } from "@/utils/appUtil";
 import { formatDate } from "@/utils/dateUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
@@ -31,24 +33,27 @@ const ContractDetailScreen = ({
 }: ContractDetailScreenProps) => {
   const { contractId } = route.params;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [contract, setContract] = useState<ContractDetailResponse | null>(null);
+  const {
+    watch,
+    formState: { isLoading, defaultValues },
+  } = useForm<ContractDetailResponse>({
+    defaultValues: async () => {
+      if (!contractId) {
+        return {} as ContractDetailResponse;
+      }
 
-  useEffect(() => {
-    const fetchContractDetail = async () => {
       try {
-        setIsLoading(true);
         const response = await getContract(contractId);
         if (response.success && response.data) {
-          setContract(response.data);
-        } else {
-          Toast.show({
-            type: "error",
-            text1: "Lỗi",
-            text2: response.message ?? "Không thể tải thông tin hợp đồng",
-          });
-          navigation.goBack();
+          return response.data;
         }
+
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: response.message ?? "Không thể tải thông tin hợp đồng",
+        });
+        navigation.goBack();
       } catch (error: any) {
         console.error("Error fetching contract detail:", error);
         Toast.show({
@@ -58,15 +63,13 @@ const ContractDetailScreen = ({
             error.response?.data?.message ?? "Không thể tải thông tin hợp đồng",
         });
         navigation.goBack();
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    if (contractId) {
-      fetchContractDetail();
-    }
-  }, [contractId]);
+      return {} as ContractDetailResponse;
+    },
+  });
+
+  const contract = watch() as ContractDetailResponse | undefined;
 
   const getDaysRemaining = () => {
     if (!contract?.endDate) return null;
@@ -83,7 +86,7 @@ const ContractDetailScreen = ({
 
   const handleTerminateContract = () => {
     if (!contract) return;
-    const landlordClient = contract.contractClient.find(
+    const landlordClient = contract.contractClient?.find(
       (client) => client.isActiveInContract
     );
     Alert.alert(
@@ -132,27 +135,19 @@ const ContractDetailScreen = ({
   const renderRow = (
     label: string,
     value?: string | number | React.ReactNode,
-    strong?: boolean
-  ) => (
-    <View className="flex-row justify-between items-center mb-2">
-      <Text className="text-base text-gray-600">{label}</Text>
-      <Text
-        className={`text-base ${strong ? "font-semibold text-gray-900" : "text-gray-900"}`}
-      >
-        {value ?? "-"}
-      </Text>
-    </View>
-  );
+    strong?: boolean,
+    type: "text" | "phone" = "text"
+  ) => <DisplayField label={label} value={value} strong={strong} type={type} />;
 
-  if (isLoading) {
+  if (isLoading && !defaultValues) {
     return <Loading />;
   }
 
-  if (!contract) {
+  if (!contract || !contract.id) {
     return <Loading />;
   }
 
-  const landlordClient = contract.contractClient.find(
+  const landlordClient = contract.contractClient?.find(
     (client) => client.isActiveInContract
   );
   const canTerminate = contract.status === ContractStatus.ACTIVE;
@@ -197,23 +192,13 @@ const ContractDetailScreen = ({
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <Text className="text-xl font-bold text-gray-900 mb-1">
-                Hợp đồng #{contract.code}
+                Mã: {contract.code}
               </Text>
               <Text className="text-sm text-gray-600">
-                {contract.room.name} - {contract.room.property.name}
+                {contract.room.name} - {contract.property.name}
               </Text>
             </View>
-            <View
-              className="px-3 py-1 rounded-full"
-              style={{ backgroundColor: getStatusColor(contract.status).bg }}
-            >
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: getStatusColor(contract.status).color }}
-              >
-                {CONTRACT_STATUS_LABEL[contract.status]}
-              </Text>
-            </View>
+            <Status value={contract.status} options={CONTRACT_STATUS_OPTIONS} />
           </View>
         </CardComponent>
 
@@ -222,15 +207,14 @@ const ContractDetailScreen = ({
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
               {renderRow("Phòng", contract.room.name)}
-              {renderRow("Tòa nhà", contract.room.property.name)}
-              {renderRow("Địa chỉ", contract.room.property.address)}
+              {renderRow("Tòa nhà", contract.property.name)}
+              {renderRow("Địa chỉ", contract.property.address)}
+              {renderRow(
+                "Giá thuê",
+                `${formatCurrency(contract.rentAmountAgreed)} đ/tháng`
+              )}
             </View>
-            <View className="items-end">
-              <Text className="text-xs text-gray-500 mb-1">Giá thuê</Text>
-              <Text className="text-lg font-bold text-blue-600">
-                {formatCurrency(contract.rentAmountAgreed)}đ/tháng
-              </Text>
-            </View>
+            <View className="items-end"></View>
           </View>
         </CardComponent>
 
@@ -242,9 +226,9 @@ const ContractDetailScreen = ({
                 {renderRow("Họ và tên", landlordClient.property.fullName)}
                 {renderRow(
                   "Số điện thoại",
-                  <DisplayPhoneNumber>
-                    {landlordClient.property.phoneNumber}
-                  </DisplayPhoneNumber>
+                  landlordClient.property.phoneNumber,
+                  false,
+                  "phone"
                 )}
                 {landlordClient.property.email &&
                   renderRow("Email", landlordClient.property.email)}
@@ -257,10 +241,10 @@ const ContractDetailScreen = ({
                   renderRow("Ngày ra", formatDate(landlordClient.moveOutDate))}
               </>
             )}
-            {contract.contractClient.length > 1 && (
+            {(contract.contractClient?.length ?? 0) > 1 && (
               <View className="mt-2 pt-2 border-t border-gray-200">
                 <Text className="text-sm text-gray-600 mb-1">
-                  Số người ở cùng: {contract.contractClient.length - 1}
+                  Số người ở cùng: {(contract.contractClient?.length ?? 1) - 1}
                 </Text>
               </View>
             )}
@@ -271,19 +255,27 @@ const ContractDetailScreen = ({
         <CardComponent title="Thời hạn hợp đồng">
           <View className="flex-row justify-between items-center mb-2">
             <View className="flex-1">
-              <Text className="text-sm text-gray-600 mb-1">Ngày bắt đầu</Text>
-              <Text className="text-base font-semibold text-gray-900">
-                {formatDate(contract.startDate)}
-              </Text>
+              <DisplayField
+                label="Ngày bắt đầu"
+                containerClassName="items-start mb-0"
+                value={formatDate(contract.startDate)}
+                direction="vertical"
+                strong
+              />
             </View>
             <Ionicons name="arrow-forward" size={20} color="#6B7280" />
             <View className="flex-1 items-end">
-              <Text className="text-sm text-gray-600 mb-1">Ngày kết thúc</Text>
-              <Text className="text-base font-semibold text-gray-900">
-                {contract.endDate
-                  ? formatDate(contract.endDate)
-                  : "Không xác định"}
-              </Text>
+              <DisplayField
+                label="Ngày kết thúc"
+                containerClassName="justify-end items-end mb-0"
+                value={
+                  contract.endDate
+                    ? formatDate(contract.endDate)
+                    : "Không xác định"
+                }
+                direction="vertical"
+                strong
+              />
             </View>
           </View>
 
@@ -401,7 +393,8 @@ const ContractDetailScreen = ({
         <CardComponent title="Thông tin bổ sung">
           <View>
             {renderRow("Ngày tạo", formatDate(contract.createdAt))}
-            {renderRow("Ngày cập nhật", formatDate(contract.updatedAt))}
+            {renderRow("Ngày cập nhật", formatDate(contract.updatedAt), true)}
+            {renderRow("Số người ở cùng", contract.partnerClientCount ?? 0)}
             {contract.notes && (
               <View className="mt-2 pt-2 border-t border-gray-200">
                 <Text className="text-sm text-gray-600 mb-1">Ghi chú</Text>
@@ -467,14 +460,6 @@ const ContractDetailScreen = ({
           ]}
         />
       )}
-
-      {/* Back Button */}
-      {/* <TouchableOpacity
-        className="absolute top-16 left-4 w-10 h-10 rounded-full bg-white/90 items-center justify-center shadow-md"
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons name="arrow-back" size={20} color="#374151" />
-      </TouchableOpacity> */}
     </>
   );
 };

@@ -19,6 +19,7 @@ interface ActionButton {
   isLoading?: boolean;
   disabled?: boolean;
   customStyle?: ViewStyle;
+  hidden?: boolean | ((action: any) => boolean);
 }
 
 interface ActionButtonBottomProps {
@@ -74,6 +75,7 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
 }) => {
   const { bottom } = useSafeAreaInsets();
   const theme = useTheme();
+
   return (
     <View
       className={`bg-white border-t border-gray-200 px-6 pt-3 ${className}`}
@@ -83,37 +85,46 @@ const ActionButtonBottom: React.FC<ActionButtonBottomProps> = ({
         { paddingBottom: bottom },
       ]}
     >
-      {actions.map((action, index) => (
-        <TouchableOpacity
-          key={`${action.label}-${index}`}
-          className={getButtonStyle(action.variant, action.customStyle)}
-          onPress={action.onPress}
-          disabled={action.disabled || action.isLoading}
-          style={[index !== actions.length - 1 && { marginBottom: 12 }]}
-        >
-          {action.isLoading ? (
-            <ActivityIndicator
-              color={getIconColor(action.variant)}
-              size="small"
-            />
-          ) : (
-            <>
-              {action.iconElement
-                ? action.iconElement
-                : action.icon && (
-                    <Ionicons
-                      name={action.icon}
-                      size={18}
-                      color={getIconColor(action.variant)}
-                    />
-                  )}
-            </>
-          )}
-          <Text className={getTextStyle(action.variant)}>
-            {action.isLoading ? "Đang xử lý..." : action.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+      {actions.map((action, index) => {
+        if (
+          action.hidden && typeof action.hidden === "function"
+            ? action.hidden(actions)
+            : action.hidden
+        ) {
+          return null;
+        }
+        return (
+          <TouchableOpacity
+            key={`${action.label}-${index}`}
+            className={getButtonStyle(action.variant, action.customStyle)}
+            onPress={action.onPress}
+            disabled={action.disabled || action.isLoading}
+            style={[index !== actions.length - 1 && { marginBottom: 12 }]}
+          >
+            {action.isLoading ? (
+              <ActivityIndicator
+                color={getIconColor(action.variant)}
+                size="small"
+              />
+            ) : (
+              <>
+                {action.iconElement
+                  ? action.iconElement
+                  : action.icon && (
+                      <Ionicons
+                        name={action.icon}
+                        size={18}
+                        color={getIconColor(action.variant)}
+                      />
+                    )}
+              </>
+            )}
+            <Text className={getTextStyle(action.variant)}>
+              {action.isLoading ? "Đang xử lý..." : action.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };

@@ -24,6 +24,8 @@ import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
 import { ContractListDto } from './dto/contract-dto/contract.list.dto';
 import { ContractUpdateDto } from './dto/contract-dto/contract.update.dto';
 import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
+import { ContractChangeDetail } from './entities/contract-change-detail.entity';
+import { ContractChangeLog } from './entities/contract-change-log.entity';
 import { Contracts } from './entities/contracts.entity';
 import { ContractsRepository } from './repositories/contracts.repository';
 
@@ -171,7 +173,7 @@ export class ContractService
     }
   }
 
-  async update(updateDto: ContractUpdateDto): Promise<ContractDetailDto> {
+  async changeStatus(updateDto: ContractUpdateDto): Promise<ContractDetailDto> {
     const id = updateDto.id;
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -232,6 +234,7 @@ export class ContractService
         'contractServices.propertyService.service',
         'contractClient',
         'contractClient.client',
+        'room',
       ],
     });
     if (!contract) {
@@ -430,5 +433,51 @@ export class ContractService
         );
       }
     }
+  }
+
+  private async recordChange(
+    contract: Contracts,
+    oldContract: Contracts,
+    type: 'CREATE' | 'UPDATE' | 'STATUS_CHANGE' | 'TERMINATE' | 'EXTEND',
+    reason: string,
+    manager: EntityManager,
+  ): Promise<void> {
+    const changeLog = new ContractChangeLog();
+    changeLog.contractId = contract.id;
+    changeLog.changeType = type;
+    changeLog.changeReason = reason;
+    const changeDetails = new ContractChangeDetail();
+    changeDetails.contractId = contract.id;
+    await manager.save(changeLog);
+  }
+
+  private async getChangeDetails(
+    oldContract: Contracts,
+    newContract: Contracts,
+  ): Promise<ContractChangeDetail[]> {
+    const changeDetails: ContractChangeDetail[] = [];
+    const fields = [
+      'status',
+      'startDate',
+      'endDate',
+      'deposit',
+      'rentalPrice',
+      'notes',
+      'roomId',
+    ];
+    for (const field of fields) {
+      if (oldContract[field] !== newContract[field]) {
+        changeDetails.push(
+          new ContractChangeDetail({
+            contractId: oldContract.id,
+            changeLogId: changeLog.id,
+            field: field,
+            oldValue: oldContract[field]?.toString() ?? '',
+            newValue: newContract[field]?.toString() ?? '',
+          }),
+        );
+      }
+    }
+    return changeDetails;
   }
 }
