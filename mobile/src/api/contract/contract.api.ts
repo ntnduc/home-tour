@@ -68,10 +68,10 @@ export const getContractWithServices = async (id: string) => {
 };
 
 // Các function bổ sung cho contract
-export const terminateContract = async (id: string, reason?: string) => {
+export const deactivateContract = async (id: string, reason: string) => {
   const response = await privateApi.post<ApiResponse<ContractDetailResponse>>(
-    `/contract/${id}/terminate`,
-    { reason }
+    `/contract/${id}/deactivate`,
+    { reason: reason }
   );
   return response.data;
 };

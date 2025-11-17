@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/common/base/Entity/base.entity';
+import { Properties } from 'src/modules/property/entities/properties.entity';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { ContractChangeLog } from './contract-change-log.entity';
 import { Contracts } from './contracts.entity';
@@ -12,6 +13,13 @@ export class ContractChangeDetail extends BaseEntity {
 
   @Column()
   contractId: string;
+
+  @ManyToOne(() => Properties, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'propertyId' })
+  property: Properties;
+
+  @Column()
+  propertyId: string;
 
   @ManyToOne(() => ContractChangeLog, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'changeLogId' })

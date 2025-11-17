@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { RequestContextService } from 'src/common/base/context/request-context.service';
 import { ContractStatus } from 'src/common/enums/contract.enum';
 import { DataSource, EntityManager, In, SelectQueryBuilder } from 'typeorm';
 import { BaseService } from '../../common/base/crud/base.service';
@@ -219,7 +220,8 @@ export class ContractService
       return detailDto;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
+      console.error(error);
+      throw new Error('Vui lòng kiểm tra lại dữ liệu hoặc thử lại sau!');
     } finally {
       await queryRunner.release();
     }
@@ -365,19 +367,10 @@ export class ContractService
     reason: string,
     manager: EntityManager,
   ): Promise<void> {
-    const oldStatus = contract.status;
-
-    // Xử lý khi chuyển sang ACTIVE
-    if (
-      newStatus === ContractStatus.ACTIVE &&
-      oldStatus !== ContractStatus.ACTIVE
-    ) {
-      await manager.update(
-        'rooms',
-        { id: contract.roomId },
-        { status: RoomStatus.OCCUPIED },
-      );
-    }
+    await manager.update(Contracts, contract.id, { status: newStatus });
+    const newContract = await manager.findOne(Contracts, {
+      where: { id: contract.id },
+    });
 
     // Kiểm tra xem có hợp đồng ACTIVE nào khác cho phòng này không
     const otherActiveContracts = await this.contractsRepository
@@ -391,11 +384,25 @@ export class ContractService
       })
       .getCount();
 
+    await this.recordChange(
+      newContract!,
+      contract,
+      'STATUS_CHANGE',
+      reason,
+      manager,
+    );
+
     if (otherActiveContracts === 0) {
       await manager.update(
         'rooms',
         { id: contract.roomId },
         { status: RoomStatus.AVAILABLE },
+      );
+    } else {
+      await manager.update(
+        'rooms',
+        { id: contract.roomId },
+        { status: RoomStatus.OCCUPIED },
       );
     }
   }
@@ -407,10 +414,20 @@ export class ContractService
     reason: string,
     manager: EntityManager,
   ): Promise<void> {
+    const user = RequestContextService.getUserObj();
+    const userRoleCurretProperty = user?.properties?.find(
+      (property: any) => property.propertyId === contract.propertyId,
+    );
+
     const changeLog = new ContractChangeLog();
+    if (userRoleCurretProperty) {
+      changeLog.actorRole = userRoleCurretProperty.role;
+    }
+    changeLog.propertyId = contract.propertyId;
     changeLog.contractId = contract.id;
     changeLog.changeType = type;
     changeLog.changeReason = reason;
+    changeLog.metadata = {};
     const changeDetails = this.getChangeDetails(oldContract, contract);
     changeLog.contractChangeDetails = changeDetails;
     await manager.save(changeLog);
@@ -430,6 +447,7 @@ export class ContractService
         changeDetail.oldValue = oldContract[field];
         changeDetail.newValue = newContract[field] ?? null;
         changeDetails.push(changeDetail);
+        changeDetail.propertyId = oldContract.propertyId;
       }
     }
     return changeDetails;

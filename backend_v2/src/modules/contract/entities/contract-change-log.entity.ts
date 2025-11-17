@@ -1,13 +1,6 @@
-import { RequestContextService } from 'src/common/base/context/request-context.service';
 import { BaseEntity } from 'src/common/base/Entity/base.entity';
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Properties } from 'src/modules/property/entities/properties.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { ContractChangeDetail } from './contract-change-detail.entity';
 import { Contracts } from './contracts.entity';
 
@@ -24,6 +17,13 @@ export class ContractChangeLog extends BaseEntity {
   )
   contractChangeDetails: ContractChangeDetail[];
 
+  @ManyToOne(() => Properties, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'propertyId' })
+  property: Properties;
+
+  @Column()
+  propertyId: string;
+
   @Column()
   contractId: string;
 
@@ -38,15 +38,4 @@ export class ContractChangeLog extends BaseEntity {
 
   @Column()
   actorRole: string;
-
-  @BeforeInsert()
-  public beforeInsert() {
-    const user = RequestContextService.getUserObj();
-    const userRoleCurretProperty = user?.properties?.find(
-      (property: any) => property.id === this.contract.propertyId,
-    );
-    if (userRoleCurretProperty) {
-      this.actorRole = userRoleCurretProperty.role;
-    }
-  }
 }

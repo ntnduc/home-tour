@@ -1,4 +1,4 @@
-import { getContract } from "@/api/contract/contract.api";
+import { deactivateContract, getContract } from "@/api/contract/contract.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
 import DisplayField from "@/components/DisplayField";
 import Loading from "@/components/Loading";
@@ -6,12 +6,7 @@ import Status from "@/components/Status";
 import { CONTRACT_STATUS_OPTIONS } from "@/constant/contract.constant";
 import { RootStackParamList } from "@/navigation/types";
 import CardComponent from "@/screens/common/CardComponent";
-import {
-  CONTRACT_STATUS_COLOR,
-  Contract,
-  ContractDetailResponse,
-  ContractStatus,
-} from "@/types/contract";
+import { ContractDetailResponse, ContractStatus } from "@/types/contract";
 import { formatCurrency } from "@/utils/appUtil";
 import { formatDate } from "@/utils/dateUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -41,7 +36,6 @@ const ContractDetailScreen = ({
       if (!contractId) {
         return {} as ContractDetailResponse;
       }
-
       try {
         const response = await getContract(contractId);
         if (response.success && response.data) {
@@ -80,47 +74,36 @@ const ContractDetailScreen = ({
     return diffDays;
   };
 
-  const getStatusColor = (status: ContractStatus) => {
-    return CONTRACT_STATUS_COLOR[status] || { bg: "#F3F4F6", color: "#6B7280" };
-  };
-
   const handleTerminateContract = () => {
     if (!contract) return;
     const landlordClient = contract.contractClient?.find(
       (client) => client.isActiveInContract
     );
-    Alert.alert(
+    Alert.prompt(
       "Xác nhận kết thúc hợp đồng",
-      `Bạn có chắc chắn muốn kết thúc hợp đồng với ${landlordClient?.property.fullName || "người thuê"}?\n\nHành động này sẽ chuyển phòng về trạng thái trống.`,
-      [
-        {
-          text: "Hủy",
-          style: "cancel",
-        },
-        {
-          text: "Kết thúc",
-          style: "destructive",
-          onPress: () => {
-            // Convert ContractDetailResponse to Contract for navigation
-            const contractForNav: Contract = {
-              id: contract.id,
-              propertyId: contract.propertyId,
-              roomId: contract.roomId,
-              startDate: contract.startDate,
-              endDate: contract.endDate || undefined,
-              rentAmountAgreed: contract.rentAmountAgreed,
-              depositAmountPaid: contract.depositAmountPaid,
-              paymentDueDay: contract.paymentDueDay,
-              contractScanURL: contract.contractScanURL || undefined,
-              status: contract.status,
-              notes: contract.notes || undefined,
-            };
-            navigation.navigate("TerminateContract", {
-              contract: contractForNav,
+      `Bạn có chắc chắn muốn kết thúc hợp đồng với ${landlordClient?.property.fullName || "người thuê"}?\nHành động này sẽ chuyển phòng về trạng thái trống.
+      \nLý do kết thúc:`,
+      async (text: string) => {
+        if (!text.trim()) {
+          Toast.show({
+            type: "error",
+            text1: "Lỗi",
+            text2: "Vui lòng nhập lý do kết thúc hợp đồng",
+          });
+          return;
+        }
+
+        await deactivateContract(contract.id, text)
+          .then(() => {})
+          .finally(() => {
+            Toast.show({
+              type: "success",
+              text1: "Thành công",
+              text2: "Đã kết thúc hợp đồng thành công!",
             });
-          },
-        },
-      ]
+            navigation.goBack();
+          });
+      }
     );
   };
 
