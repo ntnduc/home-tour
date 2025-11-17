@@ -19,6 +19,7 @@ import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { UserRepository } from '../users/repositories/user.repository';
 import { ContractClientCreateDto } from './dto/contract-client-dto/contract-client.create.dto';
+import { ContractChangeStatusDto } from './dto/contract-dto/contract.change.status.dto';
 import { ContractCreateDto } from './dto/contract-dto/contract.create.dto';
 import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
 import { ContractListDto } from './dto/contract-dto/contract.list.dto';
@@ -173,7 +174,13 @@ export class ContractService
     }
   }
 
-  async changeStatus(updateDto: ContractUpdateDto): Promise<ContractDetailDto> {
+  async update(updateDto: ContractUpdateDto): Promise<ContractDetailDto> {
+    throw new BadRequestException('Not implemented');
+  }
+
+  async changeStatus(
+    updateDto: ContractChangeStatusDto,
+  ): Promise<ContractDetailDto> {
     const id = updateDto.id;
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -189,19 +196,12 @@ export class ContractService
         throw new NotFoundException('Hợp đồng không tồn tại');
       }
 
-      const oldStatus = existingContract.status;
-      const updateData = updateDto.getEntity(existingContract);
-
-      await queryRunner.manager.update(Contracts, { id }, updateData);
-
-      // Xử lý thay đổi trạng thái
-      if (updateDto.status && updateDto.status !== oldStatus) {
-        await this.handleStatusChange(
-          existingContract,
-          updateDto.status,
-          queryRunner.manager,
-        );
-      }
+      await this.handleStatusChange(
+        existingContract,
+        updateDto.status,
+        updateDto.reason,
+        queryRunner.manager,
+      );
 
       await queryRunner.commitTransaction();
 
@@ -244,36 +244,6 @@ export class ContractService
     detailDto.fromEntity(contract);
     return detailDto;
   }
-
-  // async findById(id: string): Promise<ContractDetailDto> {
-  //   const contract = await this.contractsRepository.findWithRelations(id);
-  //   if (!contract) {
-  //     throw new NotFoundException('Hợp đồng không tồn tại');
-  //   }
-
-  //   const detailDto = new ContractDetailDto();
-  //   detailDto.fromEntity(contract);
-  //   return detailDto;
-  // }
-
-  // async findByRoomId(roomId: string): Promise<ContractListDto[]> {
-  //   const contracts = await this.contractsRepository.findByRoomId(roomId);
-  //   return this.beautifyResult(contracts);
-  // }
-
-  // async findActiveContractByRoomId(
-  //   roomId: string,
-  // ): Promise<ContractDetailDto | null> {
-  //   const contract =
-  //     await this.contractsRepository.findActiveContractByRoomId(roomId);
-  //   if (!contract) {
-  //     return null;
-  //   }
-
-  //   const detailDto = new ContractDetailDto();
-  //   detailDto.fromEntity(contract);
-  //   return detailDto;
-  // }
 
   private async createContractServices(
     contractId: string,
@@ -392,6 +362,7 @@ export class ContractService
   private async handleStatusChange(
     contract: Contracts,
     newStatus: ContractStatus,
+    reason: string,
     manager: EntityManager,
   ): Promise<void> {
     const oldStatus = contract.status;
@@ -408,30 +379,24 @@ export class ContractService
       );
     }
 
-    // Xử lý khi chuyển từ ACTIVE sang trạng thái khác
-    if (
-      oldStatus === ContractStatus.ACTIVE &&
-      newStatus !== ContractStatus.ACTIVE
-    ) {
-      // Kiểm tra xem có hợp đồng ACTIVE nào khác cho phòng này không
-      const otherActiveContracts = await this.contractsRepository
-        .createQueryBuilder('contract')
-        .where('contract.roomId = :roomId', { roomId: contract.roomId })
-        .andWhere('contract.id != :currentContractId', {
-          currentContractId: contract.id,
-        })
-        .andWhere('contract.status = :status', {
-          status: ContractStatus.ACTIVE,
-        })
-        .getCount();
+    // Kiểm tra xem có hợp đồng ACTIVE nào khác cho phòng này không
+    const otherActiveContracts = await this.contractsRepository
+      .createQueryBuilder('contract')
+      .where('contract.roomId = :roomId', { roomId: contract.roomId })
+      .andWhere('contract.id != :currentContractId', {
+        currentContractId: contract.id,
+      })
+      .andWhere('contract.status = :status', {
+        status: ContractStatus.ACTIVE,
+      })
+      .getCount();
 
-      if (otherActiveContracts === 0) {
-        await manager.update(
-          'rooms',
-          { id: contract.roomId },
-          { status: RoomStatus.AVAILABLE },
-        );
-      }
+    if (otherActiveContracts === 0) {
+      await manager.update(
+        'rooms',
+        { id: contract.roomId },
+        { status: RoomStatus.AVAILABLE },
+      );
     }
   }
 
@@ -446,36 +411,25 @@ export class ContractService
     changeLog.contractId = contract.id;
     changeLog.changeType = type;
     changeLog.changeReason = reason;
-    const changeDetails = new ContractChangeDetail();
-    changeDetails.contractId = contract.id;
+    const changeDetails = this.getChangeDetails(oldContract, contract);
+    changeLog.contractChangeDetails = changeDetails;
     await manager.save(changeLog);
   }
 
-  private async getChangeDetails(
+  private getChangeDetails(
     oldContract: Contracts,
     newContract: Contracts,
-  ): Promise<ContractChangeDetail[]> {
+  ): ContractChangeDetail[] {
     const changeDetails: ContractChangeDetail[] = [];
-    const fields = [
-      'status',
-      'startDate',
-      'endDate',
-      'deposit',
-      'rentalPrice',
-      'notes',
-      'roomId',
-    ];
+    const fields = ['status'];
     for (const field of fields) {
       if (oldContract[field] !== newContract[field]) {
-        changeDetails.push(
-          new ContractChangeDetail({
-            contractId: oldContract.id,
-            changeLogId: changeLog.id,
-            field: field,
-            oldValue: oldContract[field]?.toString() ?? '',
-            newValue: newContract[field]?.toString() ?? '',
-          }),
-        );
+        const changeDetail = new ContractChangeDetail();
+        changeDetail.contractId = oldContract.id;
+        changeDetail.field = field;
+        changeDetail.oldValue = oldContract[field];
+        changeDetail.newValue = newContract[field] ?? null;
+        changeDetails.push(changeDetail);
       }
     }
     return changeDetails;

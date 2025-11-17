@@ -19,6 +19,7 @@ import { ContractStatus } from '../../common/enums/contract.enum';
 import { Role } from '../../common/enums/role.enum';
 import { Roles } from '../rbac/decorators/roles.decorator';
 import { ContractService } from './contract.service';
+import { ContractChangeStatusDto } from './dto/contract-dto/contract.change.status.dto';
 import { ContractCreateDto } from './dto/contract-dto/contract.create.dto';
 import { ContractDetailDto } from './dto/contract-dto/contract.detail.dto';
 import { ContractListDto } from './dto/contract-dto/contract.list.dto';
@@ -113,24 +114,34 @@ export class ContractController extends BaseController<
   @ApiOperation({ summary: 'Activate contract' })
   @ApiResponse({ status: 200, description: 'Hợp đồng đã có hiệu lực.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy hợp đồng.' })
-  async activateContract(@Param('id') id: string) {
-    const updateDto = new ContractUpdateDto();
+  async activateContract(
+    @Param('id') id: string,
+    @Body() body: { reason?: string },
+  ) {
+    const updateDto = new ContractChangeStatusDto();
     updateDto.id = id;
     updateDto.status = ContractStatus.ACTIVE;
+    if (body.reason) {
+      updateDto.reason = body.reason;
+    }
     return await this.contractService.changeStatus(updateDto);
   }
 
-  @Post(':id/terminate')
+  @Post(':id/deactivate')
   @ApiOperation({ summary: 'Terminate contract' })
   @ApiResponse({
     status: 200,
     description: 'Hợp đồng đã bị hủy hiệu lực.',
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy hợp đồng.' })
-  async deactivateContract(@Param('id') id: string) {
-    const updateDto = new ContractUpdateDto();
+  async deactivateContract(
+    @Param('id') id: string,
+    @Body() body: { reason: string },
+  ) {
+    const updateDto = new ContractChangeStatusDto();
     updateDto.id = id;
     updateDto.status = ContractStatus.TERMINATED_EARLY;
+    updateDto.reason = body.reason;
     return await this.contractService.changeStatus(updateDto);
   }
 
