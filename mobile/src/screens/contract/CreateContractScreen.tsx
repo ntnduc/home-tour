@@ -32,7 +32,7 @@ const CreateContractScreen = ({
 }: CreateContractScreenProps) => {
   const { roomId } = route.params;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [roomData, setRoomData] = useState<RoomServiceDetailResponse | null>(
     null
   );
@@ -109,7 +109,13 @@ const CreateContractScreen = ({
   }
 
   if (!roomData) {
-    return <Loading />;
+    Toast.show({
+      type: "error",
+      text1: "Lỗi",
+      text2: "Không tìm thấy phòng!",
+    });
+    navigation.goBack();
+    return null;
   }
 
   if (roomData.status !== RoomStatus.AVAILABLE) {

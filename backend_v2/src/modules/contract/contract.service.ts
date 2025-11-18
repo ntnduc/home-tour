@@ -247,6 +247,8 @@ export class ContractService
     return detailDto;
   }
 
+  //#region Support functions
+
   private async createContractServices(
     contractId: string,
     contractServicesDto: ContractServiceCreateDto[],
@@ -452,4 +454,5 @@ export class ContractService
     }
     return changeDetails;
   }
+  //#endregion
 }

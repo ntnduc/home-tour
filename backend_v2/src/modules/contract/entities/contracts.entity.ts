@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  Unique,
+} from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { ContractStatus } from '../../../common/enums/contract.enum';
 import { Properties } from '../../property/entities/properties.entity';
@@ -7,6 +14,7 @@ import { ContractClient } from './contract-client.entity';
 import { ContractServices } from './contract-services.entity';
 
 @Entity('contracts')
+@Unique(['code', 'propertyId'])
 export class Contracts extends BaseEntity {
   @ManyToOne(() => Properties, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'propertyId' })
@@ -15,7 +23,7 @@ export class Contracts extends BaseEntity {
   @Column()
   propertyId: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   code: string;
 
   @ManyToOne(() => Rooms)

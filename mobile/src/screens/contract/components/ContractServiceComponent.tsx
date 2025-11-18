@@ -96,7 +96,11 @@ const ContractServiceComponent = forwardRef<
       setIndex(index);
       setValueForm("name", service.name);
       setValueForm("calculationMethod", service.calculationMethod);
-      setValueForm("price", service.price);
+      if (service.calculationMethod === ServiceCalculateMethod.FREE) {
+        setValueForm("price", 0);
+      } else {
+        setValueForm("price", service.price);
+      }
       setValueForm("isEnabled", service.isEnabled);
       setValueForm("helperValue", service.helperValue);
       setValueForm("propertyServiceId", service.propertyServiceId);
@@ -231,10 +235,8 @@ const ContractServiceComponent = forwardRef<
           </View>
         );
       case ServiceCalculateMethod.FREE: {
-        setValueForm("price", 0);
-        return null;
+        return <View></View>;
       }
-
       default:
         return null;
     }
@@ -437,7 +439,7 @@ const ContractServiceComponent = forwardRef<
                   Số lượng / Giá trị:
                 </Text>
                 <Text className="text-base text-gray-800 font-semibold text-right flex-1">
-                  {helperValue}
+                  {helperValue?.toString()}
                 </Text>
               </View>
             )}
