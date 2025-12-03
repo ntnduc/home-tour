@@ -31,10 +31,6 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
 
   @IsUUID()
   @IsOptional()
-  propertyServiceId?: string;
-
-  @IsUUID()
-  @IsOptional()
   serviceId?: string;
 
   @IsEnum(ServiceCalculationMethod)
@@ -48,7 +44,7 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
   @IsOptional()
   isSelectedFromService?: boolean;
 
-  @IsNumber()
+  @IsNumber() contr;
   @IsOptional()
   helperValue?: number;
 
@@ -56,7 +52,7 @@ export class ContractServiceCreateDto extends BaseCreateDto<ContractServices> {
     const entity = new ContractServices();
     if (this.contractId) entity.contractId = this.contractId;
     entity.price = this.price ?? 0;
-    entity.isEnabled = this.isActive ?? true;
+    entity.isEnabled = true;
     entity.name = this.name ?? '';
     entity.notes = this.notes;
     entity.calculationMethod = this.calculationMethod;

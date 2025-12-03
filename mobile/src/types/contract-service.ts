@@ -4,7 +4,6 @@ export interface ContractService {
   id: string;
   contractId: string;
   serviceId: string;
-  propertyServiceId?: string;
   price: number;
   calculationMethod: ServiceCalculateMethod;
   isEnabled: boolean;

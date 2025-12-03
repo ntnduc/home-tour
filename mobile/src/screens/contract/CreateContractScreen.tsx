@@ -422,9 +422,7 @@ const CreateContractScreen = ({
                   name={`contractServices.${index}`}
                   render={({ field: { value } }) => (
                     <ServiceItem
-                      key={`service-item-${
-                        service.propertyServiceId || index
-                      }-${index}`}
+                      key={`service-item-${index}-${service.serviceId}`}
                       service={service}
                       index={index}
                       onEdit={() =>

@@ -73,7 +73,7 @@ export class RoomsService extends BaseService<
   }
 
   public async getRoomServices(id: string): Promise<RoomServiceDetailDto> {
-    const entity = await this.genericRepository.findOne({
+    const entity = await this.roomsRepository.findOne({
       where: {
         id: id as any,
       },
@@ -90,7 +90,10 @@ export class RoomsService extends BaseService<
       where: {
         roomId: entity.id,
       },
-      relations: ['contractServices', 'contractServices.propertyService'],
+      relations: ['contractServices'],
+      order: {
+        endDate: 'DESC',
+      },
     });
 
     if (

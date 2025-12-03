@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
@@ -7,6 +8,7 @@ import {
   IsUUID,
   Max,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
 import { Contracts } from '../../entities/contracts.entity';
@@ -53,7 +55,10 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   contractClient?: ContractClientCreateDto[];
 
+  //TODO: Feature not implemented yet
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ContractServiceCreateDto)
   @IsOptional()
   contractServices?: ContractServiceCreateDto[];
 

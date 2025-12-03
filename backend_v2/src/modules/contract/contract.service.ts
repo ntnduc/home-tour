@@ -228,8 +228,6 @@ export class ContractService
       where: { id },
       relations: [
         'contractServices',
-        'contractServices.propertyService',
-        'contractServices.propertyService.service',
         'contractClient',
         'contractClient.client',
         'room',
@@ -251,7 +249,6 @@ export class ContractService
     contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {
-    contractServicesDto = contractServicesDto.filter((x) => x.isActive);
     const contractServiceCreateEntities = contractServicesDto.map((x) =>
       x.getEntity(),
     );
