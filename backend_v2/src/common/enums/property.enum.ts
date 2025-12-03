@@ -1,0 +1,13 @@
+export enum PropertyStatus {
+  AVAILABLE = 'AVAILABLE',
+  OCCUPIED = 'OCCUPIED',
+  MAINTENANCE = 'MAINTENANCE',
+  PENDING_DEPOSIT = 'PENDING_DEPOSIT',
+  UNAVAILABLE = 'UNAVAILABLE',
+}
+
+export enum PropertyRoomsStatus {
+  FULL = 'FULL',
+  EMPTY = 'EMPTY',
+  PARTIAL = 'PARTIAL',
+}

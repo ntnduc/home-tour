@@ -1,0 +1,90 @@
+Đối tượng Sử dụng và Vai trò (RBAC)
+Hệ thống định nghĩa các vai trò người dùng với các quyền hạn khác nhau để đảm bảo an ninh và phân công công việc hợp lý.
+Vai trò
+Mô tả
+Quyền hạn tiêu biểu
+Quản trị viên (Admin)
+Người có quyền cao nhất, quản lý toàn bộ hệ thống.
+Tạo và quản lý tài khoản Chủ trọ, cấu hình hệ thống, xem mọi báo cáo.
+Chủ trọ (Owner)
+Người sở hữu một hoặc nhiều nhà trọ.
+Tạo/quản lý nhà trọ, phòng, dịch vụ của mình. Xem báo cáo tài chính tổng quan của các nhà trọ mình sở hữu. Quản lý nhân viên.
+Quản lý nhà trọ (Property Manager)
+Nhân viên được Chủ trọ giao quản lý một hoặc nhiều nhà trọ cụ thể.
+Quản lý phòng, hợp đồng, ghi chỉ số điện nước, xử lý yêu cầu bảo trì trong phạm vi nhà trọ được giao.
+Kế toán (Accountant)
+Nhân viên phụ trách các vấn đề tài chính.
+Tạo hóa đơn, ghi nhận thanh toán, quản lý và theo dõi công nợ.
+Người thuê (Tenant)
+Khách hàng thuê phòng.
+Xem thông tin hợp đồng, hóa đơn của mình. Thanh toán hóa đơn, tạo yêu cầu sửa chữa, nhận thông báo.
+
+Table database:
+Hiện tại đã có bảng User 
+Hãy viết thêm các phần
+
+User Roles:
+Một user có thể có quyền trên nhiều property và mỗi property có mỗi quyền khác nhau
+
+Table UserRoles {
+ UserID int [not null]
+ RoleID int [not null]
+PropertyID int [not null, note: 'Nhà trọ được phân công quản lý']
+ AssignedDate datetime [default: `now()`, note: 'Ngày bắt đầu phân công']
+
+
+  indexes {
+   (UserID, RoleID) [pk]
+ }
+}
+
+
+
+Role
+Quyền của user
+ 
+
+
+Table Roles {
+ RoleID int [pk, increment]
+ RoleName varchar(100) [unique, not null, note: 'Tên vai trò, ví dụ: Admin, Property Manager, Accountant']
+ Description text
+}
+
+Table RolePermissions {
+ RoleID int [not null]
+ PermissionID int [not null]
+  indexes {
+   (RoleID, PermissionID) [pk]
+ }
+}
+
+
+
+Table Permissions {
+ PermissionID int [pk, increment]
+ PermissionName varchar(100) [unique, not null, note: 'Tên quyền, ví dụ: CREATE_INVOICE, EDIT_ROOM_DETAILS']
+ Description text
+}
+
+
+
+
+Công nghệ: 
+sử dụng rbac để tối ưu hoá việc phân quyền cho các api.
+Viết custom Rbac
+Nhúng quyền/claims vào JWT
+Mô tả: khi user login, token chứa scopes hoặc danh sách buildingIds (hoặc tenantId) — server chỉ cần verify token, không query DB.
+Khi quyền của user bị thay đổi lãy revoke token đó trong bảng Token rồi tạo một token mới với quyền mới
+Json tham khảo {
+  "sub": 123, // userId
+  "name": "John Doe",
+  "tenants": [
+    { "tenantId": 1, "role": "admin" },
+    { "tenantId": 2, "role": "viewer" }
+  ],
+  "iat": 1733613600,
+  "exp": 1733620800
+}
+	
+

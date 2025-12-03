@@ -1,0 +1,84 @@
+export interface PermissionNode {
+  id: string;
+  name: string;
+  description?: string;
+  children?: PermissionNode[];
+  parent?: string;
+}
+
+export interface PermissionTree {
+  [key: string]: PermissionNode;
+}
+
+// Flat permissions for backward compatibility
+export enum Permission {
+  // System permissions
+  MANAGE_SYSTEM = 'SYSTEM.MANAGE',
+  VIEW_ALL_REPORTS = 'SYSTEM.VIEW_ALL_REPORTS',
+
+  // Property permissions
+  CREATE_PROPERTY = 'PROPERTY.CREATE',
+  EDIT_PROPERTY = 'PROPERTY.EDIT',
+  DELETE_PROPERTY = 'PROPERTY.DELETE',
+  VIEW_PROPERTY = 'PROPERTY.VIEW',
+  MANAGE_PROPERTY = 'PROPERTY.MANAGE', // Parent permission
+
+  // Room permissions
+  CREATE_ROOM = 'ROOM.CREATE',
+  EDIT_ROOM = 'ROOM.EDIT',
+  DELETE_ROOM = 'ROOM.DELETE',
+  VIEW_ROOM = 'ROOM.VIEW',
+  MANAGE_ROOM = 'ROOM.MANAGE', // Parent permission
+
+  // Contract permissions
+  CREATE_CONTRACT = 'CONTRACT.CREATE',
+  EDIT_CONTRACT = 'CONTRACT.EDIT',
+  DELETE_CONTRACT = 'CONTRACT.DELETE',
+  VIEW_CONTRACT = 'CONTRACT.VIEW',
+  TERMINATE_CONTRACT = 'CONTRACT.TERMINATE',
+  MANAGE_CONTRACT = 'CONTRACT.MANAGE', // Parent permission
+
+  // Service permissions
+  CREATE_SERVICE = 'SERVICE.CREATE',
+  EDIT_SERVICE = 'SERVICE.EDIT',
+  DELETE_SERVICE = 'SERVICE.DELETE',
+  VIEW_SERVICE = 'SERVICE.VIEW',
+  RECORD_UTILITY_READING = 'SERVICE.RECORD_UTILITY',
+  MANAGE_SERVICE = 'SERVICE.MANAGE', // Parent permission
+
+  // Invoice permissions
+  CREATE_INVOICE = 'INVOICE.CREATE',
+  EDIT_INVOICE = 'INVOICE.EDIT',
+  DELETE_INVOICE = 'INVOICE.DELETE',
+  VIEW_INVOICE = 'INVOICE.VIEW',
+  RECORD_PAYMENT = 'INVOICE.RECORD_PAYMENT',
+  MANAGE_INVOICE = 'INVOICE.MANAGE', // Parent permission
+
+  // Maintenance permissions
+  CREATE_MAINTENANCE_REQUEST = 'MAINTENANCE.CREATE',
+  EDIT_MAINTENANCE_REQUEST = 'MAINTENANCE.EDIT',
+  VIEW_MAINTENANCE_REQUEST = 'MAINTENANCE.VIEW',
+  ASSIGN_MAINTENANCE_REQUEST = 'MAINTENANCE.ASSIGN',
+  MANAGE_MAINTENANCE = 'MAINTENANCE.MANAGE', // Parent permission
+
+  // User management permissions
+  CREATE_USER = 'USER.CREATE',
+  EDIT_USER = 'USER.EDIT',
+  DELETE_USER = 'USER.DELETE',
+  VIEW_USER = 'USER.VIEW',
+  ASSIGN_ROLE = 'USER.ASSIGN_ROLE',
+  MANAGE_USER = 'USER.MANAGE', // Parent permission
+
+  // Report permissions
+  VIEW_FINANCIAL_REPORT = 'REPORT.FINANCIAL',
+  VIEW_OCCUPANCY_REPORT = 'REPORT.OCCUPANCY',
+  VIEW_DEBT_REPORT = 'REPORT.DEBT',
+  MANAGE_REPORT = 'REPORT.MANAGE', // Parent permission
+
+  // Tenant specific permissions
+  VIEW_OWN_CONTRACT = 'TENANT.VIEW_CONTRACT',
+  VIEW_OWN_INVOICE = 'TENANT.VIEW_INVOICE',
+  PAY_INVOICE = 'TENANT.PAY_INVOICE',
+  CREATE_OWN_MAINTENANCE_REQUEST = 'TENANT.CREATE_MAINTENANCE',
+  TENANT_ACTIONS = 'TENANT.ACTIONS', // Parent permission
+}
