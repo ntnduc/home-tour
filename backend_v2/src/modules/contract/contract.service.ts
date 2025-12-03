@@ -12,11 +12,8 @@ import { RoomStatus } from '../../common/enums/room.enum';
 import { AuthService } from '../auth/auth.service';
 import { Client } from '../client/entities/client.entity';
 import { ClientRepository } from '../client/repositories/client.repository';
-import { PropertiesService } from '../property/entities/properties-service.entity';
 import { PropertiesServiceRepository } from '../property/repositories/properties-service.repository';
 import { RoomsRepository } from '../property/repositories/rooms.repository';
-import { ServiceDetailDto } from '../services/dto/services.detail.dto';
-import { Services } from '../services/entities/services.entity';
 import { ServicesRepository } from '../services/repositories/services.repository';
 import { UserRepository } from '../users/repositories/user.repository';
 import { ContractClientCreateDto } from './dto/contract-client-dto/contract-client.create.dto';
@@ -28,6 +25,7 @@ import { ContractUpdateDto } from './dto/contract-dto/contract.update.dto';
 import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
 import { ContractChangeDetail } from './entities/contract-change-detail.entity';
 import { ContractChangeLog } from './entities/contract-change-log.entity';
+import { ContractServices } from './entities/contract-services.entity';
 import { Contracts } from './entities/contracts.entity';
 import { ContractsRepository } from './repositories/contracts.repository';
 
@@ -157,8 +155,6 @@ export class ContractService
         where: { id: savedContract.id },
         relations: [
           'contractServices',
-          'contractServices.propertyService',
-          'contractServices.propertyService.service',
           'contractClient',
           'contractClient.client',
         ],
@@ -255,56 +251,42 @@ export class ContractService
     contract: Contracts,
     manager: EntityManager,
   ): Promise<void> {
-    for (const serviceDto of contractServicesDto) {
-      if (serviceDto.propertyServiceId && !serviceDto.isNew) {
-        const propertyService = await this.propertiesServiceRepository.findOne({
-          where: { id: serviceDto.propertyServiceId },
-          relations: ['service'],
-        });
+    contractServicesDto = contractServicesDto.filter((x) => x.isActive);
+    const contractServiceCreateEntities = contractServicesDto.map((x) =>
+      x.getEntity(),
+    );
+    contractServiceCreateEntities.forEach((x) => {
+      x.contractId = contractId;
+    });
+    const savedContractServices = await manager.save(
+      ContractServices,
+      contractServiceCreateEntities,
+    );
+    // const serviceIds = contractServicesDto.filter((x) => x.serviceId);
+    // const services = await this.servicesRepository.find({
+    //   where: { id: In(serviceIds) },
+    // });
 
-        if (propertyService) {
-          const contractService = {
-            contractId: contractId,
-            propertyServiceId: propertyService.id,
-            price: serviceDto.price ?? propertyService.price,
-            isEnabled: serviceDto.isEnabled ?? true,
-          };
-          await manager.save('contract_services', contractService);
-        }
-      } else {
-        const newService = new ServiceDetailDto();
-        if (!serviceDto.isSelectedFromService) {
-          const serviceEntity = new Services();
-          serviceEntity.name = serviceDto.name ?? '';
-          serviceEntity.isActive = true;
-          serviceEntity.isDefaultSelected = true;
-          serviceEntity.calculationMethod = serviceDto.calculationMethod;
-          serviceEntity.price = serviceDto.price ?? 0;
-          const service = await manager.save(serviceEntity);
-          newService.fromEntity(service);
-        } else {
-          const service = await this.servicesRepository.findOne({
-            where: { id: serviceDto.propertyServiceId, isActive: true },
-          });
+    // for (const serviceDto of contractServicesDto) {
+    // const service = services.findLast((x) => x.id === serviceDto.serviceId);
+    // const newService = new ServiceDetailDto();
 
-          if (!service) {
-            throw new NotFoundException('Dịch vụ không tồn tại');
-          }
-          newService.fromEntity(service);
-        }
+    // if (service) {
+    //   newService.fromEntity(service);
+    // } else {
+    //   const serviceEntity = new Services();
+    //   serviceEntity.name = serviceDto.name ?? '';
+    //   serviceEntity.isActive = true;
+    //   serviceEntity.isDefaultSelected = true;
+    //   serviceEntity.calculationMethod = serviceDto.calculationMethod;
+    //   serviceEntity.price = serviceDto.price ?? 0;
+    //   const service = await manager.save(serviceEntity);
+    //   newService.fromEntity(service);
+    // }
 
-        const newPropertyService = new PropertiesService();
-        newPropertyService.propertyId = contract.propertyId ?? '';
-        newPropertyService.serviceId = newService.id;
-        newPropertyService.price = serviceDto.price ?? 0;
-        newPropertyService.calculationMethod = serviceDto.calculationMethod;
-        await manager.save(newPropertyService);
-
-        serviceDto.propertyServiceId = newPropertyService.id;
-        const newContractService = serviceDto.getEntity();
-        await manager.save(newContractService);
-      }
-    }
+    // const newContractService = serviceDto.getEntity();
+    // await manager.save(newContractService);
+    // }
   }
 
   private async createContractClient(

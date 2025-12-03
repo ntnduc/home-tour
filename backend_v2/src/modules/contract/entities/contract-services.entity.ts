@@ -1,11 +1,10 @@
+import { IsNotEmpty, IsString } from 'class-validator';
 import { ServiceCalculationMethod } from 'src/common/enums/service.enum';
-import { PropertiesService } from 'src/modules/property/entities/properties-service.entity';
-import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { Contracts } from './contracts.entity';
 
 @Entity('contract_services')
-@Unique(['contractId', 'propertyServiceId'])
 export class ContractServices extends BaseEntity {
   @ManyToOne(() => Contracts, (contract) => contract.contractServices, {
     onDelete: 'CASCADE',
@@ -14,20 +13,12 @@ export class ContractServices extends BaseEntity {
   contract: Contracts;
 
   @Column()
-  contractId: string;
-
-  @ManyToOne(
-    () => PropertiesService,
-    (propertiesService) => propertiesService.contractServices,
-    {
-      onDelete: 'CASCADE',
-    },
-  )
-  @JoinColumn({ name: 'propertyServiceId' })
-  propertyService: PropertiesService;
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
   @Column()
-  propertyServiceId: string;
+  contractId: string;
 
   @Column({
     type: 'decimal',

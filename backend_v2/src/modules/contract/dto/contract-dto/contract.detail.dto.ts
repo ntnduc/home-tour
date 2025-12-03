@@ -60,12 +60,6 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   }>;
   contractServices: Array<{
     id: string;
-    serviceId: string;
-    service: {
-      id: string;
-      name: string;
-      icon?: string;
-    };
     price?: number;
     isEnabled: boolean;
     notes?: string;
@@ -126,12 +120,6 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractServices =
       entity.contractServices?.map((ls) => ({
         id: ls.id,
-        serviceId: ls.propertyServiceId,
-        service: {
-          id: ls.propertyService?.service?.id || '',
-          name: ls.propertyService?.service?.name || '',
-          icon: ls.propertyService?.service?.icon,
-        },
         price: ls.price,
         isEnabled: ls.isEnabled,
         notes: ls.notes,

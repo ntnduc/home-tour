@@ -1,8 +1,7 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
-import { ContractServices } from '../../contract/entities/contract-services.entity';
 import { Services } from '../../services/entities/services.entity';
 import { ServiceCalculationMethod } from './../../../common/enums/service.enum';
 import { Properties } from './properties.entity';
@@ -27,12 +26,6 @@ export class PropertiesService extends BaseEntity {
   })
   @JoinColumn({ name: 'serviceId' })
   service: Services;
-
-  @OneToMany(
-    () => ContractServices,
-    (contractServices) => contractServices.propertyService,
-  )
-  contractServices: ContractServices[];
 
   @Column()
   @IsNotEmpty()

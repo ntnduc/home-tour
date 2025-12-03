@@ -1,12 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { PropertiesServiceRepository } from '../property/repositories/properties-service.repository';
 import { ServicesRepository } from '../services/repositories/services.repository';
-import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
 import { ContractServiceUpdateDto } from './dto/contract-services-dto/contract-service.update.dto';
 import { ContractServices } from './entities/contract-services.entity';
 import { ContractServicesRepository } from './repositories/contract-services.repository';
@@ -22,95 +17,94 @@ export class ContractServicesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createDto: ContractServiceCreateDto): Promise<ContractServices> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  // async create(createDto: ContractServiceCreateDto): Promise<ContractServices> {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      const contract = await this.contractsRepository.findOne({
-        where: { id: createDto.contractId },
-      });
+  //   try {
+  //     const contract = await this.contractsRepository.findOne({
+  //       where: { id: createDto.contractId },
+  //     });
 
-      if (!contract) {
-        throw new NotFoundException('Hợp đồng không tồn tại');
-      }
+  //     if (!contract) {
+  //       throw new NotFoundException('Hợp đồng không tồn tại');
+  //     }
 
-      const existingService =
-        await this.contractServicesRepository.findByContractIdAndServiceId(
-          createDto.contractId!,
-          createDto.propertyServiceId!,
-        );
+  //     const existingService =
+  //       await this.contractServicesRepository.findByContractIdAndServiceId(
+  //         createDto.contractId!,
+  //         createDto.propertyServiceId!,
+  //       );
 
-      if (existingService) {
-        throw new BadRequestException('Dịch vụ đã được thêm vào hợp đồng này');
-      }
+  //     if (existingService) {
+  //       throw new BadRequestException('Dịch vụ đã được thêm vào hợp đồng này');
+  //     }
 
-      let serviceEntity: ContractServices;
+  //     let serviceEntity: ContractServices;
 
-      if (createDto.propertyServiceId && createDto.isNew) {
-        const propertyService = await this.propertiesServiceRepository.findOne({
-          where: { id: createDto.propertyServiceId },
-          relations: ['service'],
-        });
+  //     // if (createDto.propertyServiceId && createDto.isNew) {
+  //     //   const propertyService = await this.propertiesServiceRepository.findOne({
+  //     //     where: { id: createDto.propertyServiceId },
+  //     //     relations: ['service'],
+  //     //   });
 
-        if (!propertyService) {
-          throw new NotFoundException('Dịch vụ property không tồn tại');
-        }
+  //     //   if (!propertyService) {
+  //     //     throw new NotFoundException('Dịch vụ property không tồn tại');
+  //     //   }
 
-        serviceEntity = new ContractServices();
-        serviceEntity.contractId = createDto.contractId!;
-        serviceEntity.propertyServiceId = propertyService.id;
-        serviceEntity.price = createDto.price ?? propertyService.price;
-        serviceEntity.isEnabled = createDto.isEnabled ?? true;
-        serviceEntity.notes = createDto.notes;
-      } else if (createDto.propertyServiceId && !createDto.isNew) {
-        const service = await this.servicesRepository.findOne({
-          where: { id: createDto.propertyServiceId },
-        });
+  //     //   serviceEntity = new ContractServices();
+  //     //   serviceEntity.contractId = createDto.contractId!;
+  //     //   serviceEntity.price = createDto.price ?? propertyService.price;
+  //     //   serviceEntity.isEnabled = createDto.isEnabled ?? true;
+  //     //   serviceEntity.notes = createDto.notes;
+  //     // } else if (createDto.propertyServiceId && !createDto.isNew) {
+  //     //   const service = await this.servicesRepository.findOne({
+  //     //     where: { id: createDto.propertyServiceId },
+  //     //   });
 
-        if (!service) {
-          throw new NotFoundException('Dịch vụ không tồn tại');
-        }
+  //     //   if (!service) {
+  //     //     throw new NotFoundException('Dịch vụ không tồn tại');
+  //     //   }
 
-        serviceEntity = createDto.getEntity();
-      } else {
-        const service = await this.servicesRepository.findOne({
-          where: { id: createDto.propertyServiceId },
-        });
+  //     //   serviceEntity = createDto.getEntity();
+  //     // } else {
+  //     //   const service = await this.servicesRepository.findOne({
+  //     //     where: { id: createDto.propertyServiceId },
+  //     //   });
 
-        if (!service) {
-          throw new NotFoundException('Dịch vụ không tồn tại');
-        }
+  //     //   if (!service) {
+  //     //     throw new NotFoundException('Dịch vụ không tồn tại');
+  //     //   }
 
-        serviceEntity = createDto.getEntity();
-      }
+  //     //   serviceEntity = createDto.getEntity();
+  //     // }
 
-      const savedService = await queryRunner.manager.save(
-        ContractServices,
-        serviceEntity,
-      );
-      await queryRunner.commitTransaction();
+  //     // const savedService = await queryRunner.manager.save(
+  //     //   ContractServices,
+  //     //   serviceEntity,
+  //     // );
+  //     await queryRunner.commitTransaction();
 
-      const result = await this.contractServicesRepository.findOne({
-        where: { id: savedService.id },
-        relations: ['service'],
-      });
+  //     // const result = await this.contractServicesRepository.findOne({
+  //     //   where: { id: savedService.id },
+  //     //   relations: ['service'],
+  //     // });
 
-      if (!result) {
-        throw new NotFoundException(
-          'Dịch vụ hợp đồng không tồn tại sau khi tạo',
-        );
-      }
+  //     // if (!result) {
+  //     //   throw new NotFoundException(
+  //     //     'Dịch vụ hợp đồng không tồn tại sau khi tạo',
+  //     //   );
+  //     // }
 
-      return result;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return result;
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw error;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   async update(
     id: string,
@@ -259,7 +253,6 @@ export class ContractServicesService {
         if (!existingService) {
           const contractService = new ContractServices();
           contractService.contractId = contractId;
-          contractService.propertyServiceId = propertyService.id;
           contractService.price = propertyService.price;
           contractService.isEnabled = true; // Default enabled when cloning
           contractService.notes = `Cloned from property service: ${propertyService.service?.name}`;

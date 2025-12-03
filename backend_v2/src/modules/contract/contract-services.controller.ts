@@ -16,7 +16,6 @@ import {
 import { Role } from '../../common/enums/role.enum';
 import { Roles } from '../rbac/decorators/roles.decorator';
 import { ContractServicesService } from './contract-services.service';
-import { ContractServiceCreateDto } from './dto/contract-services-dto/contract-service.create.dto';
 import { ContractServiceUpdateDto } from './dto/contract-services-dto/contract-service.update.dto';
 
 @ApiTags('Contract Services')
@@ -27,15 +26,6 @@ export class ContractServicesController {
   constructor(
     private readonly contractServicesService: ContractServicesService,
   ) {}
-
-  @Post()
-  @ApiOperation({ summary: 'Add service to contract' })
-  @ApiResponse({ status: 201, description: 'Service added successfully.' })
-  @ApiResponse({ status: 400, description: 'Bad request.' })
-  @ApiResponse({ status: 404, description: 'Contract or service not found.' })
-  async create(@Body() createDto: ContractServiceCreateDto) {
-    return await this.contractServicesService.create(createDto);
-  }
 
   @Get('contract/:contractId')
   @ApiOperation({ summary: 'Get all services by contract ID' })
