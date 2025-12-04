@@ -39,6 +39,11 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   depositAmountPaid?: number;
 
   @IsNumber()
+  @Min(0)
+  @IsOptional()
+  partnerClientCount?: number;
+
+  @IsNumber()
   @Min(1)
   @Max(31)
   paymentDueDay: number;
@@ -73,7 +78,7 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     entity.paymentDueDay = this.paymentDueDay;
     entity.contractScanURL = this.contractScanURL;
     entity.notes = this.notes;
-
+    entity.partnerClientCount = this.partnerClientCount ?? 0;
     return entity;
   }
 }

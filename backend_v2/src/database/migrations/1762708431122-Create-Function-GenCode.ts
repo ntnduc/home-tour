@@ -55,10 +55,10 @@ BEGIN
                and (sequences."lastResetDate" is null or date_part('year', sequences."lastResetDate") <> date_part('year', now())) THEN
                 counterCurrent = 0;
         ELSEIF config."resetType" = 'MONTHLY'
-            and (sequences."lastResetDate" is null or to_char(sequences."lastResetDate", 'YYYYMM') = to_char(now(), 'YYYYMM')) THEN
+            and (sequences."lastResetDate" is null or to_char(sequences."lastResetDate", 'YYYYMM') <> to_char(now(), 'YYYYMM')) THEN
             counterCurrent:= 0;
         ELSEIF config."resetType" = 'WEEKLY'
-            and (sequences."lastResetDate" is null or to_char(sequences."lastResetDate", 'YYYYMMIW') = to_char(now(), 'YYYYMMIW')) THEN
+            and (sequences."lastResetDate" is null or to_char(sequences."lastResetDate", 'YYYYMMIW') <> to_char(now(), 'YYYYMMIW')) THEN
             counterCurrent:= 0;
         END IF;
 

@@ -2,23 +2,28 @@ import ActionButtonBottom from "@/components/ActionButtonBottom";
 import DatePicker from "@/components/DatePicker";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
+import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { RootStackParamList } from "@/navigation/types";
 import { ContractServiceDetailResponse } from "@/types/contract-service";
-import { formatCurrency } from "@/utils/appUtil";
+import { formatCurrency, generateId } from "@/utils/appUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { Alert, Text, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-toast-message";
 import { getRoomWitcService } from "../../api/room/room.api";
 import { ContractCreateRequest } from "../../types/contract";
 import { RoomServiceDetailResponse, RoomStatus } from "../../types/room";
 import CardComponent from "../common/CardComponent";
+import CompanionClientComponent, {
+  CompanionClientComponentRef,
+} from "./components/CompanionClientComponent";
 import ContractServiceComponent, {
   ContractServiceComponentRef,
 } from "./components/ContractServiceComponent";
+import PartnerClientsSection from "./components/PartnerClientsSection";
 import ServiceItem from "./components/ServiceItem";
 
 type CreateContractScreenProps = {
@@ -43,13 +48,28 @@ const CreateContractScreen = ({
         partnerClientCount: 0,
       },
     });
-  const { fields: contractServices, update } = useFieldArray({
+  const {
+    fields: contractServices,
+    update,
+    append,
+  } = useFieldArray({
     control,
     name: "contractServices",
     keyName: "fieldId",
   });
 
   const contractServiceRef = useRef<ContractServiceComponentRef>(null);
+  const companionClientRef = useRef<CompanionClientComponentRef>(null);
+
+  const {
+    fields: contractClientsFields,
+    append: appendClient,
+    update: updateClient,
+    remove: removeClient,
+  } = useFieldArray({
+    control,
+    name: "contractClient",
+  });
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -65,7 +85,9 @@ const CreateContractScreen = ({
             rentAmountAgreed: room.rentAmount,
             depositAmountPaid: room.defaultDepositAmount,
             paymentDueDay: room.defaultPaymentDueDay,
-            contractServices: room.contractServices,
+            contractServices: room.contractServices.map((item) => {
+              return { ...item, fieldId: generateId() };
+            }),
           });
         }
       } catch (error) {
@@ -91,11 +113,57 @@ const CreateContractScreen = ({
     contractServiceRef.current?.expand(service, index);
   };
 
+  const handleAddService = () => {
+    const newService: ContractServiceDetailResponse = {
+      id: generateId(),
+      serviceId: generateId(),
+      price: 0,
+      calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
+      isEnabled: true,
+      name: "",
+      helperValue: null,
+    };
+
+    contractServiceRef.current?.expand(
+      newService,
+      contractServices.length ?? 0
+    );
+  };
+
+  const contractClients = watch("contractClient") || [];
+
+  const handleAddCompanion = () => {
+    const newIndex = contractClients.length || 1;
+    const emptyClient = {
+      name: "",
+      phone: "",
+      isLandlordClient: false,
+      isActive: true,
+    } as any;
+
+    companionClientRef.current?.expand(emptyClient, newIndex);
+  };
+
+  const handleEditCompanion = (index: number) => {
+    const client = contractClients[index];
+    if (!client) return;
+    companionClientRef.current?.expand(client as any, index);
+  };
+
+  const handleDeleteCompanion = (index: number) => {
+    if (index === 0) return;
+    removeClient(index);
+  };
+
   const handleSave = async (formData: ContractCreateRequest) => {
-    /*
-      TODO: Update thêm tính năng nhập thông tin người ở cùng sau
-    */
-    formData.contractClient[0].isLandlordClient = true;
+    if (formData.contractClient?.length) {
+      formData.contractClient = formData.contractClient.map(
+        (client, index) => ({
+          ...client,
+          isLandlordClient: index === 0,
+        })
+      );
+    }
 
     navigation.navigate("ConfirmCreateContract", {
       contract: formData,
@@ -234,25 +302,15 @@ const CreateContractScreen = ({
               )}
             />
           </View>
-          <View className="mb-3">
-            <Controller
-              control={control}
-              name="partnerClientCount"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Số lượng người ở cùng"
-                  value={value?.toString()}
-                  onChangeText={onChange}
-                  placeholder="Nhập số lượng người ở cùng"
-                  type="number"
-                  icon="people-outline"
-                  defaultValue="0"
-                  keyboardType="numeric"
-                />
-              )}
-            />
-          </View>
         </CardComponent>
+
+        <PartnerClientsSection
+          control={control}
+          clients={contractClients as any}
+          onAdd={handleAddCompanion}
+          onEdit={handleEditCompanion}
+          onDelete={handleDeleteCompanion}
+        />
 
         <CardComponent title="Thời hạn thuê">
           <View className="mb-3">
@@ -399,7 +457,17 @@ const CreateContractScreen = ({
 
         <CardComponent
           title="Dịch vụ"
-          description="Bạn muốn thêm dịch vụ mới hãy tạo dịch vụ trong tòa nhà!"
+          renderActions={() => (
+            <TouchableOpacity
+              className="flex-row items-center px-3 py-2 rounded-full bg-blue-50 border border-blue-200"
+              onPress={handleAddService}
+            >
+              <Ionicons name="add-circle-outline" size={18} color="#2563EB" />
+              <Text className="ml-2 text-sm font-medium text-blue-600">
+                Thêm dịch vụ
+              </Text>
+            </TouchableOpacity>
+          )}
         >
           {contractServices.length === 0 ? (
             <View className="flex-1 items-center justify-center py-12">
@@ -417,12 +485,12 @@ const CreateContractScreen = ({
             <View className="flex flex-col gap-3">
               {contractServices.map((service, index) => (
                 <Controller
-                  key={service.fieldId || index}
+                  key={service.fieldId}
                   control={control}
                   name={`contractServices.${index}`}
                   render={({ field: { value } }) => (
                     <ServiceItem
-                      key={`service-item-${index}-${service.serviceId}`}
+                      key={`service-item-${service.fieldId}`}
                       service={service}
                       index={index}
                       onEdit={() =>
@@ -477,7 +545,36 @@ const CreateContractScreen = ({
       <ContractServiceComponent
         ref={contractServiceRef}
         onSuccess={(service, index) => {
-          update(index, service);
+          const existing = contractServices[index];
+          if (existing) {
+            update(index, {
+              ...service,
+              fieldId: (existing as any).fieldId ?? generateId(),
+            } as any);
+          } else {
+            append({
+              ...service,
+              fieldId: generateId(),
+            } as any);
+          }
+        }}
+      />
+      <CompanionClientComponent
+        ref={companionClientRef}
+        onSuccess={(client, index) => {
+          const existing = contractClients[index];
+          if (existing) {
+            updateClient(index, {
+              ...(existing as any),
+              ...client,
+              isLandlordClient: index === 0,
+            } as any);
+          } else {
+            appendClient({
+              ...client,
+              isLandlordClient: index === 0,
+            } as any);
+          }
         }}
       />
     </>

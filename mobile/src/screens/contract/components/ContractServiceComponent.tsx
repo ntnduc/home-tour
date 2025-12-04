@@ -103,7 +103,6 @@ const ContractServiceComponent = forwardRef<
       }
       setValueForm("isEnabled", service.isEnabled);
       setValueForm("helperValue", service.helperValue);
-      setValueForm("propertyServiceId", service.propertyServiceId);
 
       setTimeout(() => {
         bottomSheetRef.current?.expand();
@@ -317,7 +316,6 @@ const ContractServiceComponent = forwardRef<
               <Input
                 label="Tên dịch vụ"
                 required={true}
-                disabled={true}
                 error={errors.name?.message}
                 placeholder="Nhập tên dịch vụ"
                 value={value}

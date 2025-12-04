@@ -1,4 +1,3 @@
-import CheckboxComponent from "@/components/Checkbox";
 import Input from "@/components/Input";
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
@@ -36,34 +35,49 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
   return (
     <CardComponent
       title={
-        <View className="flex-row items-center">
-          <CheckboxComponent
-            className="mr-2"
-            id={index.toString()}
-            onCheckedChange={(val) =>
-              onChange({ ...service, isEnabled: !!val })
-            }
-            checked={service.isEnabled}
-          />
-          <Text className="font-semibold text-lg">{service?.name}</Text>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <Text
+              className="font-semibold text-base"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {service?.name}
+            </Text>
+          </View>
         </View>
       }
       description={
-        <View className="flex-row items-center mt-1">
-          <Text className="text-sm text-gray-600">
-            {formatCurrency(service?.price?.toString() ?? "0") + "đ "}
-          </Text>
-          <Ionicons
-            name={
-              SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].icon
-            }
-            size={16}
-            color="#6B7280"
-            className="mr-1"
-          />
-          <Text className="text-sm text-gray-600">
-            {SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}
-          </Text>
+        <View className="mt-1">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <Text className="text-base font-semibold text-blue-600 flex-1">
+                {formatCurrency(service?.price?.toString() ?? "0") +
+                  " đ/" +
+                  SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
+                    .unit}
+              </Text>
+              <Ionicons
+                name={
+                  SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
+                    .icon
+                }
+                size={16}
+                color="#6B7280"
+                className="mr-2"
+              />
+              <Text
+                className="text-xs text-gray-600 mr-3"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {
+                  SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
+                    .label
+                }
+              </Text>
+            </View>
+          </View>
         </View>
       }
       actions={getActions()}
@@ -74,32 +88,38 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
       {service.isEnabled &&
         service.calculationMethod ===
           ServiceCalculateMethod.PER_UNIT_SIMPLE && (
-          <Input
-            required
-            type="number"
-            labelStyles={{
-              color: "#6B7280",
-              fontSize: 14,
-            }}
-            defaultValue={service.helperValue?.toString()}
-            label={`Số ${service.name?.toLocaleLowerCase()} hiện tại`}
-            onChangeText={(text) => _onChangeHelperValue[0](text)}
-          />
+          <View className="mt-3">
+            <Input
+              required
+              type="number"
+              labelStyles={{
+                color: "#6B7280",
+                fontSize: 13,
+              }}
+              defaultValue={service.helperValue?.toString()}
+              label={`Chỉ số hiện tại (${service.name
+                ?.toLocaleLowerCase()
+                ?.trim()})`}
+              onChangeText={(text) => _onChangeHelperValue[0](text)}
+            />
+          </View>
         )}
       {service.isEnabled &&
         service.calculationMethod ===
           ServiceCalculateMethod.FIXED_PER_NUMBER && (
-          <Input
-            required
-            type="number"
-            labelStyles={{
-              color: "#6B7280",
-              fontSize: 14,
-            }}
-            defaultValue={service.helperValue?.toString()}
-            onChangeText={(text) => _onChangeHelperValue[0](text)}
-            label={`Số lượng`}
-          />
+          <View className="mt-3">
+            <Input
+              required
+              type="number"
+              labelStyles={{
+                color: "#6B7280",
+                fontSize: 13,
+              }}
+              defaultValue={service.helperValue?.toString()}
+              onChangeText={(text) => _onChangeHelperValue[0](text)}
+              label={`Số lượng sử dụng`}
+            />
+          </View>
         )}
       <View className="mt-3 pt-3 border-t border-gray-100">
         <View className="flex-row items-center justify-between">
@@ -110,19 +130,13 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
               }`}
             />
             <Text
-              className={`text-sm ${
+              className={`text-xs ${
                 service.isEnabled ? "text-green-600" : "text-gray-500"
               }`}
             >
-              {service.isEnabled ? "Đã chọn" : "Không sử dụng"}
+              {service.isEnabled ? "Đã chọn trong hợp đồng" : "Không sử dụng"}
             </Text>
           </View>
-
-          {/* {service.isNew && (
-            <View className="bg-blue-100 px-2 py-1 rounded-full">
-              <Text className="text-xs font-medium text-blue-700">Mới</Text>
-            </View>
-          )} */}
         </View>
       </View>
     </CardComponent>
