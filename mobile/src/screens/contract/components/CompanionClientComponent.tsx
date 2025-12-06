@@ -1,3 +1,15 @@
+import ActionButtonBottom from "@/components/ActionButtonBottom";
+import { stylesHeader } from "@/components/AppSheet/AppSheet";
+import AppSheetBackdropComponent from "@/components/AppSheet/AppSheetBackdropComponent";
+import AppSheetHandleComponent from "@/components/AppSheet/AppSheetHandleComponent";
+import AppSheetHeader from "@/components/AppSheet/AppSheetHeader";
+import Input from "@/components/Input";
+import { ClientCreateRequest } from "@/types/client";
+import BottomSheet, {
+  BottomSheetFooter,
+  BottomSheetFooterProps,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 import React, {
   forwardRef,
   useCallback,
@@ -5,20 +17,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Text, View } from "react-native";
-import BottomSheet, {
-  BottomSheetFooter,
-  BottomSheetFooterProps,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
-import Input from "@/components/Input";
-import ActionButtonBottom from "@/components/ActionButtonBottom";
-import { stylesHeader } from "@/components/AppSheet/AppSheet";
-import AppSheetBackdropComponent from "@/components/AppSheet/AppSheetBackdropComponent";
-import AppSheetHandleComponent from "@/components/AppSheet/AppSheetHandleComponent";
-import AppSheetHeader from "@/components/AppSheet/AppSheetHeader";
-import { ClientCreateRequest } from "@/types/client";
 import { Controller, useForm } from "react-hook-form";
+import { Text, View } from "react-native";
 
 interface CompanionClientComponentProps {
   onSuccess?: (client: ClientCreateRequest, index: number) => void;
@@ -81,23 +81,22 @@ const CompanionClientComponent = forwardRef<
             {
               label: "Xác nhận",
               variant: "success",
-              onPress: handleSubmit((value) => {
-                onSuccess?.(
-                  {
-                    ...value,
-                    isLandlordClient: false,
-                    isActive: true,
-                  },
-                  index
-                );
-                bottomSheetRef.current?.close();
-              }),
+              onPress: handleSubmit(
+                (value) => {
+                  onSuccess?.(value, index);
+                  bottomSheetRef.current?.close();
+                },
+                (errors) => {
+                  // Validation errors sẽ được hiển thị tự động qua error prop trong Input
+                  console.log("Validation errors:", errors);
+                }
+              ),
             },
           ]}
         />
       </BottomSheetFooter>
     ),
-    [index]
+    [index, onSuccess, handleSubmit]
   );
 
   const renderBackdrop = useCallback(
@@ -115,7 +114,7 @@ const CompanionClientComponent = forwardRef<
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["80%"]}
+      snapPoints={["90%"]}
       index={-1}
       backdropComponent={renderBackdrop}
       enablePanDownToClose
@@ -142,13 +141,24 @@ const CompanionClientComponent = forwardRef<
           <Controller
             control={control}
             name="name"
-            render={({ field: { onChange, value } }) => (
+            rules={{
+              required: "Vui lòng nhập họ và tên người ở cùng",
+              validate: (value) => {
+                if (!value || value.trim() === "") {
+                  return "Vui lòng nhập họ và tên người ở cùng";
+                }
+                return true;
+              },
+            }}
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
               <Input
-                label="Họ và tên người ở cùng"
+                label="Họ tên"
                 value={value}
                 onChangeText={onChange}
-                placeholder="Nhập họ và tên (không bắt buộc)"
+                placeholder="Nhập họ và tên"
                 icon="person-outline"
+                required
+                error={error?.message}
               />
             )}
           />
@@ -158,7 +168,19 @@ const CompanionClientComponent = forwardRef<
           <Controller
             control={control}
             name="phone"
-            render={({ field: { onChange, value } }) => (
+            rules={{
+              required: "Vui lòng nhập số điện thoại",
+              validate: (value) => {
+                if (!value || value.trim() === "") {
+                  return "Vui lòng nhập số điện thoại";
+                }
+                if (value.length < 10) {
+                  return "Số điện thoại phải có ít nhất 10 số";
+                }
+                return true;
+              },
+            }}
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
               <Input
                 label="Số điện thoại"
                 value={value}
@@ -166,8 +188,10 @@ const CompanionClientComponent = forwardRef<
                 maxLength={10}
                 keyboardType="phone-pad"
                 onChangeText={onChange}
-                placeholder="Nhập số điện thoại (không bắt buộc)"
+                placeholder="Nhập số điện thoại"
                 icon="call-outline"
+                required
+                error={error?.message}
               />
             )}
           />
@@ -179,7 +203,7 @@ const CompanionClientComponent = forwardRef<
             name="idCardNumber"
             render={({ field: { onChange, value } }) => (
               <Input
-                label="CCCD/CMND (tùy chọn)"
+                label="CCCD/CMND"
                 value={value}
                 maxLength={12}
                 keyboardType="numeric"
@@ -197,7 +221,7 @@ const CompanionClientComponent = forwardRef<
           render={({ field: { onChange, value } }) => (
             <Input
               type="area"
-              label="Địa chỉ thường trú (tùy chọn)"
+              label="Địa chỉ thường trú"
               value={value}
               onChangeText={onChange}
               placeholder="Nhập địa chỉ thường trú"
@@ -213,8 +237,8 @@ const CompanionClientComponent = forwardRef<
             Gợi ý nhập thông tin
           </Text>
           <Text className="text-xs text-emerald-700">
-            Bạn không bắt buộc phải nhập đầy đủ, nhưng nên có ít nhất họ tên
-            hoặc số điện thoại để dễ quản lý sau này.
+            Họ tên và số điện thoại là bắt buộc. Các thông tin khác có thể bỏ
+            qua.
           </Text>
         </View>
       </BottomSheetScrollView>
@@ -225,5 +249,3 @@ const CompanionClientComponent = forwardRef<
 CompanionClientComponent.displayName = "CompanionClientComponent";
 
 export default CompanionClientComponent;
-
-

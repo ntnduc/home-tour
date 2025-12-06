@@ -49,6 +49,7 @@ BEGIN
         WHERE "id" = sequences.id
         RETURNING * INTO sequences;
     ELSE
+        counterCurrent:= sequences.counter;
         IF config."resetType" = 'NONE' THEN
             counterCurrent:= sequences.counter;
         ELSEIF config."resetType" = 'YEARLY'

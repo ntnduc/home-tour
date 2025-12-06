@@ -42,24 +42,28 @@ const CreateContractScreen = ({
     null
   );
 
-  const { control, watch, reset, handleSubmit } =
+  const { control, watch, reset, handleSubmit, setValue, getValues } =
     useForm<ContractCreateRequest>({
       defaultValues: {
         partnerClientCount: 0,
+        contractClientLandlord: {
+          name: "",
+          phone: "",
+          isLandlordClient: true,
+          isActive: true,
+        },
       },
     });
   const {
     fields: contractServices,
     update,
     append,
+    remove,
   } = useFieldArray({
     control,
     name: "contractServices",
     keyName: "fieldId",
   });
-
-  const contractServiceRef = useRef<ContractServiceComponentRef>(null);
-  const companionClientRef = useRef<CompanionClientComponentRef>(null);
 
   const {
     fields: contractClientsFields,
@@ -70,6 +74,9 @@ const CreateContractScreen = ({
     control,
     name: "contractClient",
   });
+
+  const contractServiceRef = useRef<ContractServiceComponentRef>(null);
+  const companionClientRef = useRef<CompanionClientComponentRef>(null);
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -85,6 +92,7 @@ const CreateContractScreen = ({
             rentAmountAgreed: room.rentAmount,
             depositAmountPaid: room.defaultDepositAmount,
             paymentDueDay: room.defaultPaymentDueDay,
+            ignoreAutoUpdatePartnerNumber: false,
             contractServices: room.contractServices.map((item) => {
               return { ...item, fieldId: generateId() };
             }),
@@ -130,10 +138,8 @@ const CreateContractScreen = ({
     );
   };
 
-  const contractClients = watch("contractClient") || [];
-
   const handleAddCompanion = () => {
-    const newIndex = contractClients.length || 1;
+    const newIndex = contractClientsFields.length || 1;
     const emptyClient = {
       name: "",
       phone: "",
@@ -145,13 +151,18 @@ const CreateContractScreen = ({
   };
 
   const handleEditCompanion = (index: number) => {
-    const client = contractClients[index];
+    const client = contractClientsFields[index];
     if (!client) return;
     companionClientRef.current?.expand(client as any, index);
   };
 
   const handleDeleteCompanion = (index: number) => {
-    if (index === 0) return;
+    const ignoreAutoUpdatePartnerNumber = getValues(
+      "ignoreAutoUpdatePartnerNumber"
+    );
+    if (!ignoreAutoUpdatePartnerNumber) {
+      setValue("partnerClientCount", contractClientsFields.length - 1 || 0);
+    }
     removeClient(index);
   };
 
@@ -160,10 +171,16 @@ const CreateContractScreen = ({
       formData.contractClient = formData.contractClient.map(
         (client, index) => ({
           ...client,
-          isLandlordClient: index === 0,
+          isLandlordClient: false,
         })
       );
     }
+
+    const contractClient = [
+      ...formData.contractClient,
+      { ...formData.contractClientLandlord, isLandlordClient: true },
+    ];
+    formData.contractClient = contractClient;
 
     navigation.navigate("ConfirmCreateContract", {
       contract: formData,
@@ -237,7 +254,7 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="contractClient.0.name"
+              name="contractClientLandlord.name"
               rules={{ required: "Vui lòng nhập tên người thuê" }}
               render={({
                 field: { onChange, value },
@@ -258,7 +275,7 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="contractClient.0.phone"
+              name="contractClientLandlord.phone"
               rules={{ required: "Vui lòng nhập số điện thoại người thuê" }}
               render={({
                 field: { onChange, value },
@@ -282,7 +299,7 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="contractClient.0.idCardNumber"
+              name="contractClientLandlord.idCardNumber"
               rules={{ required: "Vui lòng nhập CCCD/CMND người thuê" }}
               render={({
                 field: { onChange, value },
@@ -302,14 +319,35 @@ const CreateContractScreen = ({
               )}
             />
           </View>
+          <View className="">
+            <Controller
+              control={control}
+              name="partnerClientCount"
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <Input
+                    label="Số lượng người ở cùng"
+                    value={value?.toString()}
+                    onChangeText={(text) => {
+                      setValue("ignoreAutoUpdatePartnerNumber", true);
+                      onChange(text);
+                    }}
+                    placeholder="Nhập số lượng người ở cùng"
+                    type="number"
+                    icon="people-outline"
+                    keyboardType="numeric"
+                  />
+                </View>
+              )}
+            />
+          </View>
         </CardComponent>
 
         <PartnerClientsSection
-          control={control}
-          clients={contractClients as any}
           onAdd={handleAddCompanion}
           onEdit={handleEditCompanion}
           onDelete={handleDeleteCompanion}
+          data={contractClientsFields}
         />
 
         <CardComponent title="Thời hạn thuê">
@@ -485,13 +523,32 @@ const CreateContractScreen = ({
             <View className="flex flex-col gap-3">
               {contractServices.map((service, index) => (
                 <Controller
-                  key={service.fieldId}
+                  key={service.id || generateId()}
                   control={control}
                   name={`contractServices.${index}`}
                   render={({ field: { value } }) => (
                     <ServiceItem
                       key={`service-item-${service.fieldId}`}
                       service={service}
+                      onDelete={() => {
+                        Alert.alert(
+                          "Xóa dịch vụ",
+                          "Bạn có chắc chắn muốn xóa dịch vụ này không?",
+                          [
+                            {
+                              text: "Hủy",
+                              style: "cancel",
+                            },
+                            {
+                              text: "Xóa",
+                              style: "destructive",
+                              onPress: () => {
+                                remove(index);
+                              },
+                            },
+                          ]
+                        );
+                      }}
                       index={index}
                       onEdit={() =>
                         openContractServiceForm(
@@ -562,18 +619,17 @@ const CreateContractScreen = ({
       <CompanionClientComponent
         ref={companionClientRef}
         onSuccess={(client, index) => {
-          const existing = contractClients[index];
+          const existing = contractClientsFields[index];
           if (existing) {
-            updateClient(index, {
-              ...(existing as any),
-              ...client,
-              isLandlordClient: index === 0,
-            } as any);
+            updateClient(index, client);
           } else {
-            appendClient({
-              ...client,
-              isLandlordClient: index === 0,
-            } as any);
+            const ignoreAutoUpdatePartnerNumber = getValues(
+              "ignoreAutoUpdatePartnerNumber"
+            );
+            if (!ignoreAutoUpdatePartnerNumber) {
+              setValue("partnerClientCount", contractClientsFields.length + 1);
+            }
+            appendClient(client);
           }
         }}
       />

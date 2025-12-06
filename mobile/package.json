@@ -7,7 +7,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "clean": "rm -rf node_modules && rm -rf .expo && yarn && expo start --clear"
+    "clean": "rm -rf node_modules && rm -rf .expo && yarn && expo start --clear",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios",
+    "build:all": "eas build --platform all",
+    "build:preview": "eas build --profile preview",
+    "build:production": "eas build --profile production",
+    "build:testflight": "eas build --profile testflight --platform ios",
+    "submit:testflight": "eas submit --platform ios --profile testflight",
+    "build-and-submit:testflight": "eas build --profile testflight --platform ios --auto-submit"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.6",

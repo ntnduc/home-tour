@@ -8,13 +8,14 @@ export interface ContractService {
   calculationMethod: ServiceCalculateMethod;
   isEnabled: boolean;
   notes?: string;
-  name?: string;
+  name: string;
   helperValue?: number | null;
 }
 
 export interface ContractServiceCreateRequest
   extends Omit<ContractService, "id" | "contractId"> {
   fieldId?: string;
+  id?: string;
 }
 
 export interface ContractServiceUpdateRequest

@@ -27,6 +27,8 @@ export interface Contract {
 export interface ContractCreateRequest extends Omit<Contract, "id" | "status"> {
   contractServices: ContractServiceCreateRequest[];
   contractClient: ClientCreateRequest[];
+  contractClientLandlord: ClientCreateRequest;
+  ignoreAutoUpdatePartnerNumber?: boolean;
 }
 
 export interface ContractUpdateRequest {

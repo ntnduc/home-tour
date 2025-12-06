@@ -15,6 +15,7 @@ interface ServiceItemProps {
   service: ContractServiceCreateRequest;
   index: number;
   onEdit: () => void;
+  onDelete: (fieldId: string, valueObj: any) => void;
   onChange: (service: ContractServiceCreateRequest) => void;
 }
 
@@ -23,9 +24,10 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
   index,
   onEdit,
   onChange,
+  onDelete,
 }) => {
   const getActions = () => {
-    return ["edit"];
+    return ["edit", "delete"];
   };
 
   const _onChangeHelperValue = useDebounce((text: string) => {
@@ -49,14 +51,14 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
       }
       description={
         <View className="mt-1">
-          <View className="flex-row items-center justify-between">
+          <View className="md:flex-row flex-col">
+            <Text className="text-base font-semibold text-blue-600 md:flex-1">
+              {formatCurrency(service?.price?.toString() ?? "0") +
+                " đ/" +
+                SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
+                  .unit}
+            </Text>
             <View className="flex-row items-center">
-              <Text className="text-base font-semibold text-blue-600 flex-1">
-                {formatCurrency(service?.price?.toString() ?? "0") +
-                  " đ/" +
-                  SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
-                    .unit}
-              </Text>
               <Ionicons
                 name={
                   SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
@@ -83,6 +85,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
       actions={getActions()}
       onActionPress={(key) => {
         if (key === "edit") onEdit();
+        if (key === "delete") onDelete(service.fieldId ?? "", service);
       }}
     >
       {service.isEnabled &&

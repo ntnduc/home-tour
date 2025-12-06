@@ -33,7 +33,6 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { Controller, useForm } from "react-hook-form";
-import Toast from "react-native-toast-message";
 
 interface ContractServiceComponentProps {
   onSuccess?: (service: ContractServiceDetailResponse, index: number) => void;
@@ -71,6 +70,7 @@ const ContractServiceComponent = forwardRef<
     handleSubmit,
     watch,
     setValue: setValueForm,
+    reset,
     formState: { errors, defaultValues },
   } = useForm<ContractServiceDetailResponse>({
     defaultValues: {
@@ -93,9 +93,13 @@ const ContractServiceComponent = forwardRef<
       bottomSheetRef.current?.close();
     },
     expand: (service: ContractServiceDetailResponse, index: number) => {
+      reset();
       setIndex(index);
-      setValueForm("name", service.name);
-      setValueForm("calculationMethod", service.calculationMethod);
+      service?.name && setValueForm("name", service.name);
+      setValueForm(
+        "calculationMethod",
+        service.calculationMethod ?? ServiceCalculateMethod.PER_UNIT_SIMPLE
+      );
       if (service.calculationMethod === ServiceCalculateMethod.FREE) {
         setValueForm("price", 0);
       } else {
@@ -215,7 +219,7 @@ const ContractServiceComponent = forwardRef<
                   message: "Nhập số lượng",
                 },
               }}
-              render={({ field: { onChange, onBlur, value } }) => (
+              render={({ field: { onChange, value } }) => (
                 <Input
                   label="Số lượng"
                   min={0}
@@ -253,12 +257,8 @@ const ContractServiceComponent = forwardRef<
                   onSuccess?.(value, index);
                   bottomSheetRef.current?.close();
                 },
-                () => {
-                  Toast.show({
-                    type: "error",
-                    text1: "Thất bại",
-                    text2: "Vui lòng nhập đầy đủ thông tin!",
-                  });
+                (erroes) => {
+                  // TODO: Do nothing
                 }
               ),
               variant: "success",
@@ -312,6 +312,12 @@ const ContractServiceComponent = forwardRef<
           <Controller
             control={control}
             name="name"
+            rules={{
+              required: {
+                value: true,
+                message: "Vui lòng nhập tên dịch vụ",
+              },
+            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Tên dịch vụ"
@@ -382,6 +388,20 @@ const ContractServiceComponent = forwardRef<
           <Controller
             control={control}
             name="price"
+            rules={{
+              validate: (
+                value: number,
+                formValues: ContractServiceDetailResponse
+              ) => {
+                if (
+                  formValues.calculationMethod === ServiceCalculateMethod.FREE
+                ) {
+                  return true;
+                }
+                if (value > 0) return true;
+                return "Giá dịch vụ phải lớn hơn 0";
+              },
+            }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label="Giá dịch vụ"
