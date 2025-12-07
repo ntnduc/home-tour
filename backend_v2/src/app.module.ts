@@ -10,7 +10,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ClientModule } from './modules/client/client.module';
 import { ContractModule } from './modules/contract/contract.module';
 import { CurrentUserModule } from './modules/current.user';
+import { InvoiceModule } from './modules/invoice/invoice.module';
 import { LocationModule } from './modules/location/location.module';
+import { PaymentModule } from './modules/payment/payment.module';
 import { PropertyModule } from './modules/property/property.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { ReportModule } from './modules/report/report.module';
@@ -52,6 +54,8 @@ import { UsersModule } from './modules/users/users.module';
     LocationModule,
     PropertyModule,
     ContractModule,
+    InvoiceModule,
+    PaymentModule,
     TestModule,
     ServicesModule,
     ReportModule,
