@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsNumber,
   IsOptional,
@@ -56,6 +57,10 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   notes?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isPrepaidRoom?: boolean;
+
   @IsArray()
   @IsOptional()
   contractClient?: ContractClientCreateDto[];
@@ -69,6 +74,7 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
 
   getEntity(): Contracts {
     const entity = new Contracts();
+    entity.isPrepaidRoom = this.isPrepaidRoom;
     entity.propertyId = this.propertyId;
     entity.roomId = this.roomId;
     entity.startDate = new Date(this.startDate);

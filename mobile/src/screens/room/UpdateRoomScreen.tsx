@@ -5,6 +5,7 @@ import { ComboBox } from "@/components/ComboBox";
 import InputBase from "@/components/Input";
 import Loading from "@/components/Loading";
 import Status from "@/components/Status";
+import { Switch } from "@/components/Switch";
 import { ROOM_STATUS_OPTIONS } from "@/constant/room.constant";
 import {
   RoomDetailResponse,
@@ -300,6 +301,20 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                   icon="shield-checkmark"
                   label="Tiền cọc"
                   error={erroForms.defaultDepositAmount?.message}
+                />
+              )}
+            />
+          </View>
+
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="isPrepaidRoom"
+              render={({ field: { onChange, value } }) => (
+                <Switch
+                  label="Thanh toán tiền phòng trước"
+                  value={value as boolean}
+                  onValueChange={onChange}
                 />
               )}
             />

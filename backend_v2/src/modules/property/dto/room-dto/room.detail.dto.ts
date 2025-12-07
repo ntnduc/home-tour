@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsNumber,
   IsOptional,
   IsString,
@@ -55,6 +56,10 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
   @IsOptional()
   propertyName?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isPrepaidRoom?: boolean;
+
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
     this.propertyId = entity.propertyId;
@@ -67,6 +72,7 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
     this.defaultDepositAmount = entity.defaultDepositAmount;
     this.defaultPaymentDueDay = entity.defaultPaymentDueDay;
     this.description = entity.description;
+    this.isPrepaidRoom = entity.isPrepaidRoom;
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
     this.createdBy = entity.createdBy;

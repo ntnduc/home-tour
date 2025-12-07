@@ -47,4 +47,7 @@ export class Rooms extends BaseEntity {
 
   @OneToMany(() => Contracts, (contract) => contract.room)
   contracts: Contracts[];
+
+  @Column({ nullable: true, default: true })
+  isPrepaidRoom?: boolean;
 }

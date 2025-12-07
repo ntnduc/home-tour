@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNumber,
@@ -57,6 +58,10 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
   @IsString()
   notes?: string;
 
+  @IsOptional()
+  @IsBoolean()
+  isPrepaidRoom?: boolean;
+
   getEntity(entity: Contracts): QueryDeepPartialEntity<Contracts> {
     const updateData: QueryDeepPartialEntity<Contracts> = {};
 
@@ -72,7 +77,8 @@ export class ContractUpdateDto implements BaseUpdateDto<Contracts> {
       updateData.contractScanURL = this.contractScanURL;
     if (this.status) updateData.status = this.status;
     if (this.notes !== undefined) updateData.notes = this.notes;
-
+    if (this.isPrepaidRoom !== undefined)
+      updateData.isPrepaidRoom = this.isPrepaidRoom;
     return updateData;
   }
 }

@@ -24,6 +24,7 @@ export interface Room {
   area?: number;
   property?: PropertyDetail;
   contracts: ContractListResponse[];
+  isPrepaidRoom?: boolean;
 }
 
 export interface RoomListResponse extends Room {

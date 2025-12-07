@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseCreateDto } from 'src/common/base/dto/create.dto';
 import { RoomStatus } from 'src/common/enums/room.enum';
 import { Rooms } from '../../entities/rooms.entity';
@@ -35,6 +35,10 @@ export class RoomCreateDto extends BaseCreateDto<Rooms> {
   @IsOptional()
   description?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isPrepaidRoom?: boolean;
+
   @IsString()
   propertyId: string;
 
@@ -50,6 +54,7 @@ export class RoomCreateDto extends BaseCreateDto<Rooms> {
     entity.defaultPaymentDueDay = this.defaultPaymentDueDay;
     entity.description = this.description;
     entity.propertyId = this.propertyId;
+    entity.isPrepaidRoom = this.isPrepaidRoom;
     return entity;
   }
 }

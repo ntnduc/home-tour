@@ -25,6 +25,7 @@ export interface Contract {
   status: ContractStatus;
   notes?: string;
   partnerClientCount?: number;
+  isPrepaidRoom?: boolean;
 }
 
 export interface ContractCreateRequest extends Omit<Contract, "id" | "status"> {

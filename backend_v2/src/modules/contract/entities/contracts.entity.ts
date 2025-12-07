@@ -54,6 +54,9 @@ export class Contracts extends BaseEntity {
   @Column({ nullable: true })
   contractScanURL?: string;
 
+  @Column({ nullable: true, default: true })
+  isPrepaidRoom?: boolean;
+
   @Column({
     type: 'enum',
     enum: ContractStatus,

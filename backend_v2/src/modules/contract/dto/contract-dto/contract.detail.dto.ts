@@ -7,6 +7,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   roomId: string;
   code: string;
   partnerClientCount?: number;
+  isPrepaidRoom?: boolean;
   room: {
     id: string;
     name: string;
@@ -71,6 +72,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.propertyId = entity.propertyId;
     this.roomId = entity.roomId;
     this.partnerClientCount = entity.partnerClientCount;
+    this.isPrepaidRoom = entity.isPrepaidRoom;
     this.room = {
       id: entity.room?.id || '',
       name: entity.room?.name || '',

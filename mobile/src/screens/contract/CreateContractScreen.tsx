@@ -2,6 +2,7 @@ import ActionButtonBottom from "@/components/ActionButtonBottom";
 import DatePicker from "@/components/DatePicker";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
+import { Switch } from "@/components/Switch";
 import { ServiceCalculateMethod } from "@/constant/service.constant";
 import { RootStackParamList } from "@/navigation/types";
 import { ContractServiceDetailResponse } from "@/types/contract-service";
@@ -52,6 +53,7 @@ const CreateContractScreen = ({
           isLandlordClient: true,
           isActive: true,
         },
+        isPrepaidRoom: true,
       },
     });
   const {
@@ -87,6 +89,7 @@ const CreateContractScreen = ({
           const room = roomServiceResponse.data;
           setRoomData(room);
           reset({
+            isPrepaidRoom: true,
             roomId: room.id,
             propertyId: room.propertyId,
             rentAmountAgreed: room.rentAmount,
@@ -425,6 +428,22 @@ const CreateContractScreen = ({
                     returnKeyLabel="Xong"
                     required
                     showClear={false}
+                  />
+                );
+              }}
+            />
+          </View>
+
+          <View className="mb-3">
+            <Controller
+              control={control}
+              name="isPrepaidRoom"
+              render={({ field: { onChange, value } }) => {
+                return (
+                  <Switch
+                    label="Thanh toán tiền phòng trước"
+                    value={value as boolean}
+                    onValueChange={onChange}
                   />
                 );
               }}

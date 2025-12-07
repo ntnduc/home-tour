@@ -24,7 +24,7 @@ export class ContractListDto extends BaseListDto<Contracts> {
   totalProperties: number;
   createdAt: Date;
   updatedAt: Date;
-
+  isPrepaidRoom?: boolean;
   fromEntity(entity: Contracts): void {
     this.id = entity.id;
     this.propertyId = entity.propertyId;
@@ -42,5 +42,6 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
     this.code = entity.code;
+    this.isPrepaidRoom = entity.isPrepaidRoom;
   }
 }

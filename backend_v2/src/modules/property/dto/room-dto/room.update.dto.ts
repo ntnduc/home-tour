@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseUpdateDto } from 'src/common/base/dto/update.dto';
 import { RoomStatus } from 'src/common/enums/room.enum';
 import { Rooms } from '../../entities/rooms.entity';
@@ -31,6 +31,10 @@ export class RoomUpdateDto extends BaseUpdateDto<Rooms> {
   @IsString()
   description?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isPrepaidRoom?: boolean;
+
   getEntity(): Rooms {
     const entity = new Rooms();
     entity.name = this.name;
@@ -41,6 +45,7 @@ export class RoomUpdateDto extends BaseUpdateDto<Rooms> {
     entity.floor = this.floor;
     entity.defaultDepositAmount = this.defaultDepositAmount;
     entity.defaultPaymentDueDay = this.defaultPaymentDueDay;
+    entity.isPrepaidRoom = this.isPrepaidRoom;
     entity.description = this.description;
     return entity;
   }
