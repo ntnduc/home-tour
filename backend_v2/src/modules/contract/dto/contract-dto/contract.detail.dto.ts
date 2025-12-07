@@ -61,6 +61,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   contractServices: Array<{
     id: string;
     price?: number;
+    name?: string;
     isEnabled: boolean;
     notes?: string;
   }>;
@@ -123,6 +124,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
         price: ls.price,
         isEnabled: ls.isEnabled,
         notes: ls.notes,
+        name: ls.name,
       })) || [];
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;

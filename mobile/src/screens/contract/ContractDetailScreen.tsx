@@ -343,27 +343,24 @@ const ContractDetailScreen = ({
                       />
                       <View className="ml-2 flex-1">
                         <Text className="text-base font-medium text-gray-900">
-                          {service.service?.name || "Dịch vụ"}
+                          {service.name}
                         </Text>
-                        {service.service?.icon && (
-                          <View className="flex-row items-center mt-1">
-                            <Ionicons
+                        <View className="flex-row items-center mt-1">
+                          {/* <Ionicons
                               name={service.service.icon as any}
                               size={14}
                               color="#9CA3AF"
-                            />
-                            <Text className="text-xs text-gray-500 ml-1">
-                              {formatCurrency(service.price)}đ/tháng
-                            </Text>
-                          </View>
-                        )}
+                            /> */}
+                          {/* <Text className="text-xs text-gray-500 ml-1">
+                            {formatCurrency(service.price)}đ/tháng
+                          </Text> */}
+                        </View>
                       </View>
                     </View>
                     <View className="items-end">
                       <Text className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(service.price)}đ
+                        {formatCurrency(service.price)} đ/tháng
                       </Text>
-                      <Text className="text-xs text-gray-500">/tháng</Text>
                     </View>
                   </View>
                 );

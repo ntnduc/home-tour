@@ -1,5 +1,8 @@
 import { ClientCreateRequest } from "./client";
-import { ContractServiceCreateRequest } from "./contract-service";
+import {
+  ContractServiceCreateRequest,
+  ContractServiceDetailResponse,
+} from "./contract-service";
 
 export enum ContractStatus {
   PENDING_START = "PENDING_START",
@@ -87,18 +90,7 @@ export interface ContractDetailResponse {
     moveOutDate?: string | null;
     isActiveInContract: boolean;
   }>;
-  contractServices: Array<{
-    id: string;
-    serviceId: string;
-    service: {
-      id: string;
-      name: string;
-      icon: string;
-    };
-    price: string;
-    isEnabled: boolean;
-    notes?: string | null;
-  }>;
+  contractServices: ContractServiceDetailResponse[];
 }
 
 export interface ContractListResponse {
