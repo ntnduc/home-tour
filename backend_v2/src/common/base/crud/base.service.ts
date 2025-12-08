@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -69,45 +70,50 @@ export class BaseService<
   async getAll(
     filter: BaseFilterDto<TEntity>,
   ): Promise<PaginateResult<TListDto>> {
-    const { globalKey, filters: filterDto, sort, limit, offset } = filter;
-    let query = await this.specQuery();
+    try {
+      const { globalKey, filters: filterDto, sort, limit, offset } = filter;
+      let query = await this.specQuery();
 
-    query.skip(offset);
-    query.take(limit);
+      query.skip(offset);
+      query.take(limit);
 
-    const isApplyFilterOverridden = isMethodOverridden(
-      this,
-      'applyFilter',
-      BaseService,
-    );
+      const isApplyFilterOverridden = isMethodOverridden(
+        this,
+        'applyFilter',
+        BaseService,
+      );
 
-    if (isApplyFilterOverridden) {
-      ({ query, filter } = await this.applyFilter(query, filter));
-    } else {
-      ({ query, filter } = await this.applyFilter(query, filter));
+      if (isApplyFilterOverridden) {
+        ({ query, filter } = await this.applyFilter(query, filter));
+      } else {
+        ({ query, filter } = await this.applyFilter(query, filter));
+      }
+      if (globalKey) {
+        query.andWhere('entity.name ILIKE :globalKey', {
+          globalKey: `%${globalKey}%`,
+        });
+      }
+
+      if (filterDto) {
+        Object.keys(filterDto).forEach((key) => {
+          query.andWhere(`entity.${key} = :${key}`, { [key]: filterDto[key] });
+        });
+      }
+
+      if (sort) {
+        Object.keys(sort).forEach((key) => {
+          query.orderBy(`entity.${key}`, sort[key]);
+        });
+      }
+
+      const [items, total] = await query.getManyAndCount();
+
+      const listDto = await this.beautifyResult(items);
+      return new PaginateResult(listDto, total, limit, offset);
+    } catch (error) {
+      console.error('Error getAll:', error);
+      throw new BadRequestException('Lỗi khi lấy dữ liệu!');
     }
-    if (globalKey) {
-      query.andWhere('entity.name ILIKE :globalKey', {
-        globalKey: `%${globalKey}%`,
-      });
-    }
-
-    if (filterDto) {
-      Object.keys(filterDto).forEach((key) => {
-        query.andWhere(`entity.${key} = :${key}`, { [key]: filterDto[key] });
-      });
-    }
-
-    if (sort) {
-      Object.keys(sort).forEach((key) => {
-        query.orderBy(`entity.${key}`, sort[key]);
-      });
-    }
-
-    const [items, total] = await query.getManyAndCount();
-
-    const listDto = await this.beautifyResult(items);
-    return new PaginateResult(listDto, total, limit, offset);
   }
 
   async get(id: string): Promise<TDetailDto> {
@@ -126,27 +132,37 @@ export class BaseService<
   }
 
   async update(dto: TUpdateDto): Promise<TDetailDto> {
-    const entity = await this.genericRepository.findOne({
-      where: {
-        id: dto.id as any,
-      },
-    });
-    if (!entity) {
-      throw new NotFoundException('Không tìm thấy dữ liệu!');
+    try {
+      const entity = await this.genericRepository.findOne({
+        where: {
+          id: dto.id as any,
+        },
+      });
+      if (!entity) {
+        throw new NotFoundException('Không tìm thấy dữ liệu!');
+      }
+      const updatedEntity = dto.getEntity(entity);
+      const newEntity = await this.genericRepository.update(
+        entity.id,
+        updatedEntity,
+      );
+      const result = new this.detailDto();
+      result.fromEntity(newEntity.raw);
+      return result;
+    } catch (error) {
+      console.error('Error update:', error);
+      throw new BadRequestException('Lỗi khi cập nhật dữ liệu!');
     }
-    const updatedEntity = dto.getEntity(entity);
-    const newEntity = await this.genericRepository.update(
-      entity.id,
-      updatedEntity,
-    );
-    const result = new this.detailDto();
-    result.fromEntity(newEntity.raw);
-    return result;
   }
 
   delete(id: string): Promise<void> {
-    this.genericRepository.delete(id);
-    return Promise.resolve();
+    try {
+      this.genericRepository.delete(id);
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error delete:', error);
+      throw new BadRequestException('Lỗi khi xóa dữ liệu!');
+    }
   }
 
   async create(dto: TCreateDto): Promise<TDetailDto> {
