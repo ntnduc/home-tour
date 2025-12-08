@@ -8583,6 +8583,18 @@
 				}
 			],
 			"id": "25885334-b7c18257-c223-4af4-b9e4-b7d64a5e2ec9"
+		},
+		{
+			"name": "New Request",
+			"id": "25885334-ecba9994-b495-406b-a77d-98b64a9cf38b",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
 		}
 	],
 	"auth": {
