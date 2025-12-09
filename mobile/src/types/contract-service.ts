@@ -16,6 +16,7 @@ export interface ContractServiceCreateRequest
   extends Omit<ContractService, "id" | "contractId"> {
   fieldId?: string;
   id?: string;
+  propertyServiceId?: string;
 }
 
 export interface ContractServiceUpdateRequest

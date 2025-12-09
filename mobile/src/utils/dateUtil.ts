@@ -6,3 +6,7 @@ export const formatDate = (dateString: string) => {
     year: "numeric",
   });
 };
+
+export const getCurrentDate = () => {
+  return new Date();
+};

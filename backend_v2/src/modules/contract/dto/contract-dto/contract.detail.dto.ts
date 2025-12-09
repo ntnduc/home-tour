@@ -1,6 +1,10 @@
+import { PropertyDetailDto } from 'src/modules/property/dto/properties-dto/property.detail.dto';
+import { RoomDetailDto } from 'src/modules/property/dto/room-dto/room.detail.dto';
 import { BaseDetailDto } from '../../../../common/base/dto/detail.dto';
 import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
+import { ContractClientDetailDto } from '../contract-client-dto/contract-client.detail.dto';
+import { ContractServiceDetailDto } from '../contract-services-dto/contract-service.detail.dto';
 
 export class ContractDetailDto extends BaseDetailDto<Contracts> {
   propertyId: string;
@@ -8,36 +12,8 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   code: string;
   partnerClientCount?: number;
   isPrepaidRoom?: boolean;
-  room: {
-    id: string;
-    name: string;
-    area?: number;
-    rentAmount: number;
-    maxOccupancy?: number;
-    floor?: string;
-    property: {
-      id: string;
-      name: string;
-      address: string;
-    };
-  };
-  primaryPropertyUser: {
-    id: string;
-    fullName: string;
-    phone: string;
-    email?: string;
-  };
-  landlord: {
-    id: string;
-    fullName: string;
-    phoneNumber: string;
-    email?: string;
-  };
-  property: {
-    id: string;
-    name: string;
-    address: string;
-  };
+  room?: RoomDetailDto;
+  property?: PropertyDetailDto;
   startDate: Date;
   endDate?: Date;
   rentAmountAgreed: number;
@@ -46,54 +22,16 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   contractScanURL?: string;
   status: ContractStatus;
   notes?: string;
-  contractClient: Array<{
-    id: string;
-    clientId: string;
-    property: {
-      id: string;
-      fullName: string;
-      phoneNumber: string;
-      email?: string;
-    };
-    moveInDate?: Date;
-    moveOutDate?: Date;
-    isActiveInContract: boolean;
-  }>;
-  contractServices: Array<{
-    id: string;
-    price?: number;
-    name?: string;
-    isEnabled: boolean;
-    notes?: string;
-  }>;
+  contractClient?: ContractClientDetailDto[];
+  contractServices?: ContractServiceDetailDto[];
 
   fromEntity(entity: Contracts): void {
     this.id = entity.id;
+    this.code = entity.code;
     this.propertyId = entity.propertyId;
     this.roomId = entity.roomId;
     this.partnerClientCount = entity.partnerClientCount;
     this.isPrepaidRoom = entity.isPrepaidRoom;
-    this.room = {
-      id: entity.room?.id || '',
-      name: entity.room?.name || '',
-      area: entity.room?.area,
-      rentAmount: entity.room?.rentAmount || 0,
-      maxOccupancy: entity.room?.maxOccupancy,
-      floor: entity.room?.floor,
-      property: {
-        id: entity.room?.property?.id || '',
-        name: entity.room?.property?.name || '',
-        address: entity.room?.property?.address || '',
-      },
-    };
-    if (entity.property) {
-      this.property = {
-        id: entity.property?.id || '',
-        name: entity.property?.name || '',
-        address: entity.property?.address || '',
-      };
-    }
-
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
     this.rentAmountAgreed = entity.rentAmountAgreed
@@ -106,32 +44,39 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractScanURL = entity.contractScanURL;
     this.status = entity.status;
     this.notes = entity.notes;
-    this.contractClient =
-      entity.contractClient?.map((lp) => ({
-        id: lp.id,
-        clientId: lp.clientId,
-        property: {
-          id: lp.client?.id || '',
-          fullName: lp.client?.fullName || '',
-          phoneNumber: lp.client?.phoneNumber || '',
-          email: lp.client?.email,
-        },
-        moveInDate: lp.moveInDate,
-        moveOutDate: lp.moveOutDate,
-        isActiveInContract: lp.isActiveInContract,
-      })) || [];
+
+    //Room
+    if (entity.room) {
+      this.room = new RoomDetailDto();
+      this.room.fromEntity(entity.room);
+    }
+
+    //Property
+    if (entity.property) {
+      this.property = new PropertyDetailDto();
+      this.property.fromEntity(entity.property);
+    }
+
+    //Contract Client
+    if (entity.contractClient) {
+      this.contractClient = entity.contractClient.map((lp) => {
+        const contractClientDetailDto = new ContractClientDetailDto();
+        contractClientDetailDto.fromEntity(lp);
+        return contractClientDetailDto;
+      });
+    }
+
+    //Contract Services
     this.contractServices =
-      entity.contractServices?.map((ls) => ({
-        id: ls.id,
-        price: ls.price,
-        isEnabled: ls.isEnabled,
-        notes: ls.notes,
-        name: ls.name,
-      })) || [];
+      entity.contractServices?.map((ls) => {
+        const contractServiceDetailDto = new ContractServiceDetailDto();
+        contractServiceDetailDto.fromEntity(ls);
+        return contractServiceDetailDto;
+      }) || [];
+
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
     this.createdBy = entity.createdBy;
     this.updatedBy = entity.updatedBy;
-    this.code = entity.code;
   }
 }

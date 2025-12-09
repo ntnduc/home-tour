@@ -1,6 +1,10 @@
 import CardComponent from "@/screens/common/CardComponent";
 import { colors } from "@/theme/colors";
-import { ContractStatus } from "@/types/contract";
+import {
+  CONTRACT_STATUS_COLOR,
+  CONTRACT_STATUS_LABEL,
+  ContractStatus,
+} from "@/types/contract";
 import { RoomListResponse, RoomStatus } from "@/types/room";
 import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
@@ -67,41 +71,55 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
           )}
 
           {/* Thông tin thanh toán */}
-          {/* {item.paymentStatus && paymentStatusColor && (
-            <View style={styles.paymentInfo}>
-              <View style={styles.paymentRow}>
-                <Text style={styles.paymentLabel}>Trạng thái thanh toán:</Text>
-                <View
-                  style={[
-                    styles.paymentStatusBadge,
-                    { backgroundColor: paymentStatusColor.bg },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.paymentStatusText,
-                      { color: paymentStatusColor.color },
-                    ]}
-                  >
-                    {PAYMENT_STATUS_LABEL[item.paymentStatus as PaymentStatus]}
-                  </Text>
-                </View>
-              </View>
-              {item.dueDate && (
+          {contractActive &&
+            contractActive.status === ContractStatus.ACTIVE && (
+              <View style={styles.paymentInfo}>
                 <View style={styles.paymentRow}>
-                  <Text style={styles.paymentLabel}>Hạn thanh toán:</Text>
-                  <Text
+                  <Text style={styles.paymentLabel}>
+                    Trạng thái thanh toán:
+                  </Text>
+                  <View
                     style={[
-                      styles.paymentDateText,
-                      daysUntilDue && daysUntilDue < 0
-                        ? styles.overdueText
-                        : daysUntilDue && daysUntilDue <= 3
-                        ? styles.warningText
-                        : styles.normalText,
+                      styles.paymentStatusBadge,
+                      {
+                        backgroundColor:
+                          CONTRACT_STATUS_COLOR[contractActive.status].bg,
+                      },
                     ]}
                   >
-                    {formatDate(item.dueDate)}
-                    {daysUntilDue !== null && (
+                    <Text
+                      style={[
+                        styles.paymentStatusText,
+                        {
+                          color:
+                            CONTRACT_STATUS_COLOR[contractActive.status].color,
+                        },
+                      ]}
+                    >
+                      {CONTRACT_STATUS_LABEL[contractActive.status]}
+                    </Text>
+                  </View>
+                </View>
+                {contractActive.endDate && (
+                  <View style={styles.paymentRow}>
+                    <Text style={styles.paymentLabel}>Hạn thanh toán:</Text>
+                    <Text
+                      style={[
+                        styles.paymentDateText,
+                        contractActive.endDate &&
+                        new Date(contractActive.endDate) < new Date()
+                          ? styles.overdueText
+                          : contractActive.endDate &&
+                              new Date(contractActive.endDate) <=
+                                new Date(
+                                  new Date().setDate(new Date().getDate() + 3)
+                                )
+                            ? styles.warningText
+                            : styles.normalText,
+                      ]}
+                    >
+                      {formatDate(contractActive.endDate)}
+                      {/* {daysUntilDue !== null && (
                       <Text style={styles.daysText}>
                         {daysUntilDue < 0
                           ? ` (Quá hạn ${Math.abs(daysUntilDue)} ngày)`
@@ -111,20 +129,20 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
                           ? ` (Còn ${daysUntilDue} ngày)`
                           : ""}
                       </Text>
-                    )}
-                  </Text>
-                </View>
-              )}
-              {invoice && (
-                <View style={styles.paymentRow}>
-                  <Text style={styles.paymentLabel}>Tổng hóa đơn:</Text>
-                  <Text style={styles.invoiceAmount}>
-                    {invoice.totalAmount.toLocaleString()}đ
-                  </Text>
-                </View>
-              )}
-            </View>
-          )} */}
+                    )} */}
+                    </Text>
+                  </View>
+                )}
+                {contractActive.id && (
+                  <View style={styles.paymentRow}>
+                    <Text style={styles.paymentLabel}>Tổng hóa đơn:</Text>
+                    <Text style={styles.invoiceAmount}>
+                      {contractActive.depositAmountPaid.toLocaleString()}đ
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
         </View>
       </View>
 
@@ -163,7 +181,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
             />
             <Text style={styles.viewContractBtnText}>Xem hợp đồng</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.terminateContractBtn}
             onPress={() => {
               navigation.navigate("TerminateContract", {
@@ -177,22 +195,23 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
               color={colors.status.error}
             />
             <Text style={styles.terminateContractBtnText}>Kết thúc</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       ) : null}
 
       {/* Nút hành động thanh toán */}
-      {/* {item.paymentStatus &&
-        (item.paymentStatus === PaymentStatus.PENDING ||
-          item.paymentStatus === PaymentStatus.OVERDUE) && (
+      {contractActive &&
+        (contractActive.status === ContractStatus.ACTIVE ||
+          contractActive.status === ContractStatus.EXPIRED) && (
           <View style={styles.actionRow}>
             <TouchableOpacity
               style={styles.invoiceBtn}
               onPress={() => {
-                if (invoice) {
-                  navigation.navigate("InvoiceDetail", {
-                    invoice,
-                    fromHistory: false,
+                console.log("contractActive", contractActive);
+                if (contractActive.id) {
+                  navigation.navigate("CreateInvoice", {
+                    contractId: contractActive.id,
+                    roomId: item.id,
                   });
                 }
               }}
@@ -202,14 +221,14 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
                 size={16}
                 color={colors.primary.main}
               />
-              <Text style={styles.invoiceBtnText}>Xem hóa đơn</Text>
+              <Text style={styles.invoiceBtnText}>Tạo hóa đơn</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.payBtn}
               onPress={() => {
-                if (invoice) {
-                  navigation.navigate("InvoiceDetail", {
-                    invoice,
+                if (contractActive.id) {
+                  navigation.navigate("CreateInvoice", {
+                    invoiceId: contractActive.id,
                     fromHistory: false,
                   });
                 }
@@ -223,7 +242,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
               <Text style={styles.payBtnText}>Thanh toán</Text>
             </TouchableOpacity>
           </View>
-        )} */}
+        )}
     </CardComponent>
   );
 };

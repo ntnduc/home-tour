@@ -1,8 +1,10 @@
 import { ClientCreateRequest } from "./client";
+import { ContractClientDetailResponse } from "./contract-client";
 import {
   ContractServiceCreateRequest,
   ContractServiceDetailResponse,
 } from "./contract-service";
+import { RoomDetailResponse } from "./room";
 
 export enum ContractStatus {
   PENDING_START = "PENDING_START",
@@ -68,29 +70,9 @@ export interface ContractDetailResponse {
   contractScanURL?: string | null;
   status: ContractStatus;
   notes?: string | null;
-  room: {
-    id: string;
-    name: string;
-    rentAmount: number;
-  };
-  property: {
-    id: string;
-    name: string;
-    address: string;
-  };
-  contractClient: Array<{
-    id: string;
-    clientId: string;
-    property: {
-      id: string;
-      fullName: string;
-      phoneNumber: string;
-      email?: string | null;
-    };
-    moveInDate?: string | null;
-    moveOutDate?: string | null;
-    isActiveInContract: boolean;
-  }>;
+  room?: RoomDetailResponse;
+  property: RoomDetailResponse;
+  contractClient: ContractClientDetailResponse[];
   contractServices: ContractServiceDetailResponse[];
 }
 

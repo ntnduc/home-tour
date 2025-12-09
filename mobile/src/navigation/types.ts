@@ -41,9 +41,9 @@ export type RootStackParamList = {
   TerminateContract: { contract: Contract };
 
   // Invoice Management
-  InvoiceDetail: { invoice: Invoice; fromHistory?: boolean };
+  InvoiceDetail: { invoiceId: string; fromHistory?: boolean };
   InvoiceHistory: undefined;
-  CreateInvoice: { contractId: string };
+  CreateInvoice: { contractId?: string; roomId?: string };
 
   // Reports
   ReportDashboard: undefined;
