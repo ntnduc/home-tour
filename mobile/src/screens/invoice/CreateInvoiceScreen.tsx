@@ -1,23 +1,36 @@
-import { getContract } from "@/api/contract/contract.api";
-import DisplayField from "@/components/DisplayField";
-import Input from "@/components/Input";
-import LabelForm from "@/components/LabelForm";
-import Loading from "@/components/Loading";
-import { RootStackParamList } from "@/navigation/types";
-import { ContractDetailResponse } from "@/types/contract";
-import { InvoiceDetailResponse, InvoiceStatus } from "@/types/invoice";
-import { formatDate, getCurrentDate } from "@/utils/dateUtil";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Toast from "react-native-toast-message";
-import CardComponent from "../common/CardComponent";
+import { getContract } from '@/api/contract/contract.api';
+import DisplayField from '@/components/DisplayField';
+import Input from '@/components/Input';
+import Loading from '@/components/Loading';
+import { SERVICE_CALCULATE_METHOD_WITH_INFO } from '@/constant/service.constant';
+import { RootStackParamList } from '@/navigation/types';
+import { ContractDetailResponse } from '@/types/contract';
+import { ContractServiceDetailResponse } from '@/types/contract-service';
+import { InvoiceDetailResponse, InvoiceStatus } from '@/types/invoice';
+import { formatCurrency } from '@/utils/appUtil';
+import { getCurrentDate } from '@/utils/dateUtil';
+import { Ionicons } from '@expo/vector-icons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
+import CardComponent from '../common/CardComponent';
+
+type UtilityService = {
+  id: string;
+  name: string;
+  unit: string;
+  unitPrice: number;
+  oldIndex: string;
+  newIndex: string;
+  allowEditOld?: boolean;
+};
 
 type CreateInvoiceScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "CreateInvoice">;
-  route: { params: RootStackParamList["CreateInvoice"] };
+  navigation: NativeStackNavigationProp<RootStackParamList, 'CreateInvoice'>;
+  route: { params: RootStackParamList['CreateInvoice'] };
 };
 
 const CreateInvoiceScreen = ({
@@ -35,13 +48,13 @@ const CreateInvoiceScreen = ({
     formState: { errors, isLoading },
   } = useForm<InvoiceDetailResponse>({
     defaultValues: async () => {
-      const response = await getContract(contractId || "");
+      const response = await getContract(contractId || '');
       if (!response.success && !response.data) {
         if (response.message) {
           Toast.show({
-            type: "error",
-            text1: "Lỗi",
-            text2: response.message ?? "Không thể tải thông tin hợp đồng",
+            type: 'error',
+            text1: 'Lỗi',
+            text2: response.message ?? 'Không thể tải thông tin hợp đồng',
           });
         }
         navigation.goBack();
@@ -54,36 +67,81 @@ const CreateInvoiceScreen = ({
       const maxDayOfMonth = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
-        0
+        0,
       ).getDate();
       const dueDate = new Date(
         currentDate.setDate(
           contract.room?.defaultPaymentDueDay &&
             contract.room?.defaultPaymentDueDay <= maxDayOfMonth
             ? contract.room?.defaultPaymentDueDay
-            : maxDayOfMonth
-        )
+            : maxDayOfMonth,
+        ),
       );
 
       const invoiceDetail: InvoiceDetailResponse = {
         contractId: contract.id,
-        roomName: contract?.room?.name || "",
+        roomName: contract?.room?.name || '',
         roomId: contract.roomId,
         billingPeriodStart: new Date(),
         billingPeriodEnd: new Date(),
         dueDate: dueDate,
         clientName:
-          contract.contractClient.find((c) => c.isLandlordClient)?.name || "",
-        notes: "",
+          contract.contractClient.find((c) => c.isLandlordClient)?.name || '',
+        notes: '',
         isPrepaid: false,
         totalAmount: 0,
         paidAmount: 0,
         remainingAmount: 0,
+        contractServices: contract.contractServices,
         status: InvoiceStatus.DRAFT,
       };
       return invoiceDetail;
     },
   });
+
+  const contractServices = watch(
+    'contractServices',
+  ) as ContractServiceDetailResponse[];
+
+  // const [utilityServices, setUtilityServices] = React.useState<
+  //   UtilityService[]
+  // >(() => MOCK_SERVICE_METERS);
+
+  // const handleChangeMeter = (
+  //   serviceId: string,
+  //   field: 'oldIndex' | 'newIndex',
+  //   value: string,
+  // ) => {
+  //   setUtilityServices((prev) =>
+  //     prev.map((service) =>
+  //       service.id === serviceId ? { ...service, [field]: value } : service,
+  //     ),
+  //   );
+  // };
+
+  const handleConfirmEditOld = (serviceId: string) => {
+    // const current = utilityServices.find((service) => service.id === serviceId);
+    // if (current?.allowEditOld) return;
+    // Alert.alert(
+    //   'Chỉnh sửa chỉ số cũ',
+    //   'Bạn chắc chắn muốn sửa chỉ số cũ? Hãy đảm bảo ghi nhận đúng số trước đó.',
+    //   [
+    //     { text: 'Huỷ', style: 'cancel' },
+    //     {
+    //       text: 'Đồng ý',
+    //       style: 'destructive',
+    //       onPress: () =>
+    //         setUtilityServices((services) =>
+    //           services.map((service) =>
+    //             service.id === serviceId
+    //               ? { ...service, allowEditOld: true }
+    //               : service,
+    //           ),
+    //         ),
+    //     },
+    //   ],
+    // );
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -93,8 +151,8 @@ const CreateInvoiceScreen = ({
     <KeyboardAwareScrollView
       contentContainerStyle={{
         padding: 16,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         gap: 16,
       }}
       enableOnAndroid={true}
@@ -109,71 +167,108 @@ const CreateInvoiceScreen = ({
       <CardComponent title="Thông tin hợp đồng">
         <Controller
           control={control}
-          name={"roomName"}
+          name={'roomName'}
           render={({ field: { onChange, value } }) => (
             <DisplayField label="Phòng" value={value} strong />
           )}
         />
         <Controller
           control={control}
-          name={"clientName"}
+          name={'clientName'}
           render={({ field: { onChange, value } }) => (
             <DisplayField label="Người thuê" value={value} />
           )}
         />
       </CardComponent>
       <CardComponent title="Thông tin thanh toán">
-        <Controller
-          control={control}
-          name={"contractId"}
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <View className="flex-col ">
-              <LabelForm
-                label="Wifi"
-                required
-                // labelStyles={{
-                //   fontSize: 16,
-                //   fontWeight: "bold",
-                // }}
-                // labelClassName="text-gray-600"
-              />
-              <Input
-                // label="Wifi"
-                value={""}
-                type="number"
-                keyboardType="phone-pad"
-                required
-                disabled
-                onPress={() => {
-                  console.log("onPress");
-                }}
-                icon="apps"
-                onChangeText={onChange}
-                error={error?.message}
-              />
-              <Input
-                // label="Wifi"
-                value={""}
-                type="number"
-                keyboardType="phone-pad"
-                required
-                icon="apps"
-                onChangeText={onChange}
-                error={error?.message}
-              />
-            </View>
-          )}
-        />
-        <Controller
-          control={control}
-          name={"billingPeriodStart"}
-          render={({ field: { onChange, value } }) => (
-            <DisplayField
-              label="Ngày bắt đầu"
-              value={formatDate(value.toString())}
-            />
-          )}
-        />
+        <View className="gap-y-3">
+          {contractServices.map((service) => {
+            return (
+              <CardComponent
+                key={service.id}
+                title={service.name}
+                description={`${formatCurrency(service.price)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
+                renderActions={() => (
+                  <TouchableOpacity
+                    onPress={() => handleConfirmEditOld(service.id)}
+                    className={`flex-row items-center rounded-full px-3 py-1 ${
+                      true
+                        ? 'bg-blue-50 border border-blue-100'
+                        : 'bg-gray-50 border border-gray-100'
+                    }`}
+                    disabled={true}
+                  >
+                    <Ionicons
+                      name="create-outline"
+                      size={18}
+                      color={true ? '#1D4ED8' : '#1F2937'}
+                    />
+                    <Text
+                      className={`ml-1 text-sm font-semibold ${
+                        true ? 'text-blue-700' : 'text-gray-900'
+                      }`}
+                    >
+                      {false ? 'Đang mở chỉnh sửa' : 'Sửa số cũ'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              >
+                <View className="flex-row gap-3">
+                  <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
+                    <Input
+                      label="Số cũ"
+                      value={service.helperValue?.toString() || '0'}
+                      type="number"
+                      keyboardType="phone-pad"
+                      min={0}
+                      disabled={true}
+                      onChangeText={(text: string) => {
+                        // handleChangeMeter(service.id, 'oldIndex', text)
+                      }}
+                      showClear={false}
+                    />
+                  </View>
+
+                  <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
+                    <Input
+                      label="Số mới"
+                      value={service.helperValue?.toString() || '0'}
+                      type="number"
+                      keyboardType="phone-pad"
+                      required
+                      // onChangeText={(text: string) =>
+                      //   // handleChangeMeter(service.id, 'newIndex', text)
+                      // }}
+                      showClear={false}
+                    />
+                  </View>
+                </View>
+
+                <View className="mt-3 flex-row items-center justify-between">
+                  <Text className="text-sm font-semibold text-gray-700">
+                    Sản lượng
+                  </Text>
+                  <Text className="text-base font-semibold text-gray-900">
+                    {service.helperValue?.toString() || '0'}{' '}
+                    {
+                      SERVICE_CALCULATE_METHOD_WITH_INFO[
+                        service.calculationMethod
+                      ].unit
+                    }
+                  </Text>
+                </View>
+                <View className="mt-2 flex-row items-center justify-between">
+                  <Text className="text-base font-semibold text-gray-800">
+                    Tạm tính
+                  </Text>
+                  <Text className="text-xl font-extrabold text-blue-700">
+                    {formatCurrency(0)} đ
+                  </Text>
+                </View>
+              </CardComponent>
+            );
+          })}
+        </View>
       </CardComponent>
     </KeyboardAwareScrollView>
   );

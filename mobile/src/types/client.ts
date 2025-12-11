@@ -1,7 +1,7 @@
 export interface Client {
   id: string;
   name: string;
-  phone: string;
+  phoneNumber: string;
   email?: string;
   idCardNumber?: string;
   permanentAddress?: string;
@@ -13,7 +13,7 @@ export interface Client {
   contractId?: string;
 }
 
-export interface ClientCreateRequest extends Omit<Client, "id"> {}
+export interface ClientCreateRequest extends Omit<Client, 'id'> {}
 
 export interface ClientUpdateRequest extends Client {}
 

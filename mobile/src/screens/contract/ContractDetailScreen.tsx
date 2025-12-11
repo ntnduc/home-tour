@@ -1,25 +1,25 @@
-import { deactivateContract, getContract } from "@/api/contract/contract.api";
-import ActionButtonBottom from "@/components/ActionButtonBottom";
-import DisplayField from "@/components/DisplayField";
-import Loading from "@/components/Loading";
-import Status from "@/components/Status";
-import { CONTRACT_STATUS_OPTIONS } from "@/constant/contract.constant";
-import { RootStackParamList } from "@/navigation/types";
-import CardComponent from "@/screens/common/CardComponent";
-import { ContractDetailResponse, ContractStatus } from "@/types/contract";
-import { formatCurrency } from "@/utils/appUtil";
-import { formatDate } from "@/utils/dateUtil";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Toast from "react-native-toast-message";
+import { deactivateContract, getContract } from '@/api/contract/contract.api';
+import ActionButtonBottom from '@/components/ActionButtonBottom';
+import DisplayField from '@/components/DisplayField';
+import Loading from '@/components/Loading';
+import Status from '@/components/Status';
+import { CONTRACT_STATUS_OPTIONS } from '@/constant/contract.constant';
+import { RootStackParamList } from '@/navigation/types';
+import CardComponent from '@/screens/common/CardComponent';
+import { ContractDetailResponse, ContractStatus } from '@/types/contract';
+import { formatCurrency } from '@/utils/appUtil';
+import { formatDate } from '@/utils/dateUtil';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
 
 type ContractDetailScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "ContractDetail">;
-  route: { params: RootStackParamList["ContractDetail"] };
+  navigation: NativeStackNavigationProp<RootStackParamList, 'ContractDetail'>;
+  route: { params: RootStackParamList['ContractDetail'] };
 };
 
 const ContractDetailScreen = ({
@@ -43,18 +43,18 @@ const ContractDetailScreen = ({
         }
 
         Toast.show({
-          type: "error",
-          text1: "Lỗi",
-          text2: response.message ?? "Không thể tải thông tin hợp đồng",
+          type: 'error',
+          text1: 'Lỗi',
+          text2: response.message ?? 'Không thể tải thông tin hợp đồng',
         });
         navigation.goBack();
       } catch (error: any) {
-        console.error("Error fetching contract detail:", error);
+        console.error('Error fetching contract detail:', error);
         Toast.show({
-          type: "error",
-          text1: "Lỗi",
+          type: 'error',
+          text1: 'Lỗi',
           text2:
-            error.response?.data?.message ?? "Không thể tải thông tin hợp đồng",
+            error.response?.data?.message ?? 'Không thể tải thông tin hợp đồng',
         });
         navigation.goBack();
       }
@@ -77,18 +77,18 @@ const ContractDetailScreen = ({
   const handleTerminateContract = () => {
     if (!contract) return;
     const landlordClient = contract.contractClient?.find(
-      (client) => client.isActiveInContract
+      (client) => client.isActiveInContract,
     );
     Alert.prompt(
-      "Xác nhận kết thúc hợp đồng",
-      `Bạn có chắc chắn muốn kết thúc hợp đồng với ${landlordClient?.property.fullName || "người thuê"}?\nHành động này sẽ chuyển phòng về trạng thái trống.
+      'Xác nhận kết thúc hợp đồng',
+      `Bạn có chắc chắn muốn kết thúc hợp đồng với ${landlordClient?.name || 'người thuê'}?\nHành động này sẽ chuyển phòng về trạng thái trống.
       \nLý do kết thúc:`,
       async (text: string) => {
         if (!text.trim()) {
           Toast.show({
-            type: "error",
-            text1: "Lỗi",
-            text2: "Vui lòng nhập lý do kết thúc hợp đồng",
+            type: 'error',
+            text1: 'Lỗi',
+            text2: 'Vui lòng nhập lý do kết thúc hợp đồng',
           });
           return;
         }
@@ -97,21 +97,21 @@ const ContractDetailScreen = ({
           .then(() => {})
           .finally(() => {
             Toast.show({
-              type: "success",
-              text1: "Thành công",
-              text2: "Đã kết thúc hợp đồng thành công!",
+              type: 'success',
+              text1: 'Thành công',
+              text2: 'Đã kết thúc hợp đồng thành công!',
             });
             navigation.goBack();
           });
-      }
+      },
     );
   };
 
   const handleRenewContract = () => {
     Alert.alert(
-      "Gia hạn hợp đồng",
-      "Tính năng gia hạn hợp đồng sẽ được phát triển trong phiên bản tiếp theo.",
-      [{ text: "OK" }]
+      'Gia hạn hợp đồng',
+      'Tính năng gia hạn hợp đồng sẽ được phát triển trong phiên bản tiếp theo.',
+      [{ text: 'OK' }],
     );
   };
 
@@ -119,7 +119,7 @@ const ContractDetailScreen = ({
     label: string,
     value?: string | number | React.ReactNode,
     strong?: boolean,
-    type: "text" | "phone" = "text"
+    type: 'text' | 'phone' = 'text',
   ) => <DisplayField label={label} value={value} strong={strong} type={type} />;
 
   if (isLoading && !defaultValues) {
@@ -131,7 +131,7 @@ const ContractDetailScreen = ({
   }
 
   const landlordClient = contract.contractClient?.find(
-    (client) => client.isActiveInContract
+    (client) => client.isActiveInContract,
   );
   const canTerminate = contract.status === ContractStatus.ACTIVE;
   const daysRemaining = getDaysRemaining();
@@ -147,8 +147,8 @@ const ContractDetailScreen = ({
         contentContainerStyle={{
           flexGrow: 1,
           padding: 16,
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           gap: 16,
         }}
         enableOnAndroid={true}
@@ -178,7 +178,7 @@ const ContractDetailScreen = ({
                 Mã: {contract.code}
               </Text>
               <Text className="text-sm text-gray-600">
-                {contract.room.name} - {contract.property.name}
+                {contract?.room?.name} - {contract?.property?.name}
               </Text>
             </View>
             <Status value={contract.status} options={CONTRACT_STATUS_OPTIONS} />
@@ -189,12 +189,12 @@ const ContractDetailScreen = ({
         <CardComponent title="Thông tin phòng">
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
-              {renderRow("Phòng", contract.room.name)}
-              {renderRow("Tòa nhà", contract.property.name)}
-              {renderRow("Địa chỉ", contract.property.address)}
+              {renderRow('Phòng', contract?.room?.name)}
+              {renderRow('Tòa nhà', contract?.property?.name)}
+              {renderRow('Địa chỉ', contract.property?.address)}
               {renderRow(
-                "Giá thuê",
-                `${formatCurrency(contract.rentAmountAgreed)} đ/tháng`
+                'Giá thuê',
+                `${formatCurrency(contract.rentAmountAgreed)} đ/tháng`,
               )}
             </View>
             <View className="items-end"></View>
@@ -206,22 +206,25 @@ const ContractDetailScreen = ({
           <View>
             {landlordClient && (
               <>
-                {renderRow("Họ và tên", landlordClient.property.fullName)}
+                {renderRow('Họ và tên', landlordClient.name)}
                 {renderRow(
-                  "Số điện thoại",
-                  landlordClient.property.phoneNumber,
+                  'Số điện thoại',
+                  landlordClient?.phoneNumber ?? '-',
                   false,
-                  "phone"
+                  'phone',
                 )}
-                {landlordClient.property.email &&
-                  renderRow("Email", landlordClient.property.email)}
+                {/* {landlordClient?.client?.email &&
+                  renderRow('Email', landlordClient?.client?.email)} */}
                 {landlordClient.moveInDate &&
                   renderRow(
-                    "Ngày vào ở",
-                    formatDate(landlordClient.moveInDate)
+                    'Ngày vào ở',
+                    formatDate(landlordClient.moveInDate?.toISOString()),
                   )}
                 {landlordClient.moveOutDate &&
-                  renderRow("Ngày ra", formatDate(landlordClient.moveOutDate))}
+                  renderRow(
+                    'Ngày ra',
+                    formatDate(landlordClient.moveOutDate?.toISOString()),
+                  )}
               </>
             )}
             {(contract.contractClient?.length ?? 0) > 1 && (
@@ -254,7 +257,7 @@ const ContractDetailScreen = ({
                 value={
                   contract.endDate
                     ? formatDate(contract.endDate)
-                    : "Không xác định"
+                    : 'Không xác định'
                 }
                 direction="vertical"
                 strong
@@ -267,25 +270,25 @@ const ContractDetailScreen = ({
               <View
                 className={`rounded-lg p-3 border ${
                   daysRemaining <= 7
-                    ? "bg-yellow-50 border-yellow-200"
-                    : "bg-blue-50 border-blue-200"
+                    ? 'bg-yellow-50 border-yellow-200'
+                    : 'bg-blue-50 border-blue-200'
                 }`}
               >
                 <Text
                   className={`text-sm font-semibold mb-1 ${
-                    daysRemaining <= 7 ? "text-yellow-800" : "text-blue-800"
+                    daysRemaining <= 7 ? 'text-yellow-800' : 'text-blue-800'
                   }`}
                 >
                   Thời gian còn lại:
                 </Text>
                 <Text
                   className={`text-base font-bold ${
-                    daysRemaining <= 7 ? "text-yellow-600" : "text-blue-600"
+                    daysRemaining <= 7 ? 'text-yellow-600' : 'text-blue-600'
                   }`}
                 >
                   {daysRemaining > 0
                     ? `${daysRemaining} ngày`
-                    : "Hết hạn hôm nay"}
+                    : 'Hết hạn hôm nay'}
                 </Text>
               </View>
             )}
@@ -295,18 +298,18 @@ const ContractDetailScreen = ({
         <CardComponent title="Thông tin thanh toán">
           <View>
             {renderRow(
-              "Tiền thuê hàng tháng",
+              'Tiền thuê hàng tháng',
               `${formatCurrency(contract.rentAmountAgreed)}đ`,
-              true
+              true,
             )}
             {renderRow(
-              "Tiền cọc (đã thanh toán)",
-              `${formatCurrency(contract.depositAmountPaid)}đ`
+              'Tiền cọc (đã thanh toán)',
+              `${formatCurrency(contract.depositAmountPaid)}đ`,
             )}
             <View className="h-[1px] bg-gray-200 my-2" />
             {renderRow(
-              "Ngày thu tiền hàng tháng",
-              contract.paymentDueDay ? `Ngày ${contract.paymentDueDay}` : "-"
+              'Ngày thu tiền hàng tháng',
+              contract.paymentDueDay ? `Ngày ${contract.paymentDueDay}` : '-',
             )}
           </View>
         </CardComponent>
@@ -335,11 +338,11 @@ const ContractDetailScreen = ({
                       <Ionicons
                         name={
                           service.isEnabled
-                            ? "checkmark-circle"
-                            : "close-circle"
+                            ? 'checkmark-circle'
+                            : 'close-circle'
                         }
                         size={18}
-                        color={service.isEnabled ? "#34C759" : "#FF3B30"}
+                        color={service.isEnabled ? '#34C759' : '#FF3B30'}
                       />
                       <View className="ml-2 flex-1">
                         <Text className="text-base font-medium text-gray-900">
@@ -372,9 +375,9 @@ const ContractDetailScreen = ({
         {/* Thông tin bổ sung */}
         <CardComponent title="Thông tin bổ sung">
           <View>
-            {renderRow("Ngày tạo", formatDate(contract.createdAt))}
-            {renderRow("Ngày cập nhật", formatDate(contract.updatedAt), true)}
-            {renderRow("Số người ở cùng", contract.partnerClientCount ?? 0)}
+            {renderRow('Ngày tạo', formatDate(contract.createdAt))}
+            {renderRow('Ngày cập nhật', formatDate(contract.updatedAt), true)}
+            {renderRow('Số người ở cùng', contract.partnerClientCount ?? 0)}
             {contract.notes && (
               <View className="mt-2 pt-2 border-t border-gray-200">
                 <Text className="text-sm text-gray-600 mb-1">Ghi chú</Text>
@@ -392,8 +395,8 @@ const ContractDetailScreen = ({
                   onPress={() => {
                     // TODO: Mở xem hợp đồng đã quét
                     Alert.alert(
-                      "Thông báo",
-                      "Tính năng xem hợp đồng đã quét sẽ được phát triển"
+                      'Thông báo',
+                      'Tính năng xem hợp đồng đã quét sẽ được phát triển',
                     );
                   }}
                   className="flex-row items-center mt-1"
@@ -420,9 +423,9 @@ const ContractDetailScreen = ({
             ...(canRenew
               ? [
                   {
-                    label: "Gia hạn",
-                    icon: "refresh" as keyof typeof Ionicons.glyphMap,
-                    variant: "success" as const,
+                    label: 'Gia hạn',
+                    icon: 'refresh' as keyof typeof Ionicons.glyphMap,
+                    variant: 'success' as const,
                     onPress: handleRenewContract,
                   },
                 ]
@@ -430,9 +433,9 @@ const ContractDetailScreen = ({
             ...(canTerminate
               ? [
                   {
-                    label: "Kết thúc hợp đồng",
-                    icon: "close-circle" as keyof typeof Ionicons.glyphMap,
-                    variant: "danger" as const,
+                    label: 'Kết thúc hợp đồng',
+                    icon: 'close-circle' as keyof typeof Ionicons.glyphMap,
+                    variant: 'danger' as const,
                     onPress: handleTerminateContract,
                   },
                 ]

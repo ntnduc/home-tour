@@ -1,10 +1,10 @@
-import { StatusType } from "@/components/Status";
-import CardComponent from "@/screens/common/CardComponent";
-import { theme } from "@/theme";
-import { colors } from "@/theme/colors";
-import { PropertyListResponse, PropertyRoomsStatus } from "@/types/property";
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StatusType } from '@/components/Status';
+import CardComponent from '@/screens/common/CardComponent';
+import { theme } from '@/theme';
+import { colors } from '@/theme/colors';
+import { PropertyListResponse, PropertyRoomsStatus } from '@/types/property';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface PropertyCardComponentProps {
   property: PropertyListResponse;
@@ -22,28 +22,28 @@ const PropertyCardComponent = ({
   onAddRoom,
 }: PropertyCardComponentProps) => {
   const getStatusInfo = (
-    status?: PropertyRoomsStatus
+    status?: PropertyRoomsStatus,
   ): { label: string; key: StatusType } => {
     switch (status) {
       case PropertyRoomsStatus.FULL:
         return {
-          label: "Đầy phòng",
-          key: "success",
+          label: 'Đầy phòng',
+          key: 'success',
         };
       case PropertyRoomsStatus.EMPTY:
         return {
-          label: "Chưa tạo phòng",
-          key: "error",
+          label: 'Chưa tạo phòng',
+          key: 'error',
         };
       case PropertyRoomsStatus.PARTIAL:
         return {
-          label: "Còn phòng",
-          key: "warning",
+          label: 'Còn phòng',
+          key: 'warning',
         };
       default:
         return {
-          label: "Trống",
-          key: "warning",
+          label: 'Trống',
+          key: 'warning',
         };
     }
   };
@@ -54,11 +54,11 @@ const PropertyCardComponent = ({
     <CardComponent
       className="mt-3"
       title={property.name}
-      actions={["edit", "delete"]}
+      actions={['edit', 'delete']}
       onActionPress={(key) => {
-        if (key === "edit") onEdit();
+        if (key === 'edit') onEdit();
       }}
-      classNameBadge="absolute right-[-80] top-[-35]"
+      // classNameBadge="absolute right-[-80] top-[-35]"
       statusBadge={{ ...status }}
     >
       <View className="flex flex-col">
@@ -109,7 +109,7 @@ const PropertyCardComponent = ({
 const styles = StyleSheet.create({
   buildingName: {
     fontSize: theme.typography.fontSize.lg + 2,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: colors.text.primary,
   },
 
@@ -124,14 +124,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   basicInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
     marginBottom: 12,
   },
   infoItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   infoIcon: {
     fontSize: 13,
@@ -144,15 +144,15 @@ const styles = StyleSheet.create({
   },
 
   actionRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 8,
     marginTop: 4,
   },
   actionBtn: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 6,
     paddingHorizontal: 8,
     borderRadius: 8,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   actionBtnText: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 });
 

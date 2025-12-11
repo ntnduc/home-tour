@@ -1,16 +1,16 @@
-import CardComponent from "@/screens/common/CardComponent";
-import { colors } from "@/theme/colors";
+import CardComponent from '@/screens/common/CardComponent';
+import { colors } from '@/theme/colors';
 import {
   CONTRACT_STATUS_COLOR,
   CONTRACT_STATUS_LABEL,
   ContractStatus,
-} from "@/types/contract";
-import { RoomListResponse, RoomStatus } from "@/types/room";
-import { formatDate } from "@/utils/dateUtil";
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import styles from "../styles/StyleRoomCardItemComponent";
+} from '@/types/contract';
+import { RoomListResponse, RoomStatus } from '@/types/room';
+import { formatDate } from '@/utils/dateUtil';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import styles from '../styles/StyleRoomCardItemComponent';
 
 type Props = {
   item: RoomListResponse;
@@ -19,31 +19,31 @@ type Props = {
 
 const RoomCardItemComponent = ({ item, navigation }: Props) => {
   const contractActive = item.contracts?.findLast(
-    (contract) => contract.status === ContractStatus.ACTIVE
+    (contract) => contract.status === ContractStatus.ACTIVE,
   );
 
   return (
     <CardComponent
       style={styles.card}
       title={item.name}
-      actions={["edit", "delete"]}
+      actions={['edit', 'delete']}
       onActionPress={(key) => {
-        if (key === "edit") {
-          navigation.navigate("UpdateRoom", { roomId: item.id });
+        if (key === 'edit') {
+          navigation.navigate('UpdateRoom', { roomId: item.id });
         }
       }}
       description={item.property?.name}
     >
       <View
         style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
         }}
       >
         <View style={{ flex: 1 }}>
           <Text style={styles.price}>
-            {item.rentAmount?.toLocaleString() ?? ""}đ/tháng
+            {item.rentAmount?.toLocaleString() ?? ''}đ/tháng
           </Text>
           {item.description && (
             <Text style={styles.roomDesc}>{item.description}</Text>
@@ -55,7 +55,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Người thuê:</Text>
                 <Text style={styles.contractText}>
-                  {item.landlordClient || "N/A"}
+                  {item.landlordClient || 'N/A'}
                 </Text>
               </View>
               <View style={styles.contractRow}>
@@ -64,7 +64,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
                   #{contractActive.code}
                   {contractActive.endDate
                     ? `đến ${formatDate(contractActive.endDate)}`
-                    : ""}
+                    : ''}
                 </Text>
               </View>
             </View>
@@ -112,7 +112,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
                           : contractActive.endDate &&
                               new Date(contractActive.endDate) <=
                                 new Date(
-                                  new Date().setDate(new Date().getDate() + 3)
+                                  new Date().setDate(new Date().getDate() + 3),
                                 )
                             ? styles.warningText
                             : styles.normalText,
@@ -152,7 +152,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
           <TouchableOpacity
             style={styles.createContractBtn}
             onPress={() => {
-              navigation.navigate("CreateContract", { roomId: item.id });
+              navigation.navigate('CreateContract', { roomId: item.id });
             }}
           >
             <Ionicons
@@ -169,7 +169,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
             style={styles.viewContractBtn}
             onPress={() => {
               contractActive?.id &&
-                navigation.navigate("ContractDetail", {
+                navigation.navigate('ContractDetail', {
                   contractId: contractActive?.id,
                 });
             }}
@@ -207,9 +207,8 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
             <TouchableOpacity
               style={styles.invoiceBtn}
               onPress={() => {
-                console.log("contractActive", contractActive);
                 if (contractActive.id) {
-                  navigation.navigate("CreateInvoice", {
+                  navigation.navigate('CreateInvoice', {
                     contractId: contractActive.id,
                     roomId: item.id,
                   });
@@ -227,7 +226,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
               style={styles.payBtn}
               onPress={() => {
                 if (contractActive.id) {
-                  navigation.navigate("CreateInvoice", {
+                  navigation.navigate('CreateInvoice', {
                     invoiceId: contractActive.id,
                     fromHistory: false,
                   });

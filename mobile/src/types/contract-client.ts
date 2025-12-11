@@ -1,4 +1,4 @@
-import { Client } from "./client";
+import { ClientDetailResponse } from './client';
 
 export interface ContractClient {
   id: string;
@@ -11,7 +11,8 @@ export interface ContractClient {
 }
 
 export interface ContractClientDetailResponse extends ContractClient {
-  client?: Client;
+  phoneNumber?: string;
+  client?: ClientDetailResponse;
 }
 
 export interface ContractClientListResponse extends ContractClient {}

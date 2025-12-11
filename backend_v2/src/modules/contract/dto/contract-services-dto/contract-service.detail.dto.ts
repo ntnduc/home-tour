@@ -29,6 +29,7 @@ export class ContractServiceDetailDto extends BaseDetailDto<ContractServices> {
 
   fromEntity(entity: ContractServices): void {
     this.id = entity.id;
+    this.name = entity.name;
     this.price = entity.price;
     this.calculationMethod = entity.calculationMethod;
     this.isEnabled = entity.isEnabled;

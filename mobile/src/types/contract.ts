@@ -1,17 +1,18 @@
-import { ClientCreateRequest } from "./client";
-import { ContractClientDetailResponse } from "./contract-client";
+import { ClientCreateRequest } from './client';
+import { ContractClientDetailResponse } from './contract-client';
 import {
   ContractServiceCreateRequest,
   ContractServiceDetailResponse,
-} from "./contract-service";
-import { RoomDetailResponse } from "./room";
+} from './contract-service';
+import { PropertyDetail } from './property';
+import { RoomDetailResponse } from './room';
 
 export enum ContractStatus {
-  PENDING_START = "PENDING_START",
-  ACTIVE = "ACTIVE",
-  ENDED = "ENDED",
-  TERMINATED_EARLY = "TERMINATED_EARLY",
-  EXPIRED = "EXPIRED",
+  PENDING_START = 'PENDING_START',
+  ACTIVE = 'ACTIVE',
+  ENDED = 'ENDED',
+  TERMINATED_EARLY = 'TERMINATED_EARLY',
+  EXPIRED = 'EXPIRED',
 }
 
 export interface Contract {
@@ -30,7 +31,7 @@ export interface Contract {
   isPrepaidRoom?: boolean;
 }
 
-export interface ContractCreateRequest extends Omit<Contract, "id" | "status"> {
+export interface ContractCreateRequest extends Omit<Contract, 'id' | 'status'> {
   contractServices: ContractServiceCreateRequest[];
   contractClient: ClientCreateRequest[];
   contractClientLandlord: ClientCreateRequest;
@@ -71,7 +72,7 @@ export interface ContractDetailResponse {
   status: ContractStatus;
   notes?: string | null;
   room?: RoomDetailResponse;
-  property: RoomDetailResponse;
+  property?: PropertyDetail;
   contractClient: ContractClientDetailResponse[];
   contractServices: ContractServiceDetailResponse[];
 }
@@ -107,28 +108,28 @@ export interface ContractListResponse {
 }
 
 export const CONTRACT_STATUS_LABEL: Record<ContractStatus, string> = {
-  [ContractStatus.PENDING_START]: "Chờ bắt đầu",
-  [ContractStatus.ACTIVE]: "Đang hiệu lực",
-  [ContractStatus.ENDED]: "Đã kết thúc",
-  [ContractStatus.TERMINATED_EARLY]: "Đã kết thúc sớm",
-  [ContractStatus.EXPIRED]: "Hết hạn",
+  [ContractStatus.PENDING_START]: 'Chờ bắt đầu',
+  [ContractStatus.ACTIVE]: 'Đang hiệu lực',
+  [ContractStatus.ENDED]: 'Đã kết thúc',
+  [ContractStatus.TERMINATED_EARLY]: 'Đã kết thúc sớm',
+  [ContractStatus.EXPIRED]: 'Hết hạn',
 };
 
 export const CONTRACT_STATUS_COLOR: Record<
   ContractStatus,
   { bg: string; color: string }
 > = {
-  [ContractStatus.PENDING_START]: { bg: "#F3F4F6", color: "#6B7280" },
-  [ContractStatus.ACTIVE]: { bg: "#E9F9EF", color: "#34C759" },
-  [ContractStatus.ENDED]: { bg: "#FFECEC", color: "#FF3B30" },
-  [ContractStatus.TERMINATED_EARLY]: { bg: "#F3F4F6", color: "#6B7280" },
-  [ContractStatus.EXPIRED]: { bg: "#FFF6E5", color: "#FF9500" },
+  [ContractStatus.PENDING_START]: { bg: '#F3F4F6', color: '#6B7280' },
+  [ContractStatus.ACTIVE]: { bg: '#E9F9EF', color: '#34C759' },
+  [ContractStatus.ENDED]: { bg: '#FFECEC', color: '#FF3B30' },
+  [ContractStatus.TERMINATED_EARLY]: { bg: '#F3F4F6', color: '#6B7280' },
+  [ContractStatus.EXPIRED]: { bg: '#FFF6E5', color: '#FF9500' },
 };
 
 export const CONTRACT_STATUS_ICON: Record<ContractStatus, string> = {
-  [ContractStatus.PENDING_START]: "document-outline",
-  [ContractStatus.ACTIVE]: "checkmark-circle",
-  [ContractStatus.ENDED]: "time-outline",
-  [ContractStatus.TERMINATED_EARLY]: "close-circle",
-  [ContractStatus.EXPIRED]: "ellipse-outline",
+  [ContractStatus.PENDING_START]: 'document-outline',
+  [ContractStatus.ACTIVE]: 'checkmark-circle',
+  [ContractStatus.ENDED]: 'time-outline',
+  [ContractStatus.TERMINATED_EARLY]: 'close-circle',
+  [ContractStatus.EXPIRED]: 'ellipse-outline',
 };
