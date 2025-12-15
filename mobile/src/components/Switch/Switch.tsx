@@ -1,8 +1,8 @@
-import { createStyles } from "@/styles/component/StyleInput";
-import { useTheme } from "@/theme/ThemeProvider";
-import React from "react";
-import { Switch as RNSwitch, Text, View } from "react-native";
-import { SwitchProps } from "./types";
+import { createStyles } from '@/styles/component/StyleInput';
+import { useTheme } from '@/theme/ThemeProvider';
+import React from 'react';
+import { Switch as RNSwitch, Text, View } from 'react-native';
+import { SwitchProps } from './types';
 
 const Switch: React.FC<SwitchProps> = ({
   value,
@@ -12,13 +12,13 @@ const Switch: React.FC<SwitchProps> = ({
   error,
   required = false,
   disabled = false,
-  size = "medium",
+  size = 'medium',
   activeColor,
   inactiveColor,
   thumbColor,
   containerStyle,
   labelStyle,
-  alignLabel = "vertical",
+  alignLabel = 'vertical',
   descriptionStyle,
   errorStyle,
   containerClassName,
@@ -35,9 +35,9 @@ const Switch: React.FC<SwitchProps> = ({
   // Tính toán size cho switch
   const getSwitchSize = () => {
     switch (size) {
-      case "small":
+      case 'small':
         return { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] };
-      case "large":
+      case 'large':
         return { transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] };
       default:
         return {};
@@ -47,24 +47,24 @@ const Switch: React.FC<SwitchProps> = ({
   // Tính toán màu sắc
   const getActiveColor = () => {
     if (activeColor) return activeColor;
-    if (error) return "#ff3b30";
-    return "#007AFF";
+    if (error) return '#ff3b30';
+    return '#007AFF';
   };
 
   const getInactiveColor = () => {
     if (inactiveColor) return inactiveColor;
-    return "#E5E7EB";
+    return '#E5E7EB';
   };
 
   const getThumbColor = () => {
     if (thumbColor) return thumbColor;
-    return "#FFFFFF";
+    return '#FFFFFF';
   };
 
   // Style cho description
   const descriptionStyles = {
     fontSize: 14,
-    color: "#6B7280",
+    color: '#6B7280',
     marginBottom: 8,
     ...(descriptionStyle as object),
   };
@@ -72,7 +72,7 @@ const Switch: React.FC<SwitchProps> = ({
   // Style cho error text
   const errorStyles = {
     fontSize: 14,
-    color: "#ff3b30",
+    color: '#ff3b30',
     marginTop: 4,
     ...(errorStyle as object),
   };
@@ -85,9 +85,9 @@ const Switch: React.FC<SwitchProps> = ({
     >
       <View
         className={`flex-row  ${
-          alignLabel === "horizontal"
-            ? "flex-row items-center align-center"
-            : "flex-col"
+          alignLabel === 'horizontal'
+            ? 'flex-row items-center align-center'
+            : 'flex-col items-start'
         }`}
       >
         <View className="mr-4">
@@ -96,7 +96,7 @@ const Switch: React.FC<SwitchProps> = ({
               style={[
                 styles.label,
                 labelStyle,
-                { marginBottom: alignLabel === "horizontal" ? 0 : 8 },
+                { marginBottom: alignLabel === 'horizontal' ? 0 : 8 },
               ]}
               className={labelClassName}
             >

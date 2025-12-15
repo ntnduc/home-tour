@@ -29,7 +29,7 @@ export class ContractClientCreateDto extends BaseCreateDto<ContractClient> {
 
   @IsPhoneNumber()
   @IsNotEmpty()
-  phone: string;
+  phoneNumber: string;
 
   @IsDateString()
   @IsOptional()

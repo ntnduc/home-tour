@@ -53,24 +53,7 @@ export interface ContractUpdateRequest {
   notes?: string;
 }
 
-export interface ContractDetailResponse {
-  id: string;
-  code: string;
-  createdBy: string;
-  updatedBy: string;
-  createdAt: string;
-  updatedAt: string;
-  propertyId: string;
-  roomId: string;
-  startDate: string;
-  endDate?: string | null;
-  partnerClientCount?: number;
-  rentAmountAgreed: number;
-  depositAmountPaid: number;
-  paymentDueDay: number;
-  contractScanURL?: string | null;
-  status: ContractStatus;
-  notes?: string | null;
+export interface ContractDetailResponse extends Contract {
   room?: RoomDetailResponse;
   property?: PropertyDetail;
   contractClient: ContractClientDetailResponse[];

@@ -1,5 +1,5 @@
 import { ContractDetailResponse } from './contract';
-import { ContractServiceDetailResponse } from './contract-service';
+import { ContractServiceInvoiceCalculateResponse } from './contract-service';
 
 export interface Invoice {
   id: string;
@@ -24,7 +24,8 @@ export interface InvoiceDetailResponse extends Omit<Invoice, 'id'> {
   clientName?: string;
   propertyName?: string;
   contract?: ContractDetailResponse;
-  contractServices?: ContractServiceDetailResponse[];
+  paymentMonth?: number;
+  contractServices?: ContractServiceInvoiceCalculateResponse[];
 }
 
 export interface InvoiceListResponse extends Invoice {}

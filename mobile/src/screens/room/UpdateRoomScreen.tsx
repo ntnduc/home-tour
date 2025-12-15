@@ -1,24 +1,24 @@
-import { getRoom, updateRoom } from "@/api/room/room.api";
-import ActionButtonBottom from "@/components/ActionButtonBottom";
-import CardContent from "@/components/CardContent";
-import { ComboBox } from "@/components/ComboBox";
-import InputBase from "@/components/Input";
-import Loading from "@/components/Loading";
-import Status from "@/components/Status";
-import { Switch } from "@/components/Switch";
-import { ROOM_STATUS_OPTIONS } from "@/constant/room.constant";
+import { getRoom, updateRoom } from '@/api/room/room.api';
+import ActionButtonBottom from '@/components/ActionButtonBottom';
+import CardContent from '@/components/CardContent';
+import { ComboBox } from '@/components/ComboBox';
+import InputBase from '@/components/Input';
+import Loading from '@/components/Loading';
+import Status from '@/components/Status';
+import { Switch } from '@/components/Switch';
+import { ROOM_STATUS_OPTIONS } from '@/constant/room.constant';
 import {
   RoomDetailResponse,
   RoomStatus,
   RoomUpdateRequest,
-} from "@/types/room";
-import { formatCurrency } from "@/utils/appUtil";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { Text, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Toast from "react-native-toast-message";
+} from '@/types/room';
+import { formatCurrency } from '@/utils/appUtil';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
 
 type RootStackParamList = {
   UpdateRoom: { roomId: string };
@@ -35,7 +35,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
 
   const {
     handleSubmit,
-    formState: { isLoading, defaultValues, errors: erroForms },
+    formState: { isLoading, defaultValues, errors: erroForms, isSubmitting },
     control,
   } = useForm<RoomDetailResponse>({
     defaultValues: async () => {
@@ -46,11 +46,11 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
         return data.data;
       } catch (error: any) {
         Toast.show({
-          type: "error",
-          text1: "Lỗi",
+          type: 'error',
+          text1: 'Lỗi',
           text2: error.response.data?.message
             ? error.response.data?.message
-            : "Không tìm thấy dữ liệu",
+            : 'Không tìm thấy dữ liệu',
         });
         navigation.goBack();
       }
@@ -62,38 +62,38 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
       updateRoom(data)
         .then((reponse) => {
           Toast.show({
-            type: "success",
-            text1: "Thành công",
-            text2: "Cập nhật đã thành công",
+            type: 'success',
+            text1: 'Thành công',
+            text2: 'Cập nhật đã thành công',
           });
           navigation.goBack();
         })
         .catch(() => {
           Toast.show({
-            type: "error",
-            text1: "Thất bại",
-            text2: "Vui lòng thử lại sau!",
+            type: 'error',
+            text1: 'Thất bại',
+            text2: 'Vui lòng thử lại sau!',
           });
         });
     } catch (error) {
-      console.error("💞💓💗💞💓💗 ~ handleSave ~ error:", error);
+      console.error('💞💓💗💞💓💗 ~ handleSave ~ error:', error);
       Toast.show({
-        type: "error",
-        text1: "Thất bại",
-        text2: "Vui lòng thử lại sau!",
+        type: 'error',
+        text1: 'Thất bại',
+        text2: 'Vui lòng thử lại sau!',
       });
     }
   };
 
   const handleError = () => {
     Toast.show({
-      type: "error",
-      text1: "Lỗi",
-      text2: "Hãy nhập đầy đủ thông tin lại thông tin!",
+      type: 'error',
+      text1: 'Lỗi',
+      text2: 'Hãy nhập đầy đủ thông tin lại thông tin!',
     });
   };
 
-  if (isLoading && !defaultValues) {
+  if (isLoading || !defaultValues) {
     return <Loading />;
   }
 
@@ -104,8 +104,9 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
         contentContainerStyle={{
           flexGrow: 1,
           padding: 16,
-          display: "flex",
-          flexDirection: "column",
+          paddingBottom: 16,
+          display: 'flex',
+          flexDirection: 'column',
           gap: 16,
         }}
         enableOnAndroid={true}
@@ -141,7 +142,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             <Controller
               control={control}
               name="name"
-              rules={{ required: "Vui lòng nhập tên gợi nhớ" }}
+              rules={{ required: 'Vui lòng nhập tên gợi nhớ' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   placeholder="Nhập tên gợi nhớ (không bắt buộc)"
@@ -186,11 +187,11 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                     options={
                       value !== RoomStatus.OCCUPIED
                         ? ROOM_STATUS_OPTIONS.filter(
-                            (option) => option.value !== RoomStatus.OCCUPIED
+                            (option) => option.value !== RoomStatus.OCCUPIED,
                           )
                         : ROOM_STATUS_OPTIONS
                     }
-                    valueKey={"value"}
+                    valueKey={'value'}
                     value={value}
                     onChange={(value) => {
                       onChange(value.value);
@@ -268,12 +269,12 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             <Controller
               control={control}
               name="rentAmount"
-              rules={{ required: "VNĐ/tháng" }}
+              rules={{ required: 'VNĐ/tháng' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   type="number"
                   placeholder="VNĐ/tháng"
-                  value={value ? formatCurrency(value.toString()) : ""}
+                  value={value ? formatCurrency(value.toString()) : ''}
                   keyboardType="numeric"
                   required
                   onChangeText={onChange}
@@ -289,12 +290,12 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             <Controller
               control={control}
               name="defaultDepositAmount"
-              rules={{ required: "VNĐ/tháng" }}
+              rules={{ required: 'VNĐ/tháng' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   type="number"
                   placeholder="VNĐ/tháng"
-                  value={value ? formatCurrency(value.toString()) : ""}
+                  value={value ? formatCurrency(value.toString()) : ''}
                   keyboardType="numeric"
                   required
                   onChangeText={onChange}
@@ -330,7 +331,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
               <InputBase
                 type="area"
                 placeholder="Điều khoản bổ sung"
-                value={value ? formatCurrency(value.toString()) : ""}
+                value={value ? formatCurrency(value.toString()) : ''}
                 onChangeText={onChange}
                 label=""
                 error={erroForms.description?.message}
@@ -368,18 +369,18 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
       <ActionButtonBottom
         actions={[
           {
-            label: "Lưu thay đổi",
+            label: 'Lưu thay đổi',
             onPress: handleSubmit(handleSave, handleError),
-            variant: "primary",
-            isLoading: isLoading,
-            icon: "checkmark-circle",
+            variant: 'primary',
+            isLoading: isLoading || isSubmitting,
+            icon: 'checkmark-circle',
           },
           {
-            label: "Xoá phòng",
+            label: 'Xoá phòng',
             onPress: handleSubmit(handleSave, handleError),
-            variant: "danger",
-            isLoading: isLoading,
-            icon: "trash-outline",
+            variant: 'danger',
+            isLoading: isLoading || isSubmitting,
+            icon: 'trash-outline',
             hidden: () => defaultValues?.status === RoomStatus.OCCUPIED,
           },
         ]}

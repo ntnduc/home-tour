@@ -1,35 +1,35 @@
-import ActionButtonBottom from "@/components/ActionButtonBottom";
-import DatePicker from "@/components/DatePicker";
-import Input from "@/components/Input";
-import Loading from "@/components/Loading";
-import { Switch } from "@/components/Switch";
-import { ServiceCalculateMethod } from "@/constant/service.constant";
-import { RootStackParamList } from "@/navigation/types";
-import { ContractServiceDetailResponse } from "@/types/contract-service";
-import { formatCurrency, generateId } from "@/utils/appUtil";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Toast from "react-native-toast-message";
-import { getRoomWitcService } from "../../api/room/room.api";
-import { ContractCreateRequest } from "../../types/contract";
-import { RoomServiceDetailResponse, RoomStatus } from "../../types/room";
-import CardComponent from "../common/CardComponent";
+import ActionButtonBottom from '@/components/ActionButtonBottom';
+import DatePicker from '@/components/DatePicker';
+import Input from '@/components/Input';
+import Loading from '@/components/Loading';
+import { Switch } from '@/components/Switch';
+import { ServiceCalculateMethod } from '@/constant/service.constant';
+import { RootStackParamList } from '@/navigation/types';
+import { ContractServiceDetailResponse } from '@/types/contract-service';
+import { formatCurrency, generateId } from '@/utils/appUtil';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useEffect, useRef, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
+import { getRoomWitcService } from '../../api/room/room.api';
+import { ContractCreateRequest } from '../../types/contract';
+import { RoomServiceDetailResponse, RoomStatus } from '../../types/room';
+import CardComponent from '../common/CardComponent';
 import CompanionClientComponent, {
   CompanionClientComponentRef,
-} from "./components/CompanionClientComponent";
+} from './components/CompanionClientComponent';
 import ContractServiceComponent, {
   ContractServiceComponentRef,
-} from "./components/ContractServiceComponent";
-import PartnerClientsSection from "./components/PartnerClientsSection";
-import ServiceItem from "./components/ServiceItem";
+} from './components/ContractServiceComponent';
+import PartnerClientsSection from './components/PartnerClientsSection';
+import ServiceItem from './components/ServiceItem';
 
 type CreateContractScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "CreateContract">;
-  route: { params: RootStackParamList["CreateContract"] };
+  navigation: NativeStackNavigationProp<RootStackParamList, 'CreateContract'>;
+  route: { params: RootStackParamList['CreateContract'] };
 };
 
 const CreateContractScreen = ({
@@ -40,16 +40,16 @@ const CreateContractScreen = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [roomData, setRoomData] = useState<RoomServiceDetailResponse | null>(
-    null
+    null,
   );
 
-  const { control, watch, reset, handleSubmit, setValue, getValues } =
+  const { control, watch, reset, handleSubmit, setValue, getValues, setError } =
     useForm<ContractCreateRequest>({
       defaultValues: {
         partnerClientCount: 0,
         contractClientLandlord: {
-          name: "",
-          phone: "",
+          name: '',
+          phoneNumber: '',
           isLandlordClient: true,
           isActive: true,
         },
@@ -63,8 +63,8 @@ const CreateContractScreen = ({
     remove,
   } = useFieldArray({
     control,
-    name: "contractServices",
-    keyName: "fieldId",
+    name: 'contractServices',
+    keyName: 'fieldId',
   });
 
   const {
@@ -74,7 +74,7 @@ const CreateContractScreen = ({
     remove: removeClient,
   } = useFieldArray({
     control,
-    name: "contractClient",
+    name: 'contractClient',
   });
 
   const contractServiceRef = useRef<ContractServiceComponentRef>(null);
@@ -96,14 +96,15 @@ const CreateContractScreen = ({
             depositAmountPaid: room.defaultDepositAmount,
             paymentDueDay: room.defaultPaymentDueDay,
             ignoreAutoUpdatePartnerNumber: false,
+            contractClient: [],
             contractServices: room.contractServices.map((item) => {
               return { ...item, fieldId: generateId() };
             }),
           });
         }
       } catch (error) {
-        console.error("Error fetching room data:", error);
-        Alert.alert("Lỗi", "Không thể tải thông tin phòng và dịch vụ");
+        console.error('Error fetching room data:', error);
+        Alert.alert('Lỗi', 'Không thể tải thông tin phòng và dịch vụ');
         setTimeout(() => {
           navigation.goBack();
         }, 500);
@@ -119,7 +120,7 @@ const CreateContractScreen = ({
 
   const openContractServiceForm = (
     service: ContractServiceDetailResponse,
-    index: number
+    index: number,
   ) => {
     contractServiceRef.current?.expand(service, index);
   };
@@ -131,21 +132,21 @@ const CreateContractScreen = ({
       price: 0,
       calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
       isEnabled: true,
-      name: "",
+      name: '',
       helperValue: null,
     };
 
     contractServiceRef.current?.expand(
       newService,
-      contractServices.length ?? 0
+      contractServices.length ?? 0,
     );
   };
 
   const handleAddCompanion = () => {
     const newIndex = contractClientsFields.length || 1;
     const emptyClient = {
-      name: "",
-      phone: "",
+      name: '',
+      phone: '',
       isLandlordClient: false,
       isActive: true,
     } as any;
@@ -161,22 +162,35 @@ const CreateContractScreen = ({
 
   const handleDeleteCompanion = (index: number) => {
     const ignoreAutoUpdatePartnerNumber = getValues(
-      "ignoreAutoUpdatePartnerNumber"
+      'ignoreAutoUpdatePartnerNumber',
     );
     if (!ignoreAutoUpdatePartnerNumber) {
-      setValue("partnerClientCount", contractClientsFields.length - 1 || 0);
+      setValue('partnerClientCount', contractClientsFields.length - 1 || 0);
     }
     removeClient(index);
   };
 
   const handleSave = async (formData: ContractCreateRequest) => {
+    if (
+      formData.endDate &&
+      formData.startDate &&
+      new Date(formData.endDate) < new Date(formData.startDate)
+    ) {
+      Toast.show({
+        type: 'error',
+        text1: 'Lỗi',
+        text2: 'Ngày kết thúc phải lớn hơn ngày bắt đầu!',
+      });
+      setError('endDate', {
+        message: 'Ngày kết thúc phải lớn hơn ngày bắt đầu!',
+      });
+      return;
+    }
     if (formData.contractClient?.length) {
-      formData.contractClient = formData.contractClient.map(
-        (client, index) => ({
-          ...client,
-          isLandlordClient: false,
-        })
-      );
+      formData.contractClient = formData.contractClient.map((client) => ({
+        ...client,
+        isLandlordClient: false,
+      }));
     }
 
     const contractClient = [
@@ -185,11 +199,15 @@ const CreateContractScreen = ({
     ];
     formData.contractClient = contractClient;
 
-    navigation.navigate("ConfirmCreateContract", {
-      contract: formData,
-      room: roomData?.name ?? "",
-      property: roomData?.property?.name ?? "",
-    });
+    try {
+      navigation.navigate('ConfirmCreateContract', {
+        contract: formData,
+        room: roomData?.name ?? '',
+        property: roomData?.property?.name ?? '',
+      });
+    } catch (error) {
+      console.log('💞💓💗💞💓💗 ~ handleSave ~ ){:', error);
+    }
   };
 
   if (isLoading) {
@@ -198,9 +216,9 @@ const CreateContractScreen = ({
 
   if (!roomData) {
     Toast.show({
-      type: "error",
-      text1: "Lỗi",
-      text2: "Không tìm thấy phòng!",
+      type: 'error',
+      text1: 'Lỗi',
+      text2: 'Không tìm thấy phòng!',
     });
     navigation.goBack();
     return null;
@@ -208,9 +226,9 @@ const CreateContractScreen = ({
 
   if (roomData.status !== RoomStatus.AVAILABLE) {
     Toast.show({
-      type: "error",
-      text1: "Lỗi",
-      text2: "Phòng không khả dụng!",
+      type: 'error',
+      text1: 'Lỗi',
+      text2: 'Phòng không khả dụng!',
     });
     navigation.goBack();
     return null;
@@ -221,8 +239,9 @@ const CreateContractScreen = ({
       <KeyboardAwareScrollView
         contentContainerStyle={{
           padding: 16,
-          display: "flex",
-          flexDirection: "column",
+          paddingBottom: 16,
+          display: 'flex',
+          flexDirection: 'column',
           gap: 16,
         }}
         enableOnAndroid={true}
@@ -237,16 +256,16 @@ const CreateContractScreen = ({
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <Text className="text-xl font-bold text-gray-900 mb-1">
-                {roomData?.name || "Tên phòng"}
+                {roomData?.name || 'Tên phòng'}
               </Text>
               <Text className="text-sm text-gray-600 mb-2">
-                {roomData?.property?.name || "Tên tòa nhà"}
+                {roomData?.property?.name || 'Tên tòa nhà'}
               </Text>
             </View>
             <View className="items-end">
               <Text className="text-xs text-gray-500 mb-1">Giá thuê</Text>
               <Text className="text-lg font-bold text-blue-600">
-                {formatCurrency(roomData?.rentAmount?.toString() || "0")}
+                {formatCurrency(roomData?.rentAmount?.toString() || '0')}
                 đ/tháng
               </Text>
             </View>
@@ -258,7 +277,7 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="contractClientLandlord.name"
-              rules={{ required: "Vui lòng nhập tên người thuê" }}
+              rules={{ required: 'Vui lòng nhập tên người thuê' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -278,8 +297,8 @@ const CreateContractScreen = ({
           <View className="mb-3">
             <Controller
               control={control}
-              name="contractClientLandlord.phone"
-              rules={{ required: "Vui lòng nhập số điện thoại người thuê" }}
+              name="contractClientLandlord.phoneNumber"
+              rules={{ required: 'Vui lòng nhập số điện thoại người thuê' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -303,7 +322,7 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="contractClientLandlord.idCardNumber"
-              rules={{ required: "Vui lòng nhập CCCD/CMND người thuê" }}
+              rules={{ required: 'Vui lòng nhập CCCD/CMND người thuê' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -332,7 +351,7 @@ const CreateContractScreen = ({
                     label="Số lượng người ở cùng"
                     value={value?.toString()}
                     onChangeText={(text) => {
-                      setValue("ignoreAutoUpdatePartnerNumber", true);
+                      setValue('ignoreAutoUpdatePartnerNumber', true);
                       onChange(text);
                     }}
                     placeholder="Nhập số lượng người ở cùng"
@@ -358,7 +377,7 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="startDate"
-              rules={{ required: "Vui lòng chọn ngày bắt đầu" }}
+              rules={{ required: 'Vui lòng chọn ngày bắt đầu' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -394,8 +413,8 @@ const CreateContractScreen = ({
                   error={error?.message}
                   icon="calendar"
                   minDate={
-                    watch("startDate")
-                      ? new Date(watch("startDate") ?? "")
+                    watch('startDate')
+                      ? new Date(watch('startDate') ?? '')
                       : new Date()
                   }
                 />
@@ -409,7 +428,7 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="rentAmountAgreed"
-              rules={{ required: "Vui lòng nhập tiền thuê hàng tháng" }}
+              rules={{ required: 'Vui lòng nhập tiền thuê hàng tháng' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -418,7 +437,7 @@ const CreateContractScreen = ({
                   <Input
                     type="number"
                     label="Tiền thuê hàng tháng"
-                    value={value ? formatCurrency(value.toString()) : ""}
+                    value={value ? formatCurrency(value.toString()) : ''}
                     onChangeText={onChange}
                     placeholder="Nhập tiền thuê hàng tháng"
                     error={error?.message}
@@ -441,7 +460,7 @@ const CreateContractScreen = ({
               render={({ field: { onChange, value } }) => {
                 return (
                   <Switch
-                    label="Thanh toán tiền phòng trước"
+                    label="Tiền phòng thanh toán trước"
                     value={value as boolean}
                     onValueChange={onChange}
                   />
@@ -454,7 +473,7 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="paymentDueDay"
-              rules={{ required: "Vui lòng nhập ngày thu tiền hàng tháng" }}
+              rules={{ required: 'Vui lòng nhập ngày thu tiền hàng tháng' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -482,14 +501,14 @@ const CreateContractScreen = ({
             <Controller
               control={control}
               name="depositAmountPaid"
-              rules={{ required: "Vui lòng nhập tiền cọc" }}
+              rules={{ required: 'Vui lòng nhập tiền cọc' }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
               }) => (
                 <Input
                   label="Tiền cọc"
-                  value={value ? formatCurrency(value.toString()) : ""}
+                  value={value ? formatCurrency(value.toString()) : ''}
                   onChangeText={onChange}
                   placeholder="Nhập tiền cọc"
                   error={error?.message}
@@ -551,28 +570,28 @@ const CreateContractScreen = ({
                       service={service}
                       onDelete={() => {
                         Alert.alert(
-                          "Xóa dịch vụ",
-                          "Bạn có chắc chắn muốn xóa dịch vụ này không?",
+                          'Xóa dịch vụ',
+                          'Bạn có chắc chắn muốn xóa dịch vụ này không?',
                           [
                             {
-                              text: "Hủy",
-                              style: "cancel",
+                              text: 'Hủy',
+                              style: 'cancel',
                             },
                             {
-                              text: "Xóa",
-                              style: "destructive",
+                              text: 'Xóa',
+                              style: 'destructive',
                               onPress: () => {
                                 remove(index);
                               },
                             },
-                          ]
+                          ],
                         );
                       }}
                       index={index}
                       onEdit={() =>
                         openContractServiceForm(
                           value as ContractServiceDetailResponse,
-                          index
+                          index,
                         )
                       }
                       onChange={(service) => update(index, service)}
@@ -605,14 +624,14 @@ const CreateContractScreen = ({
       <ActionButtonBottom
         actions={[
           {
-            label: "Xác nhận hợp đồng",
-            icon: "checkmark-circle",
+            label: 'Xác nhận hợp đồng',
+            icon: 'checkmark-circle',
             isLoading,
             onPress: handleSubmit(handleSave, (error) => {
               Toast.show({
-                type: "error",
-                text1: "Lỗi",
-                text2: "Vui lòng nhập đầy đủ thông tin!",
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Vui lòng nhập đầy đủ thông tin!',
               });
             }),
           },
@@ -643,10 +662,10 @@ const CreateContractScreen = ({
             updateClient(index, client);
           } else {
             const ignoreAutoUpdatePartnerNumber = getValues(
-              "ignoreAutoUpdatePartnerNumber"
+              'ignoreAutoUpdatePartnerNumber',
             );
             if (!ignoreAutoUpdatePartnerNumber) {
-              setValue("partnerClientCount", contractClientsFields.length + 1);
+              setValue('partnerClientCount', contractClientsFields.length + 1);
             }
             appendClient(client);
           }

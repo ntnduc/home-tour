@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { FlatList, ScrollView, StatusBar, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { SceneMap, TabView } from "react-native-tab-view";
-import BuildingDetailCard from "../../components/BuildingDetailCard";
-import CustomTabBar from "../../components/CustomTabBar";
-import EnhancedChart from "../../components/EnhancedChart";
-import FilterTabs from "../../components/FilterTabs";
-import ProgressBar from "../../components/ProgressBar";
-import StatCard from "../../components/StatCard";
-import { colors } from "../../theme/colors";
-import HeaderComponents from "../common/HeaderComponents";
+import React, { useState } from 'react';
+import { FlatList, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SceneMap, TabView } from 'react-native-tab-view';
+import BuildingDetailCard from '../../components/BuildingDetailCard';
+import CustomTabBar from '../../components/CustomTabBar';
+import EnhancedChart from '../../components/EnhancedChart';
+import FilterTabs from '../../components/FilterTabs';
+import ProgressBar from '../../components/ProgressBar';
+import StatCard from '../../components/StatCard';
+import { colors } from '../../theme/colors';
+import HeaderComponents from '../common/HeaderComponents';
 
 // Mock data cho báo cáo
 const mockRevenueData = {
@@ -24,72 +24,72 @@ const mockRevenueData = {
 };
 
 const mockChartData = [
-  { label: "T7", value: 11000000, color: colors.primary.main },
-  { label: "T8", value: 11500000, color: colors.primary.main },
-  { label: "T9", value: 11800000, color: colors.primary.main },
-  { label: "T10", value: 12200000, color: colors.primary.main },
-  { label: "T11", value: 12000000, color: colors.primary.main },
-  { label: "T12", value: 12500000, color: colors.primary.main },
+  { label: 'T7', value: 11000000, color: colors.primary.main },
+  { label: 'T8', value: 11500000, color: colors.primary.main },
+  { label: 'T9', value: 11800000, color: colors.primary.main },
+  { label: 'T10', value: 12200000, color: colors.primary.main },
+  { label: 'T11', value: 12000000, color: colors.primary.main },
+  { label: 'T12', value: 12500000, color: colors.primary.main },
 ];
 
 const mockBuildingData = [
   {
     id: 1,
-    name: "Tòa A - Khu đô thị Xanh",
+    name: 'Tòa A - Khu đô thị Xanh',
     revenue: 3200000,
     occupancy: 95,
     rooms: 24,
     occupied: 23,
-    status: "active",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
+    status: 'active',
+    address: '123 Đường ABC, Quận 1, TP.HCM',
     monthlyGrowth: 5.2,
     avgRent: 850000,
   },
   {
     id: 2,
-    name: "Tòa B - Khu đô thị Xanh",
+    name: 'Tòa B - Khu đô thị Xanh',
     revenue: 2800000,
     occupancy: 88,
     rooms: 20,
     occupied: 18,
-    status: "active",
-    address: "456 Đường DEF, Quận 2, TP.HCM",
+    status: 'active',
+    address: '456 Đường DEF, Quận 2, TP.HCM',
     monthlyGrowth: 3.8,
     avgRent: 780000,
   },
   {
     id: 3,
-    name: "Tòa C - Khu đô thị Xanh",
+    name: 'Tòa C - Khu đô thị Xanh',
     revenue: 2500000,
     occupancy: 85,
     rooms: 18,
     occupied: 15,
-    status: "active",
-    address: "789 Đường GHI, Quận 3, TP.HCM",
+    status: 'active',
+    address: '789 Đường GHI, Quận 3, TP.HCM',
     monthlyGrowth: 2.1,
     avgRent: 720000,
   },
   {
     id: 4,
-    name: "Tòa D - Khu đô thị Xanh",
+    name: 'Tòa D - Khu đô thị Xanh',
     revenue: 2200000,
     occupancy: 78,
     rooms: 16,
     occupied: 12,
-    status: "maintenance",
-    address: "321 Đường JKL, Quận 4, TP.HCM",
+    status: 'maintenance',
+    address: '321 Đường JKL, Quận 4, TP.HCM',
     monthlyGrowth: -1.5,
     avgRent: 680000,
   },
   {
     id: 5,
-    name: "Tòa E - Khu đô thị Xanh",
+    name: 'Tòa E - Khu đô thị Xanh',
     revenue: 1800000,
     occupancy: 82,
     rooms: 14,
     occupied: 11,
-    status: "active",
-    address: "654 Đường MNO, Quận 5, TP.HCM",
+    status: 'active',
+    address: '654 Đường MNO, Quận 5, TP.HCM',
     monthlyGrowth: 4.7,
     avgRent: 650000,
   },
@@ -98,67 +98,67 @@ const mockBuildingData = [
 const mockTenantData = [
   {
     id: 1,
-    name: "Nguyễn Văn A",
-    room: "A-101",
-    building: "Tòa A",
+    name: 'Nguyễn Văn A',
+    room: 'A-101',
+    building: 'Tòa A',
     rent: 850000,
-    status: "active",
-    dueDate: "15/12/2024",
+    status: 'active',
+    dueDate: '15/12/2024',
   },
   {
     id: 2,
-    name: "Trần Thị B",
-    room: "A-102",
-    building: "Tòa A",
+    name: 'Trần Thị B',
+    room: 'A-102',
+    building: 'Tòa A',
     rent: 900000,
-    status: "overdue",
-    dueDate: "05/12/2024",
+    status: 'overdue',
+    dueDate: '05/12/2024',
   },
   {
     id: 3,
-    name: "Lê Văn C",
-    room: "B-201",
-    building: "Tòa B",
+    name: 'Lê Văn C',
+    room: 'B-201',
+    building: 'Tòa B',
     rent: 750000,
-    status: "active",
-    dueDate: "20/12/2024",
+    status: 'active',
+    dueDate: '20/12/2024',
   },
   {
     id: 4,
-    name: "Phạm Thị D",
-    room: "B-202",
-    building: "Tòa B",
+    name: 'Phạm Thị D',
+    room: 'B-202',
+    building: 'Tòa B',
     rent: 800000,
-    status: "overdue",
-    dueDate: "10/12/2024",
+    status: 'overdue',
+    dueDate: '10/12/2024',
   },
   {
     id: 5,
-    name: "Hoàng Văn E",
-    room: "C-301",
-    building: "Tòa C",
+    name: 'Hoàng Văn E',
+    room: 'C-301',
+    building: 'Tòa C',
     rent: 700000,
-    status: "active",
-    dueDate: "25/12/2024",
+    status: 'active',
+    dueDate: '25/12/2024',
   },
 ];
 
 const routes = [
-  { key: "overview", title: "Tổng quan", icon: "📊" },
-  { key: "buildings", title: "Tòa nhà", icon: "🏢" },
-  { key: "tenants", title: "Người thuê", icon: "👥" },
-  { key: "analytics", title: "Phân tích", icon: "📈" },
+  { key: 'overview', title: 'Tổng quan', icon: '📊' },
+  { key: 'buildings', title: 'Tòa nhà', icon: '🏢' },
+  { key: 'tenants', title: 'Người thuê', icon: '👥' },
+  { key: 'analytics', title: 'Phân tích', icon: '📈' },
 ];
 
 // Component cho tab Tổng quan
 const OverviewTab = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedPeriod, setSelectedPeriod] = useState('month');
 
   const periodTabs = [
-    { key: "week", title: "Tuần", icon: "📅" },
-    { key: "month", title: "Tháng", icon: "📊" },
-    { key: "quarter", title: "Quý", icon: "📈" },
-    { key: "year", title: "Năm", icon: "🎯" },
+    { key: 'week', title: 'Tuần', icon: '📅' },
+    { key: 'month', title: 'Tháng', icon: '📊' },
+    { key: 'quarter', title: 'Quý', icon: '📈' },
+    { key: 'year', title: 'Năm', icon: '🎯' },
   ];
 
   return (
@@ -193,9 +193,9 @@ const OverviewTab = () => {
               icon={<Text className="text-2xl">📈</Text>}
               label="Dự kiến tháng tới"
               value={`${(mockRevenueData.expectedNextMonth / 1000000).toFixed(
-                1
+                1,
               )}M`}
-              bgColor={colors.status.success + "20"}
+              bgColor={colors.status.success + '20'}
             />
             <StatCard
               icon={<Text className="text-2xl">🏢</Text>}
@@ -207,7 +207,7 @@ const OverviewTab = () => {
               icon={<Text className="text-2xl">📊</Text>}
               label="Tổng doanh thu"
               value={`${(mockRevenueData.totalRevenue / 1000000).toFixed(0)}M`}
-              bgColor={colors.status.info + "20"}
+              bgColor={colors.status.info + '20'}
             />
           </View>
         </View>
@@ -311,24 +311,24 @@ const OverviewTab = () => {
 
 // Component cho tab Tòa nhà
 const BuildingsTab = () => {
-  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
   const filterTabs = [
-    { key: "all", title: "Tất cả", icon: "🏢" },
-    { key: "active", title: "Hoạt động", icon: "✅" },
-    { key: "maintenance", title: "Bảo trì", icon: "🔧" },
-    { key: "inactive", title: "Không hoạt động", icon: "❌" },
+    { key: 'all', title: 'Tất cả', icon: '🏢' },
+    { key: 'active', title: 'Hoạt động', icon: '✅' },
+    { key: 'maintenance', title: 'Bảo trì', icon: '🔧' },
+    { key: 'inactive', title: 'Không hoạt động', icon: '❌' },
   ];
 
   const filteredBuildings =
-    selectedFilter === "all"
+    selectedFilter === 'all'
       ? mockBuildingData
       : mockBuildingData.filter(
-          (building) => building.status === selectedFilter
+          (building) => building.status === selectedFilter,
         );
 
   const handleBuildingPress = (buildingId: number) => {
-    console.log("Nhấn vào tòa nhà:", buildingId);
+    console.log('Nhấn vào tòa nhà:', buildingId);
   };
 
   return (
@@ -370,7 +370,7 @@ const BuildingsTab = () => {
                   {(
                     filteredBuildings.reduce(
                       (sum, building) => sum + building.revenue,
-                      0
+                      0,
                     ) / 1000000
                   ).toFixed(1)}
                   M
@@ -384,7 +384,7 @@ const BuildingsTab = () => {
                   {(
                     filteredBuildings.reduce(
                       (sum, building) => sum + building.occupancy,
-                      0
+                      0,
                     ) / filteredBuildings.length
                   ).toFixed(1)}
                   %
@@ -397,7 +397,7 @@ const BuildingsTab = () => {
                 <Text className="text-base font-bold text-status-success">
                   {
                     filteredBuildings.filter(
-                      (building) => building.status === "active"
+                      (building) => building.status === 'active',
                     ).length
                   }
                   /{filteredBuildings.length}
@@ -413,16 +413,16 @@ const BuildingsTab = () => {
 
 // Component cho tab Người thuê
 const TenantsTab = () => {
-  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   const statusTabs = [
-    { key: "all", title: "Tất cả", icon: "👥" },
-    { key: "active", title: "Đã thanh toán", icon: "✅" },
-    { key: "overdue", title: "Chưa thanh toán", icon: "⚠️" },
+    { key: 'all', title: 'Tất cả', icon: '👥' },
+    { key: 'active', title: 'Đã thanh toán', icon: '✅' },
+    { key: 'overdue', title: 'Chưa thanh toán', icon: '⚠️' },
   ];
 
   const filteredTenants =
-    selectedStatus === "all"
+    selectedStatus === 'all'
       ? mockTenantData
       : mockTenantData.filter((tenant) => tenant.status === selectedStatus);
 
@@ -452,21 +452,21 @@ const TenantsTab = () => {
               </Text>
               <View
                 className={`px-2 py-1 rounded-full ${
-                  item.status === "active"
-                    ? "bg-status-success bg-opacity-20"
-                    : "bg-status-error bg-opacity-20"
+                  item.status === 'active'
+                    ? 'bg-status-success bg-opacity-20'
+                    : 'bg-status-error bg-opacity-20'
                 }`}
               >
                 <Text
                   className={`text-xs font-medium ${
-                    item.status === "active"
-                      ? "text-status-success"
-                      : "text-status-error"
+                    item.status === 'active'
+                      ? 'text-status-success'
+                      : 'text-status-error'
                   }`}
                 >
-                  {item.status === "active"
-                    ? "Đã thanh toán"
-                    : "Chưa thanh toán"}
+                  {item.status === 'active'
+                    ? 'Đã thanh toán'
+                    : 'Chưa thanh toán'}
                 </Text>
               </View>
             </View>
@@ -494,12 +494,12 @@ const TenantsTab = () => {
 
 // Component cho tab Phân tích
 const AnalyticsTab = () => {
-  const [selectedChartType, setSelectedChartType] = useState("bar");
+  const [selectedChartType, setSelectedChartType] = useState('bar');
 
   const chartTypeTabs = [
-    { key: "bar", title: "Cột", icon: "📊" },
-    { key: "line", title: "Đường", icon: "📈" },
-    { key: "area", title: "Vùng", icon: "📉" },
+    { key: 'bar', title: 'Cột', icon: '📊' },
+    { key: 'line', title: 'Đường', icon: '📈' },
+    { key: 'area', title: 'Vùng', icon: '📉' },
   ];
 
   return (
@@ -524,7 +524,7 @@ const AnalyticsTab = () => {
             data={mockChartData}
             title="Biểu đồ doanh thu 6 tháng gần đây"
             subtitle="Đơn vị: Triệu VNĐ"
-            type={selectedChartType as "bar" | "line" | "area"}
+            type={selectedChartType as 'bar' | 'line' | 'area'}
             height={220}
             showValues={true}
             showGrid={true}
@@ -638,10 +638,10 @@ const ReportScreen = () => {
     <SafeAreaView
       style={{ flex: 1, backgroundColor: colors.background.default }}
     >
-      <StatusBar
+      {/* <StatusBar
         backgroundColor={colors.primary.main}
         barStyle="light-content"
-      />
+      /> */}
       <View>
         <HeaderComponents title="Báo cáo & Thống kê" />
       </View>

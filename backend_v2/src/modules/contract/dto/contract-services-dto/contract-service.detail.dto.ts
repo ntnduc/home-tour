@@ -27,6 +27,9 @@ export class ContractServiceDetailDto extends BaseDetailDto<ContractServices> {
   @IsOptional()
   name?: string;
 
+  @IsOptional()
+  helperValue?: number;
+
   fromEntity(entity: ContractServices): void {
     this.id = entity.id;
     this.name = entity.name;
@@ -34,6 +37,7 @@ export class ContractServiceDetailDto extends BaseDetailDto<ContractServices> {
     this.calculationMethod = entity.calculationMethod;
     this.isEnabled = entity.isEnabled;
     this.notes = entity.notes;
+    this.helperValue = entity.helperValue;
   }
 
   fromPropertyService(propertyService: PropertiesService): void {

@@ -10,6 +10,8 @@ import {
   ViewStyle,
 } from 'react-native';
 
+// import { Pressable } from 'react-native-gesture-handler';
+
 export type CardActionConfig = {
   key: string;
   icon?: React.ReactNode;
@@ -185,7 +187,9 @@ const CardComponent = (props: CardComponentProps) => {
                     ) : (
                       <TouchableOpacity
                         key={act.key}
-                        onPress={act.onPress}
+                        onPress={(e) => {
+                          act.onPress?.(e as any);
+                        }}
                         style={getActionStyle(
                           (act as any).presetKey,
                           act.style,

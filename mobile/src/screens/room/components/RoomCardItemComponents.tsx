@@ -18,7 +18,7 @@ type Props = {
 };
 
 const RoomCardItemComponent = ({ item, navigation }: Props) => {
-  const contractActive = item.contracts?.findLast(
+  const contractActive = item.contracts?.find(
     (contract) => contract.status === ContractStatus.ACTIVE,
   );
 
@@ -60,12 +60,7 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
               </View>
               <View style={styles.contractRow}>
                 <Text style={styles.contractLabel}>Hợp đồng:</Text>
-                <Text style={styles.contractText}>
-                  #{contractActive.code}
-                  {contractActive.endDate
-                    ? `đến ${formatDate(contractActive.endDate)}`
-                    : ''}
-                </Text>
+                <Text style={styles.contractText}>#{contractActive.code}</Text>
               </View>
             </View>
           )}

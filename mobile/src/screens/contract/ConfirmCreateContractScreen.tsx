@@ -1,26 +1,27 @@
-import { createContract } from "@/api/contract/contract.api";
-import ActionButtonBottom from "@/components/ActionButtonBottom";
+import { createContract } from '@/api/contract/contract.api';
+import ActionButtonBottom from '@/components/ActionButtonBottom';
+import Loading from '@/components/Loading';
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
   ServiceCalculateMethod,
-} from "@/constant/service.constant";
-import { RootStackParamList } from "@/navigation/types";
-import CardComponent from "@/screens/common/CardComponent";
-import { formatCurrency } from "@/utils/appUtil";
-import { formatDate } from "@/utils/dateUtil";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useMemo, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Toast from "react-native-toast-message";
+} from '@/constant/service.constant';
+import { RootStackParamList } from '@/navigation/types';
+import CardComponent from '@/screens/common/CardComponent';
+import { formatCurrency } from '@/utils/appUtil';
+import { formatDate } from '@/utils/dateUtil';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useMemo, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
 
 type ConfirmCreateContractScreenProps = {
   navigation: NativeStackNavigationProp<
     RootStackParamList,
-    "ConfirmCreateContract"
+    'ConfirmCreateContract'
   >;
-  route: { params: RootStackParamList["ConfirmCreateContract"] };
+  route: { params: RootStackParamList['ConfirmCreateContract'] };
 };
 
 const ConfirmCreateContractScreen = ({
@@ -44,26 +45,27 @@ const ConfirmCreateContractScreen = ({
 
   const onConfirm = async () => {
     try {
+      setIsSubmitting(true);
       const response = await createContract(contract);
       if (response.success && response.data) {
         Toast.show({
-          type: "success",
-          text1: "Thành công",
-          text2: "Tạo hợp đồng thành công",
+          type: 'success',
+          text1: 'Thành công',
+          text2: 'Tạo hợp đồng thành công',
         });
         navigation.popToTop();
       } else {
         Toast.show({
-          type: "error",
-          text1: "Lỗi",
-          text2: response.message ?? "Tạo hợp đồng thất bại!",
+          type: 'error',
+          text1: 'Lỗi',
+          text2: response.message ?? 'Tạo hợp đồng thất bại!',
         });
       }
     } catch (error: any) {
       Toast.show({
-        type: "error",
-        text1: "Lỗi",
-        text2: error.response.data.message ?? "Tạo hợp đồng thất bại!",
+        type: 'error',
+        text1: 'Lỗi',
+        text2: error.response.data.message ?? 'Tạo hợp đồng thất bại!',
       });
     } finally {
       setIsSubmitting(false);
@@ -73,17 +75,21 @@ const ConfirmCreateContractScreen = ({
   const renderRow = (
     label: string,
     value?: string | number,
-    strong?: boolean
+    strong?: boolean,
   ) => (
     <View className="flex-row justify-between items-center mb-2">
       <Text className="text-base text-gray-600">{label}</Text>
       <Text
-        className={`text-base ${strong ? "font-semibold text-gray-900" : "text-gray-900"}`}
+        className={`text-base ${strong ? 'font-semibold text-gray-900' : 'text-gray-900'}`}
       >
         {value}
       </Text>
     </View>
   );
+
+  if (isSubmitting) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -92,8 +98,9 @@ const ConfirmCreateContractScreen = ({
         contentContainerStyle={{
           flexGrow: 1,
           padding: 16,
-          display: "flex",
-          flexDirection: "column",
+          paddingBottom: 16,
+          display: 'flex',
+          flexDirection: 'column',
           gap: 16,
         }}
         enableOnAndroid={true}
@@ -177,8 +184,8 @@ const ConfirmCreateContractScreen = ({
         <CardComponent title="Thông tin phòng">
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
-              {renderRow("Phòng", room || "-")}
-              {renderRow("Tòa nhà", property || "-")}
+              {renderRow('Phòng', room || '-')}
+              {renderRow('Tòa nhà', property || '-')}
             </View>
             {/* <View className="items-end">
               <Text className="text-xs text-gray-500 mb-1">Giá thuê</Text>
@@ -193,10 +200,10 @@ const ConfirmCreateContractScreen = ({
         {/* Người thuê chính */}
         <CardComponent title="Người thuê">
           <View>
-            {renderRow("Họ và tên", landlordClient?.name || "-")}
-            {renderRow("Số điện thoại", landlordClient?.phone || "-")}
-            {renderRow("CCCD/CMND", landlordClient?.idCardNumber || "-")}
-            {renderRow("Số người ở cùng", contract.partnerClientCount ?? 0)}
+            {renderRow('Họ và tên', landlordClient?.name || '-')}
+            {renderRow('Số điện thoại', landlordClient?.phoneNumber || '-')}
+            {renderRow('CCCD/CMND', landlordClient?.idCardNumber || '-')}
+            {renderRow('Số người ở cùng', contract.partnerClientCount ?? 0)}
           </View>
         </CardComponent>
 
@@ -206,7 +213,7 @@ const ConfirmCreateContractScreen = ({
             <View className="flex-1">
               <Text className="text-sm text-gray-600 mb-1">Ngày bắt đầu</Text>
               <Text className="text-base font-semibold text-gray-900">
-                {contract.startDate ? formatDate(contract.startDate) : "-"}
+                {contract.startDate ? formatDate(contract.startDate) : '-'}
               </Text>
             </View>
             <Ionicons name="arrow-forward" size={20} color="#6B7280" />
@@ -215,7 +222,7 @@ const ConfirmCreateContractScreen = ({
               <Text className="text-base font-semibold text-gray-900">
                 {contract.endDate
                   ? formatDate(contract.endDate)
-                  : "Không xác định"}
+                  : 'Không xác định'}
               </Text>
             </View>
           </View>
@@ -225,18 +232,18 @@ const ConfirmCreateContractScreen = ({
         <CardComponent title="Thông tin thanh toán">
           <View>
             {renderRow(
-              "Tiền thuê hàng tháng",
+              'Tiền thuê hàng tháng',
               `${formatCurrency((contract.rentAmountAgreed || 0).toString())}đ`,
-              true
+              true,
             )}
             {renderRow(
-              "Tiền cọc (thanh toán ban đầu)",
-              `${formatCurrency((depositTotal || 0).toString())}đ`
+              'Tiền cọc (thanh toán ban đầu)',
+              `${formatCurrency((depositTotal || 0).toString())}đ`,
             )}
             <View className="h-[1px] bg-gray-200 my-2" />
             {renderRow(
-              "Ngày thu tiền hàng tháng",
-              contract.paymentDueDay ? `Ngày ${contract.paymentDueDay}` : "-"
+              'Ngày thu tiền hàng tháng',
+              contract.paymentDueDay ? `Ngày ${contract.paymentDueDay}` : '-',
             )}
           </View>
         </CardComponent>
@@ -268,21 +275,21 @@ const ConfirmCreateContractScreen = ({
                       <Ionicons
                         name={
                           service.isEnabled
-                            ? "checkmark-circle"
-                            : "close-circle"
+                            ? 'checkmark-circle'
+                            : 'close-circle'
                         }
                         size={18}
-                        color={service.isEnabled ? "#34C759" : "#FF3B30"}
+                        color={service.isEnabled ? '#34C759' : '#FF3B30'}
                       />
                       <View className="ml-2 flex-1">
                         <Text className="text-base font-medium text-gray-900">
-                          {service.name || "Dịch vụ"}
+                          {service.name || 'Dịch vụ'}
                         </Text>
                         <Text className="text-xs text-gray-500">
-                          {methodInfo?.label || "Phương thức"}
+                          {methodInfo?.label || 'Phương thức'}
                           {service.helperValue
-                            ? ` · SL: ${service.helperValue} ${methodInfo?.unit || ""}`
-                            : ""}
+                            ? ` · SL: ${service.helperValue} ${methodInfo?.unit || ''}`
+                            : ''}
                         </Text>
                       </View>
                     </View>
@@ -292,8 +299,8 @@ const ConfirmCreateContractScreen = ({
                       </Text>
                       <Text className="text-xs text-gray-500">
                         {method === ServiceCalculateMethod.PER_UNIT_SIMPLE
-                          ? "/đơn vị"
-                          : "/tháng"}
+                          ? '/đơn vị'
+                          : '/tháng'}
                       </Text>
                     </View>
                   </View>
@@ -305,7 +312,7 @@ const ConfirmCreateContractScreen = ({
 
         <CardComponent title="Điều khoản bổ sung">
           <Text className="text-sm text-gray-800">
-            {contract.notes ?? "Không có điều khoản bổ sung"}
+            {contract.notes ?? 'Không có điều khoản bổ sung'}
           </Text>
         </CardComponent>
       </KeyboardAwareScrollView>
@@ -313,16 +320,16 @@ const ConfirmCreateContractScreen = ({
       <ActionButtonBottom
         actions={[
           {
-            label: "Xác nhận tạo hợp đồng",
-            icon: "checkmark-circle",
-            variant: "success",
+            label: 'Xác nhận tạo hợp đồng',
+            icon: 'checkmark-circle',
+            variant: 'success',
             isLoading: isSubmitting,
             onPress: onConfirm,
           },
           {
-            label: "Chỉnh sửa thông tin",
-            icon: "create-outline",
-            variant: "secondary",
+            label: 'Chỉnh sửa thông tin',
+            icon: 'create-outline',
+            variant: 'secondary',
             onPress: onEdit,
           },
         ]}

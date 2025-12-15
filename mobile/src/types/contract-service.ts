@@ -1,4 +1,4 @@
-import { ServiceCalculateMethod } from "@/constant/service.constant";
+import { ServiceCalculateMethod } from '@/constant/service.constant';
 
 export interface ContractService {
   id: string;
@@ -13,18 +13,26 @@ export interface ContractService {
 }
 
 export interface ContractServiceCreateRequest
-  extends Omit<ContractService, "id" | "contractId"> {
+  extends Omit<ContractService, 'id' | 'contractId'> {
   fieldId?: string;
   id?: string;
   propertyServiceId?: string;
 }
 
 export interface ContractServiceUpdateRequest
-  extends Omit<ContractService, "contractId"> {
+  extends Omit<ContractService, 'contractId'> {
   fieldId?: string;
 }
 
 export interface ContractServiceDetailResponse
-  extends Omit<ContractService, "contractId"> {
+  extends Omit<ContractService, 'contractId'> {
   contractId?: string;
+}
+
+export interface ContractServiceInvoiceCalculateResponse
+  extends Omit<ContractService, 'contractId'> {
+  oldHelperValue?: number | null;
+  newHelperValue?: number | null;
+  contractId?: string;
+  isUpdated?: boolean;
 }

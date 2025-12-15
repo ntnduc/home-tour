@@ -6,17 +6,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background?.default || '#fff',
     borderRadius: 12,
     padding: 16,
-    // marginBottom: 12,
-    shadowColor: colors.neutral?.black || '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: colors.border?.light || '#F3F4F6',
   },
   header: {
     flexDirection: 'row',

@@ -1,40 +1,33 @@
-import { getListProperty } from "@/api/property/property.api";
-import FabButton from "@/components/FabButton";
-import Loading from "@/components/Loading";
-import { ApiResponse } from "@/types/api";
-import { BasePagingResponse } from "@/types/base.response";
-import { PropertyListResponse } from "@/types/property";
-import { useFocusEffect } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useCallback, useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../navigation/types";
-import { colors } from "../../theme/colors";
-import HeaderComponents from "../common/HeaderComponents";
-import PropertyCardComponent from "./components/PropertyCardComponent";
+import { getListProperty } from '@/api/property/property.api';
+import FabButton from '@/components/FabButton';
+import Loading from '@/components/Loading';
+import { ApiResponse } from '@/types/api';
+import { BasePagingResponse } from '@/types/base.response';
+import { PropertyListResponse } from '@/types/property';
+import { useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import React, { useCallback, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { RootStackParamList } from '../../navigation/types';
+import { colors } from '../../theme/colors';
+import HeaderComponents from '../common/HeaderComponents';
+import PropertyCardComponent from './components/PropertyCardComponent';
 
 type PropertyListScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "PropertyList">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'PropertyList'>;
 };
 
 const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
     useInfiniteQuery<
       ApiResponse<BasePagingResponse<PropertyListResponse>>,
       Error
     >({
-      queryKey: ["properties", 1, 5, search],
+      queryKey: ['properties', 1, 5, search],
       initialPageParam: 1,
       queryFn: ({ pageParam }) =>
         getListProperty({
@@ -52,7 +45,7 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
 
   const flatData = data?.pages.flatMap((page) => page.data?.items) || [];
@@ -71,36 +64,36 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
   };
 
   const handleCreateProperty = () => {
-    navigation.navigate("CreateProperty");
+    navigation.navigate('CreateProperty');
   };
 
   const handlePropertyPress = (propertyId: string) => {
-    navigation.navigate("PropertyDetail", { propertyId });
+    navigation.navigate('PropertyDetail', { propertyId });
   };
 
   const handleUpdateProperty = (propertyId: string) => {
-    navigation.navigate("UpdateProperty", { propertyId });
+    navigation.navigate('UpdateProperty', { propertyId });
   };
 
   const handleViewRooms = (propertyId: string) => {
-    navigation.navigate("RoomList", { propertyId });
+    navigation.navigate('RoomList', { propertyId });
   };
 
   const handleAddRoom = (propertyId: string) => {
-    navigation.navigate("CreateRoom", { propertyId });
+    navigation.navigate('CreateRoom', { propertyId });
   };
 
   return (
-    <SafeAreaView className="bg-white flex-1" edges={["top"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
+    <SafeAreaView className="bg-white flex-1" edges={['top']}>
+      {/* <StatusBar barStyle="dark-content" backgroundColor={"#fff"} /> */}
       <View>
         <HeaderComponents
           title="Quản lý tài sản"
           isSearch
           searchConfig={{
-            placeholder: "Tìm kiếm tài sản...",
+            placeholder: 'Tìm kiếm tài sản...',
             onSearch: handleSearch,
-            className: "mx-2",
+            className: 'mx-2',
           }}
         />
       </View>
@@ -147,7 +140,7 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
               <View
                 style={[
                   styles.statsBox,
-                  { backgroundColor: colors.status.success + "20" },
+                  { backgroundColor: colors.status.success + '20' },
                 ]}
               >
                 <Text style={styles.statsIcon}>🔑</Text>
@@ -157,7 +150,7 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
               <View
                 style={[
                   styles.statsBox,
-                  { backgroundColor: colors.status.warning + "20" },
+                  { backgroundColor: colors.status.warning + '20' },
                 ]}
               >
                 <Text style={styles.statsIcon}>👤</Text>
@@ -189,8 +182,8 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
 
 const styles = StyleSheet.create({
   statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
     paddingHorizontal: 0,
   },
@@ -198,7 +191,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 6,
     borderRadius: 14,
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 14,
     backgroundColor: colors.background.paper,
     shadowColor: colors.neutral.black,
@@ -211,7 +204,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   statsValue: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 18,
     color: colors.primary.main,
   },

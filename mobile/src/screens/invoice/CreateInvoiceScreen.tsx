@@ -1,19 +1,20 @@
 import { getContract } from '@/api/contract/contract.api';
+import { ComboBox } from '@/components/ComboBox';
 import DisplayField from '@/components/DisplayField';
 import Input from '@/components/Input';
 import Loading from '@/components/Loading';
 import { SERVICE_CALCULATE_METHOD_WITH_INFO } from '@/constant/service.constant';
 import { RootStackParamList } from '@/navigation/types';
 import { ContractDetailResponse } from '@/types/contract';
-import { ContractServiceDetailResponse } from '@/types/contract-service';
+import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-service';
 import { InvoiceDetailResponse, InvoiceStatus } from '@/types/invoice';
-import { formatCurrency } from '@/utils/appUtil';
-import { getCurrentDate } from '@/utils/dateUtil';
+import { formatCurrency, isAndroidSystem, isIOSSystem } from '@/utils/appUtil';
+import { getCurrentDate, getNextMonth } from '@/utils/dateUtil';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
 import CardComponent from '../common/CardComponent';
@@ -92,7 +93,14 @@ const CreateInvoiceScreen = ({
         totalAmount: 0,
         paidAmount: 0,
         remainingAmount: 0,
-        contractServices: contract.contractServices,
+        contractServices: contract.contractServices?.map((item) => ({
+          ...item,
+          oldHelperValue: item.helperValue ?? 0,
+          isUpdated: false,
+        })),
+        paymentMonth: contract.isPrepaidRoom
+          ? getNextMonth()
+          : getCurrentDate().getMonth(),
         status: InvoiceStatus.DRAFT,
       };
       return invoiceDetail;
@@ -101,46 +109,28 @@ const CreateInvoiceScreen = ({
 
   const contractServices = watch(
     'contractServices',
-  ) as ContractServiceDetailResponse[];
+  ) as ContractServiceInvoiceCalculateResponse[];
 
-  // const [utilityServices, setUtilityServices] = React.useState<
-  //   UtilityService[]
-  // >(() => MOCK_SERVICE_METERS);
-
-  // const handleChangeMeter = (
-  //   serviceId: string,
-  //   field: 'oldIndex' | 'newIndex',
-  //   value: string,
-  // ) => {
-  //   setUtilityServices((prev) =>
-  //     prev.map((service) =>
-  //       service.id === serviceId ? { ...service, [field]: value } : service,
-  //     ),
-  //   );
-  // };
-
-  const handleConfirmEditOld = (serviceId: string) => {
-    // const current = utilityServices.find((service) => service.id === serviceId);
-    // if (current?.allowEditOld) return;
-    // Alert.alert(
-    //   'Chỉnh sửa chỉ số cũ',
-    //   'Bạn chắc chắn muốn sửa chỉ số cũ? Hãy đảm bảo ghi nhận đúng số trước đó.',
-    //   [
-    //     { text: 'Huỷ', style: 'cancel' },
-    //     {
-    //       text: 'Đồng ý',
-    //       style: 'destructive',
-    //       onPress: () =>
-    //         setUtilityServices((services) =>
-    //           services.map((service) =>
-    //             service.id === serviceId
-    //               ? { ...service, allowEditOld: true }
-    //               : service,
-    //           ),
-    //         ),
-    //     },
-    //   ],
-    // );
+  const handleConfirmEditOld = (index: number) => {
+    console.log('💞💓💗💞💓💗 ~ handleConfirmEditOld ~ serviceId:', index);
+    const service = contractServices[index];
+    if (!service) {
+      return;
+    }
+    Alert.alert(
+      'Chỉnh sửa chỉ số cũ',
+      'Bạn chắc chắn muốn sửa chỉ số cũ? Hãy đảm bảo ghi nhận đúng số trước đó.',
+      [
+        { text: 'Huỷ', style: 'cancel' },
+        {
+          text: 'Đồng ý',
+          style: 'destructive',
+          onPress: () => {
+            setValue(`contractServices.${index}.isUpdated`, true);
+          },
+        },
+      ],
+    );
   };
 
   if (isLoading) {
@@ -180,22 +170,53 @@ const CreateInvoiceScreen = ({
           )}
         />
       </CardComponent>
+
       <CardComponent title="Thông tin thanh toán">
         <View className="gap-y-3">
-          {contractServices.map((service) => {
+          <Controller
+            control={control}
+            rules={{ required: 'Vui lòng chọn tháng thanh toán' }}
+            name={'paymentMonth'}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <ComboBox
+                  label="Hóa đơn tháng:"
+                  required={true}
+                  isSearch={false}
+                  options={Array.from({ length: 12 }, (_, index) => ({
+                    key: index + 1,
+                    value: index + 1,
+                    label: `Tháng ${index + 1}`,
+                  }))}
+                  onChange={onChange}
+                  value={value}
+                  placeholder="Chọn tháng thanh toán"
+                />
+              );
+            }}
+          />
+          {contractServices.map((service, index) => {
             return (
               <CardComponent
                 key={service.id}
                 title={service.name}
+                style={{
+                  elevation: isAndroidSystem() ? 3 : 0,
+                }}
+                className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
                 description={`${formatCurrency(service.price)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
                 renderActions={() => (
                   <TouchableOpacity
-                    onPress={() => handleConfirmEditOld(service.id)}
-                    className={`flex-row items-center rounded-full px-3 py-1 ${
-                      true
-                        ? 'bg-blue-50 border border-blue-100'
-                        : 'bg-gray-50 border border-gray-100'
-                    }`}
+                    onPress={() => {
+                      console.log('RUNNN');
+                      handleConfirmEditOld(index);
+                    }}
+                    className={`flex-row items-center rounded-full px-3 py-1 
+                      ${
+                        true
+                          ? 'bg-blue-50 border border-blue-100'
+                          : 'bg-gray-50 border border-gray-100'
+                      }`}
                     disabled={true}
                   >
                     <Ionicons
@@ -215,31 +236,47 @@ const CreateInvoiceScreen = ({
               >
                 <View className="flex-row gap-3">
                   <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
-                    <Input
-                      label="Số cũ"
-                      value={service.helperValue?.toString() || '0'}
-                      type="number"
-                      keyboardType="phone-pad"
-                      min={0}
-                      disabled={true}
-                      onChangeText={(text: string) => {
-                        // handleChangeMeter(service.id, 'oldIndex', text)
+                    <Controller
+                      control={control}
+                      rules={{ required: 'Vui lòng nhập số cũ' }}
+                      name={`contractServices.${index}.oldHelperValue`}
+                      render={({ field: { onChange, value } }) => {
+                        return (
+                          <Input
+                            label="Số cũ"
+                            value={value?.toString() || '0'}
+                            type="number"
+                            keyboardType="numeric"
+                            min={0}
+                            disabled={
+                              !getValues(`contractServices.${index}.isUpdated`)
+                            }
+                            onChange={onChange}
+                            showClear={false}
+                          />
+                        );
                       }}
-                      showClear={false}
                     />
                   </View>
 
                   <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
-                    <Input
-                      label="Số mới"
-                      value={service.helperValue?.toString() || '0'}
-                      type="number"
-                      keyboardType="phone-pad"
-                      required
-                      // onChangeText={(text: string) =>
-                      //   // handleChangeMeter(service.id, 'newIndex', text)
-                      // }}
-                      showClear={false}
+                    <Controller
+                      control={control}
+                      name={`contractServices.${index}.newHelperValue`}
+                      rules={{ required: 'Vui lòng nhập số mới' }}
+                      render={({ field: { onChange, value } }) => {
+                        return (
+                          <Input
+                            label="Số mới"
+                            value={value?.toString() || '0'}
+                            type="number"
+                            keyboardType="numeric"
+                            required
+                            onChange={onChange}
+                            showClear={false}
+                          />
+                        );
+                      }}
                     />
                   </View>
                 </View>

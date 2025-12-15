@@ -1,8 +1,8 @@
-import CardComponent from "@/screens/common/CardComponent";
-import { ClientCreateRequest } from "@/types/client";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import CardComponent from '@/screens/common/CardComponent';
+import { ClientCreateRequest } from '@/types/client';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 type PartnerClientsSectionProps = {
   onAdd: () => void;
@@ -57,9 +57,9 @@ const PartnerClientsSection: React.FC<PartnerClientsSectionProps> = ({
                     <Text className="text-sm font-semibold text-gray-900">
                       {client.name}
                     </Text>
-                    {client.phone ? (
+                    {client.phoneNumber ? (
                       <Text className="text-xs text-gray-500 mt-1">
-                        SĐT: {client.phone}
+                        SĐT: {client.phoneNumber}
                       </Text>
                     ) : null}
                     {client.idCardNumber ? (

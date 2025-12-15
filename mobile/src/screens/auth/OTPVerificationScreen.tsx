@@ -1,19 +1,18 @@
-import { requestOTP, verifyOTP } from "@/api/auth/api";
-import { storage } from "@/utils/storage";
-import { Ionicons } from "@expo/vector-icons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useRef, useState } from "react";
+import { requestOTP, verifyOTP } from '@/api/auth/api';
+import { storage } from '@/utils/storage';
+import { Ionicons } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native';
+import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type RootStackParamList = {
   Login: undefined;
@@ -25,7 +24,7 @@ type RootStackParamList = {
 
 type OTPVerificationScreenProps = NativeStackScreenProps<
   RootStackParamList,
-  "OTPVerification"
+  'OTPVerification'
 >;
 
 const OTPVerificationScreen = ({
@@ -33,7 +32,7 @@ const OTPVerificationScreen = ({
   route,
 }: OTPVerificationScreenProps) => {
   const { phoneNumber } = route.params;
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const inputRefs = useRef<Array<TextInput | null>>([]);
@@ -55,9 +54,9 @@ const OTPVerificationScreen = ({
   };
 
   const handleVerifyOTP = async () => {
-    const otpString = otp.join("");
+    const otpString = otp.join('');
     if (otpString.length !== 6) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ mã OTP (6 số).");
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ mã OTP (6 số).');
       return;
     }
     setIsLoading(true);
@@ -65,17 +64,17 @@ const OTPVerificationScreen = ({
       const response = await verifyOTP(phoneNumber, otpString);
       const data = response.data;
       if (!data.isRegistered && data.tempToken) {
-        navigation.replace("Register", {
+        navigation.replace('Register', {
           registrationToken: data.tempToken,
         });
       } else {
         await storage.setAccessToken(data.accessToken);
         await storage.setRefreshToken(data.refreshToken);
         await storage.setUser(data.user);
-        navigation.replace("MainTabs");
+        navigation.replace('MainTabs');
       }
     } catch (error: any) {
-      Alert.alert("Lỗi", error?.error?.message ?? "Mã OTP không đúng.");
+      Alert.alert('Lỗi', error?.error?.message ?? 'Mã OTP không đúng.');
     } finally {
       setIsLoading(false);
     }
@@ -86,10 +85,10 @@ const OTPVerificationScreen = ({
     setIsLoading(true);
     try {
       await requestOTP(phoneNumber);
-      setOtp(["", "", "", "", "", ""]);
-      Alert.alert("Thành công", "Mã OTP mới đã được gửi.");
+      setOtp(['', '', '', '', '', '']);
+      Alert.alert('Thành công', 'Mã OTP mới đã được gửi.');
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể gửi lại mã OTP. Vui lòng thử lại sau.");
+      Alert.alert('Lỗi', 'Không thể gửi lại mã OTP. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
     }
@@ -98,19 +97,19 @@ const OTPVerificationScreen = ({
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
         <Ionicons
           name="shield-checkmark-outline"
           size={48}
           color="#6a5af9"
-          style={{ alignSelf: "center", marginBottom: 8 }}
+          style={{ alignSelf: 'center', marginBottom: 8 }}
         />
         <Text style={styles.title}>Xác thực OTP</Text>
         <Text style={styles.subtitle}>
-          Nhập mã xác thực gồm 6 số đã gửi đến{"\n"}
-          <Text style={{ color: "#6a5af9", fontWeight: "bold" }}>
+          Nhập mã xác thực gồm 6 số đã gửi đến{'\n'}
+          <Text style={{ color: '#6a5af9', fontWeight: 'bold' }}>
             {phoneNumber}
           </Text>
         </Text>
@@ -120,7 +119,7 @@ const OTPVerificationScreen = ({
             <TextInput
               key={index}
               ref={(ref) => {
-                if (ref) inputRefs.current[index] = ref;
+                if (ref) inputRefs.current[index] = ref as TextInput;
               }}
               style={[styles.otpInput, digit ? styles.otpInputFilled : {}]}
               value={digit}
@@ -139,7 +138,7 @@ const OTPVerificationScreen = ({
           disabled={isLoading}
         >
           <Text style={styles.buttonText}>
-            {isLoading ? "Đang xác thực..." : "Xác nhận"}
+            {isLoading ? 'Đang xác thực...' : 'Xác nhận'}
           </Text>
         </TouchableOpacity>
 
@@ -155,7 +154,7 @@ const OTPVerificationScreen = ({
             <Text style={styles.resendButtonText}>
               {timeLeft > 0
                 ? `Gửi lại mã sau ${timeLeft}s`
-                : "Gửi lại mã xác thực"}
+                : 'Gửi lại mã xác thực'}
             </Text>
           </TouchableOpacity>
 
@@ -175,25 +174,25 @@ const OTPVerificationScreen = ({
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  content: { flex: 1, padding: 24, justifyContent: "center" },
+  container: { flex: 1, backgroundColor: '#fff' },
+  content: { flex: 1, padding: 24, justifyContent: 'center' },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#222",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#222',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+    color: '#666',
+    textAlign: 'center',
     marginBottom: 32,
     lineHeight: 22,
   },
   otpContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 36,
     marginTop: 12,
     paddingHorizontal: 8,
@@ -202,34 +201,34 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderWidth: 1.5,
-    borderColor: "#e0e0e0",
+    borderColor: '#e0e0e0',
     borderRadius: 12,
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 24,
-    color: "#222",
-    backgroundColor: "#f8f9fa",
+    color: '#222',
+    backgroundColor: '#f8f9fa',
   },
   otpInputFilled: {
-    borderColor: "#6a5af9",
-    backgroundColor: "#eef1fd",
+    borderColor: '#6a5af9',
+    backgroundColor: '#eef1fd',
   },
   button: {
-    backgroundColor: "#6a5af9",
+    backgroundColor: '#6a5af9',
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 8,
-    shadowColor: "#6a5af9",
+    shadowColor: '#6a5af9',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3,
   },
-  buttonDisabled: { backgroundColor: "#ccc" },
+  buttonDisabled: { backgroundColor: '#ccc' },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 17,
-    fontWeight: "600",
+    fontWeight: '600',
     letterSpacing: 0.5,
   },
   bottomButtonsContainer: {
@@ -237,30 +236,30 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   resendButton: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 8,
   },
   resendButtonDisabled: { opacity: 0.5 },
   resendButtonText: {
-    color: "#6a5af9",
+    color: '#6a5af9',
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   backButton: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 8,
   },
   backButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   backButtonText: {
-    color: "#666",
+    color: '#666',
     fontSize: 15,
-    fontWeight: "500",
-    fontStyle: "italic",
+    fontWeight: '500',
+    fontStyle: 'italic',
     marginLeft: 4,
   },
 });

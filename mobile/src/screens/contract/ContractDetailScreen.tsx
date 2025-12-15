@@ -147,6 +147,7 @@ const ContractDetailScreen = ({
         contentContainerStyle={{
           flexGrow: 1,
           padding: 16,
+          paddingBottom: 16,
           display: 'flex',
           flexDirection: 'column',
           gap: 16,

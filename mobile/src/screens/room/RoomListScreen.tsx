@@ -1,17 +1,17 @@
-import { getComboProperty } from "@/api/property/property.api";
-import { getListRoom } from "@/api/room/room.api";
-import { useGlobalAppSheet } from "@/components/GlobalAppSheet";
-import Loading from "@/components/Loading";
-import { ApiResponse } from "@/types/api";
-import { BasePagingResponse } from "@/types/base.response";
-import { ComboOptionWithExtra } from "@/types/comboOption";
-import { PropertyDetail } from "@/types/property";
-import { RoomListResponse } from "@/types/room";
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useState } from "react";
+import { getComboProperty } from '@/api/property/property.api';
+import { getListRoom } from '@/api/room/room.api';
+import { useGlobalAppSheet } from '@/components/GlobalAppSheet';
+import Loading from '@/components/Loading';
+import { ApiResponse } from '@/types/api';
+import { BasePagingResponse } from '@/types/base.response';
+import { ComboOptionWithExtra } from '@/types/comboOption';
+import { PropertyDetail } from '@/types/property';
+import { RoomListResponse } from '@/types/room';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -19,27 +19,27 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import BuildingSelector from "../../components/BuildingSelector";
-import PaymentSummary from "../../components/PaymentSummary";
-import { RootStackParamList } from "../../navigation/types";
-import { colors } from "../../theme/colors";
-import { PaymentStatus } from "../../types/payment";
-import HeaderComponents from "../common/HeaderComponents";
-import BuildingFilterComponent from "./components/BuildingFilterComponent";
-import RoomCardItemComponent from "./components/RoomCardItemComponents";
-import styles from "./styles/StyleRoomList";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import BuildingSelector from '../../components/BuildingSelector';
+import PaymentSummary from '../../components/PaymentSummary';
+import { RootStackParamList } from '../../navigation/types';
+import { colors } from '../../theme/colors';
+import { PaymentStatus } from '../../types/payment';
+import HeaderComponents from '../common/HeaderComponents';
+import BuildingFilterComponent from './components/BuildingFilterComponent';
+import RoomCardItemComponent from './components/RoomCardItemComponents';
+import styles from './styles/StyleRoomList';
 
 type RoomListScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "RoomList">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'RoomList'>;
 };
 
 const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [filterPayment, setFilterPayment] = useState<PaymentStatus | null>(
-    null
+    null,
   );
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
   const [comboProperty, setComboProperty] =
@@ -47,7 +47,7 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
 
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
     useInfiniteQuery<ApiResponse<BasePagingResponse<RoomListResponse>>, Error>({
-      queryKey: ["rooms", 1, 5, search, selectedBuilding],
+      queryKey: ['rooms', 1, 5, search, selectedBuilding],
       initialPageParam: 1,
       queryFn: ({ pageParam }) =>
         getListRoom({
@@ -75,8 +75,8 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
       .catch((error) => {
         // Nothing
         console.error(
-          "💞💓💗💞💓💗 ~ error:",
-          JSON.stringify(error.response.data.message)
+          '💞💓💗💞💓💗 ~ error:',
+          JSON.stringify(error.response.data.message),
         );
         return [];
       })
@@ -88,7 +88,7 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
 
   const renderFilterButtons = () => (
@@ -205,19 +205,19 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
     [];
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={[styles.container]} edges={['top']}>
       <HeaderComponents
         title="Danh Sách Phòng"
         isSearch
         searchConfig={{
-          placeholder: "Tìm kiếm phòng hoặc tòa nhà...",
+          placeholder: 'Tìm kiếm phòng hoặc tòa nhà...',
           onSearch: (text) => setSearch(text),
         }}
       >
         <BuildingSelector
           buildings={comboProperty ?? []}
           selectedBuilding={
-            selectedBuilding === "Tất cả" ? null : selectedBuilding
+            selectedBuilding === 'Tất cả' ? null : selectedBuilding
           }
           onOpen={() => {
             openAppSheet(
@@ -230,11 +230,11 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
                 }}
               />,
               {
-                snapPoints: ["40%"],
+                snapPoints: ['40%'],
                 header: {
-                  title: "Chọn tòa nhà",
+                  title: 'Chọn tòa nhà',
                 },
-              }
+              },
             );
           }}
         />
@@ -242,7 +242,7 @@ const RoomListScreen = ({ navigation }: RoomListScreenProps) => {
       </HeaderComponents>
       {isLoading && (
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
           <Loading />
         </View>

@@ -1,15 +1,15 @@
-import Input from "@/components/Input";
+import Input from '@/components/Input';
 import {
   SERVICE_CALCULATE_METHOD_WITH_INFO,
   ServiceCalculateMethod,
-} from "@/constant/service.constant";
-import CardComponent from "@/screens/common/CardComponent";
-import { ContractServiceCreateRequest } from "@/types/contract-service";
-import { formatCurrency } from "@/utils/appUtil";
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Text, View } from "react-native";
-import { useDebounce } from "use-debounce";
+} from '@/constant/service.constant';
+import CardComponent from '@/screens/common/CardComponent';
+import { ContractServiceCreateRequest } from '@/types/contract-service';
+import { formatCurrency, isAndroidSystem, isIOSSystem } from '@/utils/appUtil';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, View } from 'react-native';
+import { useDebounce } from 'use-debounce';
 
 interface ServiceItemProps {
   service: ContractServiceCreateRequest;
@@ -27,7 +27,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
   onDelete,
 }) => {
   const getActions = () => {
-    return ["edit", "delete"];
+    return ['edit', 'delete'];
   };
 
   const _onChangeHelperValue = useDebounce((text: string) => {
@@ -53,8 +53,8 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
         <View className="mt-1">
           <View className="md:flex-row flex-col">
             <Text className="text-base font-semibold text-blue-600 md:flex-1">
-              {formatCurrency(service?.price?.toString() ?? "0") +
-                " đ/" +
+              {formatCurrency(service?.price?.toString() ?? '0') +
+                ' đ/' +
                 SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod]
                   .unit}
             </Text>
@@ -84,9 +84,13 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
       }
       actions={getActions()}
       onActionPress={(key) => {
-        if (key === "edit") onEdit();
-        if (key === "delete") onDelete(service.fieldId ?? "", service);
+        if (key === 'edit') onEdit();
+        if (key === 'delete') onDelete(service.fieldId ?? '', service);
       }}
+      style={{
+        elevation: isAndroidSystem() ? 3 : 0,
+      }}
+      className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
     >
       {service.isEnabled &&
         service.calculationMethod ===
@@ -96,7 +100,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
               required
               type="number"
               labelStyles={{
-                color: "#6B7280",
+                color: '#6B7280',
                 fontSize: 13,
               }}
               defaultValue={service.helperValue?.toString()}
@@ -115,7 +119,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
               required
               type="number"
               labelStyles={{
-                color: "#6B7280",
+                color: '#6B7280',
                 fontSize: 13,
               }}
               defaultValue={service.helperValue?.toString()}
@@ -129,15 +133,15 @@ const ServiceItem: React.FC<ServiceItemProps> = ({
           <View className="flex-row items-center">
             <View
               className={`w-2 h-2 rounded-full mr-2 ${
-                service.isEnabled ? "bg-green-500" : "bg-gray-400"
+                service.isEnabled ? 'bg-green-500' : 'bg-gray-400'
               }`}
             />
             <Text
               className={`text-xs ${
-                service.isEnabled ? "text-green-600" : "text-gray-500"
+                service.isEnabled ? 'text-green-600' : 'text-gray-500'
               }`}
             >
-              {service.isEnabled ? "Đã chọn trong hợp đồng" : "Không sử dụng"}
+              {service.isEnabled ? 'Đã chọn trong hợp đồng' : 'Không sử dụng'}
             </Text>
           </View>
         </View>

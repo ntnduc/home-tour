@@ -1,13 +1,13 @@
-import { ContractListResponse } from "./contract";
-import { ContractServiceDetailResponse } from "./contract-service";
-import { PropertyDetail } from "./property";
+import { ContractListResponse } from './contract';
+import { ContractServiceDetailResponse } from './contract-service';
+import { PropertyDetail } from './property';
 
 export enum RoomStatus {
-  AVAILABLE = "AVAILABLE",
-  OCCUPIED = "OCCUPIED",
-  MAINTENANCE = "MAINTENANCE",
-  PENDING_DEPOSIT = "PENDING_DEPOSIT",
-  UNAVAILABLE = "UNAVAILABLE",
+  AVAILABLE = 'AVAILABLE',
+  OCCUPIED = 'OCCUPIED',
+  MAINTENANCE = 'MAINTENANCE',
+  PENDING_DEPOSIT = 'PENDING_DEPOSIT',
+  UNAVAILABLE = 'UNAVAILABLE',
 }
 
 export interface Room {

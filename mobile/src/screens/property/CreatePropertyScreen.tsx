@@ -3,41 +3,41 @@ import {
   getComboDistricts,
   getComboProvinces,
   getComboWards,
-} from "@/api/location/location.api";
-import { ComboBox } from "@/components/ComboBox";
-import InputBase from "@/components/Input";
-import Loading from "@/components/Loading";
-import { ServiceCalculateMethod } from "@/constant/service.constant";
-import { createStyles } from "@/styles/StyleCreateTenantScreen";
-import { ComboOption } from "@/types/comboOption";
-import { PropertyCreateRequest } from "@/types/property";
-import { formatCurrency, generateId } from "@/utils/appUtil";
-import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+} from '@/api/location/location.api';
+import { ComboBox } from '@/components/ComboBox';
+import InputBase from '@/components/Input';
+import Loading from '@/components/Loading';
+import { ServiceCalculateMethod } from '@/constant/service.constant';
+import { createStyles } from '@/styles/StyleCreateTenantScreen';
+import { ComboOption } from '@/types/comboOption';
+import { PropertyCreateRequest } from '@/types/property';
+import { formatCurrency, generateId } from '@/utils/appUtil';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import {
   Controller,
   FieldErrors,
   useFieldArray,
   useForm,
-} from "react-hook-form";
+} from 'react-hook-form';
 
-import { createProperty } from "@/api/property/property.api";
-import { getServiceDefault } from "@/api/service/service.api";
-import ActionButtonBottom from "@/components/ActionButtonBottom";
-import CardContent from "@/components/CardContent";
-import { useTheme } from "@/theme/ThemeProvider";
-import { ServiceCreateOrUpdateRequest } from "@/types/service";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Toast from "react-native-toast-message";
-import { RootStackParamList } from "../../navigation/types";
-import CardComponent from "../common/CardComponent";
-import CalculatorMethodComponent from "../tenant/components/CalculatorMethodComponent";
-import ServiceSelectedSearchComponent from "../tenant/components/ServiceSelectedSearchComponent";
+import { createProperty } from '@/api/property/property.api';
+import { getServiceDefault } from '@/api/service/service.api';
+import ActionButtonBottom from '@/components/ActionButtonBottom';
+import CardContent from '@/components/CardContent';
+import { useTheme } from '@/theme/ThemeProvider';
+import { ServiceCreateOrUpdateRequest } from '@/types/service';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
+import { RootStackParamList } from '../../navigation/types';
+import CardComponent from '../common/CardComponent';
+import CalculatorMethodComponent from '../tenant/components/CalculatorMethodComponent';
+import ServiceSelectedSearchComponent from '../tenant/components/ServiceSelectedSearchComponent';
 
 type CreatePropertyScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "CreateProperty">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'CreateProperty'>;
 };
 
 const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
@@ -51,7 +51,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
   const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
   const [isLoadingWard, setIsLoadingWard] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<
-    "provinceCode" | "districtCode" | "wardCode" | null
+    'provinceCode' | 'districtCode' | 'wardCode' | null
   >(null);
 
   const {
@@ -62,7 +62,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
     watch,
   } = useForm<PropertyCreateRequest>({
     defaultValues: {
-      name: "",
+      name: '',
       defaultRoomRent: 5000000,
       paymentDate: 5,
       services: [],
@@ -76,8 +76,8 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
     prepend,
   } = useFieldArray({
     control,
-    name: "services",
-    keyName: "fieldId",
+    name: 'services',
+    keyName: 'fieldId',
   });
 
   //#region Fetch data
@@ -99,10 +99,10 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
         price: service.price,
         calculationMethod: service.calculationMethod,
         icon: service.icon,
-        id: "",
+        id: '',
       })) as ServiceCreateOrUpdateRequest[];
 
-      setValue("services", servicesDefault);
+      setValue('services', servicesDefault);
     }
   };
 
@@ -131,13 +131,13 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
 
   const handleAddService = () => {
     prepend({
-      serviceId: "",
+      serviceId: '',
       fieldId: generateId(),
       isNew: true,
-      name: "",
+      name: '',
       price: 0,
       calculationMethod: ServiceCalculateMethod.FIXED_PER_ROOM,
-      icon: "apps-outline",
+      icon: 'apps-outline',
     });
   };
 
@@ -164,17 +164,17 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
     createProperty(data)
       .then(() => {
         Toast.show({
-          type: "success",
-          text1: "Thành công",
-          text2: "Tạo tài sản thành công",
+          type: 'success',
+          text1: 'Thành công',
+          text2: 'Tạo tài sản thành công',
         });
         navigation.goBack();
       })
       .catch((errors) => {
         Toast.show({
-          type: "error",
-          text1: "Lỗi",
-          text2: "Tạo tài sản thất bại",
+          type: 'error',
+          text1: 'Lỗi',
+          text2: 'Tạo tài sản thất bại',
         });
       })
       .finally(() => {
@@ -185,7 +185,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
   //#endregion
 
   const onError = (errors: FieldErrors<PropertyCreateRequest>) => {
-    Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
+    Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
   };
 
   if (isLoading) {
@@ -225,7 +225,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="provinceCode"
-              rules={{ required: "Vui lòng chọn thành phố/tỉnh" }}
+              rules={{ required: 'Vui lòng chọn thành phố/tỉnh' }}
               render={({ field: { onChange, value } }) => {
                 return (
                   <ComboBox
@@ -233,13 +233,13 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                     options={cities}
                     required={true}
                     onChange={(item) => {
-                      onChange(item?.value ?? "");
-                      getDistricts(item?.value ?? "");
+                      onChange(item?.value ?? '');
+                      getDistricts(item?.value ?? '');
                     }}
                     placeholder="Chọn thành phố/tỉnh"
                     error={errors.provinceCode?.message}
-                    onFocus={() => setActiveDropdown("provinceCode")}
-                    isActive={activeDropdown === "provinceCode"}
+                    onFocus={() => setActiveDropdown('provinceCode')}
+                    isActive={activeDropdown === 'provinceCode'}
                     label="Thành phố / Tỉnh"
                   />
                 );
@@ -251,21 +251,21 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="districtCode"
-              rules={{ required: "Vui lòng chọn quận/huyện" }}
+              rules={{ required: 'Vui lòng chọn quận/huyện' }}
               render={({ field: { onChange, value } }) => (
                 <ComboBox
                   value={value as any}
                   required={true}
                   options={location}
                   onChange={(item) => {
-                    onChange(item?.value ?? "");
-                    getWards(item?.value ?? "");
+                    onChange(item?.value ?? '');
+                    getWards(item?.value ?? '');
                   }}
                   placeholder="Chọn quận/huyện"
                   error={errors.districtCode?.message}
                   isLoading={isLoadingDistricts}
-                  onFocus={() => setActiveDropdown("districtCode")}
-                  isActive={activeDropdown === "districtCode"}
+                  onFocus={() => setActiveDropdown('districtCode')}
+                  isActive={activeDropdown === 'districtCode'}
                   label="Quận / Huyện"
                 />
               )}
@@ -276,20 +276,20 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="wardCode"
-              rules={{ required: "Vui lòng chọn phường/xã" }}
+              rules={{ required: 'Vui lòng chọn phường/xã' }}
               render={({ field: { onChange, value } }) => (
                 <ComboBox
                   value={value}
                   options={wards}
                   required={true}
                   onChange={(item) => {
-                    onChange(item?.value ?? "");
+                    onChange(item?.value ?? '');
                   }}
                   placeholder="Chọn phường/xã"
                   error={errors.wardCode?.message}
                   isLoading={isLoadingWard}
-                  onFocus={() => setActiveDropdown("wardCode")}
-                  isActive={activeDropdown === "wardCode"}
+                  onFocus={() => setActiveDropdown('wardCode')}
+                  isActive={activeDropdown === 'wardCode'}
                   label="Phường / Xã"
                 />
               )}
@@ -300,7 +300,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="address"
-              rules={{ required: "Vui lòng nhập địa chỉ chi tiết" }}
+              rules={{ required: 'Vui lòng nhập địa chỉ chi tiết' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   placeholder="Nhập địa chỉ chi tiết"
@@ -328,15 +328,15 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="defaultRoomRent"
-              rules={{ required: "Vui lòng nhập giá thuê mặc định" }}
+              rules={{ required: 'Vui lòng nhập giá thuê mặc định' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   label="Giá thuê mặc định"
                   required={true}
                   placeholder="Nhập giá thuê mặc định"
-                  value={value ? formatCurrency(value.toString()) : ""}
+                  value={value ? formatCurrency(value.toString()) : ''}
                   onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9]/g, "");
+                    const numericValue = text.replace(/[^0-9]/g, '');
                     onChange(numericValue);
                   }}
                   keyboardType="numeric"
@@ -350,7 +350,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="paymentDate"
-              rules={{ required: "Vui lòng nhập ngày thanh toán" }}
+              rules={{ required: 'Vui lòng nhập ngày thanh toán' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   label="Ngày thanh toán"
@@ -358,7 +358,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                   placeholder="Nhập ngày thanh toán"
                   value={value?.toString()}
                   onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9]/g, "");
+                    const numericValue = text.replace(/[^0-9]/g, '');
                     const num = parseInt(numericValue);
                     if (!num) {
                       onChange(null);
@@ -379,7 +379,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
             <Controller
               control={control}
               name="totalRoom"
-              rules={{ required: "Vui lòng nhập số phòng" }}
+              rules={{ required: 'Vui lòng nhập số phòng' }}
               render={({ field: { onChange, value } }) => (
                 <InputBase
                   label="Số phòng"
@@ -387,7 +387,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                   placeholder="Nhập số phòng"
                   value={value?.toString()}
                   onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9]/g, "");
+                    const numericValue = text.replace(/[^0-9]/g, '');
                     const num = parseInt(numericValue);
                     if (!num) {
                       onChange(null);
@@ -410,9 +410,9 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                 <InputBase
                   label="Số tầng"
                   placeholder="Nhập số tầng"
-                  value={value ? value.toString() : ""}
+                  value={value ? value.toString() : ''}
                   onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9]/g, "");
+                    const numericValue = text.replace(/[^0-9]/g, '');
                     const num = parseInt(numericValue);
                     if (!num) {
                       onChange(null);
@@ -446,7 +446,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                     <View
                       key={service.fieldId || String(index)}
                       className="gap-2 bg-white p-3 rounded-lg border border-[#e9ecef] mb-2"
-                      style={{ position: "relative" }}
+                      style={{ position: 'relative' }}
                     >
                       <TouchableOpacity
                         style={styles.removeServiceItemButton}
@@ -467,7 +467,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                                   onChange={(newService) => {
                                     setValue(
                                       `services.${index}`,
-                                      newService as any
+                                      newService as any,
                                     );
                                   }}
                                   error={
@@ -480,7 +480,7 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                           <Controller
                             control={control}
                             name={`services.${index}.price`}
-                            rules={{ required: "Vui lòng nhập giá dịch vụ" }}
+                            rules={{ required: 'Vui lòng nhập giá dịch vụ' }}
                             render={({ field: { value } }) => {
                               const currentService = watch(`services.${index}`);
                               const currentMethod =
@@ -494,24 +494,24 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
                                   }
                                   icon="cash-outline"
                                   iconProps={{
-                                    color: "#007AFF",
+                                    color: '#007AFF',
                                   }}
                                   value={
                                     currentMethod ===
                                     ServiceCalculateMethod.FREE
-                                      ? "0"
+                                      ? '0'
                                       : value
                                         ? formatCurrency(value.toString())
-                                        : ""
+                                        : ''
                                   }
                                   onChangeText={(text) => {
                                     const numericValue = text.replace(
                                       /[^0-9]/g,
-                                      ""
+                                      '',
                                     );
                                     setValue(
                                       `services.${index}.price`,
-                                      Number(numericValue)
+                                      Number(numericValue),
                                     );
                                   }}
                                   keyboardType="numeric"
@@ -551,11 +551,11 @@ const CreatePropertyScreen = ({ navigation }: CreatePropertyScreenProps) => {
       <ActionButtonBottom
         actions={[
           {
-            label: "Tạo tài sản",
+            label: 'Tạo tài sản',
             onPress: handleSubmit(onSubmit, onError),
-            variant: "primary",
+            variant: 'primary',
             isLoading: isLoading,
-            icon: "checkmark-circle",
+            icon: 'checkmark-circle',
           },
         ]}
       />

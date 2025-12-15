@@ -1,39 +1,32 @@
-import { getListTenant, TenantListResponse } from "@/api/tenant/tenant.api";
-import FabButton from "@/components/FabButton";
-import Loading from "@/components/Loading";
-import { ApiResponse } from "@/types/api";
-import { BasePagingResponse } from "@/types/base.response";
-import { useFocusEffect } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useCallback, useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { RootStackParamList } from "../../navigation/types";
-import { colors } from "../../theme/colors";
-import HeaderComponents from "../common/HeaderComponents";
-import TenantCardComponent from "./components/TenantCardComponent";
+import { getListTenant, TenantListResponse } from '@/api/tenant/tenant.api';
+import FabButton from '@/components/FabButton';
+import Loading from '@/components/Loading';
+import { ApiResponse } from '@/types/api';
+import { BasePagingResponse } from '@/types/base.response';
+import { useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import React, { useCallback, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { RootStackParamList } from '../../navigation/types';
+import { colors } from '../../theme/colors';
+import HeaderComponents from '../common/HeaderComponents';
+import TenantCardComponent from './components/TenantCardComponent';
 
 type TenantListScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "TenantList">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'TenantList'>;
 };
 
 const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
     useInfiniteQuery<
       ApiResponse<BasePagingResponse<TenantListResponse>>,
       Error
     >({
-      queryKey: ["tenants", 1, 5, search],
+      queryKey: ['tenants', 1, 5, search],
       initialPageParam: 1,
       queryFn: ({ pageParam }) =>
         getListTenant({
@@ -51,18 +44,18 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
 
   const flatData = data?.pages.flatMap((page) => page.data?.items) || [];
   const totalTenants = flatData.length;
   let activeContracts = 0;
   flatData.forEach((item) => {
-    if (item?.contractStatus === "active") activeContracts++;
+    if (item?.contractStatus === 'active') activeContracts++;
   });
   let totalRevenue = 0;
   flatData.forEach((item) => {
-    if (item?.contractStatus === "active")
+    if (item?.contractStatus === 'active')
       totalRevenue += item?.rentAmount ?? 0;
   });
 
@@ -75,23 +68,23 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
   };
 
   const handleTenantPress = (tenantId: string) => {
-    navigation.navigate("TenantDetail", { tenantId });
+    navigation.navigate('TenantDetail', { tenantId });
   };
 
   const handleUpdateTenant = (tenantId: string) => {
-    navigation.navigate("UpdateTenant", { tenantId });
+    navigation.navigate('UpdateTenant', { tenantId });
   };
 
   return (
     <SafeAreaView className="flex-1">
-      <StatusBar barStyle="dark-content" backgroundColor={"#fff"} />
+      {/* <StatusBar barStyle="dark-content" backgroundColor={"#fff"} /> */}
       <HeaderComponents
         title="Quản lý khách thuê"
         isSearch
         searchConfig={{
-          placeholder: "Tìm kiếm khách thuê...",
+          placeholder: 'Tìm kiếm khách thuê...',
           onSearch: handleSearch,
-          className: "mx-2",
+          className: 'mx-2',
         }}
       />
       {isLoading && (
@@ -135,7 +128,7 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
               <View
                 style={[
                   styles.statsBox,
-                  { backgroundColor: colors.status.success + "20" },
+                  { backgroundColor: colors.status.success + '20' },
                 ]}
               >
                 <Text style={styles.statsIcon}>📋</Text>
@@ -145,7 +138,7 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
               <View
                 style={[
                   styles.statsBox,
-                  { backgroundColor: colors.status.warning + "20" },
+                  { backgroundColor: colors.status.warning + '20' },
                 ]}
               >
                 <Text style={styles.statsIcon}>💰</Text>
@@ -179,8 +172,8 @@ const TenantListScreen = ({ navigation }: TenantListScreenProps) => {
 
 const styles = StyleSheet.create({
   statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 12,
     paddingHorizontal: 0,
   },
@@ -188,7 +181,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 6,
     borderRadius: 14,
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 14,
     backgroundColor: colors.background.paper,
     shadowColor: colors.neutral.black,
@@ -201,7 +194,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   statsValue: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 18,
     color: colors.primary.main,
   },

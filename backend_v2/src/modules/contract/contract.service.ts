@@ -302,11 +302,13 @@ export class ContractService
 
     contractClientsDto.forEach((property) => {
       if (property.isLandlordClient) {
-        property.phone = AuthService.formatPhoneNumber(property.phone);
+        property.phoneNumber = AuthService.formatPhoneNumber(
+          property.phoneNumber,
+        );
       }
     });
 
-    const phones = contractClientsDto.map((x) => x.phone);
+    const phones = contractClientsDto.map((x) => x.phoneNumber);
 
     const existedClients = await this.clientRepository.find({
       where: { phoneNumber: In(phones) },
@@ -314,14 +316,14 @@ export class ContractService
 
     for (const propertyDto of contractClientsDto) {
       const existed = existedClients.find(
-        (x) => x.phoneNumber === propertyDto.phone,
+        (x) => x.phoneNumber === propertyDto.phoneNumber,
       );
 
       if (existed) {
         propertyDto.clientId = existed.id;
       } else {
         const client = new Client();
-        client.phoneNumber = propertyDto.phone;
+        client.phoneNumber = propertyDto.phoneNumber;
         client.fullName = propertyDto.name;
         client.isActive = true;
         await manager.save(client);

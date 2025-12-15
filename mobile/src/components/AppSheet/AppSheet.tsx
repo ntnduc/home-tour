@@ -2,7 +2,7 @@ import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetProps,
   BottomSheetView,
-} from "@gorhom/bottom-sheet";
+} from '@gorhom/bottom-sheet';
 import React, {
   forwardRef,
   ReactNode,
@@ -10,12 +10,12 @@ import React, {
   useImperativeHandle,
   useRef,
   useState,
-} from "react";
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AppSheetBackdropComponent from "./AppSheetBackdropComponent";
-import AppSheetHandleComponent from "./AppSheetHandleComponent";
-import AppSheetHeader from "./AppSheetHeader";
+} from 'react';
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AppSheetBackdropComponent from './AppSheetBackdropComponent';
+import AppSheetHandleComponent from './AppSheetHandleComponent';
+import AppSheetHeader from './AppSheetHeader';
 
 export type HeaderConfig = {
   element?: ReactNode;
@@ -27,7 +27,7 @@ export type HeaderConfig = {
 };
 
 export interface AppSheetProps
-  extends Omit<BottomSheetProps, "ref" | "children"> {
+  extends Omit<BottomSheetProps, 'ref' | 'children'> {
   classNameContent?: string;
   styleContent?: StyleProp<ViewStyle>;
   header?: HeaderConfig;
@@ -49,6 +49,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const isOpeningRef = useRef(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [state, setState] = useState<{
     dynamicChildren: ReactNode | null;
@@ -70,7 +71,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
       setTimeout(() => {
         setState({ dynamicChildren: children, config: config || null });
         setTimeout(() => {
-          bottomSheetRef.current?.expand();
+          // bottomSheetRef.current?.expand();
           isOpeningRef.current = false;
         }, 100);
       }, 100);
@@ -83,6 +84,10 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
       state.config.onClose();
     }
     setState({ dynamicChildren: null, config: null });
+  }, [state.config]);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    setIsOpen(index >= 0);
   }, []);
 
   const header = (headerConfig?: HeaderConfig) => {
@@ -102,7 +107,11 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
         const headerConfig = state.config.header;
         const headerHeight = headerConfig?.height ?? 56;
         return (
-          <View>
+          <View
+            onLayout={() => {
+              bottomSheetRef.current?.expand();
+            }}
+          >
             <View
               style={[
                 stylesHeader.fixedHeaderContainer,
@@ -139,7 +148,7 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
     (props: any) => (
       <AppSheetBackdropComponent {...props} onBackdropPress={close} />
     ),
-    [close]
+    [close],
   );
 
   if (config.ignoreBottomSheetInset && state.dynamicChildren) {
@@ -147,21 +156,31 @@ const AppSheet = forwardRef<AppSheetRef, AppSheetProps>((props, ref) => {
   }
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={-1}
-      enablePanDownToClose
-      onClose={close}
-      snapPoints={["50%"]}
-      backdropComponent={renderBackdrop}
-      handleComponent={AppSheetHandleComponent}
-      enableOverDrag={false}
-      enableHandlePanningGesture={true}
-      {...config}
-      detached={true}
+    <View
+      style={StyleSheet.absoluteFill}
+      pointerEvents={isOpen ? 'auto' : 'none'}
     >
-      {_renderChildren()}
-    </BottomSheet>
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        enablePanDownToClose
+        onClose={close}
+        onChange={handleSheetChanges}
+        snapPoints={['50%']}
+        backdropComponent={renderBackdrop}
+        handleComponent={AppSheetHandleComponent}
+        enableOverDrag={false}
+        enableHandlePanningGesture={true}
+        enableContentPanningGesture={true}
+        // activeOffsetY={[-1, 1]}
+        // failOffsetX={[-5, 5]}
+        {...config}
+        detached={true}
+        android_keyboardInputMode="adjustResize"
+      >
+        {_renderChildren()}
+      </BottomSheet>
+    </View>
   );
 });
 
@@ -169,29 +188,29 @@ export const stylesHeader = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 600,
-    color: "#222",
+    color: '#222',
   },
   content: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: "95%",
-    backgroundColor: "#fff",
+    maxHeight: '95%',
+    backgroundColor: '#fff',
   },
   backdrop: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   fixedHeaderContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 50,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
 });
 
-AppSheet.displayName = "AppSheet";
+AppSheet.displayName = 'AppSheet';
 
 export default AppSheet;

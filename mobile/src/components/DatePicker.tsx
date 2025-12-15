@@ -1,18 +1,19 @@
-import { createStyles } from "@/styles/component/StyleInput";
-import { useTheme } from "@/theme/ThemeProvider";
-import { formatDate } from "@/utils/dateUtil";
-import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetView } from "@gorhom/bottom-sheet";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import React from "react";
+import { createStyles } from '@/styles/component/StyleInput';
+import { useTheme } from '@/theme/ThemeProvider';
+import { isAndroidSystem } from '@/utils/appUtil';
+import { formatDate } from '@/utils/dateUtil';
+import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetView } from '@gorhom/bottom-sheet';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useCallback, useState } from 'react';
 import {
   StyleProp,
   Text,
   TouchableOpacity,
   View,
   ViewStyle,
-} from "react-native";
-import { useGlobalAppSheet } from "./GlobalAppSheet";
+} from 'react-native';
+import { useGlobalAppSheet } from './GlobalAppSheet';
 
 export interface DatePickerIconProps {
   name?: keyof typeof Ionicons.glyphMap;
@@ -42,12 +43,12 @@ const DatePicker: React.FC<DatePickerProps> = ({
   label,
   value,
   onChange,
-  placeholder = "Chọn ngày",
+  placeholder = 'Chọn ngày',
   error,
   required = false,
   disabled = false,
   inputStyles,
-  icon = "calendar",
+  icon = 'calendar',
   iconProps,
   onClear,
   showClear = true,
@@ -57,23 +58,30 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const theme = useTheme();
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
   const styles = createStyles(theme);
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentValue, setCurrentValue] = useState<typeof value>(value);
 
   const handleOpen = () => {
     if (disabled) return;
 
+    if (isAndroidSystem()) {
+      setIsOpen(true);
+      return;
+    }
+
     openAppSheet(
       <BottomSheetView
         style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <DateTimePicker
           style={{
-            width: "100%",
-            height: "100%",
+            width: '100%',
+            height: '100%',
           }}
           value={value ? new Date(value) : new Date()}
           mode="date"
@@ -83,13 +91,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
           minimumDate={minDate}
           onChange={(event, date) => {
             if (date) {
-              onChange?.(date);
+              setCurrentValue(date);
             }
           }}
         />
       </BottomSheetView>,
       {
-        snapPoints: [300],
+        // snapPoints: [300],
+        snapPoints: ['40%'],
         header: {
           element: (
             <View className="flex-row justify-between items-center border-b border-gray-200 w-full p-4 rounded-t-2xl h-[60px]">
@@ -101,7 +110,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  onChange?.(new Date());
+                  if (currentValue) {
+                    onChange?.(currentValue as any);
+                  }
                   closeAppSheet();
                 }}
                 className="px-4 py-2 bg-blue-500 rounded-lg"
@@ -111,7 +122,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </View>
           ),
         },
-      }
+        enableOverDrag: false,
+        enableHandlePanningGesture: false,
+        enableContentPanningGesture: false,
+        enablePanDownToClose: false,
+      },
     );
   };
 
@@ -119,6 +134,36 @@ const DatePicker: React.FC<DatePickerProps> = ({
     onChange?.(null);
     onClear?.();
   };
+
+  const _renderDateTimePickerAndroid = useCallback(() => {
+    if (!isOpen) return null;
+    return (
+      <DateTimePicker
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
+        value={value ? new Date(value) : new Date()}
+        mode="date"
+        locale="vi-VN"
+        maximumDate={maxDate}
+        minimumDate={minDate}
+        positiveButton={{ label: 'Xác nhận', textColor: 'green' }}
+        negativeButton={{ label: 'Hủy', textColor: 'red' }}
+        onChange={(event, date) => {
+          if (event.type === 'dismissed') {
+            setIsOpen(false);
+          }
+          if (event.type === 'set') {
+            if (date) {
+              onChange?.(date);
+            }
+            setIsOpen(false);
+          }
+        }}
+      />
+    );
+  }, [value, isOpen]);
 
   return (
     <View className="">
@@ -129,9 +174,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
         </Text>
       )}
       <View
-        className={`flex flex-row items-center content-center justify-center rounded-lg px-3 py-2 border ${
-          error ? "border-red-300 bg-red-50" : "border-gray-200"
-        } ${disabled ? "bg-gray-100" : ""}`}
+        className={`flex flex-row items-center content-center justify-center rounded-lg px-3 py-2 border  ${
+          error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+        } ${disabled ? 'bg-gray-100' : ''}`}
         style={inputStyles}
       >
         <TouchableOpacity
@@ -139,27 +184,27 @@ const DatePicker: React.FC<DatePickerProps> = ({
           onPress={handleOpen}
           disabled={disabled}
         >
-          <View className="flex-row items-center">
+          <View className="flex-row items-center ">
             {icon && (
               <Ionicons
                 name={icon}
                 size={18}
-                color={"#6B7280"}
+                color={'#6B7280'}
                 className="mr-3"
                 {...iconProps}
               />
             )}
             <Text
-              className={`text-base ${
-                value ? "text-gray-900" : "text-gray-500"
+              className={` text-base mt-1 ${
+                value ? 'text-gray-900' : 'text-gray-500'
               }`}
               style={[
                 styles.input,
                 inputStyles,
-                { borderColor: error ? "#ff3b30" : "#ddd" },
+                { borderColor: error ? '#ff3b30' : '#ddd' },
               ]}
             >
-              {value ? formatDate(value?.toString() ?? "") : placeholder}
+              {value ? formatDate(value?.toString() ?? '') : placeholder}
             </Text>
           </View>
         </TouchableOpacity>
@@ -168,7 +213,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             <Ionicons
               name="close-outline"
               size={18}
-              color={"#6B7280"}
+              color={'#6B7280'}
               className="mr-3"
             />
           </TouchableOpacity>
@@ -179,6 +224,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           {error}
         </Text>
       )}
+      {isAndroidSystem() && _renderDateTimePickerAndroid()}
     </View>
   );
 };

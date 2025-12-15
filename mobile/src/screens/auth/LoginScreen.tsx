@@ -1,25 +1,24 @@
-import { requestOTP } from "@/api/auth/api";
-import { RootStackParamList } from "@/navigation";
-import { checkLogin } from "@/utils/appUtil";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
+import { requestOTP } from '@/api/auth/api';
+import { RootStackParamList } from '@/navigation';
+import { checkLogin } from '@/utils/appUtil';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native';
+import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type LoginScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "Login">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
 };
 
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -30,16 +29,16 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
     try {
       const isLoggedIn = await checkLogin();
       if (isLoggedIn) {
-        navigation.replace("MainTabs");
+        navigation.replace('MainTabs');
       }
     } catch (error) {
-      console.error("Lỗi khi kiểm tra đăng nhập:", error);
+      console.error('Lỗi khi kiểm tra đăng nhập:', error);
     }
   };
 
   const handleRequestOTP = async () => {
     if (!phoneNumber.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập số điện thoại");
+      Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại');
       return;
     }
 
@@ -47,12 +46,12 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
     try {
       const response = await requestOTP(phoneNumber);
       if (response.success) {
-        navigation.navigate("OTPVerification", { phoneNumber });
+        navigation.navigate('OTPVerification', { phoneNumber });
       } else {
-        Alert.alert("Lỗi", response.message || "Không thể gửi mã OTP");
+        Alert.alert('Lỗi', response.message || 'Không thể gửi mã OTP');
       }
     } catch (error) {
-      Alert.alert("Lỗi", "Đã có lỗi xảy ra khi gửi mã OTP");
+      Alert.alert('Lỗi', 'Đã có lỗi xảy ra khi gửi mã OTP');
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +60,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
         <Text style={styles.title}>Đăng nhập / Đăng ký</Text>
@@ -84,7 +83,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
           disabled={isLoading}
         >
           <Text style={styles.buttonText}>
-            {isLoading ? "Đang gửi..." : "Tiếp tục"}
+            {isLoading ? 'Đang gửi...' : 'Tiếp tục'}
           </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
@@ -95,52 +94,52 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
     padding: 24,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   title: {
     fontSize: 26,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#222",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#222',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+    color: '#666',
+    textAlign: 'center',
     marginBottom: 28,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     padding: 15,
     borderRadius: 12,
     fontSize: 16,
     marginBottom: 20,
   },
   button: {
-    backgroundColor: "#6a5af9",
+    backgroundColor: '#6a5af9',
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 8,
-    shadowColor: "#6a5af9",
+    shadowColor: '#6a5af9',
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 2,
   },
   buttonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     letterSpacing: 1,
   },
 });

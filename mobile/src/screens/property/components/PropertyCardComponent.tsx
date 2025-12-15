@@ -84,23 +84,6 @@ const PropertyCardComponent = ({
             </Text>
           </View>
         </View>
-
-        {/* <View style={styles.actionRow}>
-          <ButtonAction
-            text="Thêm phòng"
-            type="success"
-            icon="add"
-            containerStyle={{ flex: 1 }}
-            onPress={onAddRoom}
-          />
-          <ButtonAction
-            text="Xem phòng"
-            type="secondary"
-            icon="home"
-            containerStyle={{ flex: 1 }}
-            onPress={onViewRooms}
-          />
-        </View> */}
       </View>
     </CardComponent>
   );
