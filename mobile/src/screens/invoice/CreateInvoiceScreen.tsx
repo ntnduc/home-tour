@@ -1,23 +1,20 @@
 import { getContract } from '@/api/contract/contract.api';
 import { ComboBox } from '@/components/ComboBox';
 import DisplayField from '@/components/DisplayField';
-import Input from '@/components/Input';
 import Loading from '@/components/Loading';
-import { SERVICE_CALCULATE_METHOD_WITH_INFO } from '@/constant/service.constant';
 import { RootStackParamList } from '@/navigation/types';
 import { ContractDetailResponse } from '@/types/contract';
 import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-service';
 import { InvoiceDetailResponse, InvoiceStatus } from '@/types/invoice';
-import { formatCurrency, isAndroidSystem, isIOSSystem } from '@/utils/appUtil';
 import { getCurrentDate, getNextMonth } from '@/utils/dateUtil';
-import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
 import CardComponent from '../common/CardComponent';
+import ServiceInvoiceItem from './components/ServiceInvoiceItem';
 
 type UtilityService = {
   id: string;
@@ -112,7 +109,6 @@ const CreateInvoiceScreen = ({
   ) as ContractServiceInvoiceCalculateResponse[];
 
   const handleConfirmEditOld = (index: number) => {
-    console.log('💞💓💗💞💓💗 ~ handleConfirmEditOld ~ serviceId:', index);
     const service = contractServices[index];
     if (!service) {
       return;
@@ -195,7 +191,20 @@ const CreateInvoiceScreen = ({
               );
             }}
           />
-          {contractServices.map((service, index) => {
+          {contractServices.map((service, index) => (
+            <ServiceInvoiceItem
+              key={index}
+              control={control}
+              service={service}
+              index={index}
+              handleConfirmEditOld={handleConfirmEditOld}
+              setValue={(name, value) => {
+                setValue(name as any, value);
+              }}
+              getValues={getValues}
+            />
+          ))}
+          {/* {contractServices.map((service, index) => {
             return (
               <CardComponent
                 key={service.id}
@@ -208,16 +217,14 @@ const CreateInvoiceScreen = ({
                 renderActions={() => (
                   <TouchableOpacity
                     onPress={() => {
-                      console.log('RUNNN');
                       handleConfirmEditOld(index);
                     }}
                     className={`flex-row items-center rounded-full px-3 py-1 
                       ${
-                        true
+                        getValues(`contractServices.${index}.isUpdated`)
                           ? 'bg-blue-50 border border-blue-100'
                           : 'bg-gray-50 border border-gray-100'
                       }`}
-                    disabled={true}
                   >
                     <Ionicons
                       name="create-outline"
@@ -304,7 +311,7 @@ const CreateInvoiceScreen = ({
                 </View>
               </CardComponent>
             );
-          })}
+          })} */}
         </View>
       </CardComponent>
     </KeyboardAwareScrollView>
