@@ -8,7 +8,8 @@ import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-servic
 import { InvoiceDetailResponse } from '@/types/invoice';
 import { formatCurrency, isAndroidSystem, isIOSSystem } from '@/utils/appUtil';
 import { Ionicons } from '@expo/vector-icons';
-import { Control, Controller } from 'react-hook-form';
+import { useMemo } from 'react';
+import { Control, Controller, useWatch } from 'react-hook-form';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface ServiceInvoiceItemProps {
@@ -16,7 +17,6 @@ interface ServiceInvoiceItemProps {
   service: ContractServiceInvoiceCalculateResponse;
   index: number;
   handleConfirmEditOld: (index: number) => void;
-  setValue: (name: string, value: any) => void;
   getValues: (name: string) => any;
 }
 
@@ -25,9 +25,27 @@ const ServiceInvoiceItem = ({
   service,
   handleConfirmEditOld,
   index,
-  setValue,
   getValues,
 }: ServiceInvoiceItemProps) => {
+  const helperValueNew = useWatch({
+    control,
+    name: `contractServices.${index}.newHelperValue`,
+  });
+
+  const oldHelperValue = useWatch({
+    control,
+    name: `contractServices.${index}.oldHelperValue`,
+  });
+
+  const calPrice = useMemo(() => {
+    if (Number(helperValueNew) <= Number(oldHelperValue)) {
+      return 0;
+    }
+    return (
+      Number(service.price) * ((helperValueNew ?? 0) - (oldHelperValue ?? 0))
+    );
+  }, [helperValueNew, oldHelperValue]);
+
   const _serviceCalculatorSimple = () => {
     return (
       <CardComponent
@@ -46,21 +64,33 @@ const ServiceInvoiceItem = ({
             className={`flex-row items-center rounded-full px-3 py-1 
           ${
             getValues(`contractServices.${index}.isUpdated`)
-              ? 'bg-blue-50 border border-blue-100'
+              ? 'bg-yellow-50 border border-yellow-100'
               : 'bg-gray-50 border border-gray-100'
           }`}
           >
             <Ionicons
-              name="create-outline"
+              name={
+                getValues(`contractServices.${index}.isUpdated`)
+                  ? 'refresh-outline'
+                  : 'create-outline'
+              }
               size={18}
-              color={true ? '#1D4ED8' : '#1F2937'}
+              color={
+                getValues(`contractServices.${index}.isUpdated`)
+                  ? '#eab308'
+                  : '#1D4ED8'
+              }
             />
             <Text
               className={`ml-1 text-sm font-semibold ${
-                true ? 'text-blue-700' : 'text-gray-900'
+                getValues(`contractServices.${index}.isUpdated`)
+                  ? 'text-yellow-500'
+                  : 'text-blue-700'
               }`}
             >
-              {false ? 'Đang mở chỉnh sửa' : 'Sửa số cũ'}
+              {getValues(`contractServices.${index}.isUpdated`)
+                ? 'Hủy và đặt lại'
+                : 'Sửa số cũ'}
             </Text>
           </TouchableOpacity>
         )}
@@ -75,12 +105,12 @@ const ServiceInvoiceItem = ({
                 return (
                   <Input
                     label="Số cũ"
-                    value={value?.toString() || '0'}
+                    value={value?.toString()}
                     type="number"
                     keyboardType="numeric"
                     min={0}
                     disabled={!getValues(`contractServices.${index}.isUpdated`)}
-                    onChange={onChange}
+                    onChangeText={onChange}
                     showClear={false}
                   />
                 );
@@ -97,11 +127,11 @@ const ServiceInvoiceItem = ({
                 return (
                   <Input
                     label="Số mới"
-                    value={value?.toString() || '0'}
+                    value={value?.toString()}
                     type="number"
                     keyboardType="numeric"
                     required
-                    onChange={onChange}
+                    onChangeText={onChange}
                     showClear={false}
                   />
                 );
@@ -122,8 +152,131 @@ const ServiceInvoiceItem = ({
             Tạm tính
           </Text>
           <Text className="text-xl font-extrabold text-blue-700">
-            {formatCurrency(0)} đ
+            {formatCurrency(calPrice)} đ
           </Text>
+          {/* <Controller
+            control={control}
+            name={`contractServices.${index}.oldHelperValue`}
+            render={({ field: { onChange, value } }) => {
+              const calPrice =
+                Number(service.price) * (helperValueNew ?? 0 - (value ?? 0));
+              return (
+                
+              );
+            }}
+          /> */}
+        </View>
+      </CardComponent>
+    );
+  };
+
+  const _serviceCalculatorFixedPerRoom = () => {
+    return (
+      <CardComponent
+        style={{
+          elevation: isAndroidSystem() ? 3 : 0,
+        }}
+        title={service.name}
+        className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
+        key={service.id}
+      >
+        <View className=" flex-row items-center justify-between">
+          <Text className="text-base font-semibold text-gray-800">
+            Tạm tính
+          </Text>
+          <Text className="text-xl font-extrabold text-blue-700">
+            {formatCurrency(service.price)} đ
+          </Text>
+        </View>
+      </CardComponent>
+    );
+  };
+
+  const _serviceCalculatorFixedPerPerson = () => {
+    return (
+      <CardComponent
+        style={{
+          elevation: isAndroidSystem() ? 3 : 0,
+        }}
+        className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
+        key={service.id}
+        title={service.name}
+        description={`${formatCurrency(service.price)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
+        renderActions={() => (
+          <TouchableOpacity
+            onPress={() => {
+              handleConfirmEditOld(index);
+            }}
+            className={`flex-row items-center rounded-full px-3 py-1 
+          ${
+            getValues(`contractServices.${index}.isUpdated`)
+              ? 'bg-yellow-50 border border-yellow-100'
+              : 'bg-gray-50 border border-gray-100'
+          }`}
+          >
+            <Ionicons
+              name={
+                getValues(`contractServices.${index}.isUpdated`)
+                  ? 'refresh-outline'
+                  : 'create-outline'
+              }
+              size={18}
+              color={
+                getValues(`contractServices.${index}.isUpdated`)
+                  ? '#eab308'
+                  : '#1D4ED8'
+              }
+            />
+            <Text
+              className={`ml-1 text-sm font-semibold ${
+                getValues(`contractServices.${index}.isUpdated`)
+                  ? 'text-yellow-500'
+                  : 'text-blue-700'
+              }`}
+            >
+              {getValues(`contractServices.${index}.isUpdated`)
+                ? 'Hủy và đặt lại'
+                : 'Sửa số người'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      >
+        <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
+          <Controller
+            control={control}
+            name={`contractServices.${index}.oldHelperValue`}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <Input
+                  label="Số người"
+                  disabled={!getValues(`contractServices.${index}.isUpdated`)}
+                  value={value?.toString()}
+                  type="number"
+                  keyboardType="numeric"
+                  required
+                  onChangeText={onChange}
+                  showClear={false}
+                />
+              );
+            }}
+          />
+          <View className="mt-2 flex-row items-center justify-between">
+            <Text className="text-base font-semibold text-gray-800">
+              Tạm tính
+            </Text>
+            <Controller
+              control={control}
+              name={`contractServices.${index}.oldHelperValue`}
+              render={({ field: { onChange, value } }) => {
+                const calPrice = Number(service.price) * (value ?? 0);
+                return (
+                  <Text className="text-xl font-extrabold text-blue-700">
+                    {formatCurrency(calPrice)} đ
+                  </Text>
+                );
+              }}
+            />
+          </View>
         </View>
       </CardComponent>
     );
@@ -133,12 +286,16 @@ const ServiceInvoiceItem = ({
     switch (service.calculationMethod) {
       case ServiceCalculateMethod.PER_UNIT_SIMPLE:
         return _serviceCalculatorSimple();
+      case ServiceCalculateMethod.FIXED_PER_ROOM:
+        return _serviceCalculatorFixedPerRoom();
+      case ServiceCalculateMethod.FIXED_PER_PERSON:
+        return _serviceCalculatorFixedPerPerson();
       default:
-        return _serviceCalculatorSimple();
+        return <View></View>;
     }
   };
 
-  return <View>{_serviceCalculatorSimple()}</View>;
+  return <View>{_renderServiceItem()}</View>;
 };
 
 export default ServiceInvoiceItem;

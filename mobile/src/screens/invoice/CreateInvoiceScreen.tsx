@@ -92,6 +92,7 @@ const CreateInvoiceScreen = ({
         remainingAmount: 0,
         contractServices: contract.contractServices?.map((item) => ({
           ...item,
+          newHelperValue: 0,
           oldHelperValue: item.helperValue ?? 0,
           isUpdated: false,
         })),
@@ -108,25 +109,50 @@ const CreateInvoiceScreen = ({
     'contractServices',
   ) as ContractServiceInvoiceCalculateResponse[];
 
+  const _handleChangeUpdateHelperService = () => {};
+
   const handleConfirmEditOld = (index: number) => {
     const service = contractServices[index];
     if (!service) {
       return;
     }
-    Alert.alert(
-      'Chỉnh sửa chỉ số cũ',
-      'Bạn chắc chắn muốn sửa chỉ số cũ? Hãy đảm bảo ghi nhận đúng số trước đó.',
-      [
-        { text: 'Huỷ', style: 'cancel' },
-        {
-          text: 'Đồng ý',
-          style: 'destructive',
-          onPress: () => {
-            setValue(`contractServices.${index}.isUpdated`, true);
+
+    const isUpdate = getValues(`contractServices.${index}.isUpdated`);
+    if (!isUpdate) {
+      Alert.alert(
+        'Chỉnh sửa chỉ số cũ',
+        'Bạn chắc chắn muốn sửa chỉ số cũ? Hãy đảm bảo ghi nhận đúng số trước đó.',
+        [
+          { text: 'Huỷ', style: 'cancel' },
+          {
+            text: 'Đồng ý',
+            style: 'destructive',
+            onPress: () => {
+              setValue(`contractServices.${index}.isUpdated`, true);
+            },
           },
-        },
-      ],
-    );
+        ],
+      );
+    } else {
+      Alert.alert(
+        'Hủy và đặt lại',
+        'Bạn chắc chắn muốn hủy và đặt lại chỉ số cũ?',
+        [
+          { text: 'Huỷ', style: 'cancel' },
+          {
+            text: 'Đồng ý',
+            style: 'destructive',
+            onPress: () => {
+              setValue(`contractServices.${index}.isUpdated`, false);
+              setValue(
+                `contractServices.${index}.oldHelperValue`,
+                service.helperValue,
+              );
+            },
+          },
+        ],
+      );
+    }
   };
 
   if (isLoading) {
@@ -198,9 +224,6 @@ const CreateInvoiceScreen = ({
               service={service}
               index={index}
               handleConfirmEditOld={handleConfirmEditOld}
-              setValue={(name, value) => {
-                setValue(name as any, value);
-              }}
               getValues={getValues}
             />
           ))}

@@ -32,7 +32,7 @@ const STATUS_BADGE_PRESETS: Record<
 };
 
 export type CardComponentProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   className?: string;
   title?: string | React.ReactNode;
