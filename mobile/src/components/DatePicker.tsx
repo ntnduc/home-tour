@@ -98,7 +98,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       </BottomSheetView>,
       {
         // snapPoints: [300],
-        snapPoints: ['40%'],
+        snapPoints: ['35%'],
         header: {
           element: (
             <View className="flex-row justify-between items-center border-b border-gray-200 w-full p-4 rounded-t-2xl h-[60px]">
@@ -208,7 +208,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             </Text>
           </View>
         </TouchableOpacity>
-        {value && showClear && !disabled && (
+        {value && showClear && !disabled && !required && (
           <TouchableOpacity onPress={handleClear}>
             <Ionicons
               name="close-outline"

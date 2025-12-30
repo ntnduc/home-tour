@@ -1,12 +1,18 @@
 import { getContract } from '@/api/contract/contract.api';
+import ActionButtonBottom from '@/components/ActionButtonBottom';
 import { ComboBox } from '@/components/ComboBox';
+import DatePicker from '@/components/DatePicker';
 import DisplayField from '@/components/DisplayField';
 import Loading from '@/components/Loading';
 import { RootStackParamList } from '@/navigation/types';
 import { ContractDetailResponse } from '@/types/contract';
 import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-service';
 import { InvoiceDetailResponse, InvoiceStatus } from '@/types/invoice';
-import { getCurrentDate, getNextMonth } from '@/utils/dateUtil';
+import {
+  getCurrentDate,
+  getNextMonth,
+  getNextMonthDate,
+} from '@/utils/dateUtil';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -61,17 +67,16 @@ const CreateInvoiceScreen = ({
 
       const contract = response.data as ContractDetailResponse;
       // Check date payment default is valid
-      const currentDate = getCurrentDate();
+      const currentDate = getNextMonthDate();
       const maxDayOfMonth = new Date(
         currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
+        currentDate.getMonth(),
         0,
       ).getDate();
       const dueDate = new Date(
         currentDate.setDate(
-          contract.room?.defaultPaymentDueDay &&
-            contract.room?.defaultPaymentDueDay <= maxDayOfMonth
-            ? contract.room?.defaultPaymentDueDay
+          contract.paymentDueDay && contract.paymentDueDay <= maxDayOfMonth
+            ? contract.paymentDueDay
             : maxDayOfMonth,
         ),
       );
@@ -109,7 +114,7 @@ const CreateInvoiceScreen = ({
     'contractServices',
   ) as ContractServiceInvoiceCalculateResponse[];
 
-  const _handleChangeUpdateHelperService = () => {};
+  const handleSave = async (data: InvoiceDetailResponse) => {};
 
   const handleConfirmEditOld = (index: number) => {
     const service = contractServices[index];
@@ -160,184 +165,156 @@ const CreateInvoiceScreen = ({
   }
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={{
-        padding: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16,
-      }}
-      enableOnAndroid={true}
-      extraScrollHeight={30}
-      keyboardOpeningTime={0}
-      enableAutomaticScroll={true}
-      enableResetScrollToCoords={false}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-      className="gap-y-4"
-    >
-      <CardComponent title="Thông tin hợp đồng">
-        <Controller
-          control={control}
-          name={'roomName'}
-          render={({ field: { onChange, value } }) => (
-            <DisplayField label="Phòng" value={value} strong />
-          )}
-        />
-        <Controller
-          control={control}
-          name={'clientName'}
-          render={({ field: { onChange, value } }) => (
-            <DisplayField label="Người thuê" value={value} />
-          )}
-        />
-      </CardComponent>
-
-      <CardComponent title="Thông tin thanh toán">
-        <View className="gap-y-3">
+    <>
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          padding: 16,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+        enableOnAndroid={true}
+        extraScrollHeight={30}
+        keyboardOpeningTime={0}
+        enableAutomaticScroll={true}
+        enableResetScrollToCoords={false}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        className="gap-y-4"
+      >
+        <CardComponent title="Thông tin hợp đồng">
           <Controller
             control={control}
-            rules={{ required: 'Vui lòng chọn tháng thanh toán' }}
-            name={'paymentMonth'}
-            render={({ field: { onChange, value } }) => {
-              return (
-                <ComboBox
-                  label="Hóa đơn tháng:"
-                  required={true}
-                  isSearch={false}
-                  options={Array.from({ length: 12 }, (_, index) => ({
-                    key: index + 1,
-                    value: index + 1,
-                    label: `Tháng ${index + 1}`,
-                  }))}
-                  onChange={onChange}
-                  value={value}
-                  placeholder="Chọn tháng thanh toán"
-                />
-              );
-            }}
+            name={'roomName'}
+            render={({ field: { onChange, value } }) => (
+              <DisplayField label="Phòng" value={value} strong />
+            )}
           />
-          {contractServices.map((service, index) => (
-            <ServiceInvoiceItem
-              key={index}
+          <Controller
+            control={control}
+            name={'clientName'}
+            render={({ field: { onChange, value } }) => (
+              <DisplayField label="Người thuê" value={value} />
+            )}
+          />
+        </CardComponent>
+
+        <CardComponent title="Thông tin thanh toán">
+          <View className="gap-y-3">
+            <Controller
               control={control}
-              service={service}
-              index={index}
-              handleConfirmEditOld={handleConfirmEditOld}
-              getValues={getValues}
+              rules={{ required: 'Vui lòng chọn tháng thanh toán' }}
+              name={'paymentMonth'}
+              render={({ field: { onChange, value } }) => {
+                return (
+                  <ComboBox
+                    label="Hóa đơn tháng:"
+                    required={true}
+                    isSearch={false}
+                    options={Array.from({ length: 12 }, (_, index) => ({
+                      key: index + 1,
+                      value: index + 1,
+                      label: `Tháng ${index + 1}`,
+                    }))}
+                    onChange={onChange}
+                    value={value}
+                    placeholder="Chọn tháng thanh toán"
+                  />
+                );
+              }}
             />
-          ))}
-          {/* {contractServices.map((service, index) => {
-            return (
-              <CardComponent
-                key={service.id}
-                title={service.name}
-                style={{
-                  elevation: isAndroidSystem() ? 3 : 0,
-                }}
-                className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
-                description={`${formatCurrency(service.price)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
-                renderActions={() => (
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleConfirmEditOld(index);
-                    }}
-                    className={`flex-row items-center rounded-full px-3 py-1 
-                      ${
-                        getValues(`contractServices.${index}.isUpdated`)
-                          ? 'bg-blue-50 border border-blue-100'
-                          : 'bg-gray-50 border border-gray-100'
-                      }`}
-                  >
-                    <Ionicons
-                      name="create-outline"
-                      size={18}
-                      color={true ? '#1D4ED8' : '#1F2937'}
-                    />
-                    <Text
-                      className={`ml-1 text-sm font-semibold ${
-                        true ? 'text-blue-700' : 'text-gray-900'
-                      }`}
-                    >
-                      {false ? 'Đang mở chỉnh sửa' : 'Sửa số cũ'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              >
-                <View className="flex-row gap-3">
-                  <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
-                    <Controller
-                      control={control}
-                      rules={{ required: 'Vui lòng nhập số cũ' }}
-                      name={`contractServices.${index}.oldHelperValue`}
-                      render={({ field: { onChange, value } }) => {
-                        return (
-                          <Input
-                            label="Số cũ"
-                            value={value?.toString() || '0'}
-                            type="number"
-                            keyboardType="numeric"
-                            min={0}
-                            disabled={
-                              !getValues(`contractServices.${index}.isUpdated`)
-                            }
-                            onChange={onChange}
-                            showClear={false}
-                          />
-                        );
-                      }}
-                    />
-                  </View>
 
-                  <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
-                    <Controller
-                      control={control}
-                      name={`contractServices.${index}.newHelperValue`}
-                      rules={{ required: 'Vui lòng nhập số mới' }}
-                      render={({ field: { onChange, value } }) => {
-                        return (
-                          <Input
-                            label="Số mới"
-                            value={value?.toString() || '0'}
-                            type="number"
-                            keyboardType="numeric"
-                            required
-                            onChange={onChange}
-                            showClear={false}
-                          />
-                        );
-                      }}
-                    />
-                  </View>
-                </View>
+            <Controller
+              control={control}
+              name={'dueDate'}
+              rules={{
+                required: 'Vui lòng chọn ngày thanh toán',
+                validate: (value: Date) => {
+                  const currentDate = getCurrentDate();
+                  if (value.getDate() < currentDate.getDate()) {
+                    return 'Ngày thanh toán phải trong tương lai';
+                  }
+                  return true;
+                },
+              }}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => {
+                return (
+                  <DatePicker
+                    error={error?.message}
+                    label="Ngày thanh toán"
+                    value={value}
+                    onChange={onChange}
+                    required
+                  />
+                );
+              }}
+            />
+          </View>
+        </CardComponent>
 
-                <View className="mt-3 flex-row items-center justify-between">
-                  <Text className="text-sm font-semibold text-gray-700">
-                    Sản lượng
-                  </Text>
-                  <Text className="text-base font-semibold text-gray-900">
-                    {service.helperValue?.toString() || '0'}{' '}
-                    {
-                      SERVICE_CALCULATE_METHOD_WITH_INFO[
-                        service.calculationMethod
-                      ].unit
-                    }
-                  </Text>
-                </View>
-                <View className="mt-2 flex-row items-center justify-between">
-                  <Text className="text-base font-semibold text-gray-800">
-                    Tạm tính
-                  </Text>
-                  <Text className="text-xl font-extrabold text-blue-700">
-                    {formatCurrency(0)} đ
-                  </Text>
-                </View>
-              </CardComponent>
-            );
-          })} */}
+        <CardComponent title="Thông tin dịch vụ">
+          <View className="gap-y-3">
+            {contractServices.map((service, index) => (
+              <ServiceInvoiceItem
+                key={index}
+                control={control}
+                service={service}
+                index={index}
+                handleConfirmEditOld={handleConfirmEditOld}
+                getValues={getValues}
+              />
+            ))}
+          </View>
+        </CardComponent>
+        {/* Invoice Info */}
+        {/* <CardComponent title="Thông tin hóa đơn">
+        <View className="space-y-3">
+          <View className="flex-row justify-between items-center">
+            <Text className="text-sm text-gray-500">Kỳ thanh toán</Text>
+            <Text className="text-sm font-medium text-gray-900">
+              {formatDate(new Date().toISOString())} -{' '}
+              {formatDate(new Date().toISOString())}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-sm font-medium text-gray-900">
+              <Text className="text-sm text-gray-500">Hạn thanh toán</Text>
+              {formatDate(new Date().toISOString())}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-sm text-gray-500">Ngày tạo</Text>
+            <Text className="text-sm font-medium text-gray-900">
+              {formatDate(new Date().toISOString())}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className="text-sm text-gray-500 mb-1">Ghi chú</Text>
+            <Text className="text-sm text-gray-900">123</Text>
+          </View>
         </View>
-      </CardComponent>
-    </KeyboardAwareScrollView>
+      </CardComponent> */}
+      </KeyboardAwareScrollView>
+      <ActionButtonBottom
+        actions={[
+          {
+            label: 'Tạo hóa đơn',
+            icon: 'checkmark-circle',
+            // isLoading: isSubmitting,
+            onPress: handleSubmit(handleSave, (errors) => {
+              Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Vui lòng nhập đầy đủ thông tin!',
+              });
+            }),
+          },
+        ]}
+      />
+    </>
   );
 
   // useEffect(() => {

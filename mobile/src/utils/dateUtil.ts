@@ -17,3 +17,9 @@ export const getNextMonth = (dateTime?: Date) => {
 
   return currentMonth === 12 ? 1 : currentMonth + 1;
 };
+
+export const getNextMonthDate = (dateTime?: Date) => {
+  const now = dateTime ? new Date(dateTime) : getCurrentDate();
+  now.setMonth(now.getMonth() + 1);
+  return now;
+};
