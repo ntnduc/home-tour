@@ -1,9 +1,9 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { FlatList, Modal, Text, TouchableOpacity, View } from "react-native";
-import { colors } from "../theme/colors";
-import { Contract, ContractStatus } from "../types/contract";
-import ContractCard from "./ContractCard";
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { FlatList, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { colors } from '../theme/colors';
+import { Contract, ContractStatus } from '../types/contract';
+import ContractCard from './ContractCard';
 
 interface ContractListModalProps {
   visible: boolean;
@@ -38,7 +38,7 @@ const ContractListModal = ({
     active: contracts.filter((c) => c.status === ContractStatus.ACTIVE).length,
     expired: contracts.filter((c) => c.status === ContractStatus.EXPIRED)
       .length,
-    terminated: contracts.filter((c) => c.status === ContractStatus.TERMINATED)
+    terminated: contracts.filter((c) => c.status === ContractStatus.EXPIRED)
       .length,
   };
 
@@ -63,15 +63,15 @@ const ContractListModal = ({
         >
           <View
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
           >
             <Text
               style={{
                 fontSize: 20,
-                fontWeight: "bold",
+                fontWeight: 'bold',
                 color: colors.text.primary,
               }}
             >
@@ -84,8 +84,8 @@ const ContractListModal = ({
                 height: 32,
                 borderRadius: 16,
                 backgroundColor: colors.neutral.gray[100],
-                alignItems: "center",
-                justifyContent: "center",
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Ionicons
@@ -97,7 +97,7 @@ const ContractListModal = ({
           </View>
 
           {/* Stats */}
-          <View style={{ flexDirection: "row", marginTop: 16, gap: 8 }}>
+          <View style={{ flexDirection: 'row', marginTop: 16, gap: 8 }}>
             <View
               style={{
                 flex: 1,
@@ -110,7 +110,7 @@ const ContractListModal = ({
                 style={{
                   fontSize: 12,
                   color: colors.primary.main,
-                  fontWeight: "500",
+                  fontWeight: '500',
                 }}
               >
                 Tổng
@@ -118,7 +118,7 @@ const ContractListModal = ({
               <Text
                 style={{
                   fontSize: 18,
-                  fontWeight: "bold",
+                  fontWeight: 'bold',
                   color: colors.primary.dark,
                 }}
               >
@@ -128,7 +128,7 @@ const ContractListModal = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: colors.status.success + "15",
+                backgroundColor: colors.status.success + '15',
                 borderRadius: 8,
                 padding: 12,
               }}
@@ -137,7 +137,7 @@ const ContractListModal = ({
                 style={{
                   fontSize: 12,
                   color: colors.status.success,
-                  fontWeight: "500",
+                  fontWeight: '500',
                 }}
               >
                 Đang hoạt động
@@ -145,7 +145,7 @@ const ContractListModal = ({
               <Text
                 style={{
                   fontSize: 18,
-                  fontWeight: "bold",
+                  fontWeight: 'bold',
                   color: colors.status.success,
                 }}
               >
@@ -155,7 +155,7 @@ const ContractListModal = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: colors.status.warning + "15",
+                backgroundColor: colors.status.warning + '15',
                 borderRadius: 8,
                 padding: 12,
               }}
@@ -164,7 +164,7 @@ const ContractListModal = ({
                 style={{
                   fontSize: 12,
                   color: colors.status.warning,
-                  fontWeight: "500",
+                  fontWeight: '500',
                 }}
               >
                 Hết hạn
@@ -172,7 +172,7 @@ const ContractListModal = ({
               <Text
                 style={{
                   fontSize: 18,
-                  fontWeight: "bold",
+                  fontWeight: 'bold',
                   color: colors.status.warning,
                 }}
               >
@@ -182,7 +182,7 @@ const ContractListModal = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: colors.status.error + "15",
+                backgroundColor: colors.status.error + '15',
                 borderRadius: 8,
                 padding: 12,
               }}
@@ -191,7 +191,7 @@ const ContractListModal = ({
                 style={{
                   fontSize: 12,
                   color: colors.status.error,
-                  fontWeight: "500",
+                  fontWeight: '500',
                 }}
               >
                 Đã kết thúc
@@ -199,7 +199,7 @@ const ContractListModal = ({
               <Text
                 style={{
                   fontSize: 18,
-                  fontWeight: "bold",
+                  fontWeight: 'bold',
                   color: colors.status.error,
                 }}
               >
@@ -219,8 +219,8 @@ const ContractListModal = ({
           ListEmptyComponent={
             <View
               style={{
-                alignItems: "center",
-                justifyContent: "center",
+                alignItems: 'center',
+                justifyContent: 'center',
                 paddingVertical: 80,
               }}
             >
@@ -232,7 +232,7 @@ const ContractListModal = ({
               <Text
                 style={{
                   fontSize: 18,
-                  fontWeight: "500",
+                  fontWeight: '500',
                   color: colors.text.secondary,
                   marginTop: 16,
                 }}
@@ -244,7 +244,7 @@ const ContractListModal = ({
                   fontSize: 14,
                   color: colors.text.disabled,
                   marginTop: 8,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
                 Tạo hợp đồng đầu tiên để bắt đầu quản lý
@@ -256,7 +256,7 @@ const ContractListModal = ({
         {/* Close Button */}
         <View
           style={{
-            position: "absolute",
+            position: 'absolute',
             bottom: 24,
             left: 24,
             right: 24,
@@ -264,18 +264,18 @@ const ContractListModal = ({
         >
           <TouchableOpacity
             style={{
-              width: "100%",
+              width: '100%',
               backgroundColor: colors.neutral.gray[900],
               borderRadius: 12,
               paddingVertical: 16,
-              alignItems: "center",
+              alignItems: 'center',
             }}
             onPress={onClose}
           >
             <Text
               style={{
                 color: colors.text.inverse,
-                fontWeight: "600",
+                fontWeight: '600',
                 fontSize: 16,
               }}
             >

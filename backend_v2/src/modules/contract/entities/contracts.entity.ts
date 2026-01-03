@@ -42,9 +42,11 @@ export class Contracts extends BaseEntity {
   @Column({ type: 'date', nullable: true })
   endDate?: Date;
 
+  // tiền thuê
   @Column({ type: 'decimal', precision: 15, scale: 2 })
   rentAmountAgreed: number;
 
+  // tiền cọc
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   depositAmountPaid: number;
 

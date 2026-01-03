@@ -1,9 +1,9 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React from 'react';
+import { Text, View } from 'react-native';
 
-import DisplayPhoneNumber from "@/components/DisplayPhoneNumber";
+import DisplayPhoneNumber from '@/components/DisplayPhoneNumber';
 
-type DisplayFieldType = "text" | "phone";
+type DisplayFieldType = 'text' | 'phone';
 
 type Props = {
   label: string;
@@ -13,32 +13,32 @@ type Props = {
   containerClassName?: string;
   labelClassName?: string;
   valueClassName?: string;
-  direction?: "horizontal" | "vertical";
+  direction?: 'horizontal' | 'vertical';
 };
 
 const DisplayField = ({
   label,
   value,
   strong = false,
-  type = "text",
-  containerClassName = "",
-  labelClassName = "",
-  valueClassName = "",
-  direction = "horizontal",
+  type = 'text',
+  containerClassName = '',
+  labelClassName = '',
+  valueClassName = '',
+  direction = 'horizontal',
 }: Props) => {
-  const _containerClassName = `mb-2 ${direction === "horizontal" ? "flex-row justify-between items-center" : "flex-col"} ${containerClassName}`;
+  const _containerClassName = `mb-2 ${direction === 'horizontal' ? 'flex-row justify-between items-center' : 'flex-col'} ${containerClassName}`;
 
-  const fallbackValue = value ?? "-";
+  const fallbackValue = value ?? '-';
 
   const renderValue = () => {
     if (React.isValidElement(fallbackValue)) {
       return fallbackValue;
     }
 
-    if (type === "phone" && typeof fallbackValue === "string") {
+    if (type === 'phone' && typeof fallbackValue === 'string') {
       return (
         <DisplayPhoneNumber
-          className={`text-base text-gray-900 ${strong ? "font-semibold" : ""} ${valueClassName}`}
+          className={`text-base text-gray-900 ${strong ? 'font-semibold' : ''} ${valueClassName}`}
         >
           {fallbackValue}
         </DisplayPhoneNumber>
@@ -47,7 +47,7 @@ const DisplayField = ({
 
     return (
       <Text
-        className={`text-base text-gray-900 ${strong ? "font-semibold" : ""} ${valueClassName}`}
+        className={`text-base text-gray-900 ${strong ? 'font-semibold' : ''} ${valueClassName}`}
       >
         {fallbackValue}
       </Text>

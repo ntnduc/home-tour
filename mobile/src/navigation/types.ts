@@ -1,6 +1,6 @@
-import { Contract, ContractCreateRequest } from "@/types/contract";
-import { Invoice } from "@/types/payment";
-import { Room } from "@/types/room";
+import { Contract, ContractCreateRequest } from '@/types/contract';
+import { InvoiceCreateRequest } from '@/types/invoice';
+import { Room } from '@/types/room';
 
 export type RootStackParamList = {
   // Auth Flow
@@ -44,6 +44,9 @@ export type RootStackParamList = {
   InvoiceDetail: { invoiceId: string; fromHistory?: boolean };
   InvoiceHistory: undefined;
   CreateInvoice: { contractId?: string; roomId?: string };
+  ConfirmCreateInvoice: {
+    invoice: InvoiceCreateRequest;
+  };
 
   // Reports
   ReportDashboard: undefined;

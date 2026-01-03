@@ -31,7 +31,15 @@ export interface InvoiceDetailResponse extends Omit<Invoice, 'id'> {
 export interface InvoiceListResponse extends Invoice {}
 
 export interface InvoiceCreateRequest
-  extends Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'> {}
+  extends Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'> {
+  isPrepaid: boolean;
+  roomName: string;
+  clientName?: string;
+  propertyName?: string;
+  contract?: ContractDetailResponse;
+  paymentMonth?: number;
+  contractServices?: ContractServiceInvoiceCalculateResponse[];
+}
 
 export interface InvoiceUpdateRequest
   extends Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'> {}

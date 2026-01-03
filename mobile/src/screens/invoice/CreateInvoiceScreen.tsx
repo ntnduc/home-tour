@@ -3,11 +3,17 @@ import ActionButtonBottom from '@/components/ActionButtonBottom';
 import { ComboBox } from '@/components/ComboBox';
 import DatePicker from '@/components/DatePicker';
 import DisplayField from '@/components/DisplayField';
+import Input from '@/components/Input';
 import Loading from '@/components/Loading';
 import { RootStackParamList } from '@/navigation/types';
 import { ContractDetailResponse } from '@/types/contract';
 import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-service';
-import { InvoiceDetailResponse, InvoiceStatus } from '@/types/invoice';
+import {
+  InvoiceCreateRequest,
+  InvoiceDetailResponse,
+  InvoiceStatus,
+} from '@/types/invoice';
+import { formatCurrency } from '@/utils/appUtil';
 import {
   getCurrentDate,
   getNextMonth,
@@ -50,7 +56,7 @@ const CreateInvoiceScreen = ({
     setValue,
     getValues,
     formState: { errors, isLoading },
-  } = useForm<InvoiceDetailResponse>({
+  } = useForm<InvoiceCreateRequest>({
     defaultValues: async () => {
       const response = await getContract(contractId || '');
       if (!response.success && !response.data) {
@@ -62,7 +68,7 @@ const CreateInvoiceScreen = ({
           });
         }
         navigation.goBack();
-        return {} as InvoiceDetailResponse;
+        return {} as InvoiceCreateRequest;
       }
 
       const contract = response.data as ContractDetailResponse;
@@ -92,7 +98,7 @@ const CreateInvoiceScreen = ({
           contract.contractClient.find((c) => c.isLandlordClient)?.name || '',
         notes: '',
         isPrepaid: false,
-        totalAmount: 0,
+        totalAmount: contract.rentAmountAgreed,
         paidAmount: 0,
         remainingAmount: 0,
         contractServices: contract.contractServices?.map((item) => ({
@@ -114,7 +120,12 @@ const CreateInvoiceScreen = ({
     'contractServices',
   ) as ContractServiceInvoiceCalculateResponse[];
 
-  const handleSave = async (data: InvoiceDetailResponse) => {};
+  const handleSave = async (data: InvoiceDetailResponse) => {
+    // Navigate to confirm screen with invoice data
+    navigation.navigate('ConfirmCreateInvoice', {
+      invoice: data,
+    });
+  };
 
   const handleConfirmEditOld = (index: number) => {
     const service = contractServices[index];
@@ -197,6 +208,29 @@ const CreateInvoiceScreen = ({
               <DisplayField label="Người thuê" value={value} />
             )}
           />
+          <Controller
+            control={control}
+            name={'totalAmount'}
+            render={({ field: { onChange, value } }) => (
+              <DisplayField
+                label="Tiền thuê"
+                value={formatCurrency(value)}
+                valueClassName="text-3xl font-bold text-blue-600"
+              />
+            )}
+          />
+          {/* <View className="items-center pt-4 border-t border-gray-200">
+            <Text className="text-sm text-gray-500 mb-2">Tổng cộng</Text>
+            <Text className="text-3xl font-bold text-blue-600">
+              123
+            </Text>
+            <View className="mt-2 flex-row items-center">
+              <Text className="text-sm text-gray-500 mr-2">Còn lại: </Text>
+              <Text className="text-base font-semibold text-red-600">
+                2321
+              </Text>
+            </View>
+          </View> */}
         </CardComponent>
 
         <CardComponent title="Thông tin thanh toán">
@@ -231,9 +265,9 @@ const CreateInvoiceScreen = ({
                 required: 'Vui lòng chọn ngày thanh toán',
                 validate: (value: Date) => {
                   const currentDate = getCurrentDate();
-                  if (value.getDate() < currentDate.getDate()) {
-                    return 'Ngày thanh toán phải trong tương lai';
-                  }
+                  // if (value.getDate() < currentDate.getDate()) {
+                  //   return 'Ngày thanh toán phải trong tương lai';
+                  // }
                   return true;
                 },
               }}
@@ -244,13 +278,27 @@ const CreateInvoiceScreen = ({
                 return (
                   <DatePicker
                     error={error?.message}
-                    label="Ngày thanh toán"
+                    label="Hạn thanh toán"
                     value={value}
                     onChange={onChange}
                     required
                   />
                 );
               }}
+            />
+            <Controller
+              control={control}
+              name={'notes'}
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Ghi chú"
+                  value={value}
+                  onChangeText={onChange}
+                  type="area"
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              )}
             />
           </View>
         </CardComponent>
@@ -269,34 +317,6 @@ const CreateInvoiceScreen = ({
             ))}
           </View>
         </CardComponent>
-        {/* Invoice Info */}
-        {/* <CardComponent title="Thông tin hóa đơn">
-        <View className="space-y-3">
-          <View className="flex-row justify-between items-center">
-            <Text className="text-sm text-gray-500">Kỳ thanh toán</Text>
-            <Text className="text-sm font-medium text-gray-900">
-              {formatDate(new Date().toISOString())} -{' '}
-              {formatDate(new Date().toISOString())}
-            </Text>
-          </View>
-          <View className="flex-row justify-between items-center">
-            <Text className="text-sm font-medium text-gray-900">
-              <Text className="text-sm text-gray-500">Hạn thanh toán</Text>
-              {formatDate(new Date().toISOString())}
-            </Text>
-          </View>
-          <View className="flex-row justify-between items-center">
-            <Text className="text-sm text-gray-500">Ngày tạo</Text>
-            <Text className="text-sm font-medium text-gray-900">
-              {formatDate(new Date().toISOString())}
-            </Text>
-          </View>
-          <View className="mt-2">
-            <Text className="text-sm text-gray-500 mb-1">Ghi chú</Text>
-            <Text className="text-sm text-gray-900">123</Text>
-          </View>
-        </View>
-      </CardComponent> */}
       </KeyboardAwareScrollView>
       <ActionButtonBottom
         actions={[
