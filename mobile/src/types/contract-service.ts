@@ -28,11 +28,3 @@ export interface ContractServiceDetailResponse
   extends Omit<ContractService, 'contractId'> {
   contractId?: string;
 }
-
-export interface ContractServiceInvoiceCalculateResponse
-  extends Omit<ContractService, 'contractId'> {
-  oldHelperValue?: number | null;
-  newHelperValue?: number | null;
-  contractId?: string;
-  isUpdated?: boolean;
-}

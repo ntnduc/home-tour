@@ -1,4 +1,9 @@
-import { InvoiceStatus } from "./invoice";
+import { ServiceCalculateMethod } from '@/constant/service.constant';
+import {
+  ContractServiceCreateRequest,
+  ContractServiceDetailResponse,
+} from './contract-service';
+import { InvoiceStatus } from './invoice';
 
 export interface InvoiceItem {
   id: string;
@@ -6,6 +11,8 @@ export interface InvoiceItem {
   amount: number;
   type: InvoiceItemType;
   helperValue?: number;
+  oldHelperValue?: number;
+  newHelperValue?: number;
   contractServiceId?: string;
   propertyId: string;
   metadata?: Record<string, any>;
@@ -13,17 +20,30 @@ export interface InvoiceItem {
   updatedAt?: string;
 }
 
+export interface InvoiceItemDetailResponse extends InvoiceItem {
+  contractService?: ContractServiceDetailResponse;
+}
+
+export interface InvoiceItemCreateRequest
+  extends Omit<InvoiceItem, 'id' | 'createdAt' | 'updatedAt' | 'invoiceId'> {
+  isUpdated: boolean;
+  contractService?: ContractServiceCreateRequest;
+  name: string;
+  contractServiceId: string;
+  calculationMethod: ServiceCalculateMethod;
+}
+
 export enum InvoiceItemType {
-  ROOM_RENT = "ROOM_RENT",
-  SERVICE_FEE = "SERVICE_FEE",
-  UTILITY_FEE = "UTILITY_FEE",
+  ROOM_RENT = 'ROOM_RENT',
+  SERVICE_FEE = 'SERVICE_FEE',
+  UTILITY_FEE = 'UTILITY_FEE',
 }
 
 export const INVOICE_STATUS_LABEL: Record<InvoiceStatus, string> = {
-  [InvoiceStatus.PENDING]: "Chờ thanh toán",
-  [InvoiceStatus.PAID]: "Đã thanh toán",
-  [InvoiceStatus.PARTIALLY_PAID]: "Thanh toán một phần",
-  [InvoiceStatus.OVERDUE]: "Quá hạn",
-  [InvoiceStatus.CANCELLED]: "Đã hủy",
-  [InvoiceStatus.DRAFT]: "Nháp",
+  [InvoiceStatus.PENDING]: 'Chờ thanh toán',
+  [InvoiceStatus.PAID]: 'Đã thanh toán',
+  [InvoiceStatus.PARTIALLY_PAID]: 'Thanh toán một phần',
+  [InvoiceStatus.OVERDUE]: 'Quá hạn',
+  [InvoiceStatus.CANCELLED]: 'Đã hủy',
+  [InvoiceStatus.DRAFT]: 'Nháp',
 };

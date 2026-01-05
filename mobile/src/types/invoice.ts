@@ -1,5 +1,8 @@
 import { ContractDetailResponse } from './contract';
-import { ContractServiceInvoiceCalculateResponse } from './contract-service';
+import {
+  InvoiceItemCreateRequest,
+  InvoiceItemDetailResponse,
+} from './invoice.item';
 
 export interface Invoice {
   id: string;
@@ -25,7 +28,7 @@ export interface InvoiceDetailResponse extends Omit<Invoice, 'id'> {
   propertyName?: string;
   contract?: ContractDetailResponse;
   paymentMonth?: number;
-  contractServices?: ContractServiceInvoiceCalculateResponse[];
+  invoiceItems?: InvoiceItemDetailResponse[];
 }
 
 export interface InvoiceListResponse extends Invoice {}
@@ -38,7 +41,7 @@ export interface InvoiceCreateRequest
   propertyName?: string;
   contract?: ContractDetailResponse;
   paymentMonth?: number;
-  contractServices?: ContractServiceInvoiceCalculateResponse[];
+  invoiceItems?: InvoiceItemCreateRequest[];
 }
 
 export interface InvoiceUpdateRequest

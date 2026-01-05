@@ -4,8 +4,8 @@ import {
   ServiceCalculateMethod,
 } from '@/constant/service.constant';
 import CardComponent from '@/screens/common/CardComponent';
-import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-service';
-import { InvoiceDetailResponse } from '@/types/invoice';
+import { InvoiceCreateRequest } from '@/types/invoice';
+import { InvoiceItemCreateRequest } from '@/types/invoice.item';
 import { formatCurrency, isAndroidSystem, isIOSSystem } from '@/utils/appUtil';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
@@ -13,8 +13,8 @@ import { Control, Controller, useWatch } from 'react-hook-form';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface ServiceInvoiceItemProps {
-  control: Control<InvoiceDetailResponse, any, InvoiceDetailResponse>;
-  service: ContractServiceInvoiceCalculateResponse;
+  control: Control<InvoiceCreateRequest, InvoiceCreateRequest, any>;
+  service: InvoiceItemCreateRequest;
   index: number;
   handleConfirmEditOld: (index: number) => void;
   getValues: (name: string) => any;
@@ -29,12 +29,12 @@ const ServiceInvoiceItem = ({
 }: ServiceInvoiceItemProps) => {
   const helperValueNew = useWatch({
     control,
-    name: `contractServices.${index}.newHelperValue`,
+    name: `invoiceItems.${index}.newHelperValue`,
   });
 
   const oldHelperValue = useWatch({
     control,
-    name: `contractServices.${index}.oldHelperValue`,
+    name: `invoiceItems.${index}.oldHelperValue`,
   });
 
   const calPrice = useMemo(() => {
@@ -42,20 +42,20 @@ const ServiceInvoiceItem = ({
       return 0;
     }
     return (
-      Number(service.price) * ((helperValueNew ?? 0) - (oldHelperValue ?? 0))
+      Number(service.amount) * ((helperValueNew ?? 0) - (oldHelperValue ?? 0))
     );
   }, [helperValueNew, oldHelperValue]);
 
   const _serviceCalculatorSimple = () => {
     return (
       <CardComponent
-        key={service.id}
+        key={service.contractServiceId}
         title={service.name}
         style={{
           elevation: isAndroidSystem() ? 3 : 0,
         }}
         className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
-        description={`${formatCurrency(service.price)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
+        description={`${formatCurrency(service.amount)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
         renderActions={() => (
           <TouchableOpacity
             onPress={() => {
@@ -100,7 +100,7 @@ const ServiceInvoiceItem = ({
             <Controller
               control={control}
               rules={{ required: 'Vui lòng nhập số cũ' }}
-              name={`contractServices.${index}.oldHelperValue`}
+              name={`invoiceItems.${index}.oldHelperValue`}
               render={({ field: { onChange, value } }) => {
                 return (
                   <Input
@@ -109,7 +109,7 @@ const ServiceInvoiceItem = ({
                     type="number"
                     keyboardType="numeric"
                     min={0}
-                    disabled={!getValues(`contractServices.${index}.isUpdated`)}
+                    disabled={!getValues(`invoiceItems.${index}.isUpdated`)}
                     onChangeText={onChange}
                     showClear={false}
                   />
@@ -121,9 +121,12 @@ const ServiceInvoiceItem = ({
           <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
             <Controller
               control={control}
-              name={`contractServices.${index}.newHelperValue`}
+              name={`invoiceItems.${index}.newHelperValue`}
               rules={{ required: 'Vui lòng nhập số mới' }}
-              render={({ field: { onChange, value } }) => {
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => {
                 return (
                   <Input
                     label="Số mới"
@@ -131,6 +134,7 @@ const ServiceInvoiceItem = ({
                     type="number"
                     keyboardType="numeric"
                     required
+                    error={error?.message}
                     onChangeText={onChange}
                     showClear={false}
                   />
@@ -178,14 +182,14 @@ const ServiceInvoiceItem = ({
         }}
         title={service.name}
         className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
-        key={service.id}
+        key={service.contractServiceId}
       >
         <View className=" flex-row items-center justify-between">
           <Text className="text-base font-semibold text-gray-800">
             Tạm tính
           </Text>
           <Text className="text-xl font-extrabold text-blue-700">
-            {formatCurrency(service.price)} đ
+            {formatCurrency(service.amount)} đ
           </Text>
         </View>
       </CardComponent>
@@ -199,9 +203,9 @@ const ServiceInvoiceItem = ({
           elevation: isAndroidSystem() ? 3 : 0,
         }}
         className={`${isIOSSystem() ? 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]' : ''}`}
-        key={service.id}
+        key={service.contractServiceId}
         title={service.name}
-        description={`${formatCurrency(service.price)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
+        description={`${formatCurrency(service.amount)} đ/ ${SERVICE_CALCULATE_METHOD_WITH_INFO[service.calculationMethod].unit}`}
         renderActions={() => (
           <TouchableOpacity
             onPress={() => {
@@ -209,32 +213,32 @@ const ServiceInvoiceItem = ({
             }}
             className={`flex-row items-center rounded-full px-3 py-1 
           ${
-            getValues(`contractServices.${index}.isUpdated`)
+            getValues(`invoiceItems.${index}.isUpdated`)
               ? 'bg-yellow-50 border border-yellow-100'
               : 'bg-gray-50 border border-gray-100'
           }`}
           >
             <Ionicons
               name={
-                getValues(`contractServices.${index}.isUpdated`)
+                getValues(`invoiceItems.${index}.isUpdated`)
                   ? 'refresh-outline'
                   : 'create-outline'
               }
               size={18}
               color={
-                getValues(`contractServices.${index}.isUpdated`)
+                getValues(`invoiceItems.${index}.isUpdated`)
                   ? '#eab308'
                   : '#1D4ED8'
               }
             />
             <Text
               className={`ml-1 text-sm font-semibold ${
-                getValues(`contractServices.${index}.isUpdated`)
+                getValues(`invoiceItems.${index}.isUpdated`)
                   ? 'text-yellow-500'
                   : 'text-blue-700'
               }`}
             >
-              {getValues(`contractServices.${index}.isUpdated`)
+              {getValues(`invoiceItems.${index}.isUpdated`)
                 ? 'Hủy và đặt lại'
                 : 'Sửa số người'}
             </Text>
@@ -244,12 +248,12 @@ const ServiceInvoiceItem = ({
         <View className="flex-1 rounded-lg bg-white p-2 border border-gray-100">
           <Controller
             control={control}
-            name={`contractServices.${index}.oldHelperValue`}
+            name={`invoiceItems.${index}.oldHelperValue`}
             render={({ field: { onChange, value } }) => {
               return (
                 <Input
                   label="Số người"
-                  disabled={!getValues(`contractServices.${index}.isUpdated`)}
+                  disabled={!getValues(`invoiceItems.${index}.isUpdated`)}
                   value={value?.toString()}
                   type="number"
                   keyboardType="numeric"
@@ -266,9 +270,9 @@ const ServiceInvoiceItem = ({
             </Text>
             <Controller
               control={control}
-              name={`contractServices.${index}.oldHelperValue`}
+              name={`invoiceItems.${index}.oldHelperValue`}
               render={({ field: { onChange, value } }) => {
-                const calPrice = Number(service.price) * (value ?? 0);
+                const calPrice = Number(service.amount) * (value ?? 0);
                 return (
                   <Text className="text-xl font-extrabold text-blue-700">
                     {formatCurrency(calPrice)} đ

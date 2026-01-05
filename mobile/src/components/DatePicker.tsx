@@ -1,11 +1,11 @@
 import { createStyles } from '@/styles/component/StyleInput';
 import { useTheme } from '@/theme/ThemeProvider';
 import { isAndroidSystem } from '@/utils/appUtil';
-import { formatDate } from '@/utils/dateUtil';
+import { formatDate, getCurrentDate } from '@/utils/dateUtil';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   StyleProp,
   Text,
@@ -60,9 +60,23 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const styles = createStyles(theme);
   const [isOpen, setIsOpen] = useState(false);
   const [currentValue, setCurrentValue] = useState<typeof value>(value);
+  // Ref để lưu giá trị hiện tại trong picker, tránh closure issue
+  const pickerValueRef = useRef<typeof value>(value);
+
+  // Sync currentValue với value prop khi value thay đổi từ bên ngoài
+  useEffect(() => {
+    setCurrentValue(value);
+    pickerValueRef.current = value;
+  }, [value]);
 
   const handleOpen = () => {
     if (disabled) return;
+
+    // Reset currentValue về value hiện tại mỗi khi mở picker
+    // Nếu value là null, dùng ngày hiện tại làm giá trị mặc định
+    const initialValue = value || (required ? getCurrentDate() : null);
+    setCurrentValue(initialValue);
+    pickerValueRef.current = initialValue;
 
     if (isAndroidSystem()) {
       setIsOpen(true);
@@ -83,7 +97,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             width: '100%',
             height: '100%',
           }}
-          value={value ? new Date(value) : new Date()}
+          value={initialValue ? new Date(initialValue) : new Date()}
           mode="date"
           locale="vi-VN"
           display="spinner"
@@ -92,6 +106,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           onChange={(event, date) => {
             if (date) {
               setCurrentValue(date);
+              pickerValueRef.current = date;
             }
           }}
         />
@@ -110,8 +125,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  if (currentValue) {
-                    onChange?.(currentValue as any);
+                  // Sử dụng ref để tránh closure issue, đảm bảo lấy giá trị mới nhất
+                  const selectedValue = pickerValueRef.current;
+                  if (selectedValue) {
+                    onChange?.(selectedValue as any);
                   }
                   closeAppSheet();
                 }}

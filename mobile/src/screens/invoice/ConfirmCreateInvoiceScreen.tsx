@@ -33,50 +33,50 @@ const ConfirmCreateInvoiceScreen = ({
 
   // Tính toán giá từng dịch vụ
   const serviceCalculations = useMemo(() => {
-    if (!invoice.contractServices) return [];
+    if (!invoice.invoiceItems || invoice.invoiceItems.length === 0) return [];
 
-    return invoice.contractServices
-      .filter((service) => service.isEnabled)
-      .map((service) => {
-        let serviceAmount = 0;
+    return invoice.invoiceItems.map((item) => {
+      let serviceAmount = 0;
 
-        switch (service.calculationMethod) {
-          case ServiceCalculateMethod.FIXED_PER_ROOM:
-            serviceAmount = service.price || 0;
-            break;
+      switch (item.calculationMethod) {
+        case ServiceCalculateMethod.FIXED_PER_ROOM:
+          serviceAmount = item.amount || 0;
+          break;
 
-          case ServiceCalculateMethod.FIXED_PER_PERSON:
-            // Use oldHelperValue as it's the value from the form
-            serviceAmount =
-              (service.price || 0) * (service.oldHelperValue || 0);
-            break;
+        case ServiceCalculateMethod.FIXED_PER_PERSON:
+          // Use oldHelperValue as it's the value from the form
+          serviceAmount = (item.amount || 0) * (item.oldHelperValue || 0);
+          break;
 
-          case ServiceCalculateMethod.PER_UNIT_SIMPLE:
-            const oldValue = service.oldHelperValue ?? 0;
-            const newValue = service.newHelperValue ?? 0;
-            const usage = Math.max(0, newValue - oldValue);
-            serviceAmount = (service.price || 0) * usage;
-            break;
+        case ServiceCalculateMethod.PER_UNIT_SIMPLE:
+          const oldValue = item.oldHelperValue ?? 0;
+          const newValue = item.newHelperValue ?? 0;
+          const usage = Math.max(0, newValue - oldValue);
+          serviceAmount = (item.amount || 0) * usage;
+          break;
 
-          default:
-            serviceAmount = service.price || 0;
-        }
+        default:
+          serviceAmount = item.amount || 0;
+      }
 
-        return {
-          service,
-          amount: serviceAmount,
-        };
-      });
-  }, [invoice.contractServices]);
+      return {
+        item,
+        amount: serviceAmount,
+      };
+    });
+  }, [invoice.invoiceItems]);
 
   // Tính tổng tiền dịch vụ
   const totalServiceAmount = useMemo(() => {
-    return serviceCalculations.reduce((sum, item) => sum + item.amount, 0);
+    return serviceCalculations.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0,
+    );
   }, [serviceCalculations]);
 
   // Tính tổng tiền cần thu
   const totalAmount = useMemo(() => {
-    return (invoice.totalAmount || 0) + totalServiceAmount;
+    return (Number(invoice.totalAmount) || 0) + Number(totalServiceAmount);
   }, [invoice.totalAmount, totalServiceAmount]);
 
   const onEdit = () => {
@@ -187,7 +187,7 @@ const ConfirmCreateInvoiceScreen = ({
                 </Text>
               </View>
             </View>
-            <Text className="text-3xl font-extrabold text-blue-700">
+            <Text className="text-3xl font-extrabold text-blue-700 text-center">
               {formatCurrency(totalAmount.toString())}đ
             </Text>
             <View className="mt-3 pt-3 border-t border-blue-200">
@@ -254,15 +254,14 @@ const ConfirmCreateInvoiceScreen = ({
             </View>
           ) : (
             <View className="flex flex-col">
-              {serviceCalculations.map((item, idx) => {
-                const { service } = item;
-                const method =
-                  service.calculationMethod as ServiceCalculateMethod;
+              {serviceCalculations.map((calc, idx) => {
+                const { item } = calc;
+                const method = item.calculationMethod as ServiceCalculateMethod;
                 const methodInfo = SERVICE_CALCULATE_METHOD_WITH_INFO[method];
 
                 return (
                   <View
-                    key={`${service.serviceId || service.id || idx}`}
+                    key={`${item.contractServiceId || idx}`}
                     className={`flex-row items-center justify-between py-3 ${
                       idx !== serviceCalculations.length - 1
                         ? 'border-b border-gray-100'
@@ -277,7 +276,7 @@ const ConfirmCreateInvoiceScreen = ({
                       />
                       <View className="ml-2 flex-1">
                         <Text className="text-base font-medium text-gray-900">
-                          {service.name || 'Dịch vụ'}
+                          {item.name || 'Dịch vụ'}
                         </Text>
                         <View className="flex-row items-center mt-0.5">
                           <Text className="text-xs text-gray-500">
@@ -290,8 +289,8 @@ const ConfirmCreateInvoiceScreen = ({
                                 ·
                               </Text>
                               <Text className="text-xs text-gray-500">
-                                Cũ: {service.oldHelperValue ?? 0} → Mới:{' '}
-                                {service.newHelperValue ?? 0}
+                                Cũ: {item.oldHelperValue ?? 0} → Mới:{' '}
+                                {item.newHelperValue ?? 0}
                               </Text>
                               <Text className="text-xs text-gray-400 mx-1">
                                 ·
@@ -300,8 +299,8 @@ const ConfirmCreateInvoiceScreen = ({
                                 SL:{' '}
                                 {Math.max(
                                   0,
-                                  (service.newHelperValue ?? 0) -
-                                    (service.oldHelperValue ?? 0),
+                                  (item.newHelperValue ?? 0) -
+                                    (item.oldHelperValue ?? 0),
                                 )}{' '}
                                 {methodInfo?.unit || ''}
                               </Text>
@@ -314,14 +313,14 @@ const ConfirmCreateInvoiceScreen = ({
                                 ·
                               </Text>
                               <Text className="text-xs text-gray-500">
-                                SL: {service.oldHelperValue ?? 0}{' '}
+                                SL: {item.oldHelperValue ?? 0}{' '}
                                 {methodInfo?.unit || ''}
                               </Text>
                             </>
                           )}
                         </View>
                         <Text className="text-xs text-gray-400 mt-0.5">
-                          {formatCurrency((service.price || 0).toString())}đ
+                          {formatCurrency((item.amount || 0).toString())}đ
                           {method === ServiceCalculateMethod.PER_UNIT_SIMPLE
                             ? `/${methodInfo?.unit || 'đơn vị'}`
                             : method === ServiceCalculateMethod.FIXED_PER_PERSON
@@ -332,7 +331,7 @@ const ConfirmCreateInvoiceScreen = ({
                     </View>
                     <View className="items-end">
                       <Text className="text-base font-semibold text-gray-900">
-                        {formatCurrency(item.amount.toString())}đ
+                        {formatCurrency(calc.amount.toString())}đ
                       </Text>
                     </View>
                   </View>

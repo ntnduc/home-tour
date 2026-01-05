@@ -7,18 +7,13 @@ import Input from '@/components/Input';
 import Loading from '@/components/Loading';
 import { RootStackParamList } from '@/navigation/types';
 import { ContractDetailResponse } from '@/types/contract';
-import { ContractServiceInvoiceCalculateResponse } from '@/types/contract-service';
+import { InvoiceCreateRequest, InvoiceStatus } from '@/types/invoice';
 import {
-  InvoiceCreateRequest,
-  InvoiceDetailResponse,
-  InvoiceStatus,
-} from '@/types/invoice';
+  InvoiceItemCreateRequest,
+  InvoiceItemType,
+} from '@/types/invoice.item';
 import { formatCurrency } from '@/utils/appUtil';
-import {
-  getCurrentDate,
-  getNextMonth,
-  getNextMonthDate,
-} from '@/utils/dateUtil';
+import { getCurrentDate } from '@/utils/dateUtil';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -27,16 +22,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Toast from 'react-native-toast-message';
 import CardComponent from '../common/CardComponent';
 import ServiceInvoiceItem from './components/ServiceInvoiceItem';
-
-type UtilityService = {
-  id: string;
-  name: string;
-  unit: string;
-  unitPrice: number;
-  oldIndex: string;
-  newIndex: string;
-  allowEditOld?: boolean;
-};
 
 type CreateInvoiceScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CreateInvoice'>;
@@ -73,13 +58,13 @@ const CreateInvoiceScreen = ({
 
       const contract = response.data as ContractDetailResponse;
       // Check date payment default is valid
-      const currentDate = getNextMonthDate();
+      const currentDate = getCurrentDate();
       const maxDayOfMonth = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
         0,
       ).getDate();
-      const dueDate = new Date(
+      let dueDate = new Date(
         currentDate.setDate(
           contract.paymentDueDay && contract.paymentDueDay <= maxDayOfMonth
             ? contract.paymentDueDay
@@ -87,7 +72,9 @@ const CreateInvoiceScreen = ({
         ),
       );
 
-      const invoiceDetail: InvoiceDetailResponse = {
+      dueDate = dueDate < getCurrentDate() ? getCurrentDate() : dueDate;
+
+      const invoiceDetail: InvoiceCreateRequest = {
         contractId: contract.id,
         roomName: contract?.room?.name || '',
         roomId: contract.roomId,
@@ -101,39 +88,33 @@ const CreateInvoiceScreen = ({
         totalAmount: contract.rentAmountAgreed,
         paidAmount: 0,
         remainingAmount: 0,
-        contractServices: contract.contractServices?.map((item) => ({
-          ...item,
-          newHelperValue: 0,
-          oldHelperValue: item.helperValue ?? 0,
+        invoiceItems: contract.contractServices?.map((serivceItem) => ({
+          name: serivceItem.name,
+          amount: serivceItem.price || 0,
+          type: InvoiceItemType.SERVICE_FEE,
+          propertyId: contract.roomId,
+          oldHelperValue: serivceItem.helperValue || 0,
           isUpdated: false,
+          contractServiceId: serivceItem.id,
+          calculationMethod: serivceItem.calculationMethod,
         })),
-        paymentMonth: contract.isPrepaidRoom
-          ? getNextMonth()
-          : getCurrentDate().getMonth(),
+        paymentMonth: getCurrentDate().getMonth() + 1,
         status: InvoiceStatus.DRAFT,
       };
       return invoiceDetail;
     },
   });
 
-  const contractServices = watch(
-    'contractServices',
-  ) as ContractServiceInvoiceCalculateResponse[];
+  const invoiceItems = watch('invoiceItems') as InvoiceItemCreateRequest[];
 
-  const handleSave = async (data: InvoiceDetailResponse) => {
+  const handleSave = async (data: InvoiceCreateRequest) => {
     // Navigate to confirm screen with invoice data
     navigation.navigate('ConfirmCreateInvoice', {
-      invoice: data,
+      invoice: data as InvoiceCreateRequest,
     });
   };
-
   const handleConfirmEditOld = (index: number) => {
-    const service = contractServices[index];
-    if (!service) {
-      return;
-    }
-
-    const isUpdate = getValues(`contractServices.${index}.isUpdated`);
+    const isUpdate = getValues(`invoiceItems.${index}.isUpdated`);
     if (!isUpdate) {
       Alert.alert(
         'Chỉnh sửa chỉ số cũ',
@@ -144,7 +125,7 @@ const CreateInvoiceScreen = ({
             text: 'Đồng ý',
             style: 'destructive',
             onPress: () => {
-              setValue(`contractServices.${index}.isUpdated`, true);
+              setValue(`invoiceItems.${index}.isUpdated`, true);
             },
           },
         ],
@@ -159,10 +140,10 @@ const CreateInvoiceScreen = ({
             text: 'Đồng ý',
             style: 'destructive',
             onPress: () => {
-              setValue(`contractServices.${index}.isUpdated`, false);
+              setValue(`invoiceItems.${index}.isUpdated`, false);
               setValue(
-                `contractServices.${index}.oldHelperValue`,
-                service.helperValue,
+                `invoiceItems.${index}.oldHelperValue`,
+                invoiceItems[index].helperValue,
               );
             },
           },
@@ -208,33 +189,28 @@ const CreateInvoiceScreen = ({
               <DisplayField label="Người thuê" value={value} />
             )}
           />
-          <Controller
-            control={control}
-            name={'totalAmount'}
-            render={({ field: { onChange, value } }) => (
-              <DisplayField
-                label="Tiền thuê"
-                value={formatCurrency(value)}
-                valueClassName="text-3xl font-bold text-blue-600"
-              />
-            )}
-          />
-          {/* <View className="items-center pt-4 border-t border-gray-200">
-            <Text className="text-sm text-gray-500 mb-2">Tổng cộng</Text>
-            <Text className="text-3xl font-bold text-blue-600">
-              123
-            </Text>
-            <View className="mt-2 flex-row items-center">
-              <Text className="text-sm text-gray-500 mr-2">Còn lại: </Text>
-              <Text className="text-base font-semibold text-red-600">
-                2321
-              </Text>
-            </View>
-          </View> */}
         </CardComponent>
 
         <CardComponent title="Thông tin thanh toán">
           <View className="gap-y-3">
+            <Controller
+              control={control}
+              name={'totalAmount'}
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Tiền phòng"
+                  value={formatCurrency(value)}
+                  onChangeText={onChange}
+                  type="number"
+                  keyboardType="numeric"
+                  returnKeyType="done"
+                  returnKeyLabel="Xong"
+                  required
+                  showClear={false}
+                />
+              )}
+            />
+
             <Controller
               control={control}
               rules={{ required: 'Vui lòng chọn tháng thanh toán' }}
@@ -261,16 +237,6 @@ const CreateInvoiceScreen = ({
             <Controller
               control={control}
               name={'dueDate'}
-              rules={{
-                required: 'Vui lòng chọn ngày thanh toán',
-                validate: (value: Date) => {
-                  const currentDate = getCurrentDate();
-                  // if (value.getDate() < currentDate.getDate()) {
-                  //   return 'Ngày thanh toán phải trong tương lai';
-                  // }
-                  return true;
-                },
-              }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -286,36 +252,39 @@ const CreateInvoiceScreen = ({
                 );
               }}
             />
-            <Controller
-              control={control}
-              name={'notes'}
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Ghi chú"
-                  value={value}
-                  onChangeText={onChange}
-                  type="area"
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
-              )}
-            />
           </View>
         </CardComponent>
 
         <CardComponent title="Thông tin dịch vụ">
           <View className="gap-y-3">
-            {contractServices.map((service, index) => (
+            {invoiceItems.map((invoiceItem, index) => (
               <ServiceInvoiceItem
-                key={index}
+                key={invoiceItem.contractServiceId}
                 control={control}
-                service={service}
+                service={invoiceItem as InvoiceItemCreateRequest}
                 index={index}
                 handleConfirmEditOld={handleConfirmEditOld}
                 getValues={getValues}
               />
             ))}
           </View>
+        </CardComponent>
+
+        <CardComponent>
+          <Controller
+            control={control}
+            name={'notes'}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Ghi chú"
+                value={value}
+                onChangeText={onChange}
+                type="area"
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            )}
+          />
         </CardComponent>
       </KeyboardAwareScrollView>
       <ActionButtonBottom
@@ -325,6 +294,10 @@ const CreateInvoiceScreen = ({
             icon: 'checkmark-circle',
             // isLoading: isSubmitting,
             onPress: handleSubmit(handleSave, (errors) => {
+              console.log(
+                '💞💓💗💞💓💗 ~ CreateInvoiceScreen ~ errors:',
+                JSON.stringify(errors),
+              );
               Toast.show({
                 type: 'error',
                 text1: 'Lỗi',
