@@ -6,6 +6,7 @@ import {
   IsUUID,
   Min,
 } from 'class-validator';
+import { ServiceCalculationMethod } from 'src/common/enums/service.enum';
 import { BaseCreateDto } from '../../../../common/base/dto/create.dto';
 import { InvoiceItemType } from '../../../../common/enums/invoice.enum';
 import { InvoiceItem } from '../../entities/invoice.item.entity';
@@ -33,6 +34,10 @@ export class InvoiceItemCreateDto extends BaseCreateDto<InvoiceItem> {
   propertyId: string;
 
   @IsOptional()
+  @IsEnum(ServiceCalculationMethod)
+  calculationMethod?: ServiceCalculationMethod;
+
+  @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
 
@@ -45,6 +50,7 @@ export class InvoiceItemCreateDto extends BaseCreateDto<InvoiceItem> {
     entity.contractServiceId = this.contractServiceId;
     entity.propertyId = this.propertyId;
     entity.metadata = this.metadata ?? {};
+    entity.calculationMethod = this.calculationMethod;
     return entity;
   }
 }

@@ -1,5 +1,4 @@
 import { InvoiceItemType } from 'src/common/enums/invoice.enum';
-import { ServiceCalculationMethod } from 'src/common/enums/service.enum';
 import { ContractServices } from 'src/modules/contract/entities/contract-services.entity';
 import { Properties } from 'src/modules/property/entities/properties.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -28,10 +27,9 @@ export class InvoiceItem extends BaseEntity {
   contractServiceId?: string;
 
   @Column({
-    type: 'text',
-    default: ServiceCalculationMethod.FREE,
+    type: 'text', nullable: true
   })
-  calculationMethod: string;
+  calculationMethod?: string;
 
   @ManyToOne(() => ContractServices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'contractServiceId' })

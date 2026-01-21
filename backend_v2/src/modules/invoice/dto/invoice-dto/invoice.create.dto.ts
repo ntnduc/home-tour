@@ -59,7 +59,6 @@ export class InvoiceCreateDto extends BaseCreateDto<Invoice> {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => InvoiceItemCreateDto)
-  @IsOptional()
   invoiceItems?: InvoiceItemCreateDto[];
 
   getEntity(): Invoice {
