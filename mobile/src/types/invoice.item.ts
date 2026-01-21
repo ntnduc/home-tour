@@ -18,6 +18,7 @@ export interface InvoiceItem {
   metadata?: Record<string, any>;
   createdAt: string;
   updatedAt?: string;
+  totalAmount?: number;
 }
 
 export interface InvoiceItemDetailResponse extends InvoiceItem {
@@ -29,8 +30,8 @@ export interface InvoiceItemCreateRequest
   isUpdated: boolean;
   contractService?: ContractServiceCreateRequest;
   name: string;
-  contractServiceId: string;
-  calculationMethod: ServiceCalculateMethod;
+  contractServiceId?: string;
+  calculationMethod?: ServiceCalculateMethod;
 }
 
 export enum InvoiceItemType {

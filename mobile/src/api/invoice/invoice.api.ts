@@ -13,15 +13,11 @@ import { PaymentCreateRequest } from "@/types/payment";
 const USE_MOCK_DATA = true;
 
 // Import mock functions
-import * as invoiceMock from "./invoice.api.mock";
 
 // Invoice APIs
 export const getListInvoice = async (
   queryKey: BasePagingRequest
 ): Promise<ApiResponse<BasePagingResponse<InvoiceListResponse>>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.getListInvoiceMock(queryKey);
-  }
 
   const { limit, offset, filters, sortBy, sortOrder, globalKey } = queryKey;
 
@@ -43,10 +39,6 @@ export const getListInvoice = async (
 export const getInvoice = async (
   id: string
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.getInvoiceMock(id);
-  }
-
   const response = await privateApi.get<ApiResponse<InvoiceDetailResponse>>(
     `/invoice/${id}`
   );
@@ -56,24 +48,20 @@ export const getInvoice = async (
 export const createInvoice = async (
   data: InvoiceCreateRequest
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.createInvoiceMock(data);
-  }
+  console.log("💞💓💗💞💓💗 ~ createInvoice ~ data:", JSON.stringify(data))
 
-  const response = await privateApi.post<ApiResponse<InvoiceDetailResponse>>(
-    "/invoice",
-    data
-  );
-  return response.data;
+  // const response = await privateApi.post<ApiResponse<InvoiceDetailResponse>>(
+  //   "/invoice",
+  //   data
+  // );
+  // return response.data;
+  return { success: false, data: {} as InvoiceDetailResponse };
 };
 
 export const updateInvoice = async (
   id: string,
   data: Partial<InvoiceCreateRequest>
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.updateInvoiceMock(id, data);
-  }
 
   const response = await privateApi.put<ApiResponse<InvoiceDetailResponse>>(
     `/invoice/${id}`,
@@ -85,9 +73,6 @@ export const updateInvoice = async (
 export const deleteInvoice = async (
   id: string
 ): Promise<ApiResponse<boolean>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.deleteInvoiceMock(id);
-  }
 
   const response = await privateApi.delete<ApiResponse<boolean>>(
     `/invoice/${id}`
@@ -99,9 +84,6 @@ export const getInvoicesByContract = async (
   contractId: string,
   queryKey?: BasePagingRequest
 ): Promise<ApiResponse<BasePagingResponse<InvoiceListResponse>>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.getInvoicesByContractMock(contractId, queryKey);
-  }
 
   const params = queryKey
     ? {
@@ -126,9 +108,6 @@ export const getInvoicesByRoom = async (
   roomId: string,
   queryKey?: BasePagingRequest
 ): Promise<ApiResponse<BasePagingResponse<InvoiceListResponse>>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.getInvoicesByRoomMock(roomId, queryKey);
-  }
 
   const params = queryKey
     ? {
@@ -153,9 +132,6 @@ export const getInvoicesByRoom = async (
 export const createPayment = async (
   data: PaymentCreateRequest
 ): Promise<ApiResponse<PaymentResponse>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.createPaymentMock(data);
-  }
 
   const response = await privateApi.post<ApiResponse<PaymentResponse>>(
     "/payment",
@@ -167,9 +143,6 @@ export const createPayment = async (
 export const getPaymentsByInvoice = async (
   invoiceId: string
 ): Promise<ApiResponse<PaymentResponse[]>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.getPaymentsByInvoiceMock(invoiceId);
-  }
 
   const response = await privateApi.get<ApiResponse<PaymentResponse[]>>(
     `/payment/invoice/${invoiceId}`
@@ -181,9 +154,6 @@ export const updatePayment = async (
   id: string,
   data: Partial<PaymentCreateRequest>
 ): Promise<ApiResponse<PaymentResponse>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.updatePaymentMock(id, data);
-  }
 
   const response = await privateApi.put<ApiResponse<PaymentResponse>>(
     `/payment/${id}`,
@@ -195,9 +165,6 @@ export const updatePayment = async (
 export const deletePayment = async (
   id: string
 ): Promise<ApiResponse<boolean>> => {
-  if (USE_MOCK_DATA) {
-    return invoiceMock.deletePaymentMock(id);
-  }
 
   const response = await privateApi.delete<ApiResponse<boolean>>(
     `/payment/${id}`
@@ -241,9 +208,6 @@ export const deletePayment = async (
 //   roomId: string,
 //   serviceId: string
 // ): Promise<ApiResponse<UtilityReadingResponse>> => {
-//   if (USE_MOCK_DATA) {
-//     return invoiceMock.getLatestUtilityReadingMock(roomId, serviceId);
-//   }
 
 //   const response = await privateApi.get<ApiResponse<UtilityReadingResponse>>(
 //     `/utility-reading/room/${roomId}/service/${serviceId}/latest`

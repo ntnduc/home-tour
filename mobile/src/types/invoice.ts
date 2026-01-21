@@ -8,6 +8,7 @@ export interface Invoice {
   id: string;
   contractId: string;
   roomId: string;
+  propertyId: string;
   billingPeriodStart: Date;
   billingPeriodEnd: Date;
   dueDate: Date;

@@ -1,12 +1,11 @@
 import { createInvoice } from '@/api/invoice/invoice.api';
 import ActionButtonBottom from '@/components/ActionButtonBottom';
 import Loading from '@/components/Loading';
-import {
-  SERVICE_CALCULATE_METHOD_WITH_INFO,
-  ServiceCalculateMethod,
-} from '@/constant/service.constant';
+import { ServiceCalculateMethod } from '@/constant/service.constant';
 import { RootStackParamList } from '@/navigation/types';
 import CardComponent from '@/screens/common/CardComponent';
+import ServiceDetailInvoiceItemComponent from '@/screens/invoice/components/ServiceDetailInvoiceItemComponent';
+import { InvoiceItemType } from '@/types/invoice.item';
 import { formatCurrency } from '@/utils/appUtil';
 import { formatDate } from '@/utils/dateUtil';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -24,6 +23,11 @@ type ConfirmCreateInvoiceScreenProps = {
   route: { params: RootStackParamList['ConfirmCreateInvoice'] };
 };
 
+// type ServiceCalculation = {
+//   item: InvoiceItemCreateRequest;
+//   amount: number;
+// };
+
 const ConfirmCreateInvoiceScreen = ({
   navigation,
   route,
@@ -31,53 +35,89 @@ const ConfirmCreateInvoiceScreen = ({
   const { invoice } = route.params;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  // Tính toán giá từng dịch vụ
-  const serviceCalculations = useMemo(() => {
-    if (!invoice.invoiceItems || invoice.invoiceItems.length === 0) return [];
+  // Tính toán giá từng dịch vụ và tổng tiền
+  const calculatedInvoiceData = useMemo(() => {
+    if (!invoice.invoiceItems || invoice.invoiceItems.length === 0) {
+      return {
+        invoiceItemsWithTotal: invoice.invoiceItems || [],
+        totalServiceAmount: 0,
+        totalAmount: 0,
+      };
+    }
 
-    return invoice.invoiceItems.map((item) => {
+    //#region  Tính toán giá từng dịch vụ
+    const invoiceItemsWithTotal = invoice.invoiceItems.map((item) => {
+      // Nếu không phải service fee, giữ nguyên
+      if (item.type !== InvoiceItemType.SERVICE_FEE) {
+        return { ...item, amount: Number(item.amount) };
+      }
+
+      // Tính toán cho service fee
       let serviceAmount = 0;
+      const helperValue = Number(item.helperValue);
+      const oldHelperValue = Number(item.oldHelperValue);
+      const newHelperValue = Number(item.newHelperValue);
+      const amount = Number(item.amount);
 
       switch (item.calculationMethod) {
         case ServiceCalculateMethod.FIXED_PER_ROOM:
-          serviceAmount = item.amount || 0;
+          serviceAmount = amount || 0;
           break;
-
+        case ServiceCalculateMethod.FIXED_PER_NUMBER:
+          serviceAmount = (amount || 0) * (helperValue || 0);
+          break;
         case ServiceCalculateMethod.FIXED_PER_PERSON:
           // Use oldHelperValue as it's the value from the form
-          serviceAmount = (item.amount || 0) * (item.oldHelperValue || 0);
+          serviceAmount = (amount || 0) * (helperValue || 0);
           break;
-
         case ServiceCalculateMethod.PER_UNIT_SIMPLE:
-          const oldValue = item.oldHelperValue ?? 0;
-          const newValue = item.newHelperValue ?? 0;
-          const usage = Math.max(0, newValue - oldValue);
-          serviceAmount = (item.amount || 0) * usage;
+          const preHelperValue = newHelperValue ?? oldHelperValue ?? 0;
+          serviceAmount = (amount || 0) * (helperValue - preHelperValue || 0);
           break;
-
         default:
-          serviceAmount = item.amount || 0;
+          serviceAmount = 0;
+          break;
       }
 
       return {
-        item,
-        amount: serviceAmount,
+        ...item,
+        helperValue,
+        oldHelperValue,
+        newHelperValue,
+        amount,
+        totalAmount: serviceAmount,
       };
     });
+    //#endregion
+
+    // Tính tổng tiền dịch vụ
+    const totalServiceAmount = invoiceItemsWithTotal
+      .filter((item) => item.type === InvoiceItemType.SERVICE_FEE)
+      .reduce((sum, item) => sum + Number(item.totalAmount || 0), 0) || 0;
+
+    // Tính tổng tiền cuối cùng (dịch vụ + tiền thuê)
+    const totalAmount =
+      totalServiceAmount +
+      (Number(
+        invoiceItemsWithTotal.find(
+          (item) => item.type === InvoiceItemType.ROOM_RENT,
+        )?.amount || 0,
+      ) || 0);
+
+    return {
+      invoiceItemsWithTotal,
+      totalServiceAmount,
+      totalAmount,
+    };
   }, [invoice.invoiceItems]);
 
   // Tính tổng tiền dịch vụ
-  const totalServiceAmount = useMemo(() => {
-    return serviceCalculations.reduce(
-      (sum, item) => sum + Number(item.amount),
-      0,
-    );
-  }, [serviceCalculations]);
+  const totalServiceAmount = calculatedInvoiceData.totalServiceAmount;
 
   // Tính tổng tiền cần thu
-  const totalAmount = useMemo(() => {
-    return (Number(invoice.totalAmount) || 0) + Number(totalServiceAmount);
-  }, [invoice.totalAmount, totalServiceAmount]);
+  // const totalAmount = useMemo(() => {
+  //   return (Number(invoice.totalAmount) || 0) + Number(totalServiceAmount);
+  // }, [invoice.totalAmount, totalServiceAmount]);
 
   const onEdit = () => {
     navigation.goBack();
@@ -86,7 +126,13 @@ const ConfirmCreateInvoiceScreen = ({
   const onConfirm = async () => {
     try {
       setIsSubmitting(true);
-      const response = await createInvoice(invoice);
+      // Tạo invoice object với dữ liệu đã được tính toán
+      const invoiceToSubmit = {
+        ...invoice,
+        invoiceItems: calculatedInvoiceData.invoiceItemsWithTotal,
+        totalAmount: calculatedInvoiceData.totalAmount,
+      };
+      const response = await createInvoice(invoiceToSubmit);
       if (response.success && response.data) {
         Toast.show({
           type: 'success',
@@ -188,13 +234,13 @@ const ConfirmCreateInvoiceScreen = ({
               </View>
             </View>
             <Text className="text-3xl font-extrabold text-blue-700 text-center">
-              {formatCurrency(totalAmount.toString())}đ
+              {formatCurrency(calculatedInvoiceData.totalAmount.toString())}đ
             </Text>
             <View className="mt-3 pt-3 border-t border-blue-200">
               <View className="flex-row justify-between items-center mb-1">
                 <Text className="text-xs text-blue-600">Tiền thuê</Text>
                 <Text className="text-sm font-semibold text-blue-700">
-                  {formatCurrency((invoice.totalAmount || 0).toString())}đ
+                  {formatCurrency((invoice.invoiceItems?.find(item => item.type === InvoiceItemType.ROOM_RENT)?.amount || 0).toString())}đ
                 </Text>
               </View>
               <View className="flex-row justify-between items-center">
@@ -245,7 +291,7 @@ const ConfirmCreateInvoiceScreen = ({
           title="Chi tiết dịch vụ"
           description="Các dịch vụ được tính trong hóa đơn này"
         >
-          {serviceCalculations.length === 0 ? (
+          {calculatedInvoiceData.invoiceItemsWithTotal.filter(item => item.type === InvoiceItemType.SERVICE_FEE)?.length === 0 ? (
             <View className="flex-1 items-center justify-center py-8">
               <View className="w-14 h-14 bg-gray-100 rounded-full items-center justify-center mb-2">
                 <Ionicons name="construct-outline" size={22} color="#9CA3AF" />
@@ -254,89 +300,13 @@ const ConfirmCreateInvoiceScreen = ({
             </View>
           ) : (
             <View className="flex flex-col">
-              {serviceCalculations.map((calc, idx) => {
-                const { item } = calc;
-                const method = item.calculationMethod as ServiceCalculateMethod;
-                const methodInfo = SERVICE_CALCULATE_METHOD_WITH_INFO[method];
-
-                return (
-                  <View
-                    key={`${item.contractServiceId || idx}`}
-                    className={`flex-row items-center justify-between py-3 ${
-                      idx !== serviceCalculations.length - 1
-                        ? 'border-b border-gray-100'
-                        : ''
-                    }`}
-                  >
-                    <View className="flex-row items-center flex-1">
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={18}
-                        color="#34C759"
-                      />
-                      <View className="ml-2 flex-1">
-                        <Text className="text-base font-medium text-gray-900">
-                          {item.name || 'Dịch vụ'}
-                        </Text>
-                        <View className="flex-row items-center mt-0.5">
-                          <Text className="text-xs text-gray-500">
-                            {methodInfo?.label || 'Phương thức'}
-                          </Text>
-                          {method ===
-                            ServiceCalculateMethod.PER_UNIT_SIMPLE && (
-                            <>
-                              <Text className="text-xs text-gray-400 mx-1">
-                                ·
-                              </Text>
-                              <Text className="text-xs text-gray-500">
-                                Cũ: {item.oldHelperValue ?? 0} → Mới:{' '}
-                                {item.newHelperValue ?? 0}
-                              </Text>
-                              <Text className="text-xs text-gray-400 mx-1">
-                                ·
-                              </Text>
-                              <Text className="text-xs text-gray-500">
-                                SL:{' '}
-                                {Math.max(
-                                  0,
-                                  (item.newHelperValue ?? 0) -
-                                    (item.oldHelperValue ?? 0),
-                                )}{' '}
-                                {methodInfo?.unit || ''}
-                              </Text>
-                            </>
-                          )}
-                          {method ===
-                            ServiceCalculateMethod.FIXED_PER_PERSON && (
-                            <>
-                              <Text className="text-xs text-gray-400 mx-1">
-                                ·
-                              </Text>
-                              <Text className="text-xs text-gray-500">
-                                SL: {item.oldHelperValue ?? 0}{' '}
-                                {methodInfo?.unit || ''}
-                              </Text>
-                            </>
-                          )}
-                        </View>
-                        <Text className="text-xs text-gray-400 mt-0.5">
-                          {formatCurrency((item.amount || 0).toString())}đ
-                          {method === ServiceCalculateMethod.PER_UNIT_SIMPLE
-                            ? `/${methodInfo?.unit || 'đơn vị'}`
-                            : method === ServiceCalculateMethod.FIXED_PER_PERSON
-                              ? `/${methodInfo?.unit || 'người'}`
-                              : '/tháng'}
-                        </Text>
-                      </View>
-                    </View>
-                    <View className="items-end">
-                      <Text className="text-base font-semibold text-gray-900">
-                        {formatCurrency(calc.amount.toString())}đ
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })}
+              {calculatedInvoiceData.invoiceItemsWithTotal.filter(item => item.type === InvoiceItemType.SERVICE_FEE)?.map((calc, idx) => (
+                <ServiceDetailInvoiceItemComponent
+                  key={`${calc.contractServiceId || idx + 1}`}
+                  data={calc}
+                  isLast={idx === (calculatedInvoiceData.invoiceItemsWithTotal.filter(item => item.type === InvoiceItemType.SERVICE_FEE)?.length || 0) - 1}
+                />
+              ))}
             </View>
           )}
         </CardComponent>
@@ -347,7 +317,7 @@ const ConfirmCreateInvoiceScreen = ({
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-base text-gray-600">Tiền thuê</Text>
               <Text className="text-base font-semibold text-gray-900">
-                {formatCurrency((invoice.totalAmount || 0).toString())}đ
+                {formatCurrency((invoice?.invoiceItems?.find(item => item.type === InvoiceItemType.ROOM_RENT)?.amount || 0).toString())}đ
               </Text>
             </View>
             <View className="flex-row justify-between items-center mb-2">
@@ -360,7 +330,7 @@ const ConfirmCreateInvoiceScreen = ({
             <View className="flex-row justify-between items-center pt-2">
               <Text className="text-lg font-bold text-gray-900">Tổng cộng</Text>
               <Text className="text-xl font-extrabold text-blue-600">
-                {formatCurrency(totalAmount.toString())}đ
+                {formatCurrency(calculatedInvoiceData.totalAmount.toString())}đ
               </Text>
             </View>
           </View>

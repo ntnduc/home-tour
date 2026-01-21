@@ -5,6 +5,7 @@ import DatePicker from '@/components/DatePicker';
 import DisplayField from '@/components/DisplayField';
 import Input from '@/components/Input';
 import Loading from '@/components/Loading';
+import { ServiceCalculateMethod } from '@/constant/service.constant';
 import { RootStackParamList } from '@/navigation/types';
 import { ContractDetailResponse } from '@/types/contract';
 import { InvoiceCreateRequest, InvoiceStatus } from '@/types/invoice';
@@ -16,8 +17,8 @@ import { formatCurrency } from '@/utils/appUtil';
 import { getCurrentDate } from '@/utils/dateUtil';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Alert, View } from 'react-native';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
 import CardComponent from '../common/CardComponent';
@@ -34,14 +35,7 @@ const CreateInvoiceScreen = ({
 }: CreateInvoiceScreenProps) => {
   const { contractId, roomId } = route.params || {};
 
-  const {
-    control,
-    watch,
-    handleSubmit,
-    setValue,
-    getValues,
-    formState: { errors, isLoading },
-  } = useForm<InvoiceCreateRequest>({
+  const methods = useForm<InvoiceCreateRequest>({
     defaultValues: async () => {
       const response = await getContract(contractId || '');
       if (!response.success && !response.data) {
@@ -74,8 +68,21 @@ const CreateInvoiceScreen = ({
 
       dueDate = dueDate < getCurrentDate() ? getCurrentDate() : dueDate;
 
+      const itemRoomRent: InvoiceItemCreateRequest = {
+        name: 'Tiền phòng',
+        amount: contract.rentAmountAgreed,
+        totalAmount: contract.rentAmountAgreed,
+        type: InvoiceItemType.ROOM_RENT,
+        propertyId: contract.propertyId,
+        helperValue: undefined,
+        oldHelperValue: undefined,
+        newHelperValue: undefined,
+        isUpdated: false,
+      };
+
       const invoiceDetail: InvoiceCreateRequest = {
         contractId: contract.id,
+        propertyId: contract.propertyId,
         roomName: contract?.room?.name || '',
         roomId: contract.roomId,
         billingPeriodStart: new Date(),
@@ -85,25 +92,36 @@ const CreateInvoiceScreen = ({
           contract.contractClient.find((c) => c.isLandlordClient)?.name || '',
         notes: '',
         isPrepaid: false,
-        totalAmount: contract.rentAmountAgreed,
+        totalAmount: 0,
         paidAmount: 0,
         remainingAmount: 0,
-        invoiceItems: contract.contractServices?.map((serivceItem) => ({
+        invoiceItems: [itemRoomRent, ...contract.contractServices?.map((serivceItem) => ({
           name: serivceItem.name,
           amount: serivceItem.price || 0,
           type: InvoiceItemType.SERVICE_FEE,
           propertyId: contract.roomId,
           oldHelperValue: serivceItem.helperValue || 0,
+          newHelperValue: serivceItem.helperValue || 0,
+          helperValue: serivceItem.calculationMethod === ServiceCalculateMethod.PER_UNIT_SIMPLE ? 0 : serivceItem.helperValue || 0,
           isUpdated: false,
           contractServiceId: serivceItem.id,
           calculationMethod: serivceItem.calculationMethod,
-        })),
+        }))],
         paymentMonth: getCurrentDate().getMonth() + 1,
         status: InvoiceStatus.DRAFT,
       };
       return invoiceDetail;
     },
   });
+
+  const {
+    control,
+    watch,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { errors, isLoading },
+  } = methods;
 
   const invoiceItems = watch('invoiceItems') as InvoiceItemCreateRequest[];
 
@@ -112,44 +130,6 @@ const CreateInvoiceScreen = ({
     navigation.navigate('ConfirmCreateInvoice', {
       invoice: data as InvoiceCreateRequest,
     });
-  };
-  const handleConfirmEditOld = (index: number) => {
-    const isUpdate = getValues(`invoiceItems.${index}.isUpdated`);
-    if (!isUpdate) {
-      Alert.alert(
-        'Chỉnh sửa chỉ số cũ',
-        'Bạn chắc chắn muốn sửa chỉ số cũ? Hãy đảm bảo ghi nhận đúng số trước đó.',
-        [
-          { text: 'Huỷ', style: 'cancel' },
-          {
-            text: 'Đồng ý',
-            style: 'destructive',
-            onPress: () => {
-              setValue(`invoiceItems.${index}.isUpdated`, true);
-            },
-          },
-        ],
-      );
-    } else {
-      Alert.alert(
-        'Hủy và đặt lại',
-        'Bạn chắc chắn muốn hủy và đặt lại chỉ số cũ?',
-        [
-          { text: 'Huỷ', style: 'cancel' },
-          {
-            text: 'Đồng ý',
-            style: 'destructive',
-            onPress: () => {
-              setValue(`invoiceItems.${index}.isUpdated`, false);
-              setValue(
-                `invoiceItems.${index}.oldHelperValue`,
-                invoiceItems[index].helperValue,
-              );
-            },
-          },
-        ],
-      );
-    }
   };
 
   if (isLoading) {
@@ -174,118 +154,109 @@ const CreateInvoiceScreen = ({
         showsVerticalScrollIndicator={false}
         className="gap-y-4"
       >
-        <CardComponent title="Thông tin hợp đồng">
-          <Controller
-            control={control}
-            name={'roomName'}
-            render={({ field: { onChange, value } }) => (
-              <DisplayField label="Phòng" value={value} strong />
-            )}
-          />
-          <Controller
-            control={control}
-            name={'clientName'}
-            render={({ field: { onChange, value } }) => (
-              <DisplayField label="Người thuê" value={value} />
-            )}
-          />
-        </CardComponent>
-
-        <CardComponent title="Thông tin thanh toán">
-          <View className="gap-y-3">
+        <FormProvider {...methods}>
+          <CardComponent title="Thông tin hợp đồng">
             <Controller
               control={control}
-              name={'totalAmount'}
+              name={'roomName'}
+              render={({ field: { onChange, value } }) => (
+                <DisplayField label="Phòng" value={value} strong />
+              )}
+            />
+            <Controller
+              control={control}
+              name={'clientName'}
+              render={({ field: { onChange, value } }) => (
+                <DisplayField label="Người thuê" value={value} />
+              )}
+            />
+          </CardComponent>
+
+          <CardComponent title="Thông tin thanh toán">
+            <View className="gap-y-3">
+              <Controller
+                control={control}
+                name={'invoiceItems.0.amount'}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Tiền phòng"
+                    value={formatCurrency(value?.toString() || '0')}
+                    onChangeText={onChange}
+                    type="number"
+                    keyboardType="numeric"
+                    returnKeyType="done"
+                    returnKeyLabel="Xong"
+                    required
+                    showClear={false}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                rules={{ required: 'Vui lòng chọn tháng thanh toán' }}
+                name={'paymentMonth'}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <ComboBox
+                      label="Hóa đơn tháng:"
+                      required={true}
+                      isSearch={false}
+                      options={Array.from({ length: 12 }, (_, index) => ({
+                        key: index + 1,
+                        value: index + 1,
+                        label: `Tháng ${index + 1}`,
+                      }))}
+                      onChange={onChange}
+                      value={value}
+                      placeholder="Chọn tháng thanh toán"
+                    />
+                  );
+                }}
+              />
+
+              <Controller
+                control={control}
+                name={'dueDate'}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => {
+                  return (
+                    <DatePicker
+                      error={error?.message}
+                      label="Hạn thanh toán"
+                      value={value}
+                      onChange={onChange}
+                      required
+                    />
+                  );
+                }}
+              />
+            </View>
+          </CardComponent>
+
+          <CardComponent title="Thông tin dịch vụ">
+            <ServiceInvoiceItem />
+          </CardComponent>
+
+          <CardComponent>
+            <Controller
+              control={control}
+              name={'notes'}
               render={({ field: { onChange, value } }) => (
                 <Input
-                  label="Tiền phòng"
-                  value={formatCurrency(value)}
+                  label="Ghi chú"
+                  value={value}
                   onChangeText={onChange}
-                  type="number"
-                  keyboardType="numeric"
-                  returnKeyType="done"
-                  returnKeyLabel="Xong"
-                  required
-                  showClear={false}
+                  type="area"
+                  numberOfLines={3}
+                  textAlignVertical="top"
                 />
               )}
             />
-
-            <Controller
-              control={control}
-              rules={{ required: 'Vui lòng chọn tháng thanh toán' }}
-              name={'paymentMonth'}
-              render={({ field: { onChange, value } }) => {
-                return (
-                  <ComboBox
-                    label="Hóa đơn tháng:"
-                    required={true}
-                    isSearch={false}
-                    options={Array.from({ length: 12 }, (_, index) => ({
-                      key: index + 1,
-                      value: index + 1,
-                      label: `Tháng ${index + 1}`,
-                    }))}
-                    onChange={onChange}
-                    value={value}
-                    placeholder="Chọn tháng thanh toán"
-                  />
-                );
-              }}
-            />
-
-            <Controller
-              control={control}
-              name={'dueDate'}
-              render={({
-                field: { onChange, value },
-                fieldState: { error },
-              }) => {
-                return (
-                  <DatePicker
-                    error={error?.message}
-                    label="Hạn thanh toán"
-                    value={value}
-                    onChange={onChange}
-                    required
-                  />
-                );
-              }}
-            />
-          </View>
-        </CardComponent>
-
-        <CardComponent title="Thông tin dịch vụ">
-          <View className="gap-y-3">
-            {invoiceItems.map((invoiceItem, index) => (
-              <ServiceInvoiceItem
-                key={invoiceItem.contractServiceId}
-                control={control}
-                service={invoiceItem as InvoiceItemCreateRequest}
-                index={index}
-                handleConfirmEditOld={handleConfirmEditOld}
-                getValues={getValues}
-              />
-            ))}
-          </View>
-        </CardComponent>
-
-        <CardComponent>
-          <Controller
-            control={control}
-            name={'notes'}
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Ghi chú"
-                value={value}
-                onChangeText={onChange}
-                type="area"
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
-            )}
-          />
-        </CardComponent>
+          </CardComponent>
+        </FormProvider>
       </KeyboardAwareScrollView>
       <ActionButtonBottom
         actions={[
