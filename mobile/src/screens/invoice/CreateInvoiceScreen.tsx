@@ -14,7 +14,7 @@ import {
   InvoiceItemType,
 } from '@/types/invoice.item';
 import { formatCurrency } from '@/utils/appUtil';
-import { getCurrentDate } from '@/utils/dateUtil';
+import { getCurrentDate, getNextMonthDate } from '@/utils/dateUtil';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -85,8 +85,8 @@ const CreateInvoiceScreen = ({
         propertyId: contract.propertyId,
         roomName: contract?.room?.name || '',
         roomId: contract.roomId,
-        billingPeriodStart: new Date(),
-        billingPeriodEnd: new Date(),
+        billingPeriodStart: getCurrentDate(),
+        billingPeriodEnd: getNextMonthDate(),
         dueDate: dueDate,
         clientName:
           contract.contractClient.find((c) => c.isLandlordClient)?.name || '',

@@ -55,7 +55,7 @@ const ConfirmCreateInvoiceScreen = ({
       // Tính toán cho service fee
       let serviceAmount = 0;
       const helperValue = Number(item.helperValue);
-      const oldHelperValue = Number(item.oldHelperValue);
+      let oldHelperValue = Number(item.oldHelperValue);
       const newHelperValue = Number(item.newHelperValue);
       const amount = Number(item.amount);
 
@@ -73,6 +73,7 @@ const ConfirmCreateInvoiceScreen = ({
         case ServiceCalculateMethod.PER_UNIT_SIMPLE:
           const preHelperValue = newHelperValue ?? oldHelperValue ?? 0;
           serviceAmount = (amount || 0) * (helperValue - preHelperValue || 0);
+          oldHelperValue = newHelperValue;
           break;
         default:
           serviceAmount = 0;
@@ -122,6 +123,7 @@ const ConfirmCreateInvoiceScreen = ({
     try {
       setIsSubmitting(true);
       // Tạo invoice object với dữ liệu đã được tính toán
+
       const invoiceToSubmit = {
         ...invoice,
         invoiceItems: calculatedInvoiceData.invoiceItemsWithTotal,

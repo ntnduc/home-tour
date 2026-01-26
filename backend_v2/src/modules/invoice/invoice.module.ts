@@ -11,6 +11,8 @@ import { Invoice } from './entities/invoice.entity';
 import { InvoiceItem } from './entities/invoice.item.entity';
 import { InvoiceController } from './invoice.controller';
 import { InvoiceService } from './invoice.service';
+import { InvoiceRepository } from './repositories/invoice.repository';
+import { InvoiceItemRepository } from './repositories/invoice-item.repository';
 
 @Module({
   imports: [
@@ -26,8 +28,12 @@ import { InvoiceService } from './invoice.service';
     RbacModule,
     PaymentModule,
   ],
-  providers: [InvoiceService],
-  exports: [InvoiceService],
+  providers: [
+    InvoiceService,
+    InvoiceRepository,
+    InvoiceItemRepository,
+  ],
+  exports: [InvoiceService, InvoiceRepository, InvoiceItemRepository],
   controllers: [InvoiceController],
 })
 export class InvoiceModule {}

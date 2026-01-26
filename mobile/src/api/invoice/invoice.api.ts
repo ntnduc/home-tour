@@ -48,14 +48,13 @@ export const getInvoice = async (
 export const createInvoice = async (
   data: InvoiceCreateRequest
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
-  console.log("💞💓💗💞💓💗 ~ createInvoice ~ data:", JSON.stringify(data))
 
-  // const response = await privateApi.post<ApiResponse<InvoiceDetailResponse>>(
-  //   "/invoice",
-  //   data
-  // );
-  // return response.data;
-  return { success: false, data: {} as InvoiceDetailResponse };
+  const response = await privateApi.post<ApiResponse<InvoiceDetailResponse>>(
+    "/invoice",
+    data
+  );
+  return response.data;
+  // return { success: false, data: {} as InvoiceDetailResponse };
 };
 
 export const updateInvoice = async (

@@ -10,7 +10,8 @@ import { InvoiceDetailDto } from './dto/invoice-dto/invoice.detail.dto';
 import { InvoiceListDto } from './dto/invoice-dto/invoice.list.dto';
 import { InvoiceUpdateDto } from './dto/invoice-dto/invoice.update.dto';
 import { Invoice } from './entities/invoice.entity';
-import { InvoiceItem } from './entities/invoice.item.entity';
+import { InvoiceItemRepository } from './repositories/invoice-item.repository';
+import { InvoiceRepository } from './repositories/invoice.repository';
 
 @Injectable()
 export class InvoiceService
@@ -22,25 +23,22 @@ export class InvoiceService
     InvoiceUpdateDto
   >
   implements
-    IBaseService<
-      Invoice,
-      InvoiceDetailDto,
-      InvoiceListDto,
-      InvoiceCreateDto,
-      InvoiceUpdateDto
-    >
-{
+  IBaseService<
+    Invoice,
+    InvoiceDetailDto,
+    InvoiceListDto,
+    InvoiceCreateDto,
+    InvoiceUpdateDto
+  > {
   constructor(
-    @InjectRepository(Invoice)
-    private readonly invoiceRepository: Repository<Invoice>,
-    @InjectRepository(InvoiceItem)
-    private readonly invoiceItemRepository: Repository<InvoiceItem>,
+    private readonly invoiceRepository: InvoiceRepository,
+    private readonly invoiceItemRepository: InvoiceItemRepository,
     @InjectRepository(Contracts)
     private readonly contractRepository: Repository<Contracts>,
     private readonly dataSource: DataSource,
   ) {
     super(
-      invoiceRepository as any,
+      invoiceRepository,
       InvoiceDetailDto,
       InvoiceListDto,
       InvoiceCreateDto,
@@ -62,8 +60,22 @@ export class InvoiceService
         throw new NotFoundException('Hợp đồng không tồn tại');
       }
 
-      if(findContract.status !== ContractStatus.ACTIVE) {
+      if (findContract.status !== ContractStatus.ACTIVE) {
         throw new BadRequestException('Hợp đồng không hoạt động');
+      }
+
+      const findPreInvoice = await this.invoiceRepository.findOne({
+        where: {
+          contractId: dto.contractId,
+          roomId: dto.roomId,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      if (findPreInvoice) {
+        entity.preInvoiceId = findPreInvoice.id;
       }
 
       const createdEntity = this.invoiceRepository.create(entity);
@@ -72,8 +84,8 @@ export class InvoiceService
         item.invoiceId = createdEntity.id;
         item.propertyId = createdEntity.propertyId;
       });
-      
-      const createdInvoiceItems = this.invoiceItemRepository.create( entity.invoiceItems);
+
+      const createdInvoiceItems = this.invoiceItemRepository.create(entity.invoiceItems);
       await queryRunner.manager.save(createdInvoiceItems);
       createdEntity.invoiceItems = createdInvoiceItems;
       await queryRunner.commitTransaction();
