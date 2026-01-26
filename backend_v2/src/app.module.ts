@@ -18,6 +18,7 @@ import { RbacModule } from './modules/rbac/rbac.module';
 import { ReportModule } from './modules/report/report.module';
 import { ServicesModule } from './modules/services/services.module';
 import { TestModule } from './modules/test/test.module';
+import { UploadFileModule } from './modules/upload.file/upload-file.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -60,6 +61,7 @@ import { UsersModule } from './modules/users/users.module';
     ServicesModule,
     ReportModule,
     RbacModule,
+    UploadFileModule,
   ],
   controllers: [],
   providers: [

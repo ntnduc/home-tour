@@ -109,9 +109,8 @@ const Input: React.FC<InputProps> = ({
         </Text>
       )}
       <View
-        className={`flex flex-row items-center content-center justify-center  rounded-lg px-3 py-2 border ${
-          error ? 'border-red-300 bg-red-50' : 'border-gray-200'
-        } ${disabled ? 'bg-gray-100' : 'bg-white'}`}
+        className={`flex flex-row items-center content-center justify-center  rounded-lg px-3 py-2 border ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+          } ${disabled ? 'bg-gray-100' : 'bg-white'}`}
       >
         {icon && (
           <Ionicons
@@ -135,7 +134,7 @@ const Input: React.FC<InputProps> = ({
           onChangeText={handleChangeText}
           placeholder={placeholder ?? `Nhập ${label?.toLowerCase()}...`}
           keyboardType={type === 'number' ? 'numeric' : keyboardType}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={error ? '#ff3b30' : '#9CA3AF'}
           multiline={type === 'area'}
           numberOfLines={type === 'area' ? numberOfLines : 1}
           editable={!disabled}

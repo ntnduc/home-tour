@@ -1,8 +1,10 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ContractStatus } from 'src/common/enums/contract.enum';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
+import { Contracts } from '../contract/entities/contracts.entity';
 import { InvoiceCreateDto } from './dto/invoice-dto/invoice.create.dto';
 import { InvoiceDetailDto } from './dto/invoice-dto/invoice.detail.dto';
 import { InvoiceListDto } from './dto/invoice-dto/invoice.list.dto';
@@ -33,6 +35,8 @@ export class InvoiceService
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(InvoiceItem)
     private readonly invoiceItemRepository: Repository<InvoiceItem>,
+    @InjectRepository(Contracts)
+    private readonly contractRepository: Repository<Contracts>,
     private readonly dataSource: DataSource,
   ) {
     super(
@@ -50,6 +54,18 @@ export class InvoiceService
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+
+      const findContract = await this.contractRepository.findOne({
+        where: { id: dto.contractId, roomId: dto.roomId },
+      });
+      if (!findContract) {
+        throw new NotFoundException('Hợp đồng không tồn tại');
+      }
+
+      if(findContract.status !== ContractStatus.ACTIVE) {
+        throw new BadRequestException('Hợp đồng không hoạt động');
+      }
+
       const createdEntity = this.invoiceRepository.create(entity);
       await queryRunner.manager.save(createdEntity);
       entity.invoiceItems.forEach(item => {
@@ -72,6 +88,13 @@ export class InvoiceService
       await queryRunner.release();
     }
   }
+
+  // private async calculatorBillingPeriod(invoice: Invoice, contract: Contracts) {
+
+  //   const start = new Date(contract.startDate);
+  //   const end = new Date(contract.endDate);
+  //   return { start, end };
+  // }
 
   async specQuery(): Promise<SelectQueryBuilder<Invoice>> {
     const query = this.invoiceRepository

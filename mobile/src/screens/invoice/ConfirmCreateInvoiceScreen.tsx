@@ -114,16 +114,11 @@ const ConfirmCreateInvoiceScreen = ({
   // Tính tổng tiền dịch vụ
   const totalServiceAmount = calculatedInvoiceData.totalServiceAmount;
 
-  // Tính tổng tiền cần thu
-  // const totalAmount = useMemo(() => {
-  //   return (Number(invoice.totalAmount) || 0) + Number(totalServiceAmount);
-  // }, [invoice.totalAmount, totalServiceAmount]);
-
   const onEdit = () => {
     navigation.goBack();
   };
 
-  const onConfirm = async () => {
+  const onSubmit = async () => {
     try {
       setIsSubmitting(true);
       // Tạo invoice object với dữ liệu đã được tính toán
@@ -344,7 +339,7 @@ const ConfirmCreateInvoiceScreen = ({
             icon: 'checkmark-circle',
             variant: 'success',
             isLoading: isSubmitting,
-            onPress: onConfirm,
+            onPress: onSubmit,
           },
           {
             label: 'Chỉnh sửa thông tin',

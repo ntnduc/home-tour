@@ -27,9 +27,13 @@ export class InvoiceItem extends BaseEntity {
   contractServiceId?: string;
 
   @Column({
-    type: 'text', nullable: true
+    type: 'text',
+    nullable: true,
   })
   calculationMethod?: string;
+
+  @Column({ nullable: true })
+  oldHelperValue?: number;
 
   @ManyToOne(() => ContractServices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'contractServiceId' })

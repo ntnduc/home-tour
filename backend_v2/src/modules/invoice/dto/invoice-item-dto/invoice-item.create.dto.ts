@@ -26,6 +26,10 @@ export class InvoiceItemCreateDto extends BaseCreateDto<InvoiceItem> {
   @IsOptional()
   helperValue?: number;
 
+  @IsNumber()
+  @IsOptional()
+  oldHelperValue?: number;
+
   @IsUUID()
   @IsOptional()
   contractServiceId?: string;
@@ -47,6 +51,7 @@ export class InvoiceItemCreateDto extends BaseCreateDto<InvoiceItem> {
     entity.amount = this.amount;
     entity.type = this.type;
     entity.helperValue = this.helperValue;
+    entity.oldHelperValue = this.oldHelperValue;
     entity.contractServiceId = this.contractServiceId;
     entity.propertyId = this.propertyId;
     entity.metadata = this.metadata ?? {};

@@ -177,10 +177,12 @@ const CreateInvoiceScreen = ({
               <Controller
                 control={control}
                 name={'invoiceItems.0.amount'}
-                render={({ field: { onChange, value } }) => (
+                rules={{ required: 'Vui lòng nhập tiền phòng' }}
+                render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
                     label="Tiền phòng"
-                    value={formatCurrency(value?.toString() || '0')}
+                    value={formatCurrency(value?.toString())}
+                    error={error?.message}
                     onChangeText={onChange}
                     type="number"
                     keyboardType="numeric"

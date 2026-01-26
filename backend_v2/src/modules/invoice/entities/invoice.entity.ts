@@ -54,6 +54,9 @@ export class Invoice extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
+  @Column({ nullable: true })
+  preInvoiceId?: string;
+
   @OneToMany(() => InvoiceItem, (invoiceItem) => invoiceItem.invoice)
   invoiceItems: InvoiceItem[];
 
