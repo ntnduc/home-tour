@@ -4,7 +4,7 @@ import { storage } from "@/utils/storage";
 import { AxiosProgressEvent } from "axios";
 // Dùng API legacy của expo-file-system cho upload + progress
 import * as FileSystem from "expo-file-system/legacy";
-import { UploadedFile } from "./UploadFile";
+import { UploadedFile } from "./types";
 
 // Upload 1 file bằng expo-file-system, hỗ trợ progress
 export const uploadFile = async (

@@ -3,58 +3,17 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  StyleProp,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
-import LabelForm, { LabelProps } from '../LabelForm';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import LabelForm from '../LabelForm';
+import SliderLoading from './SliderLoading';
+import { UploadedFile, UploadFileBaseProps, UploadStatus } from './types';
 import { uploadFile, uploadFileCollection } from './uploadfile.api';
 
-export type UploadFileType = 'image' | 'file' | 'both';
-
-export interface UploadedFile {
-  uri: string;
-  name: string;
-  type?: string;
-  size?: number;
-  mimeType?: string;
-}
-
-export interface UploadFileIconProps {
-  name?: keyof typeof Ionicons.glyphMap;
-  size?: number;
-  color?: string;
-  className?: string;
-}
-
-interface UploadFileProps {
-  label?: string | LabelProps;
+export interface UploadFileProps extends UploadFileBaseProps {
   value?: UploadedFile | UploadedFile[] | null;
-  onChange?: (files: UploadedFile | UploadedFile[] | null, status: 'success' | 'error' | 'loading' | 'prepare') => void;
-  url?: string;
-  type?: UploadFileType;
-  error?: string;
-  required?: boolean;
-  disabled?: boolean;
+  onChange?: (files: UploadedFile | UploadedFile[] | null, status: UploadStatus) => void;
   multiple?: boolean;
-  maxFiles?: number;
-  maxSize?: number; // in MB
-  acceptedTypes?: string[]; // MIME types, e.g., ['image/jpeg', 'image/png']
-  placeholder?: string;
-  containerStyles?: StyleProp<ViewStyle>;
-  onUploadStart?: () => void;
-  onUploadEnd?: () => void;
-  onError?: (error: string) => void;
-  icon?: keyof typeof Ionicons.glyphMap;
-  iconProps?: UploadFileIconProps;
-  showPreview?: boolean;
 }
 
 const UploadFile: React.FC<UploadFileProps> = ({
@@ -81,6 +40,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
   const theme = useTheme();
   const styles = createStyles(theme);
   const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [files, setFiles] = useState<UploadedFile[]>(Array.isArray(value) ? value : value ? [value] : []);
 
   const uploadAsync = async (filesToUpload: UploadedFile[]) => {
@@ -102,7 +62,9 @@ const UploadFile: React.FC<UploadFileProps> = ({
         }));
       } else {
         const response = await uploadFile(filesToUpload[0], (status, progessEvent) => {
-          console.log("💞💓💗💞💓💗 ~ uploadAsync ~ progessEvent:", progessEvent)
+          if (progessEvent?.progress != null) {
+            setProgress(progessEvent.progress);
+          }
           setIsLoading(status === 'loading');
           onChange?.(filesToUpload[0], status);
         }).catch((error: any) => {
@@ -326,7 +288,6 @@ const UploadFile: React.FC<UploadFileProps> = ({
   };
 
   const renderImagePreview = (file: UploadedFile, index: number) => {
-    console.log("💞💓💗💞💓💗 ~ renderImagePreview ~ file:", file)
     if (!showPreview) return null;
 
     return (
@@ -391,6 +352,12 @@ const UploadFile: React.FC<UploadFileProps> = ({
     );
   };
 
+  const renderSliderLoading = useCallback(() => {
+    return (
+      <SliderLoading value={80} height={12} animateFromCenter={false} showShimmer />
+    );
+  }, [progress]);
+
   const canAddMore = multiple ? files.length < maxFiles : true;
   const showAddButton = files.length > 0 ? (multiple ? canAddMore : true) : true;
 
@@ -400,74 +367,82 @@ const UploadFile: React.FC<UploadFileProps> = ({
         <LabelForm {...(typeof label === 'object' ? label : { label, required })} />
       )}
       <View
-        className={`flex flex-row items-center content-center justify-center  rounded-lg px-3 py-2 border ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+        className={`flex flex-row items-center content-center justify-center rounded-lg px-3 pb-2 border ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'
           } ${disabled ? 'bg-gray-100' : 'bg-white'}`}
       >
-        {files.length > 0 ? (
-          <View style={styles.previewContainer}>
-            {files.map((file, index) => renderFileItem(file, index))}
-            {showAddButton && (
-              <TouchableOpacity
-                onPress={handlePick}
-                disabled={disabled || isLoading}
-                style={styles.uploadButton}
-              >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="#6b7280" />
-                ) : (
-                  <>
-                    <Ionicons
-                      name={icon}
-                      size={20}
-                      color="#6b7280"
-                      {...iconProps}
-                    />
-                    <Text style={styles.uploadButtonText}>
-                      {multiple ? 'Thêm file khác' : 'Thay đổi file'}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
-        ) : (
-          <TouchableOpacity
-            className="flex-1"
-            onPress={handlePick}
-            disabled={disabled || isLoading}
-            style={styles.uploadButton}
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#6b7280" />
-            ) : (
-              <>
-                <Ionicons
-                  name={icon}
-                  size={24}
-                  color="#6b7280"
-                  {...iconProps}
-                />
-                <Text style={styles.uploadButtonText}>
-                  {placeholder ||
-                    (type === 'image'
-                      ? 'Chọn hình ảnh'
-                      : type === 'file'
-                        ? 'Chọn file'
-                        : 'Chọn hình ảnh hoặc file')}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        )}
+        <View className="flex flex-col flex-1 h-[60px] items-center content-center justify-center ">
 
-        {files.length > 0 && multiple && (
-          <View className="px-3 pb-2">
-            <Text className="text-xs text-gray-500 text-center">
-              {files.length}/{maxFiles} file đã chọn
-            </Text>
+          <View className="w-full mb-1 h-1">
+            {renderSliderLoading()}
           </View>
-        )}
+          {files.length > 0 ? (
+            <View style={styles.previewContainer}>
+              {files.map((file, index) => renderFileItem(file, index))}
+              {showAddButton && (
+                <TouchableOpacity
+                  onPress={handlePick}
+                  disabled={disabled || isLoading}
+                  style={styles.uploadButton}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color="#6b7280" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name={icon}
+                        size={20}
+                        color="#6b7280"
+                        {...iconProps}
+                      />
+                      <Text style={styles.uploadButtonText}>
+                        {multiple ? 'Thêm file khác' : 'Thay đổi file'}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <TouchableOpacity
+              className="flex-1"
+              onPress={handlePick}
+              disabled={disabled || isLoading}
+              style={styles.uploadButton}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#6b7280" />
+              ) : (
+
+                <View className="flex-row items-center justify-center flex-1 w-full h-full">
+                  <Ionicons
+                    name={icon}
+                    size={24}
+                    color="#6b7280"
+                    {...iconProps}
+                  />
+                  <Text style={styles.uploadButtonText}>
+                    {placeholder ||
+                      (type === 'image'
+                        ? 'Chọn hình ảnh'
+                        : type === 'file'
+                          ? 'Chọn file'
+                          : 'Chọn hình ảnh hoặc file')}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+
+          {files.length > 0 && multiple && (
+            <View className="px-3 pb-2">
+              <Text className="text-xs text-gray-500 text-center">
+                {files.length}/{maxFiles} file đã chọn
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
+
 
       {error && (
         <Text style={styles.errorText} className="mt-1">
