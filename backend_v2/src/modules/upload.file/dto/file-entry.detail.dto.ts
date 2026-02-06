@@ -10,15 +10,16 @@ export class FileEntryDetailDto extends BaseDetailDto<FileEntry> {
   filePath: string;
   order?: number;
   metadata?: Record<string, any>;
-  collectionId: string;
+  collectionId?: string;
   isDeleted: boolean;
   deletedAt?: Date;
+  isPublic: boolean;
   url?: string; // Generated URL
 
   fromEntity(entity: FileEntry): void {
     this.id = entity.id;
     this.originalName = entity.originalName;
-    this.fileName = entity.fileName;
+    this.fileName = entity.originalName;
     this.mimeType = entity.mimeType;
     this.fileSize = entity.fileSize;
     this.extension = entity.extension;
@@ -32,5 +33,6 @@ export class FileEntryDetailDto extends BaseDetailDto<FileEntry> {
     this.updatedAt = entity.updatedAt;
     this.createdBy = entity.createdBy;
     this.updatedBy = entity.updatedBy;
+    this.isPublic = entity.isPublic;
   }
 }

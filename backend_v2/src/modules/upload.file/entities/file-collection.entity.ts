@@ -73,5 +73,5 @@ export class FileCollection extends BaseEntity {
   @OneToMany(() => FileEntry, (fileEntry) => fileEntry.collection, {
     cascade: true, // Khi xóa collection thì xóa luôn các file entries
   })
-  files: FileEntry[];
+  files?: FileEntry[];
 }

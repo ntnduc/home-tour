@@ -4,15 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native';
 import LabelForm from '../LabelForm';
 import SliderLoading from './SliderLoading';
 import { UploadedFile, UploadFileBaseProps, UploadStatus } from './types';
-import { uploadFile, uploadFileCollection } from './uploadfile.api';
+import { uploadFile } from './uploadfile.api';
 
 export interface UploadFileProps extends UploadFileBaseProps {
-  value?: UploadedFile | UploadedFile[] | null;
-  onChange?: (files: UploadedFile | UploadedFile[] | null, status: UploadStatus) => void;
+  value?: UploadedFile | null;
+  onChange?: (files: UploadedFile | null, status: UploadStatus) => void;
   multiple?: boolean;
 }
 
@@ -41,54 +41,50 @@ const UploadFile: React.FC<UploadFileProps> = ({
   const styles = createStyles(theme);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [files, setFiles] = useState<UploadedFile[]>(Array.isArray(value) ? value : value ? [value] : []);
+  const [processStatus, setProcessStatus] = useState<'prepare' | 'loading' | 'success' | 'error'>('prepare');
+  const [files, setFiles] = useState<UploadedFile | null | undefined>(value);
 
-  const uploadAsync = async (filesToUpload: UploadedFile[]) => {
+  const uploadAsync = async (fileToUpload: UploadedFile) => {
     try {
       setIsLoading(true);
-      onChange?.(filesToUpload, 'prepare');
+      onChange?.(fileToUpload, processStatus);
       onUploadStart?.();
-      let uploadedFiles: UploadedFile[];
 
-      if (multiple) {
-        const response = await uploadFileCollection(filesToUpload, (status) => {
-          setIsLoading(status === 'loading');
-          onChange?.(filesToUpload, status);
-        });
+      const response = await uploadFile(fileToUpload, (status, progessEvent) => {
+        if (progessEvent?.progress != null) {
+          setProgress(progessEvent.progress);
+        }
+        setIsLoading(status === 'loading');
+        setProcessStatus(status);
+        onChange?.(fileToUpload, processStatus);
+      }).catch((error: any) => {
+        setProcessStatus('error');
+        onChange?.(null, processStatus);
+        onError?.(error.message);
+      });
+      const firstFile = response?.data?.files?.[0];
+      console.log("💞💓💗💞💓💗 ~ uploadAsync ~ firstFile:", firstFile)
+      const finalFiles = {
+        name: firstFile?.fileName,
+        uri: firstFile?.url,
+        size: firstFile?.fileSize,
+        mimeType: firstFile?.mimeType,
+      };
+      console.log("💞💓💗💞💓💗 ~ uploadAsync ~ finalFiles:", finalFiles)
 
-        uploadedFiles = filesToUpload.map((file, index) => ({
-          ...file,
-          uri: response?.data?.[index]?.url || file.uri,
-        }));
-      } else {
-        const response = await uploadFile(filesToUpload[0], (status, progessEvent) => {
-          if (progessEvent?.progress != null) {
-            setProgress(progessEvent.progress);
-          }
-          setIsLoading(status === 'loading');
-          onChange?.(filesToUpload[0], status);
-        }).catch((error: any) => {
-          onChange?.(filesToUpload[0], 'error');
-          onError?.(error.message);
-        });
-
-        uploadedFiles = [response?.data];
-      }
-
-      const finalFiles = multiple ? uploadedFiles : uploadedFiles[0];
-      setFiles(Array.isArray(finalFiles) ? finalFiles : finalFiles ? [finalFiles] : []);
-      onChange?.(finalFiles, 'success');
+      setProcessStatus('success');
+      setFiles(finalFiles);
+      onChange?.(finalFiles, processStatus);
 
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra khi upload file';
       onError?.(errorMessage);
-      onChange?.(filesToUpload, 'error');
+      onChange?.(null, 'error');
     } finally {
       setIsLoading(false);
       onUploadEnd?.();
     }
   };
-
 
   const formatFileSize = (bytes?: number): string => {
     if (!bytes) return '';
@@ -166,15 +162,10 @@ const UploadFile: React.FC<UploadFileProps> = ({
         }
       }
 
-      // if (multiple) {
-      const currentFiles = Array.isArray(value) ? value : value ? [value] : [];
-      const updatedFiles = [...currentFiles, ...newFiles].slice(0, maxFiles);
-      await uploadAsync(updatedFiles);
-      // } else {
-      //   uploadAsync();
-      //   // uploadAsync(newFiles[0]);
-      // }
+      const newFile = newFiles[0];
+      setFiles(newFile);
 
+      await uploadAsync(newFile);
       onUploadEnd?.();
     } catch (err: any) {
       const errorMessage = err.message || 'Có lỗi xảy ra khi chọn hình ảnh';
@@ -224,9 +215,8 @@ const UploadFile: React.FC<UploadFileProps> = ({
       }
 
       // Merge với files hiện tại và upload
-      const currentFiles = Array.isArray(value) ? value : value ? [value] : [];
-      const updatedFiles = [...currentFiles, ...newFiles].slice(0, maxFiles);
-      await uploadAsync(updatedFiles);
+      const newFile = newFiles[0];
+      await uploadAsync(newFile);
 
       onUploadEnd?.();
     } catch (err: any) {
@@ -267,82 +257,65 @@ const UploadFile: React.FC<UploadFileProps> = ({
     }
   };
 
-  const handleRemove = (index: number) => {
+  const handleRemove = () => {
     if (disabled) return;
 
     if (multiple && Array.isArray(value)) {
-      const updatedFiles = value.filter((_, i) => i !== index);
       // onChange?.(updatedFiles.length > 0 ? updatedFiles : null);
     } else {
       // onChange?.(null);
     }
   };
 
-  const getFileIcon = (mimeType?: string): keyof typeof Ionicons.glyphMap => {
-    if (!mimeType) return 'document-outline';
-    if (mimeType.startsWith('image/')) return 'image-outline';
-    if (mimeType.includes('pdf')) return 'document-text-outline';
-    if (mimeType.includes('word') || mimeType.includes('doc')) return 'document-outline';
-    if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'document-outline';
-    return 'document-outline';
-  };
+  // const getFileIcon = (mimeType?: string): keyof typeof Ionicons.glyphMap => {
+  //   if (!mimeType) return 'document-outline';
+  //   if (mimeType.startsWith('image/')) return 'image-outline';
+  //   if (mimeType.includes('pdf')) return 'document-text-outline';
+  //   if (mimeType.includes('word') || mimeType.includes('doc')) return 'document-outline';
+  //   if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'document-outline';
+  //   return 'document-outline';
+  // };
 
-  const renderImagePreview = (file: UploadedFile, index: number) => {
-    if (!showPreview) return null;
+  // const renderImagePreview = (file: UploadedFile, index: number) => {
+  //   if (!showPreview) return null;
 
-    return (
-      <View key={index} className="mb-3">
-        <View className="relative">
-          <Image
-            source={{ uri: file.uri }}
-            style={styles.imagePreview}
-            resizeMode="cover"
-          />
-          {!disabled && (
-            <TouchableOpacity
-              onPress={() => handleRemove(index)}
-              className="absolute top-2 right-2 bg-red-500 rounded-full p-1.5"
-              style={styles.removeButton}
-            >
-              <Ionicons name="close" size={16} color="#ffffff" />
-            </TouchableOpacity>
-          )}
-        </View>
-        {file.name && (
-          <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
-            {file.name}
-          </Text>
-        )}
-      </View>
-    );
-  };
+  //   return (
+  //     <View key={index} className="mb-3">
+  //       <View className="relative">
+  //         <Image
+  //           source={{ uri: file.uri }}
+  //           style={styles.imagePreview}
+  //           resizeMode="cover"
+  //         />
+  //         {!disabled && (
+  //           <TouchableOpacity
+  //             onPress={() => handleRemove(index)}
+  //             className="absolute top-2 right-2 bg-red-500 rounded-full p-1.5"
+  //             style={styles.removeButton}
+  //           >
+  //             <Ionicons name="close" size={16} color="#ffffff" />
+  //           </TouchableOpacity>
+  //         )}
+  //       </View>
+  //       {file.name && (
+  //         <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
+  //           {file.name}
+  //         </Text>
+  //       )}
+  //     </View>
+  //   );
+  // };
 
-  const renderFileItem = (file: UploadedFile, index: number) => {
-    const isImage = file.type === 'image' || file.mimeType?.startsWith('image/');
-
-    if (isImage && showPreview) {
-      return renderImagePreview(file, index);
-    }
+  const renderFileItem = (file: UploadedFile) => {
 
     return (
-      <View key={index} style={styles.fileItem}>
-        <Ionicons
-          name={getFileIcon(file.mimeType)}
-          size={24}
-          color="#6b7280"
-          style={styles.fileIcon}
-        />
-        <View style={styles.fileInfo}>
-          <Text style={styles.fileName} numberOfLines={1}>
-            {file.name}
-          </Text>
-          {file.size && (
-            <Text style={styles.fileSize}>{formatFileSize(file.size)}</Text>
-          )}
-        </View>
+      <View className='flex flex-row items-center h-full w-full '>
+        <Text className='flex-1 text-lg '>
+          {file.name}
+        </Text>
         {!disabled && (
           <TouchableOpacity
-            onPress={() => handleRemove(index)}
+            onPress={handleRemove}
             style={styles.removeButton}
           >
             <Ionicons name="close-circle" size={24} color="#ef4444" />
@@ -352,14 +325,23 @@ const UploadFile: React.FC<UploadFileProps> = ({
     );
   };
 
+  const _renderLoading = useCallback(() => {
+    if (!isLoading) return;
+    return (
+      <View className="flex-row items-center justify-center flex-1 w-full h-full">
+        <ActivityIndicator size="small" color="#6b7280" />
+      </View>
+    );
+  }, [isLoading]);
+
   const renderSliderLoading = useCallback(() => {
     return (
-      <SliderLoading value={80} height={12} animateFromCenter={false} showShimmer />
+      <SliderLoading value={progress} height={12} animateFromCenter={false} showShimmer />
     );
-  }, [progress]);
+  }, [progress, processStatus]);
 
-  const canAddMore = multiple ? files.length < maxFiles : true;
-  const showAddButton = files.length > 0 ? (multiple ? canAddMore : true) : true;
+  const canAddMore = false;
+  const showAddButton = false;
 
   return (
     <View>
@@ -372,12 +354,12 @@ const UploadFile: React.FC<UploadFileProps> = ({
       >
         <View className="flex flex-col flex-1 h-[60px] items-center content-center justify-center ">
 
-          <View className="w-full mb-1 h-1">
+          <View className={`w-full mb-1 h-1 ${processStatus === 'loading' ? 'block' : 'hidden'}`}>
             {renderSliderLoading()}
           </View>
-          {files.length > 0 ? (
+          {files ? (
             <View style={styles.previewContainer}>
-              {files.map((file, index) => renderFileItem(file, index))}
+              {renderFileItem(files)}
               {showAddButton && (
                 <TouchableOpacity
                   onPress={handlePick}
@@ -388,15 +370,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
                     <ActivityIndicator size="small" color="#6b7280" />
                   ) : (
                     <>
-                      <Ionicons
-                        name={icon}
-                        size={20}
-                        color="#6b7280"
-                        {...iconProps}
-                      />
-                      <Text style={styles.uploadButtonText}>
-                        {multiple ? 'Thêm file khác' : 'Thay đổi file'}
-                      </Text>
+                      {renderFileItem(files)}
                     </>
                   )}
                 </TouchableOpacity>
@@ -409,11 +383,9 @@ const UploadFile: React.FC<UploadFileProps> = ({
               disabled={disabled || isLoading}
               style={styles.uploadButton}
             >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#6b7280" />
-              ) : (
-
-                <View className="flex-row items-center justify-center flex-1 w-full h-full">
+              {isLoading
+                ? _renderLoading()
+                : <View className="flex-row items-center justify-center flex-1 w-full h-full">
                   <Ionicons
                     name={icon}
                     size={24}
@@ -428,18 +400,10 @@ const UploadFile: React.FC<UploadFileProps> = ({
                           ? 'Chọn file'
                           : 'Chọn hình ảnh hoặc file')}
                   </Text>
-                </View>
-              )}
+                </View>}
             </TouchableOpacity>
           )}
 
-          {files.length > 0 && multiple && (
-            <View className="px-3 pb-2">
-              <Text className="text-xs text-gray-500 text-center">
-                {files.length}/{maxFiles} file đã chọn
-              </Text>
-            </View>
-          )}
         </View>
       </View>
 

@@ -16,6 +16,7 @@ import { FileCollectionCreateDto } from './dto/file-collection.create.dto';
 import { FileCollectionDetailDto } from './dto/file-collection.detail.dto';
 import { FileCollectionListDto } from './dto/file-collection.list.dto';
 import { FileCollectionUpdateDto } from './dto/file-collection.update.dto';
+import { FileEntryDetailDto } from './dto/file-entry.detail.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { FileCollection } from './entities/file-collection.entity';
 import { FileEntry } from './entities/file-entry.entity';
@@ -32,14 +33,13 @@ export class UploadFileService
     FileCollectionUpdateDto
   >
   implements
-    IBaseService<
-      FileCollection,
-      FileCollectionDetailDto,
-      FileCollectionListDto,
-      FileCollectionCreateDto,
-      FileCollectionUpdateDto
-    >
-{
+  IBaseService<
+    FileCollection,
+    FileCollectionDetailDto,
+    FileCollectionListDto,
+    FileCollectionCreateDto,
+    FileCollectionUpdateDto
+  > {
   private readonly config: UploadFileConfig;
 
   constructor(
@@ -78,7 +78,7 @@ export class UploadFileService
   async uploadFile(
     file: Express.Multer.File,
     dto: FileUploadDto,
-  ): Promise<FileCollectionDetailDto> {
+  ): Promise<FileEntryDetailDto> {
     if (!file) {
       throw new BadRequestException('File không được để trống');
     }
@@ -86,32 +86,11 @@ export class UploadFileService
     // Validate file
     this.validateFile(file, dto.category);
 
-    // Create file collection
-    const collectionDto = new FileCollectionCreateDto();
-    collectionDto.name = dto.name;
-    collectionDto.category = dto.category;
-    collectionDto.description = dto.description;
-    collectionDto.relatedEntityType = dto.relatedEntityType;
-    collectionDto.relatedEntityId = dto.relatedEntityId;
-    collectionDto.isPublic = dto.isPublic ?? true;
-
-    const collection = await this.create(collectionDto);
-
     // Save file to disk
-    const fileEntry = await this.saveFileToDisk(file, collection.id, 1);
+    const fileEntry = await this.saveFileToDisk(file, 1);
 
-    // Get collection with files
-    const collectionWithFiles = await this.fileCollectionRepository.findOne({
-      where: { id: collection.id },
-      relations: ['files'],
-    });
-
-    if (!collectionWithFiles) {
-      throw new NotFoundException('Không tìm thấy collection sau khi tạo');
-    }
-
-    const detailDto = new FileCollectionDetailDto();
-    detailDto.fromEntity(collectionWithFiles);
+    const detailDto = new FileEntryDetailDto();
+    detailDto.fromEntity(fileEntry);
     return detailDto;
   }
 
@@ -151,7 +130,7 @@ export class UploadFileService
     // Save all files to disk
     const fileEntries = await Promise.all(
       files.map((file, index) =>
-        this.saveFileToDisk(file, collection.id, index + 1),
+        this.saveFileToDisk(file, index + 1, collection.id),
       ),
     );
 
@@ -271,8 +250,8 @@ export class UploadFileService
    */
   private async saveFileToDisk(
     file: Express.Multer.File,
-    collectionId: string,
     order: number,
+    collectionId?: string,
   ): Promise<FileEntry> {
     // Generate file name with UUID
     const extension = this.getFileExtension(file.originalname);
@@ -307,7 +286,7 @@ export class UploadFileService
     fileEntry.fileSize = file.size;
     fileEntry.extension = extension;
     fileEntry.filePath = filePath;
-    fileEntry.collectionId = collectionId;
+    fileEntry.collectionId = collectionId ?? undefined;
     fileEntry.order = order;
 
     // Save to database
