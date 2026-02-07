@@ -7,11 +7,13 @@ export type UploadFileType = 'image' | 'file' | 'both';
 export type UploadStatus = 'success' | 'error' | 'loading' | 'prepare';
 
 export interface UploadedFile {
+  id?: string;
   uri: string;
   name: string;
   type?: string;
   size?: number;
   mimeType?: string;
+  [key: string]: any;
 }
 
 export interface UploadFileIconProps {

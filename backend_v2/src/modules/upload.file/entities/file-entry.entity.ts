@@ -1,5 +1,5 @@
 import { IsOptional } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/base/Entity/base.entity';
 import { FileCollection } from './file-collection.entity';
 
@@ -47,5 +47,6 @@ export class FileEntry extends BaseEntity {
   isDeleted: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
+  @DeleteDateColumn({ nullable: true, name: 'deletedAt' })
   deletedAt?: Date;
 }

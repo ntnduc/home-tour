@@ -1,10 +1,10 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { SelectQueryBuilder } from 'typeorm';
@@ -40,12 +40,11 @@ export class UploadFileService
     FileCollectionCreateDto,
     FileCollectionUpdateDto
   > {
+  private readonly logger = new Logger(UploadFileService.name);
   private readonly config: UploadFileConfig;
 
   constructor(
-    @InjectRepository(FileCollection)
     private readonly fileCollectionRepository: FileCollectionRepository,
-    @InjectRepository(FileEntry)
     private readonly fileEntryRepository: FileEntryRepository,
     private readonly configService: ConfigService,
   ) {
@@ -85,6 +84,7 @@ export class UploadFileService
 
     // Validate file
     this.validateFile(file, dto.category);
+    file.originalname = dto.originalName ?? '';
 
     // Save file to disk
     const fileEntry = await this.saveFileToDisk(file, 1);
@@ -319,5 +319,50 @@ export class UploadFileService
     collection.isDeleted = true;
     collection.deletedAt = new Date();
     await this.fileCollectionRepository.save(collection);
+  }
+
+  /**
+   * Soft delete file entry
+   */
+  async deleteFileEntry(id: string): Promise<void> {
+    try {
+      this.logger.debug(`Attempting to delete file entry with id: ${id}`);
+
+      // Check if file entry exists
+      const fileEntry = await this.fileEntryRepository.findOne({
+        where: { id },
+      });
+
+      if (!fileEntry) {
+        this.logger.warn(`File entry not found with id: ${id}`);
+        throw new NotFoundException(`Không tìm thấy file entry với id: ${id}`);
+      }
+
+      // Perform soft delete
+      const result = await this.fileEntryRepository.softDelete(id);
+
+      if (result.affected === 0) {
+        this.logger.warn(`Soft delete did not affect any rows for id: ${id}`);
+        throw new NotFoundException(`Không thể xóa file entry với id: ${id}`);
+      }
+
+      this.logger.log(`Successfully deleted file entry with id: ${id}`);
+    } catch (error) {
+      // Log error with full context
+      this.logger.error(
+        `Failed to delete file entry with id: ${id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+
+      // Re-throw known exceptions
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+
+      // Wrap unknown errors
+      throw new BadRequestException(
+        `Lỗi khi xóa file entry: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 }

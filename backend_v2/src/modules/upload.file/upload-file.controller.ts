@@ -33,6 +33,7 @@ import { FileCollectionCreateDto } from './dto/file-collection.create.dto';
 import { FileCollectionDetailDto } from './dto/file-collection.detail.dto';
 import { FileCollectionListDto } from './dto/file-collection.list.dto';
 import { FileCollectionUpdateDto } from './dto/file-collection.update.dto';
+import { FileEntryDetailDto } from './dto/file-entry.detail.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { FileCollection } from './entities/file-collection.entity';
 import { UploadFileService } from './upload-file.service';
@@ -104,7 +105,7 @@ export class UploadFileController extends BaseController<
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: FileUploadDto,
-  ): Promise<FileCollectionDetailDto> {
+  ): Promise<FileEntryDetailDto> {
     return await this.uploadFileService.uploadFile(file, dto);
   }
 
@@ -227,5 +228,14 @@ export class UploadFileController extends BaseController<
   @ApiResponse({ status: 404, description: 'Collection not found' })
   async deleteCollection(@Param('id') id: string): Promise<void> {
     return await this.uploadFileService.deleteCollection(id);
+  }
+
+  @Delete('file/:id')
+  @ApiOperation({ summary: 'Delete file entry' })
+  @ApiParam({ name: 'id', description: 'File Entry ID' })
+  @ApiResponse({ status: 200, description: 'File entry deleted' })
+  @ApiResponse({ status: 404, description: 'File entry not found' })
+  async deleteFileEntry(@Param('id') id: string): Promise<void> {
+    return await this.uploadFileService.deleteFileEntry(id);
   }
 }

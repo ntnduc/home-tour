@@ -29,7 +29,6 @@ export abstract class BaseEntity {
     const userId = RequestContextService.getUserId();
     if (userId) {
       this.createdBy = userId;
-      this.updatedBy = userId;
     }
   }
 

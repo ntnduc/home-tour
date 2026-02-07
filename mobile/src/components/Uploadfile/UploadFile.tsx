@@ -8,7 +8,7 @@ import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-na
 import LabelForm from '../LabelForm';
 import SliderLoading from './SliderLoading';
 import { UploadedFile, UploadFileBaseProps, UploadStatus } from './types';
-import { uploadFile } from './uploadfile.api';
+import { deleteFile, uploadFile } from './uploadfile.api';
 
 export interface UploadFileProps extends UploadFileBaseProps {
   value?: UploadedFile | null;
@@ -47,42 +47,46 @@ const UploadFile: React.FC<UploadFileProps> = ({
   const uploadAsync = async (fileToUpload: UploadedFile) => {
     try {
       setIsLoading(true);
+      setProcessStatus('loading');
       onChange?.(fileToUpload, processStatus);
       onUploadStart?.();
 
       const response = await uploadFile(fileToUpload, (status, progessEvent) => {
-        if (progessEvent?.progress != null) {
-          setProgress(progessEvent.progress);
+        if (progessEvent?.loaded != null && progessEvent?.total != null) {
+          const progress = (progessEvent.loaded / (progessEvent.total ?? 1)) * 100;
+          setProgress(progress);
         }
-        setIsLoading(status === 'loading');
-        setProcessStatus(status);
         onChange?.(fileToUpload, processStatus);
+
       }).catch((error: any) => {
         setProcessStatus('error');
         onChange?.(null, processStatus);
         onError?.(error.message);
+        setIsLoading(false);
+      }).finally(() => {
+        setProcessStatus('success');
+        onUploadEnd?.();
       });
-      const firstFile = response?.data?.files?.[0];
-      console.log("💞💓💗💞💓💗 ~ uploadAsync ~ firstFile:", firstFile)
+
+      const firstFile = response?.data;
       const finalFiles = {
+        id: firstFile?.id,
         name: firstFile?.fileName,
-        uri: firstFile?.url,
+        uri: firstFile?.filePath,
         size: firstFile?.fileSize,
         mimeType: firstFile?.mimeType,
       };
-      console.log("💞💓💗💞💓💗 ~ uploadAsync ~ finalFiles:", finalFiles)
 
-      setProcessStatus('success');
       setFiles(finalFiles);
       onChange?.(finalFiles, processStatus);
+      setProgress(0);
+
 
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra khi upload file';
       onError?.(errorMessage);
       onChange?.(null, 'error');
-    } finally {
       setIsLoading(false);
-      onUploadEnd?.();
     }
   };
 
@@ -129,17 +133,15 @@ const UploadFile: React.FC<UploadFileProps> = ({
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes:
-          type === 'image'
-            ? ImagePicker.MediaTypeOptions.Images
-            : ImagePicker.MediaTypeOptions.All,
-        allowsMultipleSelection: multiple,
+        mediaTypes: ['images', 'videos'],
+        allowsMultipleSelection: false,
         quality: 0.8,
-        selectionLimit: multiple ? maxFiles : 1,
+        selectionLimit: 1,
       });
 
       if (result.canceled) {
         onUploadEnd?.();
+        setIsLoading(false);
         return;
       }
 
@@ -158,22 +160,20 @@ const UploadFile: React.FC<UploadFileProps> = ({
           Alert.alert('Lỗi', error);
           onError?.(error);
           onUploadEnd?.();
+          setIsLoading(false);
           return;
         }
       }
 
       const newFile = newFiles[0];
-      setFiles(newFile);
-
       await uploadAsync(newFile);
       onUploadEnd?.();
+      setIsLoading(false);
     } catch (err: any) {
       const errorMessage = err.message || 'Có lỗi xảy ra khi chọn hình ảnh';
       Alert.alert('Lỗi', errorMessage);
       onError?.(errorMessage);
-    } finally {
       setIsLoading(false);
-      onUploadEnd?.();
     }
   };
 
@@ -235,7 +235,6 @@ const UploadFile: React.FC<UploadFileProps> = ({
     } else if (type === 'file') {
       handlePickFile();
     } else {
-      // Show action sheet for 'both'
       Alert.alert(
         'Chọn loại file',
         'Bạn muốn chọn hình ảnh hay file?',
@@ -257,14 +256,22 @@ const UploadFile: React.FC<UploadFileProps> = ({
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     if (disabled) return;
+    if (files == null || files.id == null) return;
 
-    if (multiple && Array.isArray(value)) {
-      // onChange?.(updatedFiles.length > 0 ? updatedFiles : null);
-    } else {
-      // onChange?.(null);
-    }
+    setIsLoading(true);
+    await deleteFile(files.id)
+      .then(() => {
+        onChange?.(null, 'success');
+      })
+      .catch((error: any) => {
+        //DO NOTHING
+      })
+      .finally(() => {
+        setFiles(null);
+        setIsLoading(false);
+      });
   };
 
   // const getFileIcon = (mimeType?: string): keyof typeof Ionicons.glyphMap => {
@@ -336,12 +343,11 @@ const UploadFile: React.FC<UploadFileProps> = ({
 
   const renderSliderLoading = useCallback(() => {
     return (
-      <SliderLoading value={progress} height={12} animateFromCenter={false} showShimmer />
+      <View className={`${processStatus === 'loading' ? 'block' : 'hidden'}`}>
+        <SliderLoading value={progress} height={12} animateFromCenter={false} showShimmer />
+      </View>
     );
   }, [progress, processStatus]);
-
-  const canAddMore = false;
-  const showAddButton = false;
 
   return (
     <View>
@@ -354,13 +360,13 @@ const UploadFile: React.FC<UploadFileProps> = ({
       >
         <View className="flex flex-col flex-1 h-[60px] items-center content-center justify-center ">
 
-          <View className={`w-full mb-1 h-1 ${processStatus === 'loading' ? 'block' : 'hidden'}`}>
+          <View className={`w-full mb-1 h-1 `}>
             {renderSliderLoading()}
           </View>
           {files ? (
             <View style={styles.previewContainer}>
               {renderFileItem(files)}
-              {showAddButton && (
+              {/* {showAddButton && (
                 <TouchableOpacity
                   onPress={handlePick}
                   disabled={disabled || isLoading}
@@ -374,7 +380,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
                     </>
                   )}
                 </TouchableOpacity>
-              )}
+              )} */}
             </View>
           ) : (
             <TouchableOpacity

@@ -1,5 +1,5 @@
 import { API_URL, PREFIX_URL } from "@/config";
-import { filePrivateApi } from "@/services/api";
+import { filePrivateApi, privateApi } from "@/services/api";
 import { storage } from "@/utils/storage";
 import { AxiosProgressEvent } from "axios";
 // Dùng API legacy của expo-file-system cho upload + progress
@@ -15,7 +15,6 @@ export const uploadFile = async (
     const token = await storage.getAccessToken();
     const uploadUrl = `${API_URL}${PREFIX_URL}/upload-file/upload`;
 
-    // Tạo task upload với MULTIPART, fieldName = 'file'
     const uploadTask = FileSystem.createUploadTask(
       uploadUrl,
       file.uri,
@@ -24,8 +23,7 @@ export const uploadFile = async (
         uploadType: FileSystem.FileSystemUploadType.MULTIPART,
         fieldName: "file",
         parameters: {
-          // Thêm meta nếu backend cần, ví dụ: fileName
-          fileName: file.name || `file_${Date.now()}`,
+          originalName: file.name || `file_${Date.now()}`,
         },
         headers: {
           Accept: "application/json",
@@ -47,10 +45,6 @@ export const uploadFile = async (
     }
 
     if (result.status && result.status >= 400) {
-      console.log("💞💓💗💞💓💗 ~ uploadFile ~ httpError:", {
-        status: result.status,
-        body: result.body,
-      });
       onChange?.("error");
       throw new Error(`Upload failed with status ${result.status}`);
     }
@@ -59,7 +53,6 @@ export const uploadFile = async (
       try {
         data = JSON.parse(result.body);
       } catch (parseError) {
-        console.log("💞💓💗💞💓💗 ~ uploadFile ~ parseError:", parseError);
         data = result.body;
       }
     }
@@ -115,7 +108,7 @@ export const deleteFileCollection = async (fileCollectionId: string) => {
 };
 
 export const deleteFile = async (fileId: string) => {
-  const response = await filePrivateApi.delete(`/upload-file/delete/${fileId}`);
+  const response = await privateApi.delete(`/upload-file/file/${fileId}`);
   return response.data;
 };
 
