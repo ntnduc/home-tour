@@ -24,6 +24,12 @@
         {
           "photosPermission": "The app accesses your photos to let you upload them."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "The app accesses your camera to let you upload videos."
+        }
       ]
 
     ],

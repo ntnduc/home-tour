@@ -113,9 +113,13 @@ export const deleteFile = async (fileId: string) => {
 };
 
 export const getFile = async (fileId: string) => {
-  const response = await filePrivateApi.get(`/upload-file/get/${fileId}`);
+  const response = await filePrivateApi.get(`/upload-file/${fileId}`);
   return response.data;
 };
+
+export const getFileUrl = (fileId: string): string => {
+  return API_URL + PREFIX_URL + '/upload-file/' + fileId;
+}
 
 export const getFilesCollection = async (fileCollectionId: string) => {
   const response = await filePrivateApi.get(`/upload-file/get-collection/${fileCollectionId}`);

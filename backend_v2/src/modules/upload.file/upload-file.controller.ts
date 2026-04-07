@@ -9,7 +9,7 @@ import {
   Res,
   UploadedFile,
   UploadedFiles,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
@@ -25,6 +25,7 @@ import {
 import { Response } from 'express';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { AllowAnonymous } from 'src/common/decorators/allow-anonymous.decorator';
 import { BaseController } from '../../common/base/crud/base.controller';
 import { AutoCrudPermissions } from '../../common/decorators/crud-permissions.decorator';
 import { Role } from '../../common/enums/role.enum';
@@ -181,6 +182,25 @@ export class UploadFileController extends BaseController<
     @Query('entityId') entityId: string,
   ): Promise<FileCollectionDetailDto[]> {
     return await this.uploadFileService.getFilesByEntity(entityType, entityId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get file by id' })
+  @ApiParam({ name: 'id', description: 'File Entry ID' })
+  @ApiResponse({ status: 200, description: 'File found' })
+  @ApiResponse({ status: 404, description: 'File not found' })
+  @AllowAnonymous()
+  async getFileById(@Param('id') id: string, @Res() res: Response): Promise<void> {
+    const file = await this.uploadFileService.getFileById(id);
+    const uploadPath = await this.uploadFileService.getUploadPath();
+    const fullPath = join(uploadPath, file.filePath);
+    const fileBuffer = readFileSync(fullPath);
+    res.setHeader('Content-Type', file.mimeType);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${file.originalName}"`,
+    );
+    res.send(fileBuffer);
   }
 
   @Get('download/:collectionId/:fileId')

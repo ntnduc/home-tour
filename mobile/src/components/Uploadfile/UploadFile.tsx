@@ -4,11 +4,19 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import ImageView from 'react-native-image-viewing';
 import LabelForm from '../LabelForm';
 import SliderLoading from './SliderLoading';
 import { UploadedFile, UploadFileBaseProps, UploadStatus } from './types';
-import { deleteFile, uploadFile } from './uploadfile.api';
+import { deleteFile, getFileUrl, uploadFile } from './uploadfile.api';
+import { validateFile } from './util';
 
 export interface UploadFileProps extends UploadFileBaseProps {
   value?: UploadedFile | null;
@@ -25,9 +33,23 @@ const UploadFile: React.FC<UploadFileProps> = ({
   required = false,
   disabled = false,
   multiple = false,
-  maxFiles = 5,
-  maxSize = 10, // 10MB default
-  acceptedTypes,
+  maxSize = 10,
+  acceptedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'image/gif',
+    'image/webp',
+    'image/svg',
+    'image/ico',
+    'image/bmp',
+    'image/tiff',
+    'image/tif',
+    'image/heic',
+    'image/heif',
+    'image/heif-sequence',
+    'image/heic-sequence',
+  ],
   placeholder,
   containerStyles,
   onUploadStart,
@@ -41,6 +63,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
   const styles = createStyles(theme);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   const [processStatus, setProcessStatus] = useState<'prepare' | 'loading' | 'success' | 'error'>('prepare');
   const [files, setFiles] = useState<UploadedFile | null | undefined>(value);
 
@@ -90,30 +113,6 @@ const UploadFile: React.FC<UploadFileProps> = ({
     }
   };
 
-  const formatFileSize = (bytes?: number): string => {
-    if (!bytes) return '';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-  };
-
-  const validateFile = (file: UploadedFile): string | null => {
-    if (maxSize && file.size) {
-      const sizeInMB = file.size / (1024 * 1024);
-      if (sizeInMB > maxSize) {
-        return `File không được vượt quá ${maxSize}MB`;
-      }
-    }
-
-    if (acceptedTypes && file.mimeType) {
-      if (!acceptedTypes.includes(file.mimeType)) {
-        return `File không đúng định dạng. Chấp nhận: ${acceptedTypes.join(', ')}`;
-      }
-    }
-
-    return null;
-  };
-
   const handlePickImage = async () => {
     if (disabled || isLoading) return;
 
@@ -132,9 +131,11 @@ const UploadFile: React.FC<UploadFileProps> = ({
         return;
       }
 
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images', 'videos'],
         allowsMultipleSelection: false,
+        cameraType: ImagePicker.CameraType.back,
         quality: 0.8,
         selectionLimit: 1,
       });
@@ -155,7 +156,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
 
       // Validate files
       for (const file of newFiles) {
-        const error = validateFile(file);
+        const error = validateFile(file, maxSize ?? 10, acceptedTypes ?? []);
         if (error) {
           Alert.alert('Lỗi', error);
           onError?.(error);
@@ -205,7 +206,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
 
       // Validate files
       for (const file of newFiles) {
-        const error = validateFile(file);
+        const error = validateFile(file, maxSize ?? 10, acceptedTypes ?? []);
         if (error) {
           Alert.alert('Lỗi', error);
           onError?.(error);
@@ -274,45 +275,6 @@ const UploadFile: React.FC<UploadFileProps> = ({
       });
   };
 
-  // const getFileIcon = (mimeType?: string): keyof typeof Ionicons.glyphMap => {
-  //   if (!mimeType) return 'document-outline';
-  //   if (mimeType.startsWith('image/')) return 'image-outline';
-  //   if (mimeType.includes('pdf')) return 'document-text-outline';
-  //   if (mimeType.includes('word') || mimeType.includes('doc')) return 'document-outline';
-  //   if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'document-outline';
-  //   return 'document-outline';
-  // };
-
-  // const renderImagePreview = (file: UploadedFile, index: number) => {
-  //   if (!showPreview) return null;
-
-  //   return (
-  //     <View key={index} className="mb-3">
-  //       <View className="relative">
-  //         <Image
-  //           source={{ uri: file.uri }}
-  //           style={styles.imagePreview}
-  //           resizeMode="cover"
-  //         />
-  //         {!disabled && (
-  //           <TouchableOpacity
-  //             onPress={() => handleRemove(index)}
-  //             className="absolute top-2 right-2 bg-red-500 rounded-full p-1.5"
-  //             style={styles.removeButton}
-  //           >
-  //             <Ionicons name="close" size={16} color="#ffffff" />
-  //           </TouchableOpacity>
-  //         )}
-  //       </View>
-  //       {file.name && (
-  //         <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
-  //           {file.name}
-  //         </Text>
-  //       )}
-  //     </View>
-  //   );
-  // };
-
   const renderFileItem = (file: UploadedFile) => {
 
     return (
@@ -350,76 +312,71 @@ const UploadFile: React.FC<UploadFileProps> = ({
   }, [progress, processStatus]);
 
   return (
-    <View>
-      {label && (
-        <LabelForm {...(typeof label === 'object' ? label : { label, required })} />
-      )}
-      <View
-        className={`flex flex-row items-center content-center justify-center rounded-lg px-3 pb-2 border ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'
-          } ${disabled ? 'bg-gray-100' : 'bg-white'}`}
-      >
-        <View className="flex flex-col flex-1 h-[60px] items-center content-center justify-center ">
+    <>
+      <View>
+        {label && (
+          <LabelForm {...(typeof label === 'object' ? label : { label, required })} />
+        )}
+        <View
+          className={`flex flex-row items-center content-center justify-center rounded-lg px-3 pb-2 border ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'
+            } ${disabled ? 'bg-gray-100' : 'bg-white'}`}
+        >
+          <View className="flex flex-col flex-1 h-[60px] items-center content-center justify-center ">
 
-          <View className={`w-full mb-1 h-1 `}>
-            {renderSliderLoading()}
-          </View>
-          {files ? (
-            <View style={styles.previewContainer}>
-              {renderFileItem(files)}
-              {/* {showAddButton && (
-                <TouchableOpacity
-                  onPress={handlePick}
-                  disabled={disabled || isLoading}
-                  style={styles.uploadButton}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator size="small" color="#6b7280" />
-                  ) : (
-                    <>
-                      {renderFileItem(files)}
-                    </>
-                  )}
-                </TouchableOpacity>
-              )} */}
+            <View className={`w-full mb-1 h-1 `}>
+              {renderSliderLoading()}
             </View>
-          ) : (
-            <TouchableOpacity
-              className="flex-1"
-              onPress={handlePick}
-              disabled={disabled || isLoading}
-              style={styles.uploadButton}
-            >
-              {isLoading
-                ? _renderLoading()
-                : <View className="flex-row items-center justify-center flex-1 w-full h-full">
-                  <Ionicons
-                    name={icon}
-                    size={24}
-                    color="#6b7280"
-                    {...iconProps}
-                  />
-                  <Text style={styles.uploadButtonText}>
-                    {placeholder ||
-                      (type === 'image'
-                        ? 'Chọn hình ảnh'
-                        : type === 'file'
-                          ? 'Chọn file'
-                          : 'Chọn hình ảnh hoặc file')}
-                  </Text>
-                </View>}
-            </TouchableOpacity>
-          )}
+            {files ? (
+              <TouchableOpacity style={styles.previewContainer} onPress={() => {
+                {
+                  setIsVisible(true);
+                }
+              }}>
+                {renderFileItem(files)}
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                className="flex-1"
+                onPress={handlePick}
+                disabled={disabled || isLoading}
+                style={styles.uploadButton}
+              >
+                {isLoading
+                  ? _renderLoading()
+                  : <View className="flex-row items-center justify-center flex-1 w-full h-full">
+                    <Ionicons
+                      name={icon}
+                      size={24}
+                      color="#6b7280"
+                      {...iconProps}
+                    />
+                    <Text style={styles.uploadButtonText}>
+                      {placeholder ||
+                        (type === 'image'
+                          ? 'Chọn hình ảnh'
+                          : type === 'file'
+                            ? 'Chọn file'
+                            : 'Chọn hình ảnh hoặc file')}
+                    </Text>
+                  </View>}
+              </TouchableOpacity>
+            )}
 
+          </View>
         </View>
+        {error && (
+          <Text style={styles.errorText} className="mt-1">
+            {error}
+          </Text>
+        )}
       </View>
-
-
-      {error && (
-        <Text style={styles.errorText} className="mt-1">
-          {error}
-        </Text>
-      )}
-    </View>
+      <ImageView
+        images={[{ uri: getFileUrl(files?.id || '') }]}
+        imageIndex={0}
+        visible={isVisible}
+        onRequestClose={() => { setIsVisible(false); }}
+      />
+    </>
   );
 };
 

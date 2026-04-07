@@ -192,6 +192,21 @@ export class UploadFileService
     });
   }
 
+  async getFileById(id: string): Promise<FileEntryDetailDto> {
+    const fileEntry = await this.fileEntryRepository.findOne({
+      where: { id },
+    });
+    console.log("💞💓💗💞💓💗 ~ UploadFileService ~ getFileById ~ fileEntry:", fileEntry)
+
+    if (!fileEntry) {
+      throw new NotFoundException('Không tìm thấy file entry');
+    }
+
+    const detailDto = new FileEntryDetailDto();
+    detailDto.fromEntity(fileEntry);
+    return detailDto;
+  }
+
   /**
    * Generate URL from filePath
    */
