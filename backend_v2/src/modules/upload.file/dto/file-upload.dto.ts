@@ -31,4 +31,8 @@ export class FileUploadDto {
   @IsBoolean()
   @IsOptional()
   isPublic?: boolean;
+
+  @IsString()
+  @IsOptional()
+  originalName?: string;
 }

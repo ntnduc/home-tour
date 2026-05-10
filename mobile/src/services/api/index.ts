@@ -2,7 +2,6 @@ import { API_URL, PREFIX_URL } from "@/config";
 import { storage } from "@/utils/storage";
 import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
-
 // Cấu hình timeout
 const TIMEOUT = 10000; // 10 giây
 
@@ -24,6 +23,26 @@ export const privateApi = axios.create({
   timeout: TIMEOUT,
 });
 
+// Instance chuyên cho upload file (multipart/form-data)
+export const filePrivateApi = axios.create({
+  baseURL: API_URL + PREFIX_URL,
+  headers: {
+    // Để undefined cho axios tự set boundary khi dùng FormData
+    "Content-Type": undefined as any,
+    Accept: "application/json",
+  },
+  timeout: TIMEOUT,
+});
+
+// export const filePrivateApi = axios.create({
+//   baseURL: API_URL + PREFIX_URL,
+//   headers: {
+//     'Content-Type': 'multipart/form-data',
+//     'Accept': 'application/json',
+//   },
+//   timeout: TIMEOUT,
+// });
+
 // Hàm kiểm tra kết nối mạng
 const checkNetworkConnection = async () => {
   const netInfo = await NetInfo.fetch();
@@ -41,6 +60,7 @@ const networkInterceptor = async (config: any) => {
 
 publicApi.interceptors.request.use(networkInterceptor);
 privateApi.interceptors.request.use(networkInterceptor);
+filePrivateApi.interceptors.request.use(networkInterceptor);
 
 // Thêm interceptor để tự động thêm token vào header cho privateApi
 privateApi.interceptors.request.use(
@@ -96,6 +116,19 @@ privateApi.interceptors.response.use(
         return Promise.reject(error);
       }
     }
+    return Promise.reject(error);
+  }
+);
+
+filePrivateApi.interceptors.request.use(
+  async (config) => {
+    const token = await storage.getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );

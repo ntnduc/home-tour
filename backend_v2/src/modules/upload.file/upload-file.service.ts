@@ -1,10 +1,10 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { SelectQueryBuilder } from 'typeorm';
@@ -16,6 +16,7 @@ import { FileCollectionCreateDto } from './dto/file-collection.create.dto';
 import { FileCollectionDetailDto } from './dto/file-collection.detail.dto';
 import { FileCollectionListDto } from './dto/file-collection.list.dto';
 import { FileCollectionUpdateDto } from './dto/file-collection.update.dto';
+import { FileEntryDetailDto } from './dto/file-entry.detail.dto';
 import { FileUploadDto } from './dto/file-upload.dto';
 import { FileCollection } from './entities/file-collection.entity';
 import { FileEntry } from './entities/file-entry.entity';
@@ -32,20 +33,18 @@ export class UploadFileService
     FileCollectionUpdateDto
   >
   implements
-    IBaseService<
-      FileCollection,
-      FileCollectionDetailDto,
-      FileCollectionListDto,
-      FileCollectionCreateDto,
-      FileCollectionUpdateDto
-    >
-{
+  IBaseService<
+    FileCollection,
+    FileCollectionDetailDto,
+    FileCollectionListDto,
+    FileCollectionCreateDto,
+    FileCollectionUpdateDto
+  > {
+  private readonly logger = new Logger(UploadFileService.name);
   private readonly config: UploadFileConfig;
 
   constructor(
-    @InjectRepository(FileCollection)
     private readonly fileCollectionRepository: FileCollectionRepository,
-    @InjectRepository(FileEntry)
     private readonly fileEntryRepository: FileEntryRepository,
     private readonly configService: ConfigService,
   ) {
@@ -78,40 +77,20 @@ export class UploadFileService
   async uploadFile(
     file: Express.Multer.File,
     dto: FileUploadDto,
-  ): Promise<FileCollectionDetailDto> {
+  ): Promise<FileEntryDetailDto> {
     if (!file) {
       throw new BadRequestException('File không được để trống');
     }
 
     // Validate file
     this.validateFile(file, dto.category);
-
-    // Create file collection
-    const collectionDto = new FileCollectionCreateDto();
-    collectionDto.name = dto.name;
-    collectionDto.category = dto.category;
-    collectionDto.description = dto.description;
-    collectionDto.relatedEntityType = dto.relatedEntityType;
-    collectionDto.relatedEntityId = dto.relatedEntityId;
-    collectionDto.isPublic = dto.isPublic ?? true;
-
-    const collection = await this.create(collectionDto);
+    file.originalname = dto.originalName ?? '';
 
     // Save file to disk
-    const fileEntry = await this.saveFileToDisk(file, collection.id, 1);
+    const fileEntry = await this.saveFileToDisk(file, 1);
 
-    // Get collection with files
-    const collectionWithFiles = await this.fileCollectionRepository.findOne({
-      where: { id: collection.id },
-      relations: ['files'],
-    });
-
-    if (!collectionWithFiles) {
-      throw new NotFoundException('Không tìm thấy collection sau khi tạo');
-    }
-
-    const detailDto = new FileCollectionDetailDto();
-    detailDto.fromEntity(collectionWithFiles);
+    const detailDto = new FileEntryDetailDto();
+    detailDto.fromEntity(fileEntry);
     return detailDto;
   }
 
@@ -151,7 +130,7 @@ export class UploadFileService
     // Save all files to disk
     const fileEntries = await Promise.all(
       files.map((file, index) =>
-        this.saveFileToDisk(file, collection.id, index + 1),
+        this.saveFileToDisk(file, index + 1, collection.id),
       ),
     );
 
@@ -213,6 +192,20 @@ export class UploadFileService
     });
   }
 
+  async getFileById(id: string): Promise<FileEntryDetailDto> {
+    const fileEntry = await this.fileEntryRepository.findOne({
+      where: { id },
+    });
+
+    if (!fileEntry) {
+      throw new NotFoundException('Không tìm thấy file entry');
+    }
+
+    const detailDto = new FileEntryDetailDto();
+    detailDto.fromEntity(fileEntry);
+    return detailDto;
+  }
+
   /**
    * Generate URL from filePath
    */
@@ -271,8 +264,8 @@ export class UploadFileService
    */
   private async saveFileToDisk(
     file: Express.Multer.File,
-    collectionId: string,
     order: number,
+    collectionId?: string,
   ): Promise<FileEntry> {
     // Generate file name with UUID
     const extension = this.getFileExtension(file.originalname);
@@ -307,7 +300,7 @@ export class UploadFileService
     fileEntry.fileSize = file.size;
     fileEntry.extension = extension;
     fileEntry.filePath = filePath;
-    fileEntry.collectionId = collectionId;
+    fileEntry.collectionId = collectionId ?? undefined;
     fileEntry.order = order;
 
     // Save to database
@@ -340,5 +333,50 @@ export class UploadFileService
     collection.isDeleted = true;
     collection.deletedAt = new Date();
     await this.fileCollectionRepository.save(collection);
+  }
+
+  /**
+   * Soft delete file entry
+   */
+  async deleteFileEntry(id: string): Promise<void> {
+    try {
+      this.logger.debug(`Attempting to delete file entry with id: ${id}`);
+
+      // Check if file entry exists
+      const fileEntry = await this.fileEntryRepository.findOne({
+        where: { id },
+      });
+
+      if (!fileEntry) {
+        this.logger.warn(`File entry not found with id: ${id}`);
+        throw new NotFoundException(`Không tìm thấy file entry với id: ${id}`);
+      }
+
+      // Perform soft delete
+      const result = await this.fileEntryRepository.softDelete(id);
+
+      if (result.affected === 0) {
+        this.logger.warn(`Soft delete did not affect any rows for id: ${id}`);
+        throw new NotFoundException(`Không thể xóa file entry với id: ${id}`);
+      }
+
+      this.logger.log(`Successfully deleted file entry with id: ${id}`);
+    } catch (error) {
+      // Log error with full context
+      this.logger.error(
+        `Failed to delete file entry with id: ${id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+
+      // Re-throw known exceptions
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+
+      // Wrap unknown errors
+      throw new BadRequestException(
+        `Lỗi khi xóa file entry: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 }

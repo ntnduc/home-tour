@@ -76,7 +76,6 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           });
         });
     } catch (error) {
-      console.error('💞💓💗💞💓💗 ~ handleSave ~ error:', error);
       Toast.show({
         type: 'error',
         text1: 'Thất bại',
@@ -187,8 +186,8 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                     options={
                       value !== RoomStatus.OCCUPIED
                         ? ROOM_STATUS_OPTIONS.filter(
-                            (option) => option.value !== RoomStatus.OCCUPIED,
-                          )
+                          (option) => option.value !== RoomStatus.OCCUPIED,
+                        )
                         : ROOM_STATUS_OPTIONS
                     }
                     valueKey={'value'}

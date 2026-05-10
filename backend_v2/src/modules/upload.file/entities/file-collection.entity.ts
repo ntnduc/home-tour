@@ -65,6 +65,9 @@ export class FileCollection extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   metadata?: Record<string, any>;
 
+  @Column({ nullable: true })
+  propertyId?: string;
+
   // ========== QUAN HỆ ==========
 
   /**
@@ -73,5 +76,5 @@ export class FileCollection extends BaseEntity {
   @OneToMany(() => FileEntry, (fileEntry) => fileEntry.collection, {
     cascade: true, // Khi xóa collection thì xóa luôn các file entries
   })
-  files: FileEntry[];
+  files?: FileEntry[];
 }

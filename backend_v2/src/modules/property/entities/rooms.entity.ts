@@ -50,4 +50,8 @@ export class Rooms extends BaseEntity {
 
   @Column({ nullable: true, default: true })
   isPrepaidRoom?: boolean;
+
+  @Column({ nullable: true })
+  imageCollectionId?: string;
+
 }
