@@ -49,4 +49,9 @@ export class FileEntry extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   @DeleteDateColumn({ nullable: true, name: 'deletedAt' })
   deletedAt?: Date;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  propertyId?: string;
+
 }

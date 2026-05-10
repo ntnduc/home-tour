@@ -196,7 +196,6 @@ export class UploadFileService
     const fileEntry = await this.fileEntryRepository.findOne({
       where: { id },
     });
-    console.log("💞💓💗💞💓💗 ~ UploadFileService ~ getFileById ~ fileEntry:", fileEntry)
 
     if (!fileEntry) {
       throw new NotFoundException('Không tìm thấy file entry');

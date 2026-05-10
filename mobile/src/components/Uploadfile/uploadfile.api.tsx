@@ -4,7 +4,7 @@ import { storage } from "@/utils/storage";
 import { AxiosProgressEvent } from "axios";
 // Dùng API legacy của expo-file-system cho upload + progress
 import * as FileSystem from "expo-file-system/legacy";
-import { UploadedFile } from "./types";
+import { UploadFileCollectionDto, UploadedFile } from "./types";
 
 // Upload 1 file bằng expo-file-system, hỗ trợ progress
 export const uploadFile = async (
@@ -70,13 +70,15 @@ export const uploadFile = async (
   }
 };
 
-// Upload nhiều file 1 lần (không cần progress chi tiết từng file)
+// Upload nhiều file theo endpoint mới /upload/multiple, có progress
 export const uploadFileCollection = async (
   files: UploadedFile[],
+  dto?: UploadFileCollectionDto,
   onChange?: (status: "success" | "error" | "loading", progressEvent?: AxiosProgressEvent) => void
 ) => {
   try {
-    onChange?.("loading");
+    const token = await storage.getAccessToken();
+    const uploadUrl = `${API_URL}${PREFIX_URL}/upload-file/upload/multiple`;
 
     const formData = new FormData();
 
@@ -88,14 +90,58 @@ export const uploadFileCollection = async (
       } as any);
     });
 
-    const response = await filePrivateApi.post("/upload-file/upload-collection", formData, {
-      onUploadProgress: (progressEvent) => {
-        onChange?.("loading", progressEvent);
-      },
+    if (dto?.name) formData.append("name", dto.name);
+    if (dto?.category) formData.append("category", dto.category);
+    if (dto?.description) formData.append("description", dto.description);
+    if (dto?.relatedEntityType) formData.append("relatedEntityType", dto.relatedEntityType);
+    if (dto?.relatedEntityId) formData.append("relatedEntityId", dto.relatedEntityId);
+    if (typeof dto?.isPublic === "boolean") {
+      formData.append("isPublic", String(dto.isPublic));
+    }
+
+    const responseData = await new Promise<any>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("POST", uploadUrl);
+      xhr.setRequestHeader("Accept", "application/json");
+      if (token) {
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      }
+
+      xhr.upload.onprogress = (event) => {
+        const fakeAxiosProgress: AxiosProgressEvent = {
+          loaded: event.loaded,
+          total: event.total,
+        } as AxiosProgressEvent;
+        onChange?.("loading", fakeAxiosProgress);
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          if (!xhr.responseText) {
+            resolve(null);
+            return;
+          }
+
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch (e) {
+            resolve(xhr.responseText);
+          }
+          return;
+        }
+
+        reject(new Error(`Upload failed with status ${xhr.status}`));
+      };
+
+      xhr.onerror = () => reject(new Error("Network error while uploading multiple files"));
+      xhr.onabort = () => reject(new Error("Upload aborted"));
+
+      xhr.send(formData);
     });
 
     onChange?.("success");
-    return response.data;
+    return responseData;
   } catch (error) {
     onChange?.("error");
     throw error;

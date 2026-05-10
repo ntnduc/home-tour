@@ -1,34 +1,39 @@
-import CommonUpload from "@/components/Uploadfile";
-import { RootStackParamList } from "@/navigation/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import CommonUpload from '@/components/Uploadfile';
+import { UploadedFile, UploadStatus } from '@/components/Uploadfile/types';
+import { RootStackParamList } from '@/navigation/types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type TestScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList, "TestScreen">;
+  navigation: NativeStackNavigationProp<RootStackParamList, 'TestScreen'>;
 };
 
-const TestScreen = ({ navigation }: TestScreenProps) => {
-  // const handleChange = (
-  //   files: UploadedFile | UploadedFile[] | null,
-  //   status: 'success' | 'error' | 'loading' | 'prepare',
-  // ) => {
-  //   console.log('💞💓💗💞💓💗 ~ handleChange ~ status:', status)
-  // };
+const TestScreen = ({ }: TestScreenProps) => {
+  const [files, setFiles] = useState<UploadedFile[] | null>(null);
 
-  const [value, setValue] = useState(0);
+  const handleChange = (nextFiles: UploadedFile[] | null, status: UploadStatus) => {
+    if (status === 'success' || status === 'prepare' || status === 'loading') {
+      setFiles(nextFiles);
+    }
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <CommonUpload label="Upload file" type="image" variant="single" onChange={() => { }} />
-      {/* <SliderLoading value={value} height={12} animateFromCenter={false} showShimmer />
-      <Text>{value}</Text>
-      <ButtonAction text="Upload" onPress={() => {
-        setValue(value + 10);
-      }} />
-      <ButtonAction text="reset" onPress={() => {
-        setValue(0);
-      }} /> */}
+    <SafeAreaView className="flex-1 bg-gray-50 p-4">
+      <CommonUpload
+        label="Ảnh thực tế"
+        type="image"
+        variant="multiple"
+        value={files ?? []}
+        onChange={handleChange as any}
+      />
+      <CommonUpload
+        label={'single'}
+        type='image'
+        variant='single'
+        value={files?.[0] ?? null}
+        onChange={handleChange as any}
+      />
     </SafeAreaView>
   );
 };

@@ -16,6 +16,15 @@ export interface UploadedFile {
   [key: string]: any;
 }
 
+export interface UploadFileCollectionDto {
+  name?: string;
+  category?: string;
+  description?: string;
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+  isPublic?: boolean;
+}
+
 export interface UploadFileIconProps {
   name?: keyof typeof Ionicons.glyphMap;
   size?: number;
