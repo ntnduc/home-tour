@@ -1,7 +1,9 @@
+import { createStyles } from '@/styles/component/StyleUploadFile';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Ionicons } from '@expo/vector-icons';
+import { AxiosProgressEvent } from 'axios';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,24 +14,24 @@ import {
 } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 import LabelForm from '../LabelForm';
-import { createStyles } from '@/styles/component/StyleUploadFile';
+import {
+  FileEntryDetailResponse,
+  UploadedFile,
+  UploadFileBaseProps,
+  UploadStatus
+} from './types';
 import {
   deleteFile,
+  getFilesCollection,
   getFileUrl,
   uploadFileCollection,
 } from './uploadfile.api';
-import {
-  UploadedFile,
-  UploadFileBaseProps,
-  UploadStatus,
-} from './types';
-import { AxiosProgressEvent } from 'axios';
 import { validateFile } from './util';
 
 export interface UploadMultiFileProps extends UploadFileBaseProps {
-  value?: UploadedFile[] | null;
+  value?: UploadedFile[] | UploadedFile | string[] | string | null;
   onChange?: (
-    files: UploadedFile[] | null,
+    files: UploadedFile[] | FileEntryDetailResponse[] | null,
     status: UploadStatus,
     progressEvent?: AxiosProgressEvent,
   ) => void;
@@ -84,7 +86,7 @@ const UploadMultiFile: React.FC<UploadMultiFileProps> = ({
   const theme = useTheme();
   const styles = createStyles(theme);
 
-  const [files, setFiles] = useState<UploadedFile[]>(value ?? []);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -93,11 +95,22 @@ const UploadMultiFile: React.FC<UploadMultiFileProps> = ({
 
   const imageSources = useMemo(
     () =>
-      files.map((file) => ({
+      files.map((file: any) => ({
         uri: file?.id ? getFileUrl(file.id) : file.uri,
       })),
     [files],
   );
+
+  useEffect(() => {
+    if (value && typeof value === 'string') {
+      setIsLoading(true);
+      getFilesCollection(value).then((fileCollection) => {
+        setFiles(fileCollection.files as unknown as UploadedFile[] ?? []);
+      }).finally(() => {
+        setIsLoading(false);
+      });
+    }
+  }, [value]);
 
   const handlePickImages = async () => {
     if (disabled || isLoading || !canAddMore) return;
@@ -220,6 +233,7 @@ const UploadMultiFile: React.FC<UploadMultiFileProps> = ({
 
         <View className="flex-row flex-wrap -m-1">
           {files.map((file, index) => {
+
             const uri = file?.id ? getFileUrl(file.id) : file.uri;
 
             return (

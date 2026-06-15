@@ -60,6 +60,10 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
   @IsOptional()
   isPrepaidRoom?: boolean;
 
+  @IsString()
+  @IsOptional()
+  imageCollectionId?: string
+
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
     this.propertyId = entity.propertyId;
@@ -73,6 +77,7 @@ export class RoomDetailDto extends BaseDetailDto<Rooms> {
     this.defaultPaymentDueDay = entity.defaultPaymentDueDay;
     this.description = entity.description;
     this.isPrepaidRoom = entity.isPrepaidRoom;
+    this.imageCollectionId = entity.imageCollectionId;
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
     this.createdBy = entity.createdBy;

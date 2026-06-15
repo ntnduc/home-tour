@@ -16,6 +16,41 @@ export interface UploadedFile {
   [key: string]: any;
 }
 
+export interface FileEntry {
+  id: string;
+  originalName: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  extension: string;
+  filePath: string;
+  order?: number;
+  metadata?: Record<string, any>;
+  collectionId?: string;
+  isDeleted: boolean;
+  deletedAt?: Date;
+  isPublic: boolean;
+  url?: string;
+}
+
+export interface FileCollection {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  files: FileEntry[] | null;
+  [key: string]: any;
+}
+
+export interface FileEntryDetailResponse extends FileEntry {
+  [key: string]: any;
+}
+
+export interface FileCollectionDetailResponse extends FileCollection {
+  files: FileEntryDetailResponse[] | null;
+}
+
 export interface UploadFileCollectionDto {
   name?: string;
   category?: string;

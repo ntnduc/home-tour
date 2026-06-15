@@ -12,7 +12,7 @@ export interface CommonUploadProps
    *  - 'multiple': nhiều file
    */
   variant?: UploadVariant;
-  value?: UploadedFile | UploadedFile[] | null;
+  value?: UploadedFile | UploadedFile[] | string[] | string | null;
   onChange?: (
     files: UploadedFile | UploadedFile[] | null,
     status: 'success' | 'error' | 'loading' | 'prepare',
@@ -34,8 +34,8 @@ const CommonUpload: React.FC<CommonUploadProps> = ({
     return (
       <UploadMultiFile
         {...(rest as Omit<UploadMultiFileProps, 'value' | 'onChange'>)}
-        value={Array.isArray(value) ? value : value ? [value] : []}
-        onChange={(files, status) => onChange?.(files, status)}
+        value={value}
+        onChange={(files, status) => onChange?.(files as UploadedFile[] | null, status)}
       />
     );
   }
@@ -43,7 +43,7 @@ const CommonUpload: React.FC<CommonUploadProps> = ({
   return (
     <UploadFile
       {...rest}
-      value={Array.isArray(value) ? (value[0] ?? null) : value ?? null}
+      value={value as UploadedFile | null}
       onChange={(file, status) => onChange?.(file, status)}
     />
   );
@@ -56,3 +56,4 @@ export default CommonUpload;
 export type { UploadedFile, UploadFileIconProps, UploadFileType } from './types';
 export type { UploadFileProps } from './UploadFile';
 export type { UploadMultiFileProps } from './UploadMultiFile';
+

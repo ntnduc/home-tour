@@ -4,7 +4,7 @@ import { storage } from "@/utils/storage";
 import { AxiosProgressEvent } from "axios";
 // Dùng API legacy của expo-file-system cho upload + progress
 import * as FileSystem from "expo-file-system/legacy";
-import { UploadFileCollectionDto, UploadedFile } from "./types";
+import { FileCollectionDetailResponse, UploadFileCollectionDto, UploadedFile } from "./types";
 
 // Upload 1 file bằng expo-file-system, hỗ trợ progress
 export const uploadFile = async (
@@ -167,7 +167,7 @@ export const getFileUrl = (fileId: string): string => {
   return API_URL + PREFIX_URL + '/upload-file/' + fileId;
 }
 
-export const getFilesCollection = async (fileCollectionId: string) => {
-  const response = await filePrivateApi.get(`/upload-file/get-collection/${fileCollectionId}`);
-  return response.data;
+export const getFilesCollection = async (fileCollectionId: string): Promise<FileCollectionDetailResponse> => {
+  const response = await filePrivateApi.get(`/upload-file/collection/${fileCollectionId}`);
+  return response.data?.data;
 };
