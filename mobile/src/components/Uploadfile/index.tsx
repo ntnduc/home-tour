@@ -1,25 +1,17 @@
 import React from 'react';
-import UploadFile, { UploadFileProps } from './UploadFile';
+import UploadFile from './UploadFile';
 import UploadMultiFile, { UploadMultiFileProps } from './UploadMultiFile';
 
-type UploadVariant = 'single' | 'multiple';
+
 
 export interface CommonUploadProps
-  extends Omit<UploadFileProps, 'multiple' | 'value' | 'onChange'> {
-  /**
-   * Kiểu upload:
-   *  - 'single': 1 file
-   *  - 'multiple': nhiều file
-   */
-  variant?: UploadVariant;
-  value?: UploadedFile | UploadedFile[] | null;
-  onChange?: (
-    files: UploadedFile | UploadedFile[] | null,
-    status: 'success' | 'error' | 'loading' | 'prepare',
-  ) => void;
+  extends UploadFileBaseProps {
+  variant: UploadVariant;
+  value?: UploadedFile | UploadedFile[] | string[] | string | null;
+
 }
 
-import { UploadedFile } from './types';
+import { UploadedFile, UploadFileBaseProps, UploadVariant } from './types';
 
 /**
  * Component chung cho upload, chọn đúng implementation theo `variant`
@@ -34,8 +26,8 @@ const CommonUpload: React.FC<CommonUploadProps> = ({
     return (
       <UploadMultiFile
         {...(rest as Omit<UploadMultiFileProps, 'value' | 'onChange'>)}
-        value={Array.isArray(value) ? value : value ? [value] : []}
-        onChange={(files, status) => onChange?.(files, status)}
+        value={value}
+        onChange={(files, status) => onChange?.(files as UploadedFile[] | null, status)}
       />
     );
   }
@@ -43,9 +35,8 @@ const CommonUpload: React.FC<CommonUploadProps> = ({
   return (
     <UploadFile
       {...rest}
-      value={Array.isArray(value) ? (value[0] ?? null) : value ?? null}
-      onChange={(file, status) => onChange?.(file, status)}
-    />
+      value={value as UploadedFile | null}
+      onChange={(file, status) => onChange?.(file, status)} />
   );
 };
 
@@ -56,3 +47,4 @@ export default CommonUpload;
 export type { UploadedFile, UploadFileIconProps, UploadFileType } from './types';
 export type { UploadFileProps } from './UploadFile';
 export type { UploadMultiFileProps } from './UploadMultiFile';
+

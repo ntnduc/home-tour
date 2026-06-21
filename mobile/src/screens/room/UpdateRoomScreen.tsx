@@ -6,6 +6,8 @@ import InputBase from '@/components/Input';
 import Loading from '@/components/Loading';
 import Status from '@/components/Status';
 import { Switch } from '@/components/Switch';
+import CommonUpload from '@/components/Uploadfile';
+import { FileCategory } from '@/components/Uploadfile/fileEnum';
 import { ROOM_STATUS_OPTIONS } from '@/constant/room.constant';
 import {
   RoomDetailResponse,
@@ -37,12 +39,12 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
     handleSubmit,
     formState: { isLoading, defaultValues, errors: erroForms, isSubmitting },
     control,
+    setValue,
   } = useForm<RoomDetailResponse>({
     defaultValues: async () => {
       try {
         const data = await getRoom(roomId);
         if (!data.data) return {} as any;
-
         return data.data;
       } catch (error: any) {
         Toast.show({
@@ -60,7 +62,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
   const handleSave = async (data: RoomUpdateRequest) => {
     try {
       updateRoom(data)
-        .then((reponse) => {
+        .then(() => {
           Toast.show({
             type: 'success',
             text1: 'Thành công',
@@ -83,6 +85,7 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
       });
     }
   };
+
 
   const handleError = () => {
     Toast.show({
@@ -338,6 +341,28 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             )}
           />
         </CardContent>
+
+        <Controller
+          control={control}
+          name="imageCollectionId"
+          render={({ field: { value } }) => {
+            return <CommonUpload
+              label="Ảnh thực tế"
+              typeFile="image"
+              typeAction="update"
+              variant="multiple"
+              value={value}
+              postData={{
+                category: FileCategory.ROOM,
+                relatedEntityId: defaultValues?.id,
+                propertyId: defaultValues?.propertyId,
+                collectionId: value,
+                isPublic: true,
+              }}
+              onChange={() => { }}
+            />
+          }}
+        />
 
         <CardContent
           title="Dịch vụ mặc định"

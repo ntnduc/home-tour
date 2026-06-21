@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "mobile",
-    "slug": "mobile",
+    "slug": "home-tour",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,7 +31,6 @@
           "cameraPermission": "The app accesses your camera to let you upload videos."
         }
       ]
-
     ],
     "ios": {
       "supportsTablet": true,
@@ -39,16 +38,26 @@
       "buildNumber": "1"
     },
     "android": {
-       "softwareKeyboardLayoutMode": "pan",
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4c6d8506-6e7e-4b71-bbbc-8c0dad6e22a8"
+      }
+    },
+    "owner": "ntnduc"
   }
 }

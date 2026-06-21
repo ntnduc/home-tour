@@ -1,4 +1,5 @@
 import {
+  BadGatewayException,
   BadRequestException,
   Injectable,
   Logger,
@@ -7,10 +8,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { SelectQueryBuilder } from 'typeorm';
+import { UploadCategory } from 'src/common/enums/upload.enum';
+import { DataSource, EntityManager, SelectQueryBuilder } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
+import { Rooms } from '../property/entities/rooms.entity';
 import { UploadFileConfig } from './config/upload-file.config';
 import { FileCollectionCreateDto } from './dto/file-collection.create.dto';
 import { FileCollectionDetailDto } from './dto/file-collection.detail.dto';
@@ -47,6 +50,7 @@ export class UploadFileService
     private readonly fileCollectionRepository: FileCollectionRepository,
     private readonly fileEntryRepository: FileEntryRepository,
     private readonly configService: ConfigService,
+    private readonly dataSource: DataSource
   ) {
     super(
       fileCollectionRepository,
@@ -78,6 +82,7 @@ export class UploadFileService
     file: Express.Multer.File,
     dto: FileUploadDto,
   ): Promise<FileEntryDetailDto> {
+
     if (!file) {
       throw new BadRequestException('File không được để trống');
     }
@@ -87,7 +92,7 @@ export class UploadFileService
     file.originalname = dto.originalName ?? '';
 
     // Save file to disk
-    const fileEntry = await this.saveFileToDisk(file, 1);
+    const fileEntry = await this.saveFileToDisk(file, 1, dto);
 
     const detailDto = new FileEntryDetailDto();
     detailDto.fromEntity(fileEntry);
@@ -101,52 +106,83 @@ export class UploadFileService
     files: Express.Multer.File[],
     dto: FileUploadDto,
   ): Promise<FileCollectionDetailDto> {
-    if (!files || files.length === 0) {
-      throw new BadRequestException('Files không được để trống');
-    }
+    const querryRunner = this.dataSource.createQueryRunner();
 
-    if (files.length > this.config.maxFilesPerRequest) {
-      throw new BadRequestException(
-        `Chỉ được upload tối đa ${this.config.maxFilesPerRequest} files`,
+    await querryRunner.connect();
+    await querryRunner.startTransaction();
+    try {
+      const manager = querryRunner.manager;
+      if (!files || files.length === 0) {
+        throw new BadRequestException('Files không được để trống');
+      }
+
+      if (files.length > this.config.maxFilesPerRequest) {
+        throw new BadRequestException(
+          `Chỉ được upload tối đa ${this.config.maxFilesPerRequest} files`,
+        );
+      }
+
+      // Validate all files
+      files.forEach((file) => {
+        this.validateFile(file, dto.category);
+      });
+
+      const updateEntity = this._getRepositoryEntityByCategory(dto.category);
+      dto.relatedEntityType = updateEntity.name;
+      let collection: FileCollection;
+      let totalFileEnitryChild = 0;
+
+      if (dto.collectionId) {
+        const findCollection = await manager.findOne(FileCollection, {
+          where: { id: dto.collectionId },
+          relations: ['files'],
+        });
+        if (!findCollection) {
+          throw new NotFoundException('Không tìm thấy collection');
+        }
+        collection = findCollection;
+        totalFileEnitryChild = findCollection.files?.length || 0;
+      } else {
+        // Create file collection
+        const collectionDto = new FileCollectionCreateDto();
+        collectionDto.name = dto.name;
+        collectionDto.category = dto.category;
+        collectionDto.description = dto.description;
+        collectionDto.relatedEntityType = updateEntity.name;
+        collectionDto.relatedEntityId = dto.relatedEntityId;
+        collectionDto.isPublic = dto.isPublic === 'true' ? true : false;
+        collectionDto.propertyId = dto.propertyId;
+
+        collection = await manager.save(FileCollection, collectionDto);
+      }
+
+      // Save all files to disk
+      const fileEntries = await Promise.all(
+        files.map((file, index) =>
+          this.saveFileToDisk(file, index + 1 + totalFileEnitryChild, dto, collection.id, manager),
+        ),
       );
+
+      const collectionWithFiles = await manager.findOne(FileCollection, {
+        where: { id: collection.id },
+        relations: ['files'],
+      });
+
+      if (!collectionWithFiles) {
+        throw new NotFoundException('Không tìm thấy collection sau khi tạo');
+      }
+
+      const detailDto = new FileCollectionDetailDto();
+      detailDto.fromEntity(collectionWithFiles);
+      await this._uploadCategoryEntity(dto.category, dto.relatedEntityId, collection.id, manager);
+      await querryRunner.commitTransaction();
+      return detailDto;
+    } catch (error) {
+      await querryRunner.rollbackTransaction();
+      throw new BadGatewayException(error);
+    } finally {
+      await querryRunner.release();
     }
-
-    // Validate all files
-    files.forEach((file) => {
-      this.validateFile(file, dto.category);
-    });
-
-    // Create file collection
-    const collectionDto = new FileCollectionCreateDto();
-    collectionDto.name = dto.name;
-    collectionDto.category = dto.category;
-    collectionDto.description = dto.description;
-    collectionDto.relatedEntityType = dto.relatedEntityType;
-    collectionDto.relatedEntityId = dto.relatedEntityId;
-    collectionDto.isPublic = dto.isPublic ?? true;
-
-    const collection = await this.create(collectionDto);
-
-    // Save all files to disk
-    const fileEntries = await Promise.all(
-      files.map((file, index) =>
-        this.saveFileToDisk(file, index + 1, collection.id),
-      ),
-    );
-
-    // Get collection with files
-    const collectionWithFiles = await this.fileCollectionRepository.findOne({
-      where: { id: collection.id },
-      relations: ['files'],
-    });
-
-    if (!collectionWithFiles) {
-      throw new NotFoundException('Không tìm thấy collection sau khi tạo');
-    }
-
-    const detailDto = new FileCollectionDetailDto();
-    detailDto.fromEntity(collectionWithFiles);
-    return detailDto;
   }
 
   /**
@@ -265,7 +301,9 @@ export class UploadFileService
   private async saveFileToDisk(
     file: Express.Multer.File,
     order: number,
+    dto: FileUploadDto,
     collectionId?: string,
+    manager?: EntityManager,
   ): Promise<FileEntry> {
     // Generate file name with UUID
     const extension = this.getFileExtension(file.originalname);
@@ -302,6 +340,13 @@ export class UploadFileService
     fileEntry.filePath = filePath;
     fileEntry.collectionId = collectionId ?? undefined;
     fileEntry.order = order;
+    fileEntry.category = dto.category;
+    fileEntry.relatedEntityType = dto.relatedEntityType;
+    fileEntry.relatedEntityId = dto.relatedEntityId;
+    fileEntry.propertyId = dto.propertyId;
+    if (manager) {
+      return await manager.save(FileEntry, fileEntry);
+    }
 
     // Save to database
     return await this.fileEntryRepository.save(fileEntry);
@@ -377,6 +422,30 @@ export class UploadFileService
       throw new BadRequestException(
         `Lỗi khi xóa file entry: ${error instanceof Error ? error.message : String(error)}`,
       );
+    }
+  }
+
+  private async _uploadCategoryEntity(category: UploadCategory, entityId: string, collectionId: string, manager: EntityManager): Promise<void> {
+    const updateEntity = this._getRepositoryEntityByCategory(category);
+    const entity = await manager.findOne(updateEntity, {
+      where: { id: entityId },
+    });
+    if (!entity) {
+      throw new NotFoundException('Entity not found');
+    }
+
+    (entity as any).imageCollectionId = collectionId;
+    await manager.save(updateEntity, entity);
+  }
+
+  private _getRepositoryEntityByCategory(category: UploadCategory) {
+    switch (category) {
+      // case UploadCategory.PROPERTY:
+      //   return this.propertiesRepository;
+      case UploadCategory.ROOM:
+        return Rooms;
+      default:
+        throw new BadRequestException('Category không hợp lệ');
     }
   }
 }

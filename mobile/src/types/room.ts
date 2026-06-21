@@ -1,3 +1,4 @@
+import { UploadedFile } from '@/components/Uploadfile';
 import { ContractListResponse } from './contract';
 import { ContractServiceDetailResponse } from './contract-service';
 import { PropertyDetail } from './property';
@@ -25,6 +26,7 @@ export interface Room {
   property?: PropertyDetail;
   contracts: ContractListResponse[];
   isPrepaidRoom?: boolean;
+  imageCollectionId?: string;
 }
 
 export interface RoomListResponse extends Room {
@@ -34,6 +36,7 @@ export interface RoomListResponse extends Room {
 export interface RoomDetailResponse extends Room {
   propertyName?: string;
   contractServices: ContractServiceDetailResponse[];
+  images?: UploadedFile[]
 }
 
 export interface RoomUpdateRequest extends Room {

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Rooms } from '../property/entities/rooms.entity';
 import uploadFileConfig from './config/upload-file.config';
 import { FileCollection } from './entities/file-collection.entity';
 import { FileEntry } from './entities/file-entry.entity';
@@ -12,7 +13,7 @@ import { UploadFileService } from './upload-file.service';
 @Module({
   imports: [
     ConfigModule.forFeature(uploadFileConfig),
-    TypeOrmModule.forFeature([FileCollection, FileEntry]),
+    TypeOrmModule.forFeature([FileCollection, FileEntry, Rooms]),
   ],
   controllers: [UploadFileController],
   providers: [
@@ -22,4 +23,4 @@ import { UploadFileService } from './upload-file.service';
   ],
   exports: [UploadFileService, FileCollectionRepository, FileEntryRepository],
 })
-export class UploadFileModule {}
+export class UploadFileModule { }

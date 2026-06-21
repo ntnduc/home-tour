@@ -1,10 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
+import { AxiosProgressEvent } from 'axios';
 import { StyleProp, ViewStyle } from 'react-native';
 import type { LabelProps } from '../LabelForm';
 
 export type UploadFileType = 'image' | 'file' | 'both';
 
 export type UploadStatus = 'success' | 'error' | 'loading' | 'prepare';
+
+export type UploadVariant = 'single' | 'multiple';
+
+export type UploadFileTypeAction = 'update' | 'detail' | 'create';
 
 export interface UploadedFile {
   id?: string;
@@ -16,12 +21,50 @@ export interface UploadedFile {
   [key: string]: any;
 }
 
-export interface UploadFileCollectionDto {
+export interface FileEntry {
+  id: string;
+  originalName: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  extension: string;
+  filePath: string;
+  order?: number;
+  metadata?: Record<string, any>;
+  collectionId?: string;
+  isDeleted: boolean;
+  deletedAt?: Date;
+  isPublic: boolean;
+  url?: string;
+}
+
+export interface FileCollection {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  files: FileEntry[] | null;
+  [key: string]: any;
+}
+
+export interface FileEntryDetailResponse extends FileEntry {
+  [key: string]: any;
+}
+
+export interface FileCollectionDetailResponse extends FileCollection {
+  files: FileEntryDetailResponse[] | null;
+}
+
+export interface UploadFileDto {
   name?: string;
   category?: string;
   description?: string;
   relatedEntityType?: string;
   relatedEntityId?: string;
+  propertyId?: string;
+  collectionId?: string;
+  fileEntryId?: string;
   isPublic?: boolean;
 }
 
@@ -34,9 +77,10 @@ export interface UploadFileIconProps {
 
 // Các props dùng chung cho cả single và multiple upload
 export interface UploadFileBaseProps {
+  typeAction: UploadFileTypeAction;
   label?: string | LabelProps;
   url?: string;
-  type?: UploadFileType;
+  typeFile?: UploadFileType;
   error?: string;
   required?: boolean;
   disabled?: boolean;
@@ -51,5 +95,11 @@ export interface UploadFileBaseProps {
   icon?: keyof typeof Ionicons.glyphMap;
   iconProps?: UploadFileIconProps;
   showPreview?: boolean;
+  postData?: UploadFileDto;
+  onChange?: (
+    files: UploadedFile[] | FileEntryDetailResponse[] | UploadedFile | null,
+    status: UploadStatus,
+    progressEvent?: AxiosProgressEvent,
+  ) => void;
 }
 

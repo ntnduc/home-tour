@@ -35,6 +35,10 @@ export class RoomUpdateDto extends BaseUpdateDto<Rooms> {
   @IsOptional()
   isPrepaidRoom?: boolean;
 
+  @IsString()
+  @IsOptional()
+  imageCollectionId?: string
+
   getEntity(): Rooms {
     const entity = new Rooms();
     entity.name = this.name;
@@ -47,6 +51,7 @@ export class RoomUpdateDto extends BaseUpdateDto<Rooms> {
     entity.defaultPaymentDueDay = this.defaultPaymentDueDay;
     entity.isPrepaidRoom = this.isPrepaidRoom;
     entity.description = this.description;
+    entity.imageCollectionId = this.imageCollectionId
     return entity;
   }
 }
