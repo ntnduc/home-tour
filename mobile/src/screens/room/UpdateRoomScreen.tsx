@@ -16,7 +16,7 @@ import {
 } from '@/types/room';
 import { formatCurrency } from '@/utils/appUtil';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -34,7 +34,7 @@ type UpdateRoomScreenProps = {
 
 const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
   const { roomId } = route.params;
-
+  const [uploadProgress, setUploadProgress] = useState(false);
   const {
     handleSubmit,
     formState: { isLoading, defaultValues, errors: erroForms, isSubmitting },
@@ -359,7 +359,13 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
                 collectionId: value,
                 isPublic: true,
               }}
-              onChange={() => { }}
+              onChange={(files, status, progressEvent) => {
+                if (status !== 'success') {
+                  setUploadProgress(true)
+                  return;
+                }
+                setUploadProgress(false)
+              }}
             />
           }}
         />
@@ -396,14 +402,14 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
             label: 'Lưu thay đổi',
             onPress: handleSubmit(handleSave, handleError),
             variant: 'primary',
-            isLoading: isLoading || isSubmitting,
+            isLoading: isLoading || isSubmitting || uploadProgress,
             icon: 'checkmark-circle',
           },
           {
             label: 'Xoá phòng',
             onPress: handleSubmit(handleSave, handleError),
             variant: 'danger',
-            isLoading: isLoading || isSubmitting,
+            isLoading: isLoading || isSubmitting || uploadProgress,
             icon: 'trash-outline',
             hidden: () => defaultValues?.status === RoomStatus.OCCUPIED,
           },

@@ -151,9 +151,14 @@ export const uploadFileCollection = async (
       xhr.onabort = () => reject(new Error("Upload aborted"));
 
       xhr.send(formData);
+    }).then(response => {
+      onChange?.("success");
+      return response;
+    }).catch(error => {
+      onChange?.("error");
+      throw error;
     });
 
-    onChange?.("success");
     return responseData;
   } catch (error) {
     onChange?.("error");
