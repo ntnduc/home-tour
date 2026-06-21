@@ -23,15 +23,18 @@ export class BaseService<
   TListDto extends BaseListDto<TEntity>,
   TCreateDto extends BaseCreateDto<TEntity>,
   TUpdateDto extends BaseUpdateDto<TEntity>,
-> implements IBaseService<TEntity, TDetailDto, TListDto, TCreateDto, TUpdateDto>
-{
+> implements IBaseService<TEntity, TDetailDto, TListDto, TCreateDto, TUpdateDto> {
   constructor(
     protected readonly genericRepository: BaseRepository<TEntity>,
     protected readonly detailDto: new () => TDetailDto,
     protected readonly listDto: new () => TListDto,
     protected readonly createDto: new () => TCreateDto,
     protected readonly updateDto: new () => TUpdateDto,
-  ) {}
+  ) { }
+
+  protected getServiceName(): string {
+    return this.constructor.name;
+  }
 
   async specQuery(): Promise<SelectQueryBuilder<TEntity>> {
     const query = this.genericRepository.createQueryBuilder('entity');

@@ -4,16 +4,27 @@ import { storage } from "@/utils/storage";
 import { AxiosProgressEvent } from "axios";
 // Dùng API legacy của expo-file-system cho upload + progress
 import * as FileSystem from "expo-file-system/legacy";
-import { FileCollectionDetailResponse, UploadFileCollectionDto, UploadedFile } from "./types";
+import { FileCollectionDetailResponse, UploadedFile, UploadFileDto } from "./types";
 
 // Upload 1 file bằng expo-file-system, hỗ trợ progress
 export const uploadFile = async (
   file: UploadedFile,
+  postData?: UploadFileDto,
   onChange?: (status: "success" | "error" | "loading", progressEvent?: AxiosProgressEvent) => void
 ) => {
   try {
     const token = await storage.getAccessToken();
     const uploadUrl = `${API_URL}${PREFIX_URL}/upload-file/upload`;
+    const parameters = {
+      originalName: file.name || `file_${Date.now()}`,
+      category: postData?.category ?? '',
+      description: postData?.description ?? '',
+      relatedEntityType: postData?.relatedEntityType ?? '',
+      relatedEntityId: postData?.relatedEntityId ?? '',
+      propertyId: postData?.propertyId ?? '',
+      isPublic: postData?.isPublic ? 'true' : 'false',
+      fileEntryId: postData?.fileEntryId ?? '',
+    }
 
     const uploadTask = FileSystem.createUploadTask(
       uploadUrl,
@@ -23,7 +34,7 @@ export const uploadFile = async (
         uploadType: FileSystem.FileSystemUploadType.MULTIPART,
         fieldName: "file",
         parameters: {
-          originalName: file.name || `file_${Date.now()}`,
+          ...parameters,
         },
         headers: {
           Accept: "application/json",
@@ -73,7 +84,7 @@ export const uploadFile = async (
 // Upload nhiều file theo endpoint mới /upload/multiple, có progress
 export const uploadFileCollection = async (
   files: UploadedFile[],
-  dto?: UploadFileCollectionDto,
+  dto?: UploadFileDto,
   onChange?: (status: "success" | "error" | "loading", progressEvent?: AxiosProgressEvent) => void
 ) => {
   try {
@@ -95,6 +106,8 @@ export const uploadFileCollection = async (
     if (dto?.description) formData.append("description", dto.description);
     if (dto?.relatedEntityType) formData.append("relatedEntityType", dto.relatedEntityType);
     if (dto?.relatedEntityId) formData.append("relatedEntityId", dto.relatedEntityId);
+    if (dto?.propertyId) formData.append("propertyId", dto.propertyId);
+    if (dto?.collectionId) formData.append("collectionId", dto.collectionId);
     if (typeof dto?.isPublic === "boolean") {
       formData.append("isPublic", String(dto.isPublic));
     }

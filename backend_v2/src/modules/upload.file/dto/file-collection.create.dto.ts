@@ -34,6 +34,10 @@ export class FileCollectionCreateDto extends BaseCreateDto<FileCollection> {
   @IsOptional()
   isPublic?: boolean;
 
+  @IsString()
+  @IsOptional()
+  propertyId?: string;
+
   getEntity(): FileCollection {
     const entity = new FileCollection();
     entity.name = this.name;
@@ -42,6 +46,7 @@ export class FileCollectionCreateDto extends BaseCreateDto<FileCollection> {
     entity.relatedEntityType = this.relatedEntityType;
     entity.relatedEntityId = this.relatedEntityId;
     entity.isPublic = this.isPublic ?? true;
+    entity.propertyId = this.propertyId;
     return entity;
   }
 }

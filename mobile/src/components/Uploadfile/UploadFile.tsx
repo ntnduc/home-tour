@@ -20,7 +20,7 @@ import { validateFile } from './util';
 
 export interface UploadFileProps extends UploadFileBaseProps {
   value?: UploadedFile | null;
-  onChange?: (files: UploadedFile | null, status: UploadStatus) => void;
+  // onChange?: (files: UploadedFile | null, status: UploadStatus) => void;
   multiple?: boolean;
 }
 
@@ -28,7 +28,8 @@ const UploadFile: React.FC<UploadFileProps> = ({
   label,
   value,
   onChange,
-  type = 'both',
+  postData,
+  typeFile = 'image',
   error,
   required = false,
   disabled = false,
@@ -64,7 +65,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [processStatus, setProcessStatus] = useState<'prepare' | 'loading' | 'success' | 'error'>('prepare');
+  const [processStatus, setProcessStatus] = useState<UploadStatus>('prepare');
   const [files, setFiles] = useState<UploadedFile | null | undefined>(value);
 
   const uploadAsync = async (fileToUpload: UploadedFile) => {
@@ -74,7 +75,7 @@ const UploadFile: React.FC<UploadFileProps> = ({
       onChange?.(fileToUpload, processStatus);
       onUploadStart?.();
 
-      const response = await uploadFile(fileToUpload, (status, progessEvent) => {
+      const response = await uploadFile(fileToUpload, postData, (status, progessEvent) => {
         if (progessEvent?.loaded != null && progessEvent?.total != null) {
           const progress = (progessEvent.loaded / (progessEvent.total ?? 1)) * 100;
           setProgress(progress);
@@ -231,9 +232,9 @@ const UploadFile: React.FC<UploadFileProps> = ({
   };
 
   const handlePick = () => {
-    if (type === 'image') {
+    if (typeFile === 'image') {
       handlePickImage();
-    } else if (type === 'file') {
+    } else if (typeFile === 'file') {
       handlePickFile();
     } else {
       Alert.alert(
@@ -352,9 +353,9 @@ const UploadFile: React.FC<UploadFileProps> = ({
                     />
                     <Text style={styles.uploadButtonText}>
                       {placeholder ||
-                        (type === 'image'
+                        (typeFile === 'image'
                           ? 'Chọn hình ảnh'
-                          : type === 'file'
+                          : typeFile === 'file'
                             ? 'Chọn file'
                             : 'Chọn hình ảnh hoặc file')}
                     </Text>

@@ -1,25 +1,17 @@
 import React from 'react';
-import UploadFile, { UploadFileProps } from './UploadFile';
+import UploadFile from './UploadFile';
 import UploadMultiFile, { UploadMultiFileProps } from './UploadMultiFile';
 
-type UploadVariant = 'single' | 'multiple';
+
 
 export interface CommonUploadProps
-  extends Omit<UploadFileProps, 'multiple' | 'value' | 'onChange'> {
-  /**
-   * Kiểu upload:
-   *  - 'single': 1 file
-   *  - 'multiple': nhiều file
-   */
-  variant?: UploadVariant;
+  extends UploadFileBaseProps {
+  variant: UploadVariant;
   value?: UploadedFile | UploadedFile[] | string[] | string | null;
-  onChange?: (
-    files: UploadedFile | UploadedFile[] | null,
-    status: 'success' | 'error' | 'loading' | 'prepare',
-  ) => void;
+
 }
 
-import { UploadedFile } from './types';
+import { UploadedFile, UploadFileBaseProps, UploadVariant } from './types';
 
 /**
  * Component chung cho upload, chọn đúng implementation theo `variant`
@@ -44,8 +36,7 @@ const CommonUpload: React.FC<CommonUploadProps> = ({
     <UploadFile
       {...rest}
       value={value as UploadedFile | null}
-      onChange={(file, status) => onChange?.(file, status)}
-    />
+      onChange={(file, status) => onChange?.(file, status)} />
   );
 };
 

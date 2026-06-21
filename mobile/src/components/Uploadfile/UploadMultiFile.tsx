@@ -1,7 +1,6 @@
 import { createStyles } from '@/styles/component/StyleUploadFile';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Ionicons } from '@expo/vector-icons';
-import { AxiosProgressEvent } from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -15,10 +14,8 @@ import {
 import ImageView from 'react-native-image-viewing';
 import LabelForm from '../LabelForm';
 import {
-  FileEntryDetailResponse,
   UploadedFile,
-  UploadFileBaseProps,
-  UploadStatus
+  UploadFileBaseProps
 } from './types';
 import {
   deleteFile,
@@ -30,11 +27,11 @@ import { validateFile } from './util';
 
 export interface UploadMultiFileProps extends UploadFileBaseProps {
   value?: UploadedFile[] | UploadedFile | string[] | string | null;
-  onChange?: (
-    files: UploadedFile[] | FileEntryDetailResponse[] | null,
-    status: UploadStatus,
-    progressEvent?: AxiosProgressEvent,
-  ) => void;
+  // onChange?: (
+  //   files: UploadedFile[] | FileEntryDetailResponse[] | null,
+  //   status: UploadStatus,
+  //   progressEvent?: AxiosProgressEvent,
+  // ) => void;
   minFiles?: number;
   maxFiles?: number;
 }
@@ -58,6 +55,7 @@ const UploadMultiFile: React.FC<UploadMultiFileProps> = ({
   value,
   onChange,
   error,
+  postData,
   required = false,
   disabled = false,
   maxSize = 10,
@@ -161,13 +159,13 @@ const UploadMultiFile: React.FC<UploadMultiFileProps> = ({
 
       const response = await uploadFileCollection(
         newFiles,
-        undefined,
+        postData,
         (status, progressEvent) => {
           onChange?.(files, status, progressEvent);
         },
       );
       const uploadedFiles = normalizeUploadResponse(response);
-      const merged = [...files, ...uploadedFiles].slice(0, maxFiles);
+      const merged = [...uploadedFiles].slice(0, maxFiles);
 
       setFiles(merged);
       onChange?.(merged, 'success');

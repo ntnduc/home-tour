@@ -54,4 +54,21 @@ export class FileEntry extends BaseEntity {
   @IsOptional()
   propertyId?: string;
 
+  @Column({ length: 50, nullable: true })
+  category?: string;
+
+  /**
+   * Loại entity liên quan (nullable)
+   * Ví dụ: "Contract", "Invoice", "Client", "Property"
+   */
+  @Column({ nullable: true })
+  relatedEntityType?: string;
+
+  /**
+   * ID của entity liên quan (nullable)
+   * Ví dụ: UUID của Contract hoặc Invoice
+   */
+  @Column({ nullable: true })
+  relatedEntityId?: string;
+
 }

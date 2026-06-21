@@ -7,6 +7,7 @@ import Loading from '@/components/Loading';
 import Status from '@/components/Status';
 import { Switch } from '@/components/Switch';
 import CommonUpload from '@/components/Uploadfile';
+import { FileCategory } from '@/components/Uploadfile/fileEnum';
 import { ROOM_STATUS_OPTIONS } from '@/constant/room.constant';
 import {
   RoomDetailResponse,
@@ -347,9 +348,17 @@ const UpdateRoomScreen = ({ navigation, route }: UpdateRoomScreenProps) => {
           render={({ field: { value } }) => {
             return <CommonUpload
               label="Ảnh thực tế"
-              type="image"
+              typeFile="image"
+              typeAction="update"
               variant="multiple"
               value={value}
+              postData={{
+                category: FileCategory.ROOM,
+                relatedEntityId: defaultValues?.id,
+                propertyId: defaultValues?.propertyId,
+                collectionId: value,
+                isPublic: true,
+              }}
               onChange={() => { }}
             />
           }}

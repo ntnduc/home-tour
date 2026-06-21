@@ -1,9 +1,9 @@
 import {
-  IsBoolean,
   IsOptional,
   IsString,
-  Length,
+  Length
 } from 'class-validator';
+import { UploadCategory } from 'src/common/enums/upload.enum';
 
 export class FileUploadDto {
   @IsString()
@@ -13,8 +13,7 @@ export class FileUploadDto {
 
   @IsString()
   @Length(0, 50)
-  @IsOptional()
-  category?: string;
+  category: UploadCategory;
 
   @IsString()
   @IsOptional()
@@ -26,13 +25,22 @@ export class FileUploadDto {
 
   @IsString()
   @IsOptional()
-  relatedEntityId?: string;
+  relatedEntityId: string;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  isPublic?: boolean;
+  isPublic?: string;
 
   @IsString()
   @IsOptional()
   originalName?: string;
+
+  @IsString()
+  @IsOptional()
+  propertyId?: string;
+
+  @IsString()
+  @IsOptional()
+  collectionId?: string;
+
 }

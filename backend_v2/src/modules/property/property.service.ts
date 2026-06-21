@@ -38,14 +38,13 @@ export class PropertyService
     PropertyUpdateDto
   >
   implements
-    IBaseService<
-      Properties,
-      PropertyDetailDto,
-      PropertyListDto,
-      PropertyCreateDto,
-      PropertyUpdateDto
-    >
-{
+  IBaseService<
+    Properties,
+    PropertyDetailDto,
+    PropertyListDto,
+    PropertyCreateDto,
+    PropertyUpdateDto
+  > {
   constructor(
     private propertiesRepository: PropertiesRepository,
     private servicesRepository: ServicesRepository,
