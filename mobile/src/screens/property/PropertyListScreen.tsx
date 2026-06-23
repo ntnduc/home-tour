@@ -84,91 +84,94 @@ const PropertyListScreen = ({ navigation }: PropertyListScreenProps) => {
   };
 
   return (
-    <SafeAreaView className="bg-white flex-1" edges={['top']}>
+    <SafeAreaView edges={['top']} style={{
+      backgroundColor: colors.background.default,
+      flex: 1
+    }}>
       {/* <StatusBar barStyle="dark-content" backgroundColor={"#fff"} /> */}
-      <View>
-        <HeaderComponents
-          title="Quản lý tài sản"
-          isSearch
-          searchConfig={{
-            placeholder: 'Tìm kiếm tài sản...',
-            onSearch: handleSearch,
-            className: 'mx-2',
-          }}
-        />
-      </View>
+      <HeaderComponents
+        title="Quản lý tài sản"
+        isSearch
+        searchConfig={{
+          placeholder: 'Tìm kiếm tài sản...',
+          onSearch: handleSearch,
+          className: 'mx-2',
+        }}
+      />
       {isLoading && (
         <View className="flex-1 justify-center items-center">
           <Loading />
         </View>
       )}
       {!isLoading && (
-        <FlatList
-          data={flatData as PropertyListResponse[]}
-          renderItem={({ item }) => {
-            return (
-              <PropertyCardComponent
-                property={item}
-                onPress={() => handlePropertyPress(item.id)}
-                onEdit={() => handleUpdateProperty(item.id)}
-                onViewRooms={() => handleViewRooms(item.id)}
-                onAddRoom={() => handleAddRoom(item.id)}
+        <View style={{ flex: 1, backgroundColor: colors.background.paper }}>
+          <FlatList
+            data={flatData as PropertyListResponse[]}
+            renderItem={({ item }) => {
+              return (
+                <PropertyCardComponent
+                  property={item}
+                  onPress={() => handlePropertyPress(item.id)}
+                  onEdit={() => handleUpdateProperty(item.id)}
+                  onViewRooms={() => handleViewRooms(item.id)}
+                  onAddRoom={() => handleAddRoom(item.id)}
+                />
+              );
+            }}
+            keyExtractor={(item) => item.id}
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  refetch();
+                }}
               />
-            );
-          }}
-          keyExtractor={(item) => item.id}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={() => {
-                refetch();
-              }}
-            />
-          }
-          ListHeaderComponent={
-            <View style={styles.statsRow}>
-              <View
-                style={[
-                  styles.statsBox,
-                  { backgroundColor: colors.primary.light },
-                ]}
-              >
-                <Text style={styles.statsIcon}>🏢</Text>
-                <Text style={styles.statsValue}>{totalBuildings}</Text>
-                <Text style={styles.statsLabel}>Tài sản</Text>
+            }
+            ListHeaderComponent={
+              <View style={styles.statsRow}>
+                <View
+                  style={[
+                    styles.statsBox,
+                    { backgroundColor: colors.primary.light },
+                  ]}
+                >
+                  <Text style={styles.statsIcon}>🏢</Text>
+                  <Text style={styles.statsValue}>{totalBuildings}</Text>
+                  <Text style={styles.statsLabel}>Tài sản</Text>
+                </View>
+                <View
+                  style={[
+                    styles.statsBox,
+                    { backgroundColor: colors.status.success + '20' },
+                  ]}
+                >
+                  <Text style={styles.statsIcon}>🔑</Text>
+                  <Text style={styles.statsValue}>{totalRooms}</Text>
+                  <Text style={styles.statsLabel}>Phòng</Text>
+                </View>
+                <View
+                  style={[
+                    styles.statsBox,
+                    { backgroundColor: colors.status.warning + '20' },
+                  ]}
+                >
+                  <Text style={styles.statsIcon}>👤</Text>
+                  <Text style={styles.statsValue}>{totalTenants}</Text>
+                  <Text style={styles.statsLabel}>Đã thuê</Text>
+                </View>
               </View>
-              <View
-                style={[
-                  styles.statsBox,
-                  { backgroundColor: colors.status.success + '20' },
-                ]}
-              >
-                <Text style={styles.statsIcon}>🔑</Text>
-                <Text style={styles.statsValue}>{totalRooms}</Text>
-                <Text style={styles.statsLabel}>Phòng</Text>
+            }
+            contentContainerStyle={{ padding: 10 }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View className="items-center mt-10">
+                <Text style={{ color: colors.text.secondary }}>
+                  Không tìm thấy tài sản phù hợp.
+                </Text>
               </View>
-              <View
-                style={[
-                  styles.statsBox,
-                  { backgroundColor: colors.status.warning + '20' },
-                ]}
-              >
-                <Text style={styles.statsIcon}>👤</Text>
-                <Text style={styles.statsValue}>{totalTenants}</Text>
-                <Text style={styles.statsLabel}>Đã thuê</Text>
-              </View>
-            </View>
-          }
-          contentContainerStyle={{ padding: 10 }}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View className="items-center mt-10">
-              <Text style={{ color: colors.text.secondary }}>
-                Không tìm thấy tài sản phù hợp.
-              </Text>
-            </View>
-          }
-        />
+            }
+          />
+        </View>
       )}
       <FabButton
         icon="add"

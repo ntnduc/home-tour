@@ -6,6 +6,7 @@ import { PropertyListResponse, PropertyRoomsStatus } from '@/types/property';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+
 interface PropertyCardComponentProps {
   property: PropertyListResponse;
   onPress: () => void;
@@ -52,16 +53,27 @@ const PropertyCardComponent = ({
 
   return (
     <CardComponent
-      className="mt-3"
+      style={{
+        backgroundColor: colors.background.default,
+        borderRadius: 14,
+        padding: 16,
+        marginBottom: 16,
+        shadowColor: colors.neutral.black,
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: colors.border.light,
+      }}
       title={property.name}
       actions={['edit', 'delete']}
       onActionPress={(key) => {
         if (key === 'edit') onEdit();
       }}
-      // classNameBadge="absolute right-[-80] top-[-35]"
       statusBadge={{ ...status }}
     >
-      <View className="flex flex-col">
+      <View
+      >
         <View>
           <Text style={styles.buildingAddress}>{property.address}</Text>
         </View>
