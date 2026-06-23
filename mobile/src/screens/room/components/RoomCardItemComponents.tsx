@@ -102,13 +102,13 @@ const RoomCardItemComponent = ({ item, navigation }: Props) => {
                       style={[
                         styles.paymentDateText,
                         contractActive.endDate &&
-                        new Date(contractActive.endDate) < new Date()
+                          new Date(contractActive.endDate) < new Date()
                           ? styles.overdueText
                           : contractActive.endDate &&
-                              new Date(contractActive.endDate) <=
-                                new Date(
-                                  new Date().setDate(new Date().getDate() + 3),
-                                )
+                            new Date(contractActive.endDate) <=
+                            new Date(
+                              new Date().setDate(new Date().getDate() + 3),
+                            )
                             ? styles.warningText
                             : styles.normalText,
                       ]}
