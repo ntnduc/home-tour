@@ -93,7 +93,7 @@ const ContractDetailScreen = ({
           return;
         }
 
-        await deactivateContract(contract.id, text)
+        deactivateContract(contract.id, text)
           .then(() => { })
           .finally(() => {
             Toast.show({

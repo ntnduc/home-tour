@@ -58,6 +58,10 @@ export interface ContractUpdateRequest {
   notes?: string;
 }
 
+export interface ContractTerminateRequest extends ContractDetailResponse {
+  reason?: string
+}
+
 export interface ContractDetailResponse extends Contract {
   room?: RoomDetailResponse;
   property?: PropertyDetail;

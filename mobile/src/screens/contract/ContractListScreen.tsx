@@ -3,8 +3,9 @@ import Loading from "@/components/Loading";
 import { ApiResponse } from "@/types/api";
 import { BasePagingResponse } from "@/types/base.response";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -44,6 +45,12 @@ const ContractListScreen = ({ navigation }: ContractListScreenProps) => {
           : undefined;
       },
     });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const flatData =
     data?.pages
@@ -198,7 +205,7 @@ const ContractListScreen = ({ navigation }: ContractListScreenProps) => {
         }
         }
         onTerminate={() =>
-          navigation.navigate("TerminateContract", { contract: item })
+          navigation.navigate("TerminateContract", { contractId: item.id })
         }
         onRenew={() => {
           // TODO: Implement renew contract

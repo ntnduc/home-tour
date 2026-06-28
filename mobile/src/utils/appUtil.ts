@@ -1,7 +1,9 @@
 import { checkLogin as checkLoginApi } from '@/api/auth/api';
 import { User } from '@/types/user';
+import { clsx, type ClassValue } from 'clsx';
 import { Platform } from 'react-native';
 import uuid from 'react-native-uuid';
+import { twMerge } from 'tailwind-merge';
 import { storage } from './storage';
 
 export const getStoreUser = async (): Promise<User | undefined> => {
@@ -52,4 +54,8 @@ export const isIOSSystem = () => {
 
 export const isAndroidSystem = () => {
   return getCurrentOS() === 'android';
+};
+
+export const cn = (...classes: ClassValue[]) => {
+  return twMerge(clsx(classes));
 };
