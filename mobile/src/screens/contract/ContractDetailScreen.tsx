@@ -94,7 +94,7 @@ const ContractDetailScreen = ({
         }
 
         await deactivateContract(contract.id, text)
-          .then(() => {})
+          .then(() => { })
           .finally(() => {
             Toast.show({
               type: 'success',
@@ -269,23 +269,20 @@ const ContractDetailScreen = ({
           {contract.status === ContractStatus.ACTIVE &&
             daysRemaining !== null && (
               <View
-                className={`rounded-lg p-3 border ${
-                  daysRemaining <= 7
-                    ? 'bg-yellow-50 border-yellow-200'
-                    : 'bg-blue-50 border-blue-200'
-                }`}
+                className={`rounded-lg p-3 border ${daysRemaining <= 7
+                  ? 'bg-yellow-50 border-yellow-200'
+                  : 'bg-blue-50 border-blue-200'
+                  }`}
               >
                 <Text
-                  className={`text-sm font-semibold mb-1 ${
-                    daysRemaining <= 7 ? 'text-yellow-800' : 'text-blue-800'
-                  }`}
+                  className={`text-sm font-semibold mb-1 ${daysRemaining <= 7 ? 'text-yellow-800' : 'text-blue-800'
+                    }`}
                 >
                   Thời gian còn lại:
                 </Text>
                 <Text
-                  className={`text-base font-bold ${
-                    daysRemaining <= 7 ? 'text-yellow-600' : 'text-blue-600'
-                  }`}
+                  className={`text-base font-bold ${daysRemaining <= 7 ? 'text-yellow-600' : 'text-blue-600'
+                    }`}
                 >
                   {daysRemaining > 0
                     ? `${daysRemaining} ngày`
@@ -376,8 +373,8 @@ const ContractDetailScreen = ({
         {/* Thông tin bổ sung */}
         <CardComponent title="Thông tin bổ sung">
           <View>
-            {renderRow('Ngày tạo', formatDate(contract.createdAt))}
-            {renderRow('Ngày cập nhật', formatDate(contract.updatedAt), true)}
+            {renderRow('Ngày tạo', formatDate(contract.createdAt ?? ""))}
+            {renderRow('Ngày cập nhật', formatDate(contract.updatedAt ?? ""), true)}
             {renderRow('Số người ở cùng', contract.partnerClientCount ?? 0)}
             {contract.notes && (
               <View className="mt-2 pt-2 border-t border-gray-200">
@@ -423,23 +420,23 @@ const ContractDetailScreen = ({
           actions={[
             ...(canRenew
               ? [
-                  {
-                    label: 'Gia hạn',
-                    icon: 'refresh' as keyof typeof Ionicons.glyphMap,
-                    variant: 'success' as const,
-                    onPress: handleRenewContract,
-                  },
-                ]
+                {
+                  label: 'Gia hạn',
+                  icon: 'refresh' as keyof typeof Ionicons.glyphMap,
+                  variant: 'success' as const,
+                  onPress: handleRenewContract,
+                },
+              ]
               : []),
             ...(canTerminate
               ? [
-                  {
-                    label: 'Kết thúc hợp đồng',
-                    icon: 'close-circle' as keyof typeof Ionicons.glyphMap,
-                    variant: 'danger' as const,
-                    onPress: handleTerminateContract,
-                  },
-                ]
+                {
+                  label: 'Kết thúc hợp đồng',
+                  icon: 'close-circle' as keyof typeof Ionicons.glyphMap,
+                  variant: 'danger' as const,
+                  onPress: handleTerminateContract,
+                },
+              ]
               : []),
           ]}
         />

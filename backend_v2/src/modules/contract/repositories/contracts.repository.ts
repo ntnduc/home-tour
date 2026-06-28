@@ -10,20 +10,6 @@ export class ContractsRepository extends BaseRepository<Contracts> {
     super(Contracts, dataSource);
   }
 
-  // override globalQuery(
-  //   query: SelectQueryBuilder<Contracts>,
-  // ): SelectQueryBuilder<Contracts> {
-  //   const currentUserId = RequestContextService.getUserId();
-
-  //   // Chỉ hiển thị hợp đồng mà user là chủ nhà hoặc người thuê chính
-  //   query.andWhere(
-  //     `(${query.alias}.landlordUserId = :currentUserId OR ${query.alias}.primaryTenantUserId = :currentUserId)`,
-  //     { currentUserId },
-  //   );
-
-  //   return query;
-  // }
-
   override globalQuery(
     query: SelectQueryBuilder<Contracts>,
   ): SelectQueryBuilder<Contracts> {

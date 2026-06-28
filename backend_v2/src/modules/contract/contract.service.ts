@@ -39,14 +39,13 @@ export class ContractService
     ContractUpdateDto
   >
   implements
-    IBaseService<
-      Contracts,
-      ContractDetailDto,
-      ContractListDto,
-      ContractCreateDto,
-      ContractUpdateDto
-    >
-{
+  IBaseService<
+    Contracts,
+    ContractDetailDto,
+    ContractListDto,
+    ContractCreateDto,
+    ContractUpdateDto
+  > {
   constructor(
     private readonly contractsRepository: ContractsRepository,
     private readonly roomsRepository: RoomsRepository,
@@ -68,17 +67,11 @@ export class ContractService
   async specQuery(): Promise<SelectQueryBuilder<Contracts>> {
     const query = this.contractsRepository
       .createQueryBuilder('contract')
-      .leftJoinAndSelect('contract.property', 'property')
       .leftJoinAndSelect('contract.room', 'room')
-      .leftJoinAndSelect('room.property', 'roomProperty')
       .leftJoinAndSelect('contract.contractClient', 'contractClient')
       .leftJoinAndSelect('contractClient.client', 'client')
-      .leftJoinAndSelect('contract.contractProperties', 'contractProperties')
-      .leftJoinAndSelect('contractProperties.property', 'contractProperty')
-      .leftJoinAndSelect('contract.contractServices', 'contractServices')
-      .leftJoinAndSelect('contractServices.propertyService', 'propertyService')
-      .leftJoinAndSelect('propertyService.service', 'service');
-
+      .leftJoinAndSelect('contract.contractServices', 'contractServices');
+    query.orderBy('contract.createdAt', 'DESC');
     return query;
   }
 
