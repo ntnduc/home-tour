@@ -1,15 +1,18 @@
+import CardComponent from "@/screens/common/CardComponent";
+import { colors } from "@/theme/colors";
+import { formatCurrency } from "@/utils/appUtil";
+import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import {
-  Contract,
-  CONTRACT_STATUS_COLOR,
-  CONTRACT_STATUS_LABEL,
-  ContractStatus,
-} from "../types/contract";
+  CONTRACT_STATUS_BADGE,
+  ContractListResponse,
+  ContractStatus
+} from "../../../types/contract";
 
 interface ContractCardProps {
-  contract: Contract;
+  contract: ContractListResponse;
   onPress: () => void;
   showActions?: boolean;
   onViewDetails?: () => void;
@@ -25,95 +28,59 @@ const ContractCard = ({
   onTerminate,
   onRenew,
 }: ContractCardProps) => {
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString("vi-VN");
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
-  };
 
   const getDaysRemaining = () => {
     const today = new Date();
-    const endDate = new Date(contract.endDate);
+    const endDate = new Date(contract.endDate ?? "");
     const diffTime = endDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
 
-  const getStatusColor = (status: ContractStatus) => {
-    return CONTRACT_STATUS_COLOR[status] || { bg: "#F3F4F6", color: "#6B7280" };
-  };
+  // const getStatusColor = (status: ContractStatus) => {
+  //   return CONTRACT_STATUS_COLOR[status] || { bg: "#F3F4F6", color: "#6B7280" };
+  // };
 
   const daysRemaining = getDaysRemaining();
-  const statusColor = getStatusColor(contract.status);
+  // const statusColor = getStatusColor(contract.status);
   const canRenew =
     contract.status === ContractStatus.ACTIVE && daysRemaining <= 30;
   const canTerminate = contract.status === ContractStatus.ACTIVE;
 
-  return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.contractId}>Hợp đồng #{contract.id}</Text>
-          <Text style={styles.roomInfo}>
-            {contract.roomName} - {contract.buildingName}
-          </Text>
-        </View>
-        <View style={styles.headerRight}>
-          <View
-            style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}
-          >
-            <Text style={[styles.statusText, { color: statusColor.color }]}>
-              {CONTRACT_STATUS_LABEL[contract.status]}
-            </Text>
-          </View>
+  const tenantContract = contract.client?.findLast(item => item.isLandlordClient && item.isActiveInContract);
 
-          {/* Action Menu */}
-          {showActions && (
-            <View style={styles.actionMenu}>
-              {onViewDetails && (
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={onViewDetails}
-                >
-                  <Ionicons name="eye-outline" size={16} color="#007AFF" />
-                </TouchableOpacity>
-              )}
-              {canRenew && onRenew && (
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.renewButton]}
-                  onPress={onRenew}
-                >
-                  <Ionicons name="refresh-outline" size={16} color="#34C759" />
-                </TouchableOpacity>
-              )}
-              {canTerminate && onTerminate && (
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.terminateButton]}
-                  onPress={onTerminate}
-                >
-                  <Ionicons name="close-outline" size={16} color="#FF3B30" />
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-      </View>
+  return (
+    <CardComponent style={styles.card}
+      actions={['view', {
+        key: 'renew',
+        disabled: !canRenew
+      }, {
+          key: 'terminate',
+          disabled: !canTerminate
+        }]}
+      title={contract.code}
+      description={`${contract.roomName} - ${contract.propertyName}`}
+      onActionPress={(key) => {
+        if (key === 'view') {
+          onViewDetails?.();
+        } else if (key === 'renew' && canRenew) {
+          onRenew?.();
+        } else if (key === 'terminate' && canTerminate) {
+          onTerminate?.();
+        }
+      }}
+      statusBadge={CONTRACT_STATUS_BADGE[contract.status]}>
 
       {/* Tenant Info */}
       <View style={styles.tenantSection}>
         <View style={styles.tenantHeader}>
           <Ionicons name="person" size={16} color="#6B7280" />
-          <Text style={styles.tenantHeaderText}>Người thuê</Text>
+          <Text style={styles.tenantName}>{tenantContract?.name}</Text>
         </View>
-        <Text style={styles.tenantName}>{contract.tenantName}</Text>
-        <Text style={styles.tenantPhone}>📞 {contract.tenantPhone}</Text>
-        {contract.tenantEmail && (
+        <Text style={styles.tenantPhone}>📞 {tenantContract?.phoneNumber}</Text>
+        {/* {contract.tenantEmail && (
           <Text style={styles.tenantEmail}>📧 {contract.tenantEmail}</Text>
-        )}
+        )} */}
       </View>
 
       {/* Contract Period */}
@@ -129,13 +96,14 @@ const ContractCard = ({
               {formatDate(contract.startDate)}
             </Text>
           </View>
-          <Ionicons name="arrow-forward" size={16} color="#6B7280" />
-          <View style={styles.periodItem}>
+          {contract.endDate &&
+            <Ionicons name="arrow-forward" size={16} color="#6B7280" />}
+          {contract.endDate && <View style={[styles.periodItem, { alignItems: 'flex-end' }]}>
             <Text style={styles.periodLabel}>Kết thúc</Text>
             <Text style={styles.periodDate}>
-              {formatDate(contract.endDate)}
+              {formatDate(contract.endDate ?? "")}
             </Text>
-          </View>
+          </View>}
         </View>
 
         {contract.status === ContractStatus.ACTIVE && (
@@ -170,36 +138,32 @@ const ContractCard = ({
         <View style={styles.financialRow}>
           <Text style={styles.financialLabel}>Tiền thuê:</Text>
           <Text style={styles.financialValue}>
-            {formatCurrency(contract.monthlyRent)}đ/tháng
+            {formatCurrency(contract.rentAmountAgreed)}đ/tháng
           </Text>
         </View>
         <View style={styles.financialRow}>
           <Text style={styles.financialLabel}>Tiền cọc:</Text>
           <Text style={styles.financialValue}>
-            {formatCurrency(contract.deposit)}đ
+            {formatCurrency(contract.depositAmountPaid)}đ
           </Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </CardComponent>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: colors.background.default,
+    borderRadius: 14,
     padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 16,
+    shadowColor: colors.neutral.black,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: colors.border.light,
   },
   header: {
     flexDirection: "row",
@@ -277,6 +241,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1F2937",
     marginBottom: 2,
+    marginLeft: 6,
   },
   tenantPhone: {
     fontSize: 13,
@@ -312,6 +277,8 @@ const styles = StyleSheet.create({
   },
   periodItem: {
     flex: 1,
+    justifyContent: 'space-between',
+    alignContent: 'space-between'
   },
   periodLabel: {
     fontSize: 12,

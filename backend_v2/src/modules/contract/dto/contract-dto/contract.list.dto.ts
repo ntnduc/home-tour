@@ -1,6 +1,7 @@
 import { BaseListDto } from '../../../../common/base/dto/list.dto';
 import { ContractStatus } from '../../../../common/enums/contract.enum';
 import { Contracts } from '../../entities/contracts.entity';
+import { ContractClientListDto } from '../contract-client-dto/contract-client.list.dto';
 
 export class ContractListDto extends BaseListDto<Contracts> {
   code: string;
@@ -8,12 +9,7 @@ export class ContractListDto extends BaseListDto<Contracts> {
   roomId: string;
   roomName: string;
   propertyName: string;
-  primaryPropertyUser: {
-    id: string;
-    fullName: string;
-    phone: string;
-    email?: string;
-  };
+  client?: ContractClientListDto[];
   landlordName: string;
   startDate: Date;
   endDate?: Date;
@@ -30,7 +26,7 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.propertyId = entity.propertyId;
     this.roomId = entity.roomId;
     this.roomName = entity.room?.name || '';
-    this.propertyName = entity.room?.property?.name || '';
+    this.propertyName = entity?.property?.name || '';
     this.startDate = entity.startDate;
     this.endDate = entity.endDate;
     this.rentAmountAgreed = entity.rentAmountAgreed;
@@ -39,6 +35,11 @@ export class ContractListDto extends BaseListDto<Contracts> {
     this.status = entity.status;
     this.totalProperties =
       entity.contractClient?.filter((p) => p.isActiveInContract).length || 0;
+    this.client = entity.contractClient && entity.contractClient?.map(item => {
+      const dto = new ContractClientListDto();
+      dto.fromEntity(item);
+      return dto;
+    });
     this.createdAt = entity.createdAt;
     this.updatedAt = entity.updatedAt;
     this.code = entity.code;

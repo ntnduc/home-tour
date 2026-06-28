@@ -1,5 +1,6 @@
+import { StatusType } from '@/components/Status';
 import { ClientCreateRequest } from './client';
-import { ContractClientDetailResponse } from './contract-client';
+import { ContractClientDetailResponse, ContractClientListResponse } from './contract-client';
 import {
   ContractServiceCreateRequest,
   ContractServiceDetailResponse,
@@ -18,6 +19,7 @@ export enum ContractStatus {
 export interface Contract {
   id: string;
   propertyId: string;
+  code: string;
   roomId: string;
   startDate: string;
   endDate?: string;
@@ -29,6 +31,9 @@ export interface Contract {
   notes?: string;
   partnerClientCount?: number;
   isPrepaidRoom?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+
 }
 
 export interface ContractCreateRequest extends Omit<Contract, 'id' | 'status'> {
@@ -60,34 +65,10 @@ export interface ContractDetailResponse extends Contract {
   contractServices: ContractServiceDetailResponse[];
 }
 
-export interface ContractListResponse {
-  id: string;
-  code: string;
-  propertyId: string;
-  roomId: string;
-  landlordUserId: string;
-  startDate: string;
-  endDate?: string;
-  rentAmountAgreed: number;
-  depositAmountPaid: number;
-  paymentDueDay: number;
-  contractScanURL?: string;
-  status: ContractStatus;
-  notes?: string;
-  room: {
-    id: string;
-    name: string;
-    property: {
-      id: string;
-      name: string;
-      address: string;
-    };
-  };
-  primaryPropertyUser: {
-    id: string;
-    fullName: string;
-    phone: string;
-  };
+export interface ContractListResponse extends Contract {
+  roomName?: string;
+  propertyName?: string;
+  client?: ContractClientListResponse[];
 }
 
 export const CONTRACT_STATUS_LABEL: Record<ContractStatus, string> = {
@@ -115,4 +96,12 @@ export const CONTRACT_STATUS_ICON: Record<ContractStatus, string> = {
   [ContractStatus.ENDED]: 'time-outline',
   [ContractStatus.TERMINATED_EARLY]: 'close-circle',
   [ContractStatus.EXPIRED]: 'ellipse-outline',
+};
+
+export const CONTRACT_STATUS_BADGE: Record<ContractStatus, { key: StatusType, label?: string, bg?: string, color?: string }> = {
+  [ContractStatus.PENDING_START]: { label: 'Chờ bắt đầu', key: 'info', ...CONTRACT_STATUS_COLOR[ContractStatus.PENDING_START] },
+  [ContractStatus.ACTIVE]: { label: 'Đang hiệu lực', key: 'success', ...CONTRACT_STATUS_COLOR[ContractStatus.ACTIVE] },
+  [ContractStatus.ENDED]: { label: 'Đã kết thúc', key: 'error', ...CONTRACT_STATUS_COLOR[ContractStatus.ENDED] },
+  [ContractStatus.TERMINATED_EARLY]: { label: 'Đã kết thúc sớm', key: 'warning', ...CONTRACT_STATUS_COLOR[ContractStatus.TERMINATED_EARLY] },
+  [ContractStatus.EXPIRED]: { label: 'Hết hạn', key: 'info', ...CONTRACT_STATUS_COLOR[ContractStatus.EXPIRED] },
 };

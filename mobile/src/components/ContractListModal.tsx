@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { FlatList, Modal, Text, TouchableOpacity, View } from 'react-native';
+import ContractCard from '../screens/contract/components/ContractCard';
 import { colors } from '../theme/colors';
 import { Contract, ContractStatus } from '../types/contract';
-import ContractCard from './ContractCard';
 
 interface ContractListModalProps {
   visible: boolean;

@@ -15,8 +15,11 @@ export interface ContractClientDetailResponse extends ContractClient {
   client?: ClientDetailResponse;
 }
 
-export interface ContractClientListResponse extends ContractClient {}
+export interface ContractClientListResponse extends ContractClient {
+  phoneNumber?: string;
+  client?: ClientDetailResponse;
+}
 
-export interface ContractClientCreateRequest extends ContractClient {}
+export interface ContractClientCreateRequest extends ContractClient { }
 
-export interface ContractClientUpdateRequest extends ContractClient {}
+export interface ContractClientUpdateRequest extends ContractClient { }

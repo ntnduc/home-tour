@@ -14,6 +14,7 @@ import {
 
 export type CardActionConfig = {
   key: string;
+  disabled?: boolean;
   icon?: React.ReactNode;
   label?: string;
   onPress?: (event: GestureResponderEvent) => void;
@@ -98,7 +99,13 @@ const CardComponent = (props: CardComponentProps) => {
         presetKey: action,
       };
     }
-    return action;
+    const preset = CARD_ACTION_PRESETS[action.key];
+    const preBuildAction = {
+      ...preset(() => onActionPress && onActionPress(action.key)),
+      presetKey: action.key,
+      ...action,
+    }
+    return preBuildAction;
   };
 
   // Helper: lấy style cho action preset
@@ -119,6 +126,14 @@ const CardComponent = (props: CardComponentProps) => {
     }
   };
 
+  const filteredActions = actions?.filter((action) => {
+
+    if (typeof action === 'string') {
+      return true;
+    }
+    return !action.disabled;
+  });
+
   const badge = getStatusBadge(statusBadge);
 
   return (
@@ -128,7 +143,7 @@ const CardComponent = (props: CardComponentProps) => {
     >
       {header !== undefined ? (
         header
-      ) : title || actions || renderActions ? (
+      ) : title || filteredActions || renderActions ? (
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', flex: 1 }} className="mb-3">
             <View style={{ flex: 1 }}>
@@ -176,30 +191,29 @@ const CardComponent = (props: CardComponentProps) => {
                 )}
               </View>
               <View style={styles.actionsContainer}>
-                {actions &&
-                  actions.map((action, idx) => {
-                    const act = buildAction(action);
-                    if (!act) return null;
-                    return act.customButton ? (
-                      <View key={act.key} style={styles.actionItem}>
-                        {act.customButton}
-                      </View>
-                    ) : (
-                      <TouchableOpacity
-                        key={act.key}
-                        onPress={(e) => {
-                          act.onPress?.(e as any);
-                        }}
-                        style={getActionStyle(
-                          (act as any).presetKey,
-                          act.style,
-                        )}
-                        accessibilityLabel={act.label}
-                      >
-                        {act.icon}
-                      </TouchableOpacity>
-                    );
-                  })}
+                {filteredActions && filteredActions.map((action, idx) => {
+                  const act = buildAction(action);
+                  if (!act) return null;
+                  return act.customButton ? (
+                    <View key={act.key} style={styles.actionItem}>
+                      {act.customButton}
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      key={act.key}
+                      onPress={(e) => {
+                        act.onPress?.(e as any);
+                      }}
+                      style={getActionStyle(
+                        (act as any).presetKey,
+                        act.style,
+                      )}
+                      accessibilityLabel={act.label}
+                    >
+                      {act.icon}
+                    </TouchableOpacity>
+                  );
+                })}
                 {renderActions && renderActions()}
               </View>
             </View>
