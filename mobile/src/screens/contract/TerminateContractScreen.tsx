@@ -1,88 +1,106 @@
+import { deactivateContract, getContract } from "@/api/contract/contract.api";
+import ActionButtonBottom from "@/components/ActionButtonBottom";
+import CardContent from "@/components/CardContent";
+import DisplayField from "@/components/DisplayField";
+import InputBase from "@/components/Input";
+import Loading from "@/components/Loading";
+import { RootStackParamList } from "@/navigation/types";
+import { formatCurrency } from "@/utils/appUtil";
+import { formatDate } from "@/utils/dateUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
-  Alert,
-  ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
-import { Contract } from "../../types/contract";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Toast from "react-native-toast-message";
+import { ContractTerminateRequest } from "../../types/contract";
 
-type RootStackParamList = {
-  TerminateContract: { contract: Contract };
-  RoomList: undefined;
-};
 
 type TerminateContractScreenProps = {
-  navigation: NativeStackNavigationProp<RootStackParamList>;
-  route: { params: { contract: Contract } };
+  navigation: NativeStackNavigationProp<RootStackParamList, 'TerminateContract'>;
+  route: { params: { contractId: string } };
 };
 
 const TerminateContractScreen = ({
   navigation,
   route,
 }: TerminateContractScreenProps) => {
-  const { contract } = route.params;
-  const [isLoading, setIsLoading] = useState(false);
+  const { contractId } = route.params;
   const [terminationReason, setTerminationReason] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const { control, handleSubmit, setValue, setError, formState: { isLoading, defaultValues: contract, errors } } = useForm<ContractTerminateRequest>({
+    defaultValues: async () => {
+      const response = await getContract(contractId);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      Toast.show({
+        type: 'error',
+        text1: 'Lỗi',
+        text2: response.message ?? 'Không thể tải thông tin hợp đồng',
+      });
+      navigation.goBack();
+      return {} as ContractTerminateRequest;
+    },
+  });
 
-    if (!terminationReason.trim()) {
-      newErrors.terminationReason = "Lý do kết thúc không được để trống";
-    }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleTerminate = async () => {
-    if (!validateForm()) {
-      Alert.alert("Lỗi", "Vui lòng nhập lý do kết thúc hợp đồng");
+  const handleTerminate = async (data: ContractTerminateRequest) => {
+    if (!data.reason) {
+      Toast.show({
+        type: 'error',
+        text1: 'Lỗi',
+        text2: 'Vui lòng nhập lý do kết thúc hợp đồng',
+      });
+      setError("reason", { message: 'Vui lòng nhập lý do kết thúc hợp đồng' });
       return;
     }
+    deactivateContract(data.id, data.reason)
+      .then(() => { })
+      .finally(() => {
+        Toast.show({
+          type: 'success',
+          text1: 'Thành công',
+          text2: 'Đã kết thúc hợp đồng thành công!',
+        });
+        navigation.goBack();
+      });
+  }
 
-    setIsLoading(true);
 
-    try {
-      // TODO: Gọi API kết thúc hợp đồng
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
+  if (isLoading || !contract) {
+    return <Loading />;
+  }
 
-      Alert.alert("Thành công", "Đã kết thúc hợp đồng thành công!", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("RoomList"),
-        },
-      ]);
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể kết thúc hợp đồng");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString("vi-VN");
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
-  };
+  const terminateClient = contract.contractClient?.findLast(client => client?.isLandlordClient && client.isActiveInContract);
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <ScrollView
-        className="flex-1 px-4 py-3"
+    <>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 16,
+          paddingBottom: 16,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+        enableOnAndroid={true}
+        extraScrollHeight={30}
+        keyboardOpeningTime={0}
+        enableAutomaticScroll={true}
+        enableResetScrollToCoords={false}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Header cảnh báo */}
-        <View className="bg-red-50 rounded-xl p-4 mb-3 border border-red-200">
+        <View className="bg-red-50 rounded-xl p-4 border border-red-200">
           <View className="flex-row items-start">
             <Ionicons
               name="warning"
@@ -103,81 +121,15 @@ const TerminateContractScreen = ({
         </View>
 
         {/* Thông tin hợp đồng */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Thông tin hợp đồng
-          </Text>
-
-          <View className="space-y-3">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-600">Mã hợp đồng</Text>
-              <Text className="text-sm font-semibold text-gray-900">
-                #{contract.id}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-600">Phòng</Text>
-              <Text className="text-sm font-semibold text-gray-900">
-                {contract.roomName} - {contract.buildingName}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-600">Người thuê</Text>
-              <Text className="text-sm font-semibold text-gray-900">
-                {contract.tenantName}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-600">Thời hạn</Text>
-              <Text className="text-sm font-semibold text-gray-900">
-                {formatDate(contract.startDate)} -{" "}
-                {formatDate(contract.endDate)}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-gray-600">Tiền thuê</Text>
-              <Text className="text-sm font-semibold text-gray-900">
-                {formatCurrency(contract.monthlyRent)}đ/tháng
-              </Text>
-            </View>
+        <CardContent title="Thông tin hợp đồng">
+          <View>
+            <DisplayField strong label="Mã hợp đồng" value={contract.code} />
+            <DisplayField strong label="Người thuê" value={terminateClient?.name} />
+            <DisplayField label="Phòng" value={contract.room?.name} />
+            <DisplayField label="Thời hạn" value={`${formatDate(contract.startDate ?? "")} - ${formatDate(contract.endDate ?? "")}`} />
+            <DisplayField label="Tiền thuê" value={`${formatCurrency(contract.rentAmountAgreed ?? 0)} đ/tháng`} />
           </View>
-        </View>
-
-        {/* Lý do kết thúc */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Lý do kết thúc *
-          </Text>
-
-          <View
-            className={`bg-gray-50 rounded-lg border ${errors.terminationReason ? "border-red-300 bg-red-50" : "border-gray-200"}`}
-          >
-            <TextInput
-              className="p-3 text-base text-gray-900 min-h-[100px]"
-              value={terminationReason}
-              onChangeText={(value) => {
-                setTerminationReason(value);
-                if (errors.terminationReason) {
-                  setErrors((prev) => ({ ...prev, terminationReason: "" }));
-                }
-              }}
-              placeholder="Nhập lý do kết thúc hợp đồng..."
-              placeholderTextColor="#9CA3AF"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-          </View>
-          {errors.terminationReason && (
-            <Text className="text-xs text-red-500 mt-1 ml-1">
-              {errors.terminationReason}
-            </Text>
-          )}
-        </View>
+        </CardContent>
 
         {/* Thông tin hoàn trả */}
         <View className="bg-blue-50 rounded-xl p-4 mb-3 border border-blue-200">
@@ -186,40 +138,33 @@ const TerminateContractScreen = ({
           </Text>
 
           <View className="space-y-3">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-blue-700">Tiền cọc</Text>
-              <Text className="text-sm font-semibold text-blue-800">
-                {formatCurrency(contract.deposit)}đ
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-sm text-blue-700">Dịch vụ đã trả</Text>
-              <Text className="text-sm font-semibold text-blue-800">
-                {formatCurrency(
-                  contract.services
-                    .filter((service) => service.isIncluded)
-                    .reduce((sum, service) => sum + service.price, 0)
-                )}
-                đ
-              </Text>
-            </View>
+            <DisplayField
+              label="Tiền cọc"
+              value={formatCurrency(contract.depositAmountPaid ?? 0)}
+              labelClassName="text-base text-blue-700"
+              valueClassName="text-base font-semibold text-blue-800"
+            />
+            {contract.contractServices && contract.contractServices.length > 0 && <DisplayField
+              label="Dịch vụ đã trả"
+              value={formatCurrency(
+                contract.contractServices
+                  .filter((service) => service?.isEnabled)
+                  .reduce((sum, service) => sum + Number(service?.price), 0)
+              )}
+              labelClassName="text-base text-blue-700"
+              valueClassName="text-base font-semibold text-blue-800" />}
 
             <View className="border-t border-blue-200 pt-3">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-base font-semibold text-blue-800">
-                  Tổng hoàn trả
-                </Text>
-                <Text className="text-lg font-bold text-blue-600">
-                  {formatCurrency(
-                    contract.deposit +
-                      contract.services
-                        .filter((service) => service.isIncluded)
-                        .reduce((sum, service) => sum + service.price, 0)
-                  )}
-                  đ
-                </Text>
-              </View>
+              {contract.depositAmountPaid && contract.contractServices && contract.contractServices.length > 0 && <DisplayField
+                label="Tổng hoàn trả"
+                value={formatCurrency(
+                  contract.depositAmountPaid +
+                  contract.contractServices
+                    .filter((service) => service?.isEnabled)
+                    .reduce((sum, service) => sum + Number(service?.price), 0)
+                )}
+                labelClassName="text-base font-semibold text-blue-800"
+                valueClassName="text-lg font-bold text-blue-600" />}
             </View>
           </View>
 
@@ -231,13 +176,33 @@ const TerminateContractScreen = ({
           </View>
         </View>
 
-        {/* Các lý do phổ biến */}
-        <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
-            Lý do phổ biến
-          </Text>
+        {/* Lý do kết thúc */}
+        <CardContent title={<Text className="text-lg font-bold text-gray-900 mb-4">
+          Lý do kết thúc
+          <Text style={{ color: "#ff3b30" }}> * </Text>
+        </Text>}>
+          <Controller
+            control={control}
+            name="reason"
+            render={({ field: { onChange, value } }) => (
+              <InputBase
+                required
+                type="area"
+                placeholder="Lý do kết thúc"
+                value={value}
+                onChangeText={onChange}
+                showClear={false}
+                error={errors.reason?.message}
+              />
+            )}
+          />
+        </CardContent>
 
-          <View className="space-y-2">
+
+
+        {/* Các lý do phổ biến */}
+        <CardContent title='Lý do phổ biến'>
+          <View className="flex flex-col gap-2">
             {[
               "Hết hạn hợp đồng",
               "Người thuê tự ý chấm dứt",
@@ -249,57 +214,37 @@ const TerminateContractScreen = ({
               <TouchableOpacity
                 key={index}
                 className="p-3 bg-gray-50 rounded-lg border border-gray-200"
-                onPress={() => setTerminationReason(reason)}
+                onPress={() => setValue('reason', reason)}
               >
                 <Text className="text-sm text-gray-700">{reason}</Text>
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-      </ScrollView>
+        </CardContent>
+        {/* <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
+          <Text className="text-lg font-bold text-gray-900 mb-4">
+            Lý do phổ biến
+          </Text>
 
-      {/* Action Buttons - Bottom Sheet Style */}
-      <View className="bg-white border-t border-gray-200 px-4 py-3">
-        <View className="flex-row gap-3">
-          {/* Cancel Button */}
-          <TouchableOpacity
-            className="flex-1 flex-row items-center justify-center py-3 px-4 rounded-xl border border-gray-300 bg-white"
-            onPress={() => navigation.goBack()}
-            disabled={isLoading}
-          >
-            <Ionicons name="close" size={18} color="#6B7280" />
-            <Text className="text-gray-600 font-semibold text-base ml-2">
-              Hủy
-            </Text>
-          </TouchableOpacity>
+          
+        </View> */}
+      </KeyboardAwareScrollView>
 
-          {/* Confirm Button */}
-          <TouchableOpacity
-            className="flex-1 flex-row items-center justify-center py-3 px-4 rounded-xl bg-red-500"
-            onPress={handleTerminate}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <View className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
-            )}
-            <Text className="text-white font-semibold text-base ml-2">
-              {isLoading ? "Đang xử lý..." : "Xác nhận"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Back Button */}
-      <TouchableOpacity
-        className="absolute top-16 left-4 w-10 h-10 rounded-full bg-white/90 items-center justify-center shadow-md"
-        onPress={() => navigation.goBack()}
-        disabled={isLoading}
-      >
-        <Ionicons name="arrow-back" size={20} color="#374151" />
-      </TouchableOpacity>
-    </View>
+      <ActionButtonBottom
+        actions={[{
+          label: 'Kết thúc hợp đồng',
+          icon: 'checkmark-circle',
+          variant: 'danger',
+          onPress: handleSubmit(handleTerminate, () => {
+            Toast.show({
+              type: 'error',
+              text1: 'Lỗi',
+              text2: 'Vui lòng nhập lý do kết thúc hợp đồng',
+            });
+          }),
+        }]}
+      />
+    </>
   );
 };
 

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
+
 import DisplayPhoneNumber from '@/components/DisplayPhoneNumber';
+import { cn } from '@/utils/appUtil';
 
 type DisplayFieldType = 'text' | 'phone';
 
@@ -38,7 +40,7 @@ const DisplayField = ({
     if (type === 'phone' && typeof fallbackValue === 'string') {
       return (
         <DisplayPhoneNumber
-          className={`text-base text-gray-900 ${strong ? 'font-semibold' : ''} ${valueClassName}`}
+          className={cn('text-base text-gray-900', strong ? 'font-semibold' : '', valueClassName)}
         >
           {fallbackValue}
         </DisplayPhoneNumber>
@@ -47,7 +49,7 @@ const DisplayField = ({
 
     return (
       <Text
-        className={`text-base text-gray-900 ${strong ? 'font-semibold' : ''} ${valueClassName}`}
+        className={cn('text-base text-gray-900', strong ? 'font-semibold' : '', valueClassName)}
       >
         {fallbackValue}
       </Text>
@@ -56,7 +58,7 @@ const DisplayField = ({
 
   return (
     <View className={_containerClassName}>
-      <Text className={`text-base text-gray-600 ${labelClassName}`}>
+      <Text className={cn('text-base text-gray-600', labelClassName)}>
         {label}
       </Text>
       {renderValue()}

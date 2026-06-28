@@ -1,4 +1,4 @@
-import { Contract, ContractCreateRequest } from '@/types/contract';
+import { ContractCreateRequest } from '@/types/contract';
 import { InvoiceCreateRequest } from '@/types/invoice';
 import { Room } from '@/types/room';
 
@@ -38,7 +38,7 @@ export type RootStackParamList = {
     room: string;
     property: string;
   };
-  TerminateContract: { contract: Contract };
+  TerminateContract: { contractId: string };
 
   // Invoice Management
   InvoiceDetail: { invoiceId: string; fromHistory?: boolean };
