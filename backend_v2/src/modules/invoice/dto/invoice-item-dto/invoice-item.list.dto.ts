@@ -7,7 +7,7 @@ export class InvoiceItemListDto extends BaseListDto<InvoiceItem> {
   amount: number;
   type: InvoiceItemType;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 
   fromEntity(entity: InvoiceItem): void {
     this.id = entity.id;
