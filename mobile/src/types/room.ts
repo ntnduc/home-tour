@@ -1,14 +1,15 @@
-import { UploadedFile } from '@/components/Uploadfile';
-import { ContractListResponse } from './contract';
-import { ContractServiceDetailResponse } from './contract-service';
-import { PropertyDetail } from './property';
+import { UploadedFile } from "@/components/Uploadfile";
+import { ContractListResponse } from "./contract";
+import { ContractServiceDetailResponse } from "./contract-service";
+import { InvoiceListResponse } from "./invoice";
+import { PropertyDetail } from "./property";
 
 export enum RoomStatus {
-  AVAILABLE = 'AVAILABLE',
-  OCCUPIED = 'OCCUPIED',
-  MAINTENANCE = 'MAINTENANCE',
-  PENDING_DEPOSIT = 'PENDING_DEPOSIT',
-  UNAVAILABLE = 'UNAVAILABLE',
+  AVAILABLE = "AVAILABLE",
+  OCCUPIED = "OCCUPIED",
+  MAINTENANCE = "MAINTENANCE",
+  PENDING_DEPOSIT = "PENDING_DEPOSIT",
+  UNAVAILABLE = "UNAVAILABLE",
 }
 
 export interface Room {
@@ -31,12 +32,13 @@ export interface Room {
 
 export interface RoomListResponse extends Room {
   landlordClient: string;
+  invoices?: InvoiceListResponse[];
 }
 
 export interface RoomDetailResponse extends Room {
   propertyName?: string;
   contractServices: ContractServiceDetailResponse[];
-  images?: UploadedFile[]
+  images?: UploadedFile[];
 }
 
 export interface RoomUpdateRequest extends Room {

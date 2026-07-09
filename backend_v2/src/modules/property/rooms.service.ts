@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseService } from 'src/common/base/crud/base.service';
+import { ContractStatus } from 'src/common/enums/contract.enum';
 import { RoomStatus } from 'src/common/enums/room.enum';
 import { SelectQueryBuilder } from 'typeorm';
 import { ContractServiceDetailDto } from '../contract/dto/contract-services-dto/contract-service.detail.dto';
@@ -40,8 +41,23 @@ export class RoomsService extends BaseService<
   override async specQuery(): Promise<SelectQueryBuilder<Rooms>> {
     const query = this.roomsRepository
       .createQueryBuilder('entity')
-      .leftJoinAndSelect('entity.contracts', 'contracts')
-      .leftJoinAndSelect('contracts.contractClient', 'contractClient');
+      .leftJoinAndSelect(
+        'entity.contracts',
+        'contracts',
+        'contracts.status = :status',
+        {
+          status: ContractStatus.ACTIVE,
+        },
+      )
+      .leftJoinAndSelect('contracts.contractClient', 'contractClient')
+      .leftJoinAndSelect(
+        'entity.invoices',
+        'invoices',
+        'invoices.status IN (:...statuses)',
+        {
+          statuses: ['PENDING', 'OVERDUE'],
+        },
+      );
     query.orderBy('property.name', 'ASC');
     return query;
   }

@@ -1,6 +1,7 @@
 import { BaseListDto } from 'src/common/base/dto/list.dto';
 import { ContractStatus } from 'src/common/enums/contract.enum';
 import { ContractListDto } from 'src/modules/contract/dto/contract-dto/contract.list.dto';
+import { InvoiceListDto } from 'src/modules/invoice/dto/invoice-dto/invoice.list.dto';
 import { Rooms } from '../../entities/rooms.entity';
 import { PropertyDetailDto } from '../properties-dto/property.detail.dto';
 
@@ -18,6 +19,7 @@ export class RoomListDto extends BaseListDto<Rooms> {
   property?: PropertyDetailDto;
   contracts?: ContractListDto[];
   landlordClient: string;
+  invoices?: InvoiceListDto[];
 
   fromEntity(entity: Rooms): void {
     this.id = entity.id;
@@ -31,6 +33,14 @@ export class RoomListDto extends BaseListDto<Rooms> {
     this.defaultDepositAmount = entity.defaultDepositAmount;
     this.defaultPaymentDueDay = entity.defaultPaymentDueDay;
     this.description = entity.description;
+
+    if (entity.invoices && entity.invoices.length > 0) {
+      this.invoices = entity.invoices.map((invoice) => {
+        const invoiceDto = new InvoiceListDto();
+        invoiceDto.fromEntity(invoice);
+        return invoiceDto;
+      });
+    }
 
     if (entity.contracts && entity.contracts.length > 0) {
       this.contracts = entity.contracts.map((contract) => {

@@ -1,6 +1,7 @@
 import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContractStatus } from 'src/common/enums/contract.enum';
+import { InvoiceStatus } from 'src/common/enums/invoice.enum';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
@@ -48,6 +49,8 @@ export class InvoiceService
 
   async create(dto: InvoiceCreateDto): Promise<InvoiceDetailDto> {
     const entity = dto.getEntity();
+    entity.status = InvoiceStatus.PENDING;
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
