@@ -1,4 +1,9 @@
-import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContractStatus } from 'src/common/enums/contract.enum';
 import { InvoiceStatus } from 'src/common/enums/invoice.enum';
@@ -24,13 +29,14 @@ export class InvoiceService
     InvoiceUpdateDto
   >
   implements
-  IBaseService<
-    Invoice,
-    InvoiceDetailDto,
-    InvoiceListDto,
-    InvoiceCreateDto,
-    InvoiceUpdateDto
-  > {
+    IBaseService<
+      Invoice,
+      InvoiceDetailDto,
+      InvoiceListDto,
+      InvoiceCreateDto,
+      InvoiceUpdateDto
+    >
+{
   constructor(
     private readonly invoiceRepository: InvoiceRepository,
     private readonly invoiceItemRepository: InvoiceItemRepository,
@@ -55,7 +61,6 @@ export class InvoiceService
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-
       const findContract = await this.contractRepository.findOne({
         where: { id: dto.contractId, roomId: dto.roomId },
       });
@@ -83,12 +88,14 @@ export class InvoiceService
 
       const createdEntity = this.invoiceRepository.create(entity);
       await queryRunner.manager.save(createdEntity);
-      entity.invoiceItems.forEach(item => {
+      entity.invoiceItems.forEach((item) => {
         item.invoiceId = createdEntity.id;
         item.propertyId = createdEntity.propertyId;
       });
 
-      const createdInvoiceItems = this.invoiceItemRepository.create(entity.invoiceItems);
+      const createdInvoiceItems = this.invoiceItemRepository.create(
+        entity.invoiceItems,
+      );
       await queryRunner.manager.save(createdInvoiceItems);
       createdEntity.invoiceItems = createdInvoiceItems;
       await queryRunner.commitTransaction();
@@ -102,6 +109,22 @@ export class InvoiceService
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async get(id: string): Promise<InvoiceDetailDto> {
+    const entity = await this.invoiceRepository.findOne({
+      where: {
+        id: id as any,
+      },
+      relations: ['contract', 'room', 'property', 'invoiceItems'],
+    });
+
+    if (!entity) {
+      throw new NotFoundException('Không tìm thấy dữ liệu!');
+    }
+    const detailDto = new InvoiceDetailDto();
+    detailDto.fromEntity(entity);
+    return detailDto;
   }
 
   // private async calculatorBillingPeriod(invoice: Invoice, contract: Contracts) {

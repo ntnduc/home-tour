@@ -20,11 +20,13 @@ export class InvoiceDetailDto extends BaseDetailDto<Invoice> {
   notes?: string;
   contract: ContractDetailDto;
   room: RoomDetailDto;
+  code?: string;
   property: PropertyDetailDto;
   invoiceItems: Array<InvoiceItemDetailDto>;
 
   fromEntity(entity: Invoice): void {
     this.id = entity.id;
+    this.code = entity.code;
     this.contractId = entity.contractId;
     this.roomId = entity.roomId;
     this.propertyId = entity.propertyId;
