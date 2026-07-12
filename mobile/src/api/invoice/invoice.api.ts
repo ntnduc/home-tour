@@ -16,9 +16,8 @@ const USE_MOCK_DATA = true;
 
 // Invoice APIs
 export const getListInvoice = async (
-  queryKey: BasePagingRequest
+  queryKey: BasePagingRequest,
 ): Promise<ApiResponse<BasePagingResponse<InvoiceListResponse>>> => {
-
   const { limit, offset, filters, sortBy, sortOrder, globalKey } = queryKey;
 
   const response = await privateApi.get<
@@ -37,53 +36,48 @@ export const getListInvoice = async (
 };
 
 export const getInvoice = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
   const response = await privateApi.get<ApiResponse<InvoiceDetailResponse>>(
-    `/invoice/${id}`
+    `/invoice/${id}`,
   );
   return response.data;
 };
 
 export const createInvoice = async (
-  data: InvoiceCreateRequest
+  data: InvoiceCreateRequest,
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
-
   const response = await privateApi.post<ApiResponse<InvoiceDetailResponse>>(
     "/invoice",
-    data
+    data,
   );
   return response.data;
-  // return { success: false, data: {} as InvoiceDetailResponse };
 };
 
 export const updateInvoice = async (
   id: string,
-  data: Partial<InvoiceCreateRequest>
+  data: Partial<InvoiceCreateRequest>,
 ): Promise<ApiResponse<InvoiceDetailResponse>> => {
-
   const response = await privateApi.put<ApiResponse<InvoiceDetailResponse>>(
     `/invoice/${id}`,
-    data
+    data,
   );
   return response.data;
 };
 
 export const deleteInvoice = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<boolean>> => {
-
   const response = await privateApi.delete<ApiResponse<boolean>>(
-    `/invoice/${id}`
+    `/invoice/${id}`,
   );
   return response.data;
 };
 
 export const getInvoicesByContract = async (
   contractId: string,
-  queryKey?: BasePagingRequest
+  queryKey?: BasePagingRequest,
 ): Promise<ApiResponse<BasePagingResponse<InvoiceListResponse>>> => {
-
   const params = queryKey
     ? {
         limit: queryKey.limit,
@@ -105,9 +99,8 @@ export const getInvoicesByContract = async (
 
 export const getInvoicesByRoom = async (
   roomId: string,
-  queryKey?: BasePagingRequest
+  queryKey?: BasePagingRequest,
 ): Promise<ApiResponse<BasePagingResponse<InvoiceListResponse>>> => {
-
   const params = queryKey
     ? {
         limit: queryKey.limit,
@@ -129,44 +122,40 @@ export const getInvoicesByRoom = async (
 
 // Payment APIs
 export const createPayment = async (
-  data: PaymentCreateRequest
+  data: PaymentCreateRequest,
 ): Promise<ApiResponse<PaymentResponse>> => {
-
   const response = await privateApi.post<ApiResponse<PaymentResponse>>(
     "/payment",
-    data
+    data,
   );
   return response.data;
 };
 
 export const getPaymentsByInvoice = async (
-  invoiceId: string
+  invoiceId: string,
 ): Promise<ApiResponse<PaymentResponse[]>> => {
-
   const response = await privateApi.get<ApiResponse<PaymentResponse[]>>(
-    `/payment/invoice/${invoiceId}`
+    `/payment/invoice/${invoiceId}`,
   );
   return response.data;
 };
 
 export const updatePayment = async (
   id: string,
-  data: Partial<PaymentCreateRequest>
+  data: Partial<PaymentCreateRequest>,
 ): Promise<ApiResponse<PaymentResponse>> => {
-
   const response = await privateApi.put<ApiResponse<PaymentResponse>>(
     `/payment/${id}`,
-    data
+    data,
   );
   return response.data;
 };
 
 export const deletePayment = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<boolean>> => {
-
   const response = await privateApi.delete<ApiResponse<boolean>>(
-    `/payment/${id}`
+    `/payment/${id}`,
   );
   return response.data;
 };

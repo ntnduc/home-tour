@@ -61,21 +61,69 @@ const InvoiceDetailScreen = ({
 }: InvoiceDetailScreenProps) => {
   const { invoiceId } = route.params;
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [invoice, setInvoice] = useState<InvoiceDetailResponse | null>(null);
   const [payments, setPayments] = useState<any[]>([]);
   const { openAppSheet, closeAppSheet } = useGlobalAppSheet();
 
-  const { control, handleSubmit, setValue, watch, reset } =
-    useForm<PaymentFormData>({
-      defaultValues: {
-        amount: 0,
-        paymentDate: new Date(),
-        paymentMethod: PaymentMethod.CASH,
-        note: "",
-      },
-    });
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<InvoiceDetailResponse>({
+    defaultValues: () => {
+      return getInvoice(invoiceId)
+        .then((response) => {
+          if (response && response.data) {
+            return response.data;
+          }
+          navigation.goBack();
+          return {} as any;
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "error",
+            text1: "Lỗi",
+            text2: error.response.data?.message
+              ? error.response.data?.message
+              : "Không tìm thấy dữ liệu",
+          });
+          navigation.goBack();
+        });
+    },
+  });
+
+  useEffect(() => {
+    getInvoice(invoiceId)
+      .then((response) => {
+        if (response && response.data) {
+          setInvoice(response.data);
+          return;
+        }
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: "Không tìm thấy dữ liệu",
+        });
+        navigation.goBack();
+      })
+      .catch((error) => {
+        Toast.show({
+          type: "error",
+          text1: "Lỗi",
+          text2: error.response.data?.message
+            ? error.response.data?.message
+            : "Không tìm thấy dữ liệu",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [invoiceId]);
 
   const remainingAmount = invoice?.remainingAmount ?? 0;
 
@@ -174,12 +222,7 @@ const InvoiceDetailScreen = ({
   }, [invoiceId]);
 
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      await Promise.all([fetchInvoice(), fetchPayments()]);
-      setIsLoading(false);
-    };
-    loadData();
+    reset();
   }, [invoiceId]);
 
   const onRefresh = useCallback(async () => {
@@ -192,10 +235,10 @@ const InvoiceDetailScreen = ({
   const handleOpenPaymentForm = () => {
     if (!invoice) return;
 
-    setValue("amount", remainingAmount);
-    setValue("paymentDate", new Date());
-    setValue("paymentMethod", PaymentMethod.CASH);
-    setValue("note", "");
+    // setValue("amount", remainingAmount);
+    // setValue("paymentDate", new Date());
+    // setValue("paymentMethod", PaymentMethod.CASH);
+    // setValue("note", "");
 
     openAppSheet(
       <BottomSheetView>
@@ -282,7 +325,7 @@ const InvoiceDetailScreen = ({
 
           <Controller
             control={control}
-            name="note"
+            name="notes"
             render={({ field: { onChange, value } }) => (
               <Input
                 type="area"
@@ -332,7 +375,7 @@ const InvoiceDetailScreen = ({
     );
   };
 
-  const handleSavePayment = async (formData: PaymentFormData) => {
+  const handleSavePayment = async (formData: any) => {
     if (!invoice) return;
 
     if (!formData.paymentDate) {
@@ -363,7 +406,6 @@ const InvoiceDetailScreen = ({
     }
 
     try {
-      setIsSubmitting(true);
       const paymentData: PaymentCreateRequest = {
         invoiceId: invoice.id,
         amount: formData.amount,
@@ -396,7 +438,6 @@ const InvoiceDetailScreen = ({
         text2: error.message || "Không thể ghi nhận thanh toán",
       });
     } finally {
-      setIsSubmitting(false);
       closeAppSheet();
     }
   };

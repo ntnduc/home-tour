@@ -30,6 +30,9 @@ export class Invoice extends BaseEntity {
   @JoinColumn({ name: 'propertyId' })
   property: Properties;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  code?: string;
+
   @Column({ type: 'date' })
   billingPeriodStart: Date;
 
