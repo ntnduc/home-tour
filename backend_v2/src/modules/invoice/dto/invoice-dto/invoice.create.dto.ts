@@ -70,7 +70,7 @@ export class InvoiceCreateDto extends BaseCreateDto<Invoice> {
     entity.billingPeriodEnd = new Date(this.billingPeriodEnd);
     entity.dueDate = new Date(this.dueDate);
     entity.totalAmount = this.totalAmount;
-    entity.paidAmount = this.paidAmount ?? 0;
+    entity.paidAmount = this.paidAmount ?? this.totalAmount;
     entity.remainingAmount =
       this.remainingAmount ?? this.totalAmount - (this.paidAmount ?? 0);
     entity.status = this.status ?? InvoiceStatus.DRAFT;

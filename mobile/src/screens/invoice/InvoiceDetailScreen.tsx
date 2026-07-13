@@ -6,6 +6,7 @@ import {
 import ActionButtonBottom from "@/components/ActionButtonBottom";
 import { ComboBox } from "@/components/ComboBox";
 import DatePicker from "@/components/DatePicker";
+import DisplayField from "@/components/DisplayField";
 import { useGlobalAppSheet } from "@/components/GlobalAppSheet";
 import Input from "@/components/Input";
 import Loading from "@/components/Loading";
@@ -17,7 +18,7 @@ import {
   InvoiceDetailResponse,
   InvoiceStatus,
 } from "@/types/invoice";
-import { INVOICE_STATUS_LABEL, InvoiceItemType } from "@/types/invoice.item";
+import { InvoiceItemType } from "@/types/invoice.item";
 import {
   PAYMENT_METHOD_LABEL,
   PAYMENT_STATUS_COLOR,
@@ -27,7 +28,7 @@ import {
   PaymentStatus,
   PaymentType,
 } from "@/types/payment";
-import { formatCurrency } from "@/utils/appUtil";
+import { cn, formatCurrency } from "@/utils/appUtil";
 import { formatDate } from "@/utils/dateUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -456,14 +457,15 @@ const InvoiceDetailScreen = ({
     value?: string | number,
     strong?: boolean,
   ) => (
-    <View className="flex-row justify-between items-center mb-2">
-      <Text className="text-base text-gray-600">{label}</Text>
-      <Text
-        className={`text-base ${strong ? "font-semibold text-gray-900" : "text-gray-900"}`}
-      >
-        {value ?? "-"}
-      </Text>
-    </View>
+    <DisplayField label={label} value={value} strong={strong} />
+    // <View className="flex-row justify-between items-center mb-2">
+    //   <Text className="text-base text-gray-600">{label}</Text>
+    //   <Text
+    //     className={`text-base ${strong ? "font-semibold text-gray-900" : "text-gray-900"}`}
+    //   >
+    //     {value ?? "-"}
+    //   </Text>
+    // </View>
   );
 
   // --- Render ---
@@ -499,34 +501,6 @@ const InvoiceDetailScreen = ({
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        {/* 1. Header + Trạng thái */}
-        <CardComponent>
-          <View className="flex-row justify-between items-start">
-            <View className="flex-1">
-              <Text className="text-xl font-bold text-gray-900 mb-1">
-                Hóa đơn{" "}
-                {invoice.paymentMonth ? `tháng ${invoice.paymentMonth}` : ""}
-              </Text>
-              <Text className="text-sm text-gray-600">
-                {invoice.roomName ?? ""}{" "}
-                {invoice.propertyName ? `• ${invoice.propertyName}` : ""}
-              </Text>
-            </View>
-            <View
-              className="px-3 py-1.5 rounded-full flex-row items-center"
-              style={{ backgroundColor: statusColor.bg }}
-            >
-              <Ionicons name={statusIcon} size={14} color={statusColor.color} />
-              <Text
-                className="text-xs font-semibold ml-1"
-                style={{ color: statusColor.color }}
-              >
-                {INVOICE_STATUS_LABEL[invoice.status]}
-              </Text>
-            </View>
-          </View>
-        </CardComponent>
-
         {/* Cảnh báo quá hạn */}
         {(invoice.status === InvoiceStatus.OVERDUE || isOverdue) && (
           <View className="bg-red-50 rounded-xl p-3 border border-red-200 flex-row items-center">
@@ -542,6 +516,34 @@ const InvoiceDetailScreen = ({
             </View>
           </View>
         )}
+
+        {/* 1. Header + Trạng thái */}
+        <CardComponent>
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1">
+              <Text className="text-xl font-bold text-gray-900 mb-1 italic">
+                {invoice.code ? `#${invoice.code}` : ""}
+                {/* {invoice.paymentMonth ? `tháng ${invoice.paymentMonth}` : ""} */}
+              </Text>
+              <Text className="text-sm text-gray-600">
+                {invoice.roomName ?? ""}{" "}
+                {invoice.propertyName ? `• ${invoice.propertyName}` : ""}
+              </Text>
+            </View>
+            {/* <View
+              className="px-3 py-1.5 rounded-full flex-row items-center"
+              style={{ backgroundColor: statusColor.bg }}
+            >
+              <Ionicons name={statusIcon} size={14} color={statusColor.color} />
+              <Text
+                className="text-xs font-semibold ml-1"
+                style={{ color: statusColor.color }}
+              >
+                {INVOICE_STATUS_LABEL[invoice.status]}
+              </Text>
+            </View> */}
+          </View>
+        </CardComponent>
 
         {/* 2. Tóm tắt thanh toán - nổi bật */}
         <CardComponent>
@@ -572,7 +574,7 @@ const InvoiceDetailScreen = ({
             </Text>
 
             {/* Thanh tiến trình */}
-            {invoice.totalAmount > 0 && (
+            {/* {invoice.totalAmount > 0 && (
               <View className="mt-3">
                 <View className="h-2 bg-blue-100 rounded-full overflow-hidden">
                   <View
@@ -591,7 +593,7 @@ const InvoiceDetailScreen = ({
                   Đã thu {paidPercentage}%
                 </Text>
               </View>
-            )}
+            )} */}
 
             {/* Chi tiết số tiền */}
             <View className="mt-3 pt-3 border-t border-blue-200">
@@ -633,17 +635,28 @@ const InvoiceDetailScreen = ({
         {/* 4. Kỳ hóa đơn */}
         <CardComponent title="Thông tin thanh toán">
           <View>
-            {renderRow(
+            {/* {renderRow(
               "Hóa đơn tháng",
               invoice.paymentMonth ? `Tháng ${invoice.paymentMonth}` : "-",
-            )}
+            )} */}
             {renderRow(
               "Kỳ thanh toán",
               invoice.billingPeriodStart && invoice.billingPeriodEnd
                 ? `${formatDate(invoice.billingPeriodStart.toString())} - ${formatDate(invoice.billingPeriodEnd.toString())}`
                 : "-",
             )}
-            <View className="flex-row justify-between items-center mb-2">
+            <DisplayField
+              label="Hạn thanh toán"
+              value={
+                invoice.dueDate ? formatDate(invoice.dueDate.toString()) : "-"
+              }
+              valueClassName={cn(
+                isOverdue && invoice.status !== InvoiceStatus.PAID
+                  ? "text-red-600 font-semibold"
+                  : "text-gray-900",
+              )}
+            />
+            {/* <View className="flex-row justify-between items-center mb-2">
               <Text className="text-base text-gray-600">Hạn thanh toán</Text>
               <Text
                 className={`text-base font-semibold ${
@@ -654,7 +667,7 @@ const InvoiceDetailScreen = ({
               >
                 {invoice.dueDate ? formatDate(invoice.dueDate.toString()) : "-"}
               </Text>
-            </View>
+            </View> */}
             {invoice.createdAt &&
               renderRow("Ngày tạo", formatDate(invoice.createdAt))}
           </View>
@@ -677,7 +690,7 @@ const InvoiceDetailScreen = ({
               {mappedServiceItems.map((item, idx) => (
                 <ServiceDetailInvoiceItemComponent
                   key={`${item.contractServiceId || idx + 1}`}
-                  data={item as any}
+                  data={item}
                   isLast={idx === mappedServiceItems.length - 1}
                 />
               ))}

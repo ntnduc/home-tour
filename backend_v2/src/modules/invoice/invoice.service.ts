@@ -116,7 +116,13 @@ export class InvoiceService
       where: {
         id: id as any,
       },
-      relations: ['contract', 'room', 'property', 'invoiceItems'],
+      relations: [
+        'contract',
+        'contract.contractClient',
+        'room',
+        'property',
+        'invoiceItems',
+      ],
     });
 
     if (!entity) {

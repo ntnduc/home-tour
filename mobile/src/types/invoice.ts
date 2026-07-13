@@ -6,6 +6,7 @@ import {
 
 export interface Invoice {
   id: string;
+  code?: string;
   contractId: string;
   roomId: string;
   propertyId: string;
