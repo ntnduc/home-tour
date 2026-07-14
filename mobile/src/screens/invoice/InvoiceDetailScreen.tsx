@@ -4,11 +4,8 @@ import {
   getPaymentsByInvoice,
 } from "@/api/invoice/invoice.api";
 import ActionButtonBottom from "@/components/ActionButtonBottom";
-import { ComboBox } from "@/components/ComboBox";
-import DatePicker from "@/components/DatePicker";
 import DisplayField from "@/components/DisplayField";
 import { useGlobalAppSheet } from "@/components/GlobalAppSheet";
-import Input from "@/components/Input";
 import Loading from "@/components/Loading";
 import { RootStackParamList } from "@/navigation/types";
 import CardComponent from "@/screens/common/CardComponent";
@@ -31,18 +28,13 @@ import {
 import { cn, formatCurrency } from "@/utils/appUtil";
 import { formatDate } from "@/utils/dateUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { BottomSheetView } from "@gorhom/bottom-sheet";
+import { BottomSheetFooter } from "@gorhom/bottom-sheet";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import {
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useForm } from "react-hook-form";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
+import ConfirmPaymentInvoice from "./components/ConfirmPaymentInvoice";
 
 type InvoiceDetailScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, "InvoiceDetail">;
@@ -236,144 +228,43 @@ const InvoiceDetailScreen = ({
   const handleOpenPaymentForm = () => {
     if (!invoice) return;
 
-    // setValue("amount", remainingAmount);
-    // setValue("paymentDate", new Date());
-    // setValue("paymentMethod", PaymentMethod.CASH);
-    // setValue("note", "");
-
-    openAppSheet(
-      <BottomSheetView>
-        <ScrollView
-          contentContainerStyle={{ padding: 16, gap: 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View>
-            <Text className="text-sm text-gray-500 mb-1">Số tiền còn lại</Text>
-            <Text className="text-2xl font-bold text-blue-600">
-              {formatCurrency(remainingAmount.toString())}đ
-            </Text>
-          </View>
-
-          <Controller
-            control={control}
-            name="amount"
-            rules={{
-              required: "Vui lòng nhập số tiền",
-              min: { value: 1, message: "Số tiền phải lớn hơn 0" },
-              max: {
-                value: remainingAmount,
-                message: "Số tiền không được vượt quá số tiền còn lại",
-              },
-            }}
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <Input
-                label="Số tiền thanh toán"
-                value={value ? formatCurrency(value.toString()) : ""}
-                onChangeText={(text) => {
-                  const numValue = parseFloat(text.replace(/[.,]/g, "") || "0");
-                  onChange(numValue);
-                }}
-                placeholder="Nhập số tiền"
-                type="number"
-                keyboardType="numeric"
-                icon="cash"
-                required
-                error={error?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="paymentDate"
-            rules={{ required: "Vui lòng chọn ngày thanh toán" }}
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <DatePicker
-                label="Ngày thanh toán"
-                value={value}
-                onChange={onChange}
-                placeholder="Chọn ngày thanh toán"
-                required
-                error={error?.message}
-                icon="calendar"
-                maxDate={new Date()}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="paymentMethod"
-            rules={{ required: "Vui lòng chọn phương thức thanh toán" }}
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <ComboBox
-                value={value}
-                options={Object.values(PaymentMethod).map((method) => ({
-                  key: method,
-                  label: PAYMENT_METHOD_LABEL[method],
-                }))}
-                onChange={(option) => onChange(option.key)}
-                placeholder="Chọn phương thức thanh toán"
-                label="Phương thức thanh toán"
-                required
-                error={error?.message}
-                labelKey="label"
-                valueKey="key"
-                icon="card-outline"
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                type="area"
-                label="Ghi chú (tùy chọn)"
-                value={value}
-                onChangeText={onChange}
-                placeholder="Nhập ghi chú"
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
-            )}
-          />
-
-          <View className="flex-row gap-3 mt-4">
-            <TouchableOpacity
-              className="flex-1 bg-gray-200 py-4 rounded-xl items-center"
-              onPress={() => {
-                closeAppSheet();
-                reset();
-              }}
-            >
-              <Text className="text-base font-semibold text-gray-700">Hủy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-blue-600 py-4 rounded-xl items-center"
-              onPress={handleSubmit(handleSavePayment)}
-              disabled={isSubmitting}
-            >
-              <Text className="text-base font-semibold text-white">
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </BottomSheetView>,
-      {
-        snapPoints: ["80%"],
-        header: {
-          title: "Ghi nhận thanh toán",
-          onClose: () => {
-            closeAppSheet();
-            reset();
-          },
+    openAppSheet(<ConfirmPaymentInvoice invoice={invoice} />, {
+      snapPoints: ["80%"],
+      detached: false,
+      header: {
+        title: "Ghi nhận thanh toán",
+        onClose: () => {
+          closeAppSheet();
         },
       },
-    );
+      renderFooter: (props) => (
+        <BottomSheetFooter {...props}>
+          <ActionButtonBottom
+            actions={[
+              {
+                label: "Hủy",
+                icon: "close-circle",
+                variant: "danger",
+                onPress: () => {
+                  closeAppSheet();
+                },
+              },
+              {
+                label: "Xác Nhận",
+                icon: "cash",
+                variant: "success",
+                isLoading: isSubmitting,
+                onPress: () => {
+                  console.log("handleSubmit(handleSavePayment)()");
+                },
+                // onPress: handleOpenPaymentForm,
+                // hidden: !canMakePayment,
+              },
+            ]}
+          />
+        </BottomSheetFooter>
+      ),
+    });
   };
 
   const handleSavePayment = async (formData: any) => {
@@ -456,17 +347,7 @@ const InvoiceDetailScreen = ({
     label: string,
     value?: string | number,
     strong?: boolean,
-  ) => (
-    <DisplayField label={label} value={value} strong={strong} />
-    // <View className="flex-row justify-between items-center mb-2">
-    //   <Text className="text-base text-gray-600">{label}</Text>
-    //   <Text
-    //     className={`text-base ${strong ? "font-semibold text-gray-900" : "text-gray-900"}`}
-    //   >
-    //     {value ?? "-"}
-    //   </Text>
-    // </View>
-  );
+  ) => <DisplayField label={label} value={value} strong={strong} />;
 
   // --- Render ---
   if (isLoading || !invoice) {
