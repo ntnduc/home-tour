@@ -6,16 +6,37 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContractStatus } from 'src/common/enums/contract.enum';
-import { InvoiceStatus } from 'src/common/enums/invoice.enum';
+import {
+  DATE_ALERT_THRESHOLD,
+  DEBT_INVOICE_STATUSES,
+  InvoiceItemType,
+  InvoiceStatus,
+} from 'src/common/enums/invoice.enum';
+import { ServiceCalculationMethod } from 'src/common/enums/service.enum';
+import {
+  addDays,
+  convertDateToString,
+  diffDays,
+  getCurrentDate,
+  getDateWithoutTime,
+  getDaysInMonth,
+  getEndOfMonth,
+} from 'src/common/utils';
+import { roundMoney } from 'src/common/utils/number.utils';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { BaseService } from '../../common/base/crud/base.service';
 import { IBaseService } from '../../common/base/crud/IService';
 import { Contracts } from '../contract/entities/contracts.entity';
+import { PaymentCreateDto } from '../payment/dto/payment-dto/payment.create.dto';
+import { PaymentService } from '../payment/payment.service';
 import { InvoiceCreateDto } from './dto/invoice-dto/invoice.create.dto';
 import { InvoiceDetailDto } from './dto/invoice-dto/invoice.detail.dto';
 import { InvoiceListDto } from './dto/invoice-dto/invoice.list.dto';
+import { InvoicePaymentDto } from './dto/invoice-dto/invoice.payment.dto';
 import { InvoiceUpdateDto } from './dto/invoice-dto/invoice.update.dto';
+import { InvoiceItemCreateDto } from './dto/invoice-item-dto/invoice-item.create.dto';
 import { Invoice } from './entities/invoice.entity';
+import { InvoiceItem } from './entities/invoice.item.entity';
 import { InvoiceItemRepository } from './repositories/invoice-item.repository';
 import { InvoiceRepository } from './repositories/invoice.repository';
 
@@ -43,6 +64,8 @@ export class InvoiceService
     @InjectRepository(Contracts)
     private readonly contractRepository: Repository<Contracts>,
     private readonly dataSource: DataSource,
+
+    private readonly paymentService: PaymentService,
   ) {
     super(
       invoiceRepository,
@@ -72,18 +95,61 @@ export class InvoiceService
         throw new BadRequestException('Hợp đồng không hoạt động');
       }
 
-      const findPreInvoice = await this.invoiceRepository.findOne({
-        where: {
+      const findPreInvoice = await queryRunner.manager
+        .createQueryBuilder(Invoice, 'invoice')
+        .where('invoice.contractId = :contractId', {
           contractId: dto.contractId,
-          roomId: dto.roomId,
-        },
-        order: {
-          createdAt: 'DESC',
-        },
-      });
+        })
+        .where('invoice.roomId = :roomId', { roomId: dto.roomId })
+        .where('invoice.status IN (:...statuses)', {
+          statuses: [
+            InvoiceStatus.PENDING,
+            InvoiceStatus.OVERDUE,
+            InvoiceStatus.PARTIALLY_PAID,
+            InvoiceStatus.PAID,
+          ],
+        })
+        .orderBy('invoice.createdAt', 'DESC')
+        .getOne();
 
-      if (findPreInvoice) {
+      // const findPreInvoice = await this.invoiceRepository.findOne({
+      //   where: {
+      //     contractId: dto.contractId,
+      //     roomId: dto.roomId,
+      //     status: {
+      //       $in: [InvoiceStatus.PENDING, InvoiceStatus.OVERDUE],
+      //     }
+      //   },
+      //   order: {
+      //     createdAt: 'DESC',
+      //   },
+      // });
+
+      if (findPreInvoice && dto.isPassPreInvoice != true) {
         entity.preInvoiceId = findPreInvoice.id;
+
+        // BR-011: nếu hợp đồng bật cộng dồn công nợ và hóa đơn trước còn nợ,
+        // cộng phần còn nợ đó vào tổng tiền của hóa đơn mới.
+        const preInvoiceRemaining = Number(findPreInvoice.remainingAmount);
+        const preInvoiceHasDebt =
+          DEBT_INVOICE_STATUSES.includes(findPreInvoice.status) &&
+          preInvoiceRemaining > 0;
+
+        if (findContract.carryDebtToNextInvoice && preInvoiceHasDebt) {
+          entity.totalAmount = Number(entity.totalAmount) + preInvoiceRemaining;
+          entity.remainingAmount =
+            Number(entity.remainingAmount) + preInvoiceRemaining;
+
+          const debtItem = new InvoiceItem();
+          debtItem.amount = preInvoiceRemaining;
+          debtItem.type = InvoiceItemType.OTHER;
+          debtItem.propertyId = entity.propertyId;
+          debtItem.metadata = {
+            reason: 'CARRY_OVER_DEBT',
+            preInvoiceId: findPreInvoice.id,
+          };
+          entity.invoiceItems.push(debtItem);
+        }
       }
 
       const createdEntity = this.invoiceRepository.create(entity);
@@ -114,7 +180,7 @@ export class InvoiceService
   async get(id: string): Promise<InvoiceDetailDto> {
     const entity = await this.invoiceRepository.findOne({
       where: {
-        id: id as any,
+        id: id,
       },
       relations: [
         'contract',
@@ -133,12 +199,132 @@ export class InvoiceService
     return detailDto;
   }
 
-  // private async calculatorBillingPeriod(invoice: Invoice, contract: Contracts) {
+  async update(dto: InvoiceUpdateDto): Promise<InvoiceDetailDto> {
+    throw new NotFoundException('Method not implemented yet');
+  }
 
-  //   const start = new Date(contract.startDate);
-  //   const end = new Date(contract.endDate);
-  //   return { start, end };
-  // }
+  async paymentInvoice(dto: InvoicePaymentDto): Promise<InvoiceDetailDto> {
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: dto.id },
+      relations: ['invoiceItems'],
+    });
+    if (!invoice) {
+      throw new NotFoundException('Hóa đơn không tồn tại');
+    }
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const invoiceDetailDto = new InvoiceDetailDto();
+      invoiceDetailDto.fromEntity(invoice);
+
+      const validateStatus =
+        this.getValidInvoiceStatusPayment(invoiceDetailDto);
+      if (!validateStatus.status) {
+        throw new BadRequestException(validateStatus.error);
+      }
+
+      const validateAmount = this.getValidInvoiceAmountPayment(
+        invoiceDetailDto,
+        dto,
+      );
+      if (!validateAmount.status) {
+        throw new BadRequestException(validateAmount.error);
+      }
+
+      const entity = dto.getEntity(invoice);
+      await this.invoiceRepository.update(dto.id, entity);
+
+      //create payment
+      const paymentCreateDto = new PaymentCreateDto();
+      paymentCreateDto.amount = dto.paidAmount;
+      paymentCreateDto.invoiceId = dto.id;
+      paymentCreateDto.propertyId = invoice.propertyId;
+      paymentCreateDto.paymentMethod = dto.paymentMethod;
+      paymentCreateDto.notes = dto.notes;
+      await this.paymentService.create(paymentCreateDto);
+
+      //update pre-invoice
+      if (invoice.preInvoiceId) {
+        const preInvoice = await this.invoiceRepository.findOne({
+          where: { id: invoice.preInvoiceId },
+        });
+
+        if (preInvoice && DEBT_INVOICE_STATUSES.includes(preInvoice.status)) {
+          preInvoice.remainingAmount = 0;
+          preInvoice.status = InvoiceStatus.PAID;
+          await this.invoiceRepository.update(preInvoice.id, preInvoice);
+        }
+      }
+
+      queryRunner.commitTransaction();
+      const detailDto = new InvoiceDetailDto();
+      detailDto.fromEntity(entity);
+      return detailDto;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new BadGatewayException(error);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  getPreInvoiceContract(contract: Contracts): InvoiceCreateDto | null {
+    if (contract.isPrepaidRoom && contract.depositAmountPaid == 0) {
+      return null;
+    }
+
+    const invoiceCreateDto = new InvoiceCreateDto();
+    invoiceCreateDto.contractId = contract.id;
+    invoiceCreateDto.roomId = contract.roomId;
+    invoiceCreateDto.propertyId = contract.propertyId;
+    invoiceCreateDto.billingPeriodStart = convertDateToString(
+      contract.startDate,
+    );
+    const endOfMonth = getEndOfMonth(contract.startDate);
+    invoiceCreateDto.billingPeriodEnd = convertDateToString(endOfMonth);
+    invoiceCreateDto.dueDate = convertDateToString(
+      addDays(getCurrentDate(), 1),
+    );
+    invoiceCreateDto.contractId = contract.id;
+    invoiceCreateDto.status = InvoiceStatus.DRAFT;
+    const invoiceItemCreateDtos: InvoiceItemCreateDto[] = [];
+    if (contract.isPrepaidRoom) {
+      const invoiceItemCreateDto = new InvoiceItemCreateDto();
+      const breakDayAmount = this.calculateBreakDayRoom(
+        contract,
+        contract.startDate,
+        endOfMonth,
+      );
+      invoiceItemCreateDto.amount = breakDayAmount;
+      invoiceItemCreateDto.type = InvoiceItemType.ROOM_RENT;
+      invoiceItemCreateDto.propertyId = contract.propertyId;
+      invoiceItemCreateDto.calculationMethod =
+        ServiceCalculationMethod.FIXED_PER_ROOM;
+      invoiceItemCreateDtos.push(invoiceItemCreateDto);
+    }
+
+    if (contract.depositAmountPaid > 0) {
+      const invoiceItemCreateDto = new InvoiceItemCreateDto();
+      invoiceItemCreateDto.amount = Number(contract.depositAmountPaid);
+      invoiceItemCreateDto.type = InvoiceItemType.DESPOSIT_CONTRACT;
+      invoiceItemCreateDto.propertyId = contract.propertyId;
+      invoiceItemCreateDto.calculationMethod =
+        ServiceCalculationMethod.FIXED_PER_ROOM;
+      invoiceItemCreateDtos.push(invoiceItemCreateDto);
+    }
+
+    if (invoiceItemCreateDtos.length > 0) {
+      invoiceCreateDto.invoiceItems = invoiceItemCreateDtos;
+      const totalAmount = invoiceItemCreateDtos.reduce(
+        (sum, item) => sum + item.amount,
+        0,
+      );
+      invoiceCreateDto.totalAmount = roundMoney(totalAmount);
+    }
+
+    return invoiceCreateDto;
+  }
 
   async specQuery(): Promise<SelectQueryBuilder<Invoice>> {
     const query = this.invoiceRepository
@@ -150,4 +336,132 @@ export class InvoiceService
 
     return query;
   }
+
+  //#region Support Functions
+
+  private calculateBreakDayRoom(
+    contract: Contracts,
+    start: Date,
+    end: Date,
+  ): number {
+    const roomRentAmount = contract.rentAmountAgreed;
+    const isEndOfMonth = getEndOfMonth(start);
+    if (start > end) {
+      return 0;
+    }
+
+    if (end === isEndOfMonth) {
+      return roomRentAmount;
+    }
+
+    const occupiedDays = diffDays(
+      getDateWithoutTime(start),
+      getDateWithoutTime(end),
+    );
+    const daysInMonth = getDaysInMonth(start);
+    const dailyRentAmount = (roomRentAmount / daysInMonth) * occupiedDays;
+
+    return dailyRentAmount < 0 ? 0 : roundMoney(dailyRentAmount);
+  }
+
+  private createInvoiceWithContractStartNow(
+    contract: Contracts,
+  ): InvoiceCreateDto {
+    const invoiceCreateDto = new InvoiceCreateDto();
+    invoiceCreateDto.contractId = contract.id;
+    invoiceCreateDto.roomId = contract.roomId;
+    const invoiceItemsCreateDto: InvoiceItemCreateDto[] = [];
+    const invoiceItemDraf = new InvoiceItemCreateDto();
+    invoiceItemDraf.amount = contract.rentAmountAgreed;
+    invoiceItemDraf.type = InvoiceItemType.ROOM_RENT;
+    invoiceItemDraf.propertyId = contract.propertyId;
+
+    // const invoiceItems: InvoiceItemCreateDto[] = [];
+
+    // Trường hợp hợp đồng có đặt cọc, tạo hóa đơn ngay lập tức với khoản tiền đặt cọc.
+    if (contract.depositAmountPaid > 0) {
+      const invoiceItem = invoiceItemDraf.deptClone();
+      invoiceItem.amount = contract.depositAmountPaid;
+      invoiceItem.type = InvoiceItemType.DESPOSIT_CONTRACT;
+      invoiceItemsCreateDto.push(invoiceItem);
+    }
+
+    // Trường hợp hợp đồng trả trước, tạo hóa đơn ngay lập tức với khoản tiền thuê phòng.
+    if (contract.isPrepaidRoom) {
+      // Trường hợp hợp đồng bắt đầu từ ngày 1 của tháng, tạo hóa đơn ngay lập tức với khoản tiền thuê phòng.
+      if (contract.startDate.getDate() === 1) {
+        const invoiceItem = invoiceItemDraf.deptClone();
+        invoiceItem.amount = contract.rentAmountAgreed;
+        invoiceItem.type = InvoiceItemType.ROOM_RENT;
+        invoiceItemsCreateDto.push(invoiceItem);
+      }
+    }
+
+    return invoiceCreateDto;
+  }
+
+  private isDateAlertCreateInvoice(
+    contract: Contracts,
+    date?: Date,
+  ): Date | null {
+    if (contract.status === ContractStatus.ENDED) {
+      return null;
+    }
+
+    const currentDate = getCurrentDate(true);
+    const paymentDueDate = new Date(
+      contract.paymentDueDay,
+      currentDate.getMonth(),
+      currentDate.getFullYear(),
+    );
+    const alertDate = addDays(paymentDueDate, DATE_ALERT_THRESHOLD * -1);
+
+    return null;
+  }
+
+  private getValidInvoiceStatusPayment(invoice: InvoiceDetailDto): {
+    error: string;
+    status: boolean;
+  } {
+    if (invoice.status === InvoiceStatus.PAID) {
+      return { error: 'Hóa đơn đã được thanh toán', status: false };
+    }
+
+    if (invoice.status === InvoiceStatus.CANCELLED) {
+      return { error: 'Hóa đơn đã bị hủy', status: false };
+    }
+
+    if (invoice.status === InvoiceStatus.DRAFT) {
+      return { error: 'Hóa đơn chưa được phát hành', status: false };
+    }
+
+    return { error: '', status: true };
+  }
+
+  private getValidInvoiceAmountPayment(
+    invoice: InvoiceDetailDto,
+    payment: InvoicePaymentDto,
+  ): {
+    error: string;
+    status: boolean;
+  } {
+    if (payment.paidAmount <= 0) {
+      return { error: 'Số tiền thanh toán phải lớn hơn 0', status: false };
+    }
+
+    if (payment.contractId !== invoice.contractId) {
+      return { error: 'Mã hợp đồng không khớp với hóa đơn', status: false };
+    }
+
+    if (payment.paidAmount > invoice.remainingAmount) {
+      return {
+        error: 'Số tiền thanh toán vượt quá số tiền cần thanh toán',
+        status: false,
+      };
+    }
+
+    return { error: '', status: true };
+  }
+
+  //#endregion
 }

@@ -61,6 +61,10 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   isPrepaidRoom?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  carryDebtToNextInvoice?: boolean;
+
   @IsArray()
   @IsOptional()
   contractClient?: ContractClientCreateDto[];
@@ -85,6 +89,7 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
     entity.contractScanURL = this.contractScanURL;
     entity.notes = this.notes;
     entity.partnerClientCount = this.partnerClientCount ?? 0;
+    entity.carryDebtToNextInvoice = this.carryDebtToNextInvoice ?? false;
     return entity;
   }
 }

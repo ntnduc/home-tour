@@ -22,6 +22,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
   contractScanURL?: string;
   status: ContractStatus;
   notes?: string;
+  carryDebtToNextInvoice: boolean;
   contractClient?: ContractClientDetailDto[];
   contractServices?: ContractServiceDetailDto[];
 
@@ -44,6 +45,7 @@ export class ContractDetailDto extends BaseDetailDto<Contracts> {
     this.contractScanURL = entity.contractScanURL;
     this.status = entity.status;
     this.notes = entity.notes;
+    this.carryDebtToNextInvoice = entity.carryDebtToNextInvoice ?? false;
 
     //Room
     if (entity.room) {

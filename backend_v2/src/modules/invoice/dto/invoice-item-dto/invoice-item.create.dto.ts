@@ -58,4 +58,18 @@ export class InvoiceItemCreateDto extends BaseCreateDto<InvoiceItem> {
     entity.calculationMethod = this.calculationMethod;
     return entity;
   }
+
+  deptClone(): InvoiceItemCreateDto {
+    const clone = new InvoiceItemCreateDto();
+    clone.invoiceId = this.invoiceId;
+    clone.amount = this.amount;
+    clone.type = this.type;
+    clone.helperValue = this.helperValue;
+    clone.oldHelperValue = this.oldHelperValue;
+    clone.contractServiceId = this.contractServiceId;
+    clone.propertyId = this.propertyId;
+    clone.metadata = { ...this.metadata };
+    clone.calculationMethod = this.calculationMethod;
+    return clone;
+  }
 }

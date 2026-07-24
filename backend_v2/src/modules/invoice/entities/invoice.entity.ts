@@ -77,7 +77,9 @@ export class Invoice extends BaseEntity {
   preInvoiceId?: string;
 
   // Danh sách các dòng chi tiết cấu thành hóa đơn.
-  @OneToMany(() => InvoiceItem, (invoiceItem) => invoiceItem.invoice)
+  @OneToMany(() => InvoiceItem, (invoiceItem) => invoiceItem.invoice, {
+    cascade: true,
+  })
   invoiceItems: InvoiceItem[];
 
   // Danh sách các lần thanh toán đã ghi nhận cho hóa đơn.
