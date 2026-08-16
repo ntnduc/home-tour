@@ -3606,6 +3606,11 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
+lucide-react-native@>=0.475.0:
+  version "1.31.0"
+  resolved "https://registry.npmjs.org/lucide-react-native/-/lucide-react-native-1.31.0.tgz"
+  integrity sha512-PwqFe7jqEHaCQDQs5jp8+IeEMrXb/Uq0lBQH3na6iE27IVxW3YUsIArARzXbOvvrfDuYD4d/I+YqRTT7w6djJw==
+
 makeerror@1.0.12:
   version "1.0.12"
   resolved "https://registry.npmjs.org/makeerror/-/makeerror-1.0.12.tgz"
@@ -4838,6 +4843,13 @@ react-native-modal@^14.0.0-rc.1:
   resolved "https://registry.npmjs.org/react-native-pager-view/-/react-native-pager-view-6.9.1.tgz"
   integrity sha512-uUT0MMMbNtoSbxe9pRvdJJKEi9snjuJ3fXlZhG8F2vVMOBJVt/AFtqMPUHu9yMflmqOr08PewKzj9EPl/Yj+Gw==
 
+react-native-progress-steps@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/react-native-progress-steps/-/react-native-progress-steps-2.0.3.tgz"
+  integrity sha512-N3JT9sQ/irEzS7RrYVNC86jHTgAXrQPDk2kHAHaz1JYv3wTCMLfbyQfDykp5y3cYqpbD3D1Ivc+1XOXhXwwvog==
+  dependencies:
+    lodash "^4.17.21"
+
 react-native-qrcode-svg@^6.3.15:
   version "6.3.21"
   resolved "https://registry.npmjs.org/react-native-qrcode-svg/-/react-native-qrcode-svg-6.3.21.tgz"
@@ -4890,7 +4902,7 @@ react-native-size-matters@^0.3.1:
   resolved "https://registry.npmjs.org/react-native-size-matters/-/react-native-size-matters-0.3.1.tgz"
   integrity sha512-mKOfBLIBFBcs9br1rlZDvxD5+mAl8Gfr5CounwJtxI6Z82rGrMO+Kgl9EIg3RMVf3G855a85YVqHJL2f5EDRlw==
 
-"react-native-svg@> 6.4.1", react-native-svg@>=14.0.0, react-native-svg@15.12.1:
+"react-native-svg@^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0", "react-native-svg@> 6.4.1", react-native-svg@>=14.0.0, react-native-svg@15.12.1:
   version "15.12.1"
   resolved "https://registry.npmjs.org/react-native-svg/-/react-native-svg-15.12.1.tgz"
   integrity sha512-vCuZJDf8a5aNC2dlMovEv4Z0jjEUET53lm/iILFnFewa15b4atjVxU6Wirm6O9y6dEsdjDZVD7Q3QM4T1wlI8g==
@@ -4941,7 +4953,7 @@ react-native-vector-icons@^10.3.0, react-native-vector-icons@>7.0.0:
     convert-source-map "^2.0.0"
     semver "7.7.2"
 
-react-native@*, "react-native@^0.0.0-0 || >=0.65 <1.0", "react-native@>= 0.50.0", react-native@>=0.42.0, react-native@>=0.48.4, react-native@>=0.59, react-native@>=0.61.3, react-native@>=0.63.4, react-native@>=0.70.0, "react-native@0.78 - 0.82", react-native@0.81.5:
+react-native@*, "react-native@^0.0.0-0 || >=0.65 <1.0", "react-native@>= 0.50.0", react-native@>=0.42.0, react-native@>=0.48.4, react-native@>=0.59, react-native@>=0.59.0, react-native@>=0.61.3, react-native@>=0.63.4, react-native@>=0.70.0, "react-native@0.78 - 0.82", react-native@0.81.5:
   version "0.81.5"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.81.5.tgz"
   integrity sha512-1w+/oSjEXZjMqsIvmkCRsOc8UBYv163bTWKTI8+1mxztvQPhCRYGTvZ/PL1w16xXHneIj/SLGfxWg2GWN2uexw==
@@ -4991,7 +5003,7 @@ react-refresh@^0.14.0, react-refresh@^0.14.2, "react-refresh@>=0.14.0 <1.0.0":
   resolved "https://registry.npmjs.org/react-refresh/-/react-refresh-0.14.2.tgz"
   integrity sha512-jCvmsr+1IUSMUyzOkRcvnVbX3ZYC6g9TDrDbFuFmRDq7PD4yaGbLKNQL6k2jnArV8hjYxh7hVhAZB6s9HDGpZA==
 
-react@*, "react@^16.8.0 || ^17 || ^18 || ^19", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^18 || ^19", react@^19.1.0, "react@> 16.7.0", "react@>= 18.2.0", react@>=16.11.0, react@>=16.8, react@>=17.0.0, react@>=18, react@19.1.0:
+react@*, "react@^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17 || ^18 || ^19", "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^18 || ^19", react@^19.1.0, "react@> 16.7.0", "react@>= 18.2.0", react@>=16.11.0, react@>=16.8, react@>=16.8.0, react@>=17.0.0, react@>=18, react@19.1.0:
   version "19.1.0"
   resolved "https://registry.npmjs.org/react/-/react-19.1.0.tgz"
   integrity sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==

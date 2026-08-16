@@ -69,7 +69,6 @@ export class ContractCreateDto extends BaseCreateDto<Contracts> {
   @IsOptional()
   contractClient?: ContractClientCreateDto[];
 
-  //TODO: Feature not implemented yet
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ContractServiceCreateDto)

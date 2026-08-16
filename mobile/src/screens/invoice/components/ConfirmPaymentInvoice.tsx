@@ -9,7 +9,7 @@ import {
 } from "@/types/payment";
 import { formatCurrency } from "@/utils/appUtil";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import React from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, View } from "react-native";
 
@@ -17,7 +17,11 @@ type Props = {
   invoice: InvoiceDetailResponse;
 };
 
-const ConfirmPaymentInvoice = (props: Props) => {
+export interface ConfirmPaymentInvoiceRef {
+  submit: () => void;
+}
+
+const ConfirmPaymentInvoice = forwardRef<ConfirmPaymentInvoiceRef, Props>((props: Props, ref) => {
   const { invoice } = props;
   const {
     control,
@@ -34,6 +38,12 @@ const ConfirmPaymentInvoice = (props: Props) => {
       roomName: "",
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    submit() {
+      console.log("Submitting payment form with values:");
+    },
+  }));
 
   return (
     <BottomSheetScrollView
@@ -140,6 +150,6 @@ const ConfirmPaymentInvoice = (props: Props) => {
       </View>
     </BottomSheetScrollView>
   );
-};
+});
 
 export default ConfirmPaymentInvoice;

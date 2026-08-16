@@ -30,11 +30,19 @@ import { formatDate } from "@/utils/dateUtil";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BottomSheetFooter } from "@gorhom/bottom-sheet";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
-import ConfirmPaymentInvoice from "./components/ConfirmPaymentInvoice";
+import ConfirmPaymentInvoice, {
+  ConfirmPaymentInvoiceRef,
+} from "./components/ConfirmPaymentInvoice";
 
 type InvoiceDetailScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, "InvoiceDetail">;
@@ -53,6 +61,8 @@ const InvoiceDetailScreen = ({
   route,
 }: InvoiceDetailScreenProps) => {
   const { invoiceId } = route.params;
+  const refPaymentForm = useRef<ConfirmPaymentInvoiceRef>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   // const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -228,43 +238,46 @@ const InvoiceDetailScreen = ({
   const handleOpenPaymentForm = () => {
     if (!invoice) return;
 
-    openAppSheet(<ConfirmPaymentInvoice invoice={invoice} />, {
-      snapPoints: ["80%"],
-      detached: false,
-      header: {
-        title: "Ghi nhận thanh toán",
-        onClose: () => {
-          closeAppSheet();
+    openAppSheet(
+      <ConfirmPaymentInvoice ref={refPaymentForm} invoice={invoice} />,
+      {
+        snapPoints: ["80%"],
+        detached: false,
+        header: {
+          title: "Ghi nhận thanh toán",
+          onClose: () => {
+            closeAppSheet();
+          },
         },
+        renderFooter: (props) => (
+          <BottomSheetFooter {...props}>
+            <ActionButtonBottom
+              actions={[
+                {
+                  label: "Xác Nhận",
+                  icon: "cash",
+                  variant: "success",
+                  isLoading: isSubmitting,
+                  onPress: () => {
+                    refPaymentForm.current?.submit();
+                  },
+                  // onPress: handleOpenPaymentForm,
+                  // hidden: !canMakePayment,
+                },
+                {
+                  label: "Hủy",
+                  icon: "close-circle",
+                  variant: "danger",
+                  onPress: () => {
+                    closeAppSheet();
+                  },
+                },
+              ]}
+            />
+          </BottomSheetFooter>
+        ),
       },
-      renderFooter: (props) => (
-        <BottomSheetFooter {...props}>
-          <ActionButtonBottom
-            actions={[
-              {
-                label: "Hủy",
-                icon: "close-circle",
-                variant: "danger",
-                onPress: () => {
-                  closeAppSheet();
-                },
-              },
-              {
-                label: "Xác Nhận",
-                icon: "cash",
-                variant: "success",
-                isLoading: isSubmitting,
-                onPress: () => {
-                  console.log("handleSubmit(handleSavePayment)()");
-                },
-                // onPress: handleOpenPaymentForm,
-                // hidden: !canMakePayment,
-              },
-            ]}
-          />
-        </BottomSheetFooter>
-      ),
-    });
+    );
   };
 
   const handleSavePayment = async (formData: any) => {

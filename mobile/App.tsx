@@ -50,10 +50,11 @@ import InvoiceDetailScreen from "./src/screens/invoice/InvoiceDetailScreen";
 import InvoiceHistoryScreen from "./src/screens/invoice/InvoiceHistoryScreen";
 
 // Config
-import ConfirmCreateContractScreen from "@/screens/contract/ConfirmCreateContractScreen";
-import TestScreen from "@/screens/test/TestScreen";
 import { Pressable } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+//Test
+import TestScreen from "@/screens/test/TestScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -201,14 +202,6 @@ export default function App() {
                   name="CreateContract"
                   component={CreateContractScreen}
                   options={{ title: "Tạo Hợp Đồng Mới" }}
-                />
-                <Stack.Screen
-                  name="ConfirmCreateContract"
-                  component={ConfirmCreateContractScreen}
-                  options={{
-                    title: "Xác Nhận Tạo Hợp Đồng",
-                    headerBackTitle: "Chỉnh sửa",
-                  }}
                 />
                 <Stack.Screen
                   name="TerminateContract"

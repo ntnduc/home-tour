@@ -67,6 +67,8 @@ export class ContractService
       ContractUpdateDto,
     );
   }
+  // Định nghĩa các trường cần theo dõi thay đổi
+  protected static FIELD_TRACKING_CHANGE = ['status'];
 
   async specQuery(): Promise<SelectQueryBuilder<Contracts>> {
     const query = this.contractsRepository
@@ -362,38 +364,40 @@ export class ContractService
       where: { id: contract.id },
     });
 
-    // Kiểm tra xem có hợp đồng ACTIVE nào khác cho phòng này không
-    const otherActiveContracts = await this.contractsRepository
-      .createQueryBuilder('contract')
-      .where('contract.roomId = :roomId', { roomId: contract.roomId })
-      .andWhere('contract.id != :currentContractId', {
-        currentContractId: contract.id,
-      })
-      .andWhere('contract.status = :status', {
-        status: ContractStatus.ACTIVE,
-      })
-      .getCount();
+    if (newStatus === ContractStatus.ACTIVE) {
+      // Kiểm tra xem có hợp đồng ACTIVE nào khác cho phòng này không
+      const otherActiveContracts = await this.contractsRepository
+        .createQueryBuilder('contract')
+        .where('contract.roomId = :roomId', { roomId: contract.roomId })
+        .andWhere('contract.id != :currentContractId', {
+          currentContractId: contract.id,
+        })
+        .andWhere('contract.status = :status', {
+          status: ContractStatus.ACTIVE,
+        })
+        .getCount();
 
-    await this.recordChange(
-      newContract!,
-      contract,
-      'STATUS_CHANGE',
-      reason,
-      manager,
-    );
+      await this.recordChange(
+        newContract!,
+        contract,
+        'STATUS_CHANGE',
+        reason,
+        manager,
+      );
 
-    if (otherActiveContracts === 0) {
-      await manager.update(
-        'rooms',
-        { id: contract.roomId },
-        { status: RoomStatus.AVAILABLE },
-      );
-    } else {
-      await manager.update(
-        'rooms',
-        { id: contract.roomId },
-        { status: RoomStatus.OCCUPIED },
-      );
+      if (otherActiveContracts === 0) {
+        await manager.update(
+          'rooms',
+          { id: contract.roomId },
+          { status: RoomStatus.AVAILABLE },
+        );
+      } else {
+        await manager.update(
+          'rooms',
+          { id: contract.roomId },
+          { status: RoomStatus.OCCUPIED },
+        );
+      }
     }
   }
 
@@ -428,7 +432,7 @@ export class ContractService
     newContract: Contracts,
   ): ContractChangeDetail[] {
     const changeDetails: ContractChangeDetail[] = [];
-    const fields = ['status'];
+    const fields = ContractService.FIELD_TRACKING_CHANGE;
     for (const field of fields) {
       if (oldContract[field] !== newContract[field]) {
         const changeDetail = new ContractChangeDetail();
